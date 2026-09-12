@@ -287,6 +287,48 @@ def test_safety_validation_keeps_subject_and_body_independent(
     assert response.status_code == 200
 
 
+def test_model_draft_addressed_to_seller_returns_502(
+    client: TestClient, monkeypatch
+) -> None:
+    def fake(reasoning, *, system, user, schema, max_tokens=4000, timeout=None):
+        return ReasoningResult(
+            output=FollowUpDraftContent(
+                subject="Proposal follow-up",
+                body="Dear Jordan Belfort,\n\nThank you for your proposal.",
+            ),
+            model="fake/model",
+            provider="openrouter",
+        )
+
+    monkeypatch.setattr("app.services.draft.structured", fake)
+    call, _ = _ingest_and_extract(client)
+
+    response = client.post(f"/api/v1/drafts/from-call/{call['id']}")
+
+    assert response.status_code == 502
+
+
+def test_seller_name_after_greeting_addressee_is_allowed(
+    client: TestClient, monkeypatch
+) -> None:
+    def fake(reasoning, *, system, user, schema, max_tokens=4000, timeout=None):
+        return ReasoningResult(
+            output=FollowUpDraftContent(
+                subject="Proposal follow-up",
+                body="Hi Donnie, Jordan Belfort here following up on our call.",
+            ),
+            model="fake/model",
+            provider="openrouter",
+        )
+
+    monkeypatch.setattr("app.services.draft.structured", fake)
+    call, _ = _ingest_and_extract(client)
+
+    response = client.post(f"/api/v1/drafts/from-call/{call['id']}")
+
+    assert response.status_code == 200
+
+
 def test_approval_works_for_model_draft(client: TestClient, monkeypatch) -> None:
     def fake(reasoning, *, system, user, schema, max_tokens=4000, timeout=None):
         return ReasoningResult(

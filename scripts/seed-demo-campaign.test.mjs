@@ -75,6 +75,26 @@ test("requires exact configured-model provenance before creating a campaign", as
   assert.equal(modelCalls.every(({ init }) => init.signal.aborted === false), true);
 });
 
+test("continues with the safe email campaign when a local call draft is rejected", async () => {
+  const fixture = fixtureFetch({ reasoning: true });
+  const fetchImpl = async (url, init) => {
+    if (url.includes("/drafts/from-call/")) {
+      fixture.calls.push({ url, init });
+      return json({ detail: "The follow-up could not be drafted" }, 502);
+    }
+    return fixture.fetchImpl(url, init);
+  };
+
+  const result = await seedDemoCampaign({
+    apiUrl: "https://api.example",
+    token: "a-secure-demo-token",
+    fetchImpl,
+  });
+
+  assert.equal(result.status, "paused");
+  assert.equal(fixture.calls.some(({ url }) => url.includes("22222222-2222-4222-8222-222222222222/approve")), false);
+});
+
 for (const disconnectMessage of ["fetch failed", "terminated"]) test(`recovers a stored local extraction after ${disconnectMessage}`, async () => {
   const fixture = fixtureFetch({ reasoning: true });
   let disconnected = false;

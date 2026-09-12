@@ -165,21 +165,28 @@ export async function seedDemoCampaign({
     }
   }
   assertExtractionProvenance(extraction, ready);
-  const draft = await requestJson(fetchImpl, `${base}/api/v1/drafts/from-call/${call.id}`, {
-    payload: {},
-    timeoutMs: modelTimeout,
-  });
-  assert(typeof draft?.id === "string", "draft creation did not return a draft ID");
-  if (ready?.reasoning_configured === true) {
-    assert(draft?.source === "model", "demo draft did not use the configured model");
-    assert(draft?.model === ready?.reasoning_model, "demo draft used the wrong model");
-  }
-  const approvedCallDraft = draft.status === "approved"
-    ? draft
-    : await requestJson(fetchImpl, `${base}/api/v1/drafts/${draft.id}/approve`, {
-      payload: { approved_by: "Hackathon demo" },
+  try {
+    const draft = await requestJson(fetchImpl, `${base}/api/v1/drafts/from-call/${call.id}`, {
+      payload: {},
+      timeoutMs: modelTimeout,
     });
-  assert(approvedCallDraft?.status === "approved" && approvedCallDraft?.sent_at == null, "demo call draft is not safely approved and unsent");
+    assert(typeof draft?.id === "string", "draft creation did not return a draft ID");
+    if (ready?.reasoning_configured === true) {
+      assert(draft?.source === "model", "demo draft did not use the configured model");
+      assert(draft?.model === ready?.reasoning_model, "demo draft used the wrong model");
+    }
+    const approvedCallDraft = draft.status === "approved"
+      ? draft
+      : await requestJson(fetchImpl, `${base}/api/v1/drafts/${draft.id}/approve`, {
+        payload: { approved_by: "Hackathon demo" },
+      });
+    assert(approvedCallDraft?.status === "approved" && approvedCallDraft?.sent_at == null, "demo call draft is not safely approved and unsent");
+  } catch (error) {
+    const rejectedLocalDraft = ready?.reasoning_provider === "local"
+      && error instanceof ApiResponseError
+      && error.status === 502;
+    if (!rejectedLocalDraft) throw error;
+  }
 
   await requestJson(fetchImpl, `${base}/api/v1/emails`, {
     token: ingestToken,
