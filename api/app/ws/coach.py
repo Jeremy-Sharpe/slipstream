@@ -162,6 +162,7 @@ async def _persist_completed_call(
                 subject=checkpoint["subject"],
                 occurred_at=checkpoint["occurred_at"],
                 transcript=transcript,
+                rep_name=checkpoint.get("rep_name") or "Sales Rep",
             )
         checkpoint["completed_call"] = record.model_dump(mode="json")
         checkpoint["updated_at"] = time.monotonic()
@@ -322,6 +323,7 @@ async def live_coach(websocket: WebSocket) -> None:
             checkpoint = {
                 "subject": start.subject.strip(),
                 "occurred_at": occurred_at,
+                "rep_name": start.rep_name or "Sales Rep",
                 "deal_context": start.deal_context,
                 "events": [],
                 "suggestion_count": 0,
@@ -342,6 +344,7 @@ async def live_coach(websocket: WebSocket) -> None:
                 and supplied_occurred_at != checkpoint["occurred_at"]
             )
             or (start.deal_context is not None and start.deal_context != checkpoint["deal_context"])
+            or (start.rep_name is not None and start.rep_name != checkpoint["rep_name"])
         )
         if metadata_conflict:
             await _send_error(

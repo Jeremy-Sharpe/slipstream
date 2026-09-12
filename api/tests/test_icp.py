@@ -52,7 +52,6 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     assert profile.version == 1
     assert len(store.source_deals_for_profile(str(profile.id))) == 5
     assert all(
-        not deal.metadata.get("demo")
-        for deal in store.source_deals_for_profile(str(profile.id))
+        not deal.metadata.get("demo") for deal in store.source_deals_for_profile(str(profile.id))
     )
     assert len(won_centroid(store, str(profile.id))) == 3

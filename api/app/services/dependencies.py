@@ -1,7 +1,7 @@
 from fastapi import Request
 
 from app.core.config import Settings
-from app.core.llm import create_openai_client
+from app.core.llm import create_embedding_client
 from app.services.icp_leads_store import IcpLeadsStore, create_icp_leads_store
 
 
@@ -17,5 +17,5 @@ def get_store(request: Request) -> IcpLeadsStore:
     return store
 
 
-def get_openai_client(request: Request) -> object:
-    return create_openai_client(request.app.state.settings)
+def get_embedding_client(request: Request) -> object:
+    return create_embedding_client(request.app.state.settings)

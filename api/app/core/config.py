@@ -80,6 +80,7 @@ class Settings(BaseSettings):
     anthropic_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None
     openrouter_api_key: SecretStr | None = None
+    scorecard_judge_model: str = "deepseek/deepseek-v3.2"
     elevenlabs_api_key: SecretStr | None = None
     ingest_token: SecretStr | None = None
     origami_api_key: SecretStr | None = None
@@ -131,7 +132,7 @@ class Settings(BaseSettings):
         return "supabase" if self.supabase_url else "memory"
 
     @property
-    def reasoning_provider(self) -> Literal["anthropic", "openai", "openrouter"]:
+    def _native_reasoning_provider(self) -> Literal["anthropic", "openai", "openrouter"]:
         model = self.reasoning_model.strip().lower()
         if model.startswith("claude"):
             return "anthropic"
@@ -140,12 +141,32 @@ class Settings(BaseSettings):
         return "openrouter"
 
     @property
+    def reasoning_provider(self) -> Literal["anthropic", "openai", "openrouter"]:
+        native = self._native_reasoning_provider
+        if native == "anthropic" and self.anthropic_api_key is not None:
+            return native
+        if native == "openai" and self.openai_api_key is not None:
+            return native
+        if self.openrouter_api_key is not None:
+            return "openrouter"
+        return native
+
+    @property
+    def embedding_provider(self) -> Literal["openai", "openrouter"] | None:
+        if self.openai_api_key is not None:
+            return "openai"
+        if self.openrouter_api_key is not None:
+            return "openrouter"
+        return None
+
+    @property
     def integration_flags(self) -> dict[str, bool]:
         return {
             "supabase": self.storage_mode == "supabase",
             "anthropic": self.anthropic_api_key is not None,
             "openai": self.openai_api_key is not None,
             "openrouter": self.openrouter_api_key is not None,
+            "embeddings": self.embedding_provider is not None,
             "elevenlabs": self.elevenlabs_api_key is not None,
             "origami": self.origami_api_key is not None,
         }

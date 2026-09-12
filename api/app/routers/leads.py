@@ -1,10 +1,10 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 
 from app.core.config import Settings
-from app.core.llm import MissingReasoningProviderError
+from app.core.llm import MissingEmbeddingProviderError, MissingReasoningProviderError
 from app.schemas.leads import (
     Draft,
     Lead,
@@ -14,7 +14,7 @@ from app.schemas.leads import (
     OutreachApproveRequest,
     OutreachRequest,
 )
-from app.services.dependencies import get_openai_client, get_settings, get_store
+from app.services.dependencies import get_embedding_client, get_settings, get_store
 from app.services.icp_leads_store import IcpLeadsStore
 from app.services.leads import complete_search, start_search
 from app.services.origami import OrigamiClient
@@ -34,7 +34,7 @@ async def source(
     store: StoreDep,
 ) -> LeadSourceAccepted:
     _require(settings, "origami")
-    _require(settings, "openai")
+    _require(settings, "embeddings")
     origami = _origami_client(settings)
     try:
         job, profile_id = await start_search(
@@ -51,7 +51,7 @@ async def source(
         _complete_and_close,
         store,
         origami,
-        get_openai_client(request),
+        get_embedding_client(request),
         settings,
         profile_id,
         job.id,
@@ -94,14 +94,15 @@ def outreach(
 ) -> Draft:
     _require(settings, settings.reasoning_provider)
     try:
-        return draft_outreach(
-            store,
-            settings,
-            settings,
-            lead_id=lead_id,
-            rep_name=body.rep_name,
-        )
-    except MissingReasoningProviderError as error:
+        with _lead_lock(request, lead_id):
+            return draft_outreach(
+                store,
+                settings,
+                settings,
+                lead_id=lead_id,
+                rep_name=body.rep_name,
+            )
+    except (MissingEmbeddingProviderError, MissingReasoningProviderError) as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(error),
@@ -114,18 +115,32 @@ def outreach(
 def approve(
     lead_id: str,
     body: OutreachApproveRequest,
+    request: Request,
     store: StoreDep,
 ) -> Draft:
-    draft = store.latest_outreach_draft_for_lead(lead_id)
-    if draft is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No outreach draft found",
-        )
-    try:
-        return approve_outreach(store, draft_id=str(draft.id), actor=body.actor)
-    except ValueError as error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    with _lead_lock(request, lead_id):
+        draft = store.latest_outreach_draft_for_lead(lead_id)
+        if draft is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No outreach draft found",
+            )
+        if str(draft.id) != str(body.draft_id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Outreach draft is stale; review the latest draft before approval",
+            )
+        try:
+            return approve_outreach(store, draft_id=str(draft.id), actor=body.actor)
+        except ValueError as error:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)
+            ) from error
+
+
+def _lead_lock(request: Request, lead_id: str) -> Any:
+    locks = request.app.state.outreach_locks
+    return locks[hash(lead_id) % len(locks)]
 
 
 async def _complete_and_close(

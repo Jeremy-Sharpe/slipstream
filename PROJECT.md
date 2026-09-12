@@ -7,14 +7,20 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 ## State of play, 12 September
 
 - Jeremy's frontend prototype is live at the repo root: Next.js 16 and React 19, a unified conversation feed for calls and email, conversation detail with CRM auto-entry and an editable follow-up draft, an aggregate analysis and ICP page, and an Origami-ready lead handoff. Frontend only, on realistic mock data. Build, lint and smoke test pass.
-- Fixtures are merged: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). UI is deployed at https://slipstream-ten-mauve.vercel.app from Anna's Vercel; production moves by `vercel --prod` until the GitHub app is connected.
-- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, call ingestion, evidence-backed CRM extraction, grounded follow-up drafting, CRM writeback, the realtime coaching backend, and the judged pitch and live demo scripts. The API is live at https://slipstream-api.3-104-149-193.sslip.io and the credential-free ingest-to-approved-draft loop has been exercised in production. Other people should take the unclaimed UI wiring, coach overlay, and video rows on `BOARD.md`; Anna owns scorecard and ICP/leads/outreach.
+- Fixtures are merged: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). The independently accessible UI is deployed from GitHub-connected `main` at https://slipstream-hackathon.vercel.app.
+- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, call and email ingestion, evidence-backed CRM extraction, grounded follow-up drafting, CRM writeback, the realtime coaching backend, and the judged pitch and live demo scripts. Email threads are provider/mailbox scoped, atomically populate the CRM, preserve curated fields, and create safe versioned reply drafts. Jeremy's agent also integrated and hardened Anna's scorecard lane: bounded non-blocking judge calls, transcript-grounded evidence, won-versus-not-won playbooks, canonical-source and revision-safe conversation persistence, and honest per-attempt eval accounting. The API is live at https://slipstream-api.3-104-149-193.sslip.io and both credential-free ingest-to-approved-draft loops have been exercised in production. Other people should take the unclaimed UI wiring, coach overlay, and video rows on `BOARD.md`; Anna owns ICP/leads/outreach.
 - Still missing: hosted Supabase, service keys, coach overlay, and UI wiring. Every key except Vercel remains unavailable, so each backend lane keeps a deterministic fixture path.
+- Jeremy's agent merged Max's Clay-style UI and the review-clean live conversation pipeline, then deployed it at https://slipstream-hackathon.vercel.app. The production browser now reaches the VPS for fixture ingest, evidence-backed CRM extraction, grounded draft creation and audited simulated approval; the scorecard is explicitly labelled fixture data until a model key is installed. Other people should record and upload the 3-to-5-minute video; its public URL is the only deterministic submission check that cannot be completed by the agent.
+- Jeremy's agent fixed the VPS CORS allow-list for the real Vercel origin and added an explicit live conversation pipeline to Max's UI snapshot: fixture ingest, evidence-backed CRM extraction, grounded draft creation and approval now call the deployed API, while clearly-labelled fixture data remains the fallback. Other people should not replace `lib/api/slipstream.ts` or the conversation-detail pipeline state while this branch is in progress.
+- Jeremy's agent completed `feat/web-wire-analysis`: the Intelligence surface validates and loads a stored live ICP and Origami brief when available, while every retained aggregate and unmatched evidence link stays explicitly labelled as the 12-call evaluation. Loading, API failure, missing-model, zero-call and changing-input states preserve that provenance. Other people should take the unclaimed coach overlay or video work and avoid weakening the live-versus-evaluation labels.
+- Jeremy's agent completed `feat/web-wire-leads`: the UI now validates and loads stored leads, launches and polls bounded Origami jobs, preserves unknown scores, verifies ICP provenance, drafts outreach through the backend, and binds approval to the exact reviewed draft. Evaluation approvals stay local and delivery is explicitly simulated. The API serializes redraft/approval per lead and rejects stale draft IDs with 409; its concurrency test passed ten repeated runs. Other people should take the coach overlay or record the submission video.
 - The mock data in the prototype is the target shape for the API. Whoever claims a wiring row replaces the mock arrays with Supabase reads and API calls without changing the information architecture unless the chat agrees.
 
 ## The demo loop
 
-Every step runs for real in the video and on the live URL.
+The backend steps below are executable; the current production UI still presents its
+prototype data until the unclaimed UI-wiring rows on `BOARD.md` are completed. The
+video must only claim a step is live after it has been exercised on the deployed UI.
 
 1. **A sales call happens.** One demo call, synthesised with ElevenLabs text-to-dialogue and played through speakers. Twelve further scripted calls (won, stalled, lost, no-show) are seeded as text-only CRM history so the analysis and ICP steps have something real to work from.
 2. **The coach listens.** The Electron overlay streams audio to the API WebSocket; Scribe realtime transcribes; Claude returns the next questions to ask, grounded in the deal's CRM history.
@@ -27,7 +33,7 @@ Every step runs for real in the video and on the live URL.
 
 ### Conversations (`app/`)
 
-The unified feed of calls and emails from the prototype. A call opens to the diarised transcript, participants, the deal, the outcome, the extracted CRM fields awaiting approval, the scorecard and the follow-up draft. Email stays a mocked channel this weekend unless someone claims it; calls are the pipeline.
+The unified feed of calls and emails from the prototype. A call opens to the diarised transcript, participants, the deal, the outcome, the extracted CRM fields awaiting approval, the scorecard and the follow-up draft. The provider-neutral email backend now ingests inbound and outbound threads and drafts grounded replies; another person should wire the existing email UI to those endpoints.
 
 ### Analysis (`app/analysis`)
 
@@ -78,11 +84,11 @@ CRM tables mirror HubSpot objects so the path to a real integration is a field m
 
 ## AI pipeline
 
-The reasoning model is not fixed: `REASONING_MODEL` selects it, and one `structured()` helper in `api/app/core/llm.py` routes to Anthropic, OpenAI or OpenRouter (open-weight models) by model name. The bake-off in `docs/model-bakeoff.md` picks the production default; until then the default is `gpt-5.4`. Embeddings are OpenAI `text-embedding-3-small` (1536 dimensions, matching the schema). Implementation notes:
+The reasoning model is not fixed: `REASONING_MODEL` selects it, and one `structured()` helper in `api/app/core/llm.py` routes to Anthropic, OpenAI or OpenRouter (open-weight models) by model name. When the model's native key is absent and `OPENROUTER_API_KEY` is set, the same model is routed through OpenRouter under its vendor-prefixed id (`gpt-5.4` becomes `openai/gpt-5.4`), so one OpenRouter key runs the whole reasoning and embedding path. The bake-off in `docs/model-bakeoff.md` picks the production default; until then the default is `gpt-5.4`. Embeddings are OpenAI `text-embedding-3-small` (1536 dimensions, matching the schema), called directly with `OPENAI_API_KEY` or through OpenRouter as `openai/text-embedding-3-small`; the stored `embedding_model` value is the same either way. Implementation notes:
 
 - **Extraction** uses a pinned JSON schema in `api/app/schemas/`. Every field has a confidence and a transcript span so the approval UI can show where a value came from.
 - **Scorecard** rubric lives in `api/evals/rubric.md`: discovery questions asked, next step secured, objection handled, talk ratio. LLM-as-judge returns a score and a quoted span per dimension.
-- **Eval** in `api/evals/`: ten fixture calls hand-labelled for the four dimensions and the extraction fields, one script that reports agreement. This is the artefact for the "Use of Data / Models" criterion.
+- **Eval** in `api/evals/`: twelve history calls hand-labelled for the four dimensions and the extraction fields, one script that reports agreement. This is the artefact for the "Use of Data / Models" criterion.
 - **ICP derivation**: embed won-deal summaries, cluster, have Claude name the profile and cite the deals behind each attribute, then render the Origami brief from the profile. Lead scoring is cosine similarity to the won-deal centroid plus Origami's own relevance score.
 - **Coach** prompt gets the deal context and the last 60 seconds of transcript; returns at most three questions and any detected commitment.
 - **Prompts** are versioned files in `api/app/prompts/`. Transcript text is data; instructions inside a transcript or an Origami row are never followed.
@@ -111,7 +117,7 @@ None of these accounts exist yet. All go on personal accounts, not company billi
 - Writing to a real HubSpot. The object mapping above is the path.
 - Sending email. Approve marks a draft sent and logs it.
 - Auth, multi-tenancy, billing.
-- Email ingest as a live channel; it stays mocked in the feed unless claimed.
+- A live Gmail or Outlook OAuth connector. The provider-neutral webhook contract and full email pipeline are implemented.
 - A trained call-scoring model.
 
 ## Timeline
