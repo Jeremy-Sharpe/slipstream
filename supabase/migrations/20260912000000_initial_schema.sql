@@ -11,7 +11,7 @@ create type public.lead_status as enum ('new', 'reviewed', 'approved', 'contacte
 create table public.companies (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  domain text unique,
+  domain text unique check (domain is null or domain = lower(btrim(domain))),
   industry text,
   size_band text,
   employee_count integer check (employee_count is null or employee_count >= 0),
@@ -51,11 +51,12 @@ create table public.deals (
   summary text,
   close_date date,
   crm_external_id text unique,
-  embedding extensions.vector(1536),
+  embedding extensions.vector(1536) check (embedding is null or extensions.vector_norm(embedding) > 0),
   embedding_model text,
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  check (embedding is null or nullif(btrim(embedding_model), '') is not null)
 );
 
 create table public.conversations (
@@ -148,6 +149,7 @@ create table public.drafts (
     or (status = 'approved' and nullif(btrim(approved_by), '') is not null and approved_at is not null and sent_at is null)
     or (status = 'sent' and nullif(btrim(approved_by), '') is not null and approved_at is not null and sent_at is not null)
   ),
+  check (sent_at is null or sent_at >= approved_at),
   foreign key (conversation_id, deal_id) references public.conversations(id, deal_id) on delete set null (conversation_id)
 );
 
@@ -158,11 +160,18 @@ create table public.icp_profiles (
   profile jsonb not null,
   evidence jsonb not null default '[]'::jsonb,
   origami_brief text,
-  source_deal_ids uuid[] not null default '{}',
   model text,
   embedding_model text,
   created_at timestamptz not null default now(),
   unique (version)
+);
+
+create table public.icp_profile_source_deals (
+  icp_profile_id uuid not null references public.icp_profiles(id) on delete cascade,
+  deal_id uuid not null references public.deals(id) on delete restrict,
+  evidence jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  primary key (icp_profile_id, deal_id)
 );
 
 create table public.leads (
@@ -181,10 +190,12 @@ create table public.leads (
   origami_relevance_score numeric(6,5) check (origami_relevance_score is null or origami_relevance_score between 0 and 1),
   similarity_score numeric(6,5) check (similarity_score is null or similarity_score between -1 and 1),
   status public.lead_status not null default 'new',
-  embedding extensions.vector(1536),
+  embedding extensions.vector(1536) check (embedding is null or extensions.vector_norm(embedding) > 0),
+  embedding_model text,
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  check (embedding is null or nullif(btrim(embedding_model), '') is not null)
 );
 
 alter table public.drafts
@@ -194,7 +205,7 @@ create table public.activities (
   id bigint generated always as identity primary key,
   deal_id uuid references public.deals(id) on delete cascade,
   contact_id uuid references public.contacts(id) on delete set null,
-  conversation_id uuid,
+  conversation_id uuid references public.conversations(id) on delete set null,
   lead_id uuid references public.leads(id) on delete set null,
   actor text not null default 'slipstream',
   action text not null,
@@ -219,6 +230,7 @@ create index tasks_open_idx on public.tasks(deal_id, due_at) where completed_at 
 create index drafts_conversation_idx on public.drafts(conversation_id);
 create index drafts_deal_idx on public.drafts(deal_id);
 create index drafts_lead_idx on public.drafts(lead_id);
+create index icp_source_deals_deal_idx on public.icp_profile_source_deals(deal_id);
 create index leads_profile_idx on public.leads(icp_profile_id, similarity_score desc);
 create index activities_deal_idx on public.activities(deal_id, created_at desc);
 create index activities_contact_idx on public.activities(contact_id);
@@ -261,6 +273,9 @@ begin
   if query_embedding is null or extensions.vector_norm(query_embedding) = 0 then
     raise exception 'query_embedding must be a non-zero 1536-dimensional vector';
   end if;
+  if extensions.vector_dims(query_embedding) <> 1536 then
+    raise exception 'query_embedding must have exactly 1536 dimensions';
+  end if;
   if nullif(btrim(query_model), '') is null then
     raise exception 'query_model is required';
   end if;
@@ -285,6 +300,7 @@ alter table public.notes enable row level security;
 alter table public.tasks enable row level security;
 alter table public.drafts enable row level security;
 alter table public.icp_profiles enable row level security;
+alter table public.icp_profile_source_deals enable row level security;
 alter table public.leads enable row level security;
 alter table public.activities enable row level security;
 
@@ -301,13 +317,20 @@ create policy "demo read notes" on public.notes for select to anon, authenticate
 create policy "demo read tasks" on public.tasks for select to anon, authenticated using (true);
 create policy "demo read drafts" on public.drafts for select to anon, authenticated using (true);
 create policy "demo read icp profiles" on public.icp_profiles for select to anon, authenticated using (true);
+create policy "demo read icp source deals" on public.icp_profile_source_deals for select to anon, authenticated using (true);
 create policy "demo read leads" on public.leads for select to anon, authenticated using (true);
 create policy "demo read activities" on public.activities for select to anon, authenticated using (true);
 
 grant usage on schema public to anon, authenticated, service_role;
+revoke all on public.companies, public.contacts, public.deals, public.conversations,
+  public.transcript_segments, public.notes, public.tasks, public.drafts,
+  public.icp_profiles, public.icp_profile_source_deals, public.leads, public.activities
+  from anon, authenticated;
+revoke all on sequence public.activities_id_seq from anon, authenticated;
 grant select on public.companies, public.contacts, public.deals, public.conversations,
   public.transcript_segments, public.notes, public.tasks, public.drafts,
-  public.icp_profiles, public.leads, public.activities to anon, authenticated;
+  public.icp_profiles, public.icp_profile_source_deals, public.leads, public.activities
+  to anon, authenticated;
 grant all on all tables in schema public to service_role;
 grant usage, select on all sequences in schema public to service_role;
 grant execute on function public.match_deals(extensions.vector, text, integer, public.deal_outcome) to anon, authenticated, service_role;
