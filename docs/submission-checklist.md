@@ -25,6 +25,9 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
   `email_delivery: false`, so no live send is claimed.
 - The deterministic rubric-sync eval passes. Every deterministic submission check
   except the required demo-video URL passes.
+- `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` performs a
+  credential-free, non-mutating check of the live Campaigns surface, API revision,
+  public campaign reads, OpenAPI contract and unauthenticated control rejection.
 
 ## Deployment-only gaps
 
@@ -43,8 +46,8 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 4. Replace `Demo video: (added at submission)` in `README.md` with the public URL.
 5. Pull `main`, then run `npm run evals:dry`. It must report `PASSED`; do not waive a
    failing check.
-6. Confirm both production URLs return HTTP 200, Campaigns still shows “Delivery execution”,
-   and the API `/ready` revision matches the latest GitHub `main` commit.
+6. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` to confirm both
+   deployments and the protected campaign boundary immediately before submitting.
 7. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
    **Track 1: Improve an Existing Business Capability** and also enter the
    **Built With ElevenLabs** special track.

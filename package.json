@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "oxlint app components lib",
     "evals": "node scripts/run-evals.mjs",
-    "evals:dry": "node scripts/run-evals.mjs --dry"
+    "evals:dry": "node scripts/run-evals.mjs --dry",
+    "smoke:production": "node scripts/smoke-production.mjs",
+    "test:smoke": "node --test scripts/smoke-production.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
