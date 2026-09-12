@@ -1,0 +1,67 @@
+name: Coach installers
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "coach-v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coach-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Linux
+            runner: ubuntu-latest
+            artifact: slipstream-coach-linux
+          - label: macOS
+            runner: macos-latest
+            artifact: slipstream-coach-macos
+          - label: Windows
+            runner: windows-latest
+            artifact: slipstream-coach-windows
+
+    defaults:
+      run:
+        working-directory: coach
+
+    steps:
+      - name: Check out the tagged revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: coach/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run coach tests
+        run: npm test
+
+      - name: Build unsigned installers
+        run: npm run make
+        env:
+          CI: "true"
+
+      - name: Upload installers
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ matrix.artifact }}-${{ github.sha }}
+          path: coach/out/make/**/*
+          if-no-files-found: error
+          retention-days: 14
