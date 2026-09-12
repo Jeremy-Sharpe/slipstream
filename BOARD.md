@@ -9,7 +9,7 @@ Order matters. The foundation rows unblock everything else and should be claimed
 | Slug | Feature | Folders | Owner | Branch | Status | Notes |
 |---|---|---|---|---|---|---|
 | `web-skeleton` | Next.js app, layout, the three surfaces as routes, mock data | `app/` | Jeremy | main | done | Prototype at repo root, mock data. Deploy to Vercel still to do |
-| `schema` | Supabase project, pgvector, migrations for the tables in PROJECT.md, seed script | `supabase/` | | | unclaimed | Blocks every lane |
+| `schema` | Supabase project, pgvector, migrations for the tables in PROJECT.md, seed script | `supabase/` | Jeremy's agent | feat/schema | in progress | Blocks every lane |
 | `fixtures` | 8 to 12 synthesised sales calls via ElevenLabs text-to-dialogue: scripts, audio, expected outcomes. Varied: won, stalled, lost, no-show | `fixtures/` | | | unclaimed | Every surface is judged against these |
 | `api-skeleton` | FastAPI app, settings, Supabase client, health route, CORS for the web origin, Render deploy | `api/` | | | unclaimed | |
 | `web-deploy` | Vercel project for the UI, env vars, production URL in README | Vercel, `README.md` | | | unclaimed | |
