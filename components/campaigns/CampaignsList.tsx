@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { NewCampaignDialog } from "./NewCampaignDialog";
 import { StatusBadge } from "./StatusBadge";
 import { campaignActions, useCampaigns } from "./store";
+import { LiveCampaignRuns } from "./LiveCampaignRuns";
 
 type Tab = "all" | CampaignStatus;
 const TABS: { key: Tab; label: string }[] = [
@@ -72,7 +73,10 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
         </div>
       </div>
 
-      <div className="mt-[42px] px-11 pb-[14px]">
+      <LiveCampaignRuns />
+
+      <div className="mt-8 flex items-end justify-between px-11 pb-[14px]">
+        <div><h2 className="text-[15px] font-semibold text-foreground">Sequence workspace</h2><p className="mt-0.5 text-xs text-muted-foreground">Evaluation data for designing and approving outreach sequences</p></div>
         <div className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
           {TABS.map((t) => (
             <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full items-center gap-2 rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors hover:text-foreground", tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]")}>
@@ -122,7 +126,7 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
               <span className="tabular-nums">{approvedCount(c)}</span>
               <Tooltip>
                 <TooltipTrigger render={<span className="w-fit cursor-default tabular-nums text-muted-foreground" />}>0</TooltipTrigger>
-                <TooltipContent>0 · nothing is sent from Slipstream</TooltipContent>
+                <TooltipContent>Evaluation sequence · no live delivery record</TooltipContent>
               </Tooltip>
               <span className="text-muted-foreground">—</span>
               <span className="flex items-center gap-2"><span className="size-4 rounded-full bg-foreground" />{c.owner}</span>

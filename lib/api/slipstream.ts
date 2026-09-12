@@ -174,6 +174,35 @@ export type ApiLeadSourceStatus = {
   phase: string | null;
 };
 
+export type ApiCampaignItemState = "queued" | "running" | "sent" | "retryable" | "failed" | "reconcile";
+
+export type ApiCampaignItem = {
+  position: number;
+  draft_id: string;
+  state: ApiCampaignItemState;
+  outcome: string | null;
+  http_status: number | null;
+  detail: string | null;
+  retryable: boolean;
+  reconciliation_required: boolean;
+  receipt: Record<string, unknown> | null;
+  attempt_count: number;
+  next_attempt_at: string | null;
+  last_attempt_at: string | null;
+};
+
+export type ApiCampaign = {
+  id: string;
+  name: string;
+  status: "scheduled" | "running" | "paused" | "completed" | "attention";
+  scheduled_for: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  counts: Record<ApiCampaignItemState, number>;
+  items: ApiCampaignItem[];
+};
+
 export type ApiScorecard = {
   call_id: string;
   request_id: string | null;
@@ -346,6 +375,48 @@ function parseOutreachDraft(value: unknown): ApiOutreachDraft {
   return value as ApiOutreachDraft;
 }
 
+function parseCampaign(value: unknown): ApiCampaign {
+  const campaignStatuses = new Set(["scheduled", "running", "paused", "completed", "attention"]);
+  const itemStates: ApiCampaignItemState[] = ["queued", "running", "sent", "retryable", "failed", "reconcile"];
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.name !== "string" ||
+    typeof value.status !== "string" ||
+    !campaignStatuses.has(value.status) ||
+    typeof value.created_by !== "string" ||
+    ![value.scheduled_for, value.created_at, value.updated_at].every((date) => typeof date === "string" && Number.isFinite(Date.parse(date))) ||
+    !isRecord(value.counts) ||
+    !Array.isArray(value.items) ||
+    value.items.length < 1 || value.items.length > 25
+  ) {
+    throw new ApiError("Slipstream API returned malformed campaign data", 502);
+  }
+  const counts = value.counts as Record<string, unknown>;
+  const items = value.items as unknown[];
+  const itemsValid = items.every((item) =>
+    isRecord(item) &&
+    Number.isSafeInteger(item.position) && Number(item.position) >= 0 &&
+    typeof item.draft_id === "string" &&
+    typeof item.state === "string" && itemStates.includes(item.state as ApiCampaignItemState) &&
+    nullableString(item.outcome) && nullableNumber(item.http_status) && nullableString(item.detail) &&
+    typeof item.retryable === "boolean" && typeof item.reconciliation_required === "boolean" &&
+    (item.receipt === null || isRecord(item.receipt)) &&
+    Number.isSafeInteger(item.attempt_count) && Number(item.attempt_count) >= 0 &&
+    [item.next_attempt_at, item.last_attempt_at].every((date) => date === null || typeof date === "string" && Number.isFinite(Date.parse(date)))
+  );
+  const countsValid = itemStates.every((state) =>
+    Number.isSafeInteger(counts[state]) &&
+    Number(counts[state]) === items.filter((item) => isRecord(item) && item.state === state).length
+  );
+  const positions = items.map((item) => isRecord(item) ? item.position : null);
+  const draftIds = items.map((item) => isRecord(item) ? item.draft_id : null);
+  if (!itemsValid || !countsValid || new Set(positions).size !== positions.length || new Set(draftIds).size !== draftIds.length) {
+    throw new ApiError("Slipstream API returned inconsistent campaign data", 502);
+  }
+  return value as ApiCampaign;
+}
+
 function parseDraft(value: unknown): ApiDraft {
   if (
     !isRecord(value) ||
@@ -487,6 +558,12 @@ export async function getLeads(icpProfileId?: string, signal?: AbortSignal): Pro
   const payload = await request<unknown>(`/leads${query}`, { signal });
   if (!Array.isArray(payload)) throw new ApiError("Slipstream API returned malformed leads data", 502);
   return payload.map(parseLead);
+}
+
+export async function getCampaigns(signal?: AbortSignal): Promise<ApiCampaign[]> {
+  const payload = await request<unknown>("/campaigns?limit=50", { signal });
+  if (!Array.isArray(payload)) throw new ApiError("Slipstream API returned malformed campaigns", 502);
+  return payload.map(parseCampaign);
 }
 
 export async function sourceLeads(count = 10, signal?: AbortSignal): Promise<ApiLeadSource> {
