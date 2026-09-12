@@ -2,9 +2,9 @@
   "call_id": "call-13-marlowe-finch-demo",
   "extraction": {
     "contact": {
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "role": "CFO",
-      "email": "dev@marlowefinch.example",
+      "email": "donnie@marlowefinch.example",
       "phone": "+61 3 7010 1113"
     },
     "company": {
@@ -33,7 +33,7 @@
       }
     ],
     "next_step": {
-      "description": "Jordan to send the proposal and 30-seat agreement by 5pm for Dev and the managing partner to review and sign.",
+      "description": "Jordan to send the proposal and 30-seat agreement by 5pm for Donnie and the managing partner to review and sign.",
       "due": "2026-09-11"
     }
   },
@@ -42,7 +42,7 @@
     "next_step_secured": true,
     "objection_handling": "partial",
     "rep_talk_ratio": 0.64,
-    "notes": "Jordan won the demo call by rushing Dev into a proposal and agreement, but the call is full of pressure, weak discovery and risky claims."
+    "notes": "Jordan won the demo call by rushing Donnie into a proposal and agreement, but the call is full of pressure, weak discovery and risky claims."
   },
   "icp_signals": {
     "industry": "Accounting practice",

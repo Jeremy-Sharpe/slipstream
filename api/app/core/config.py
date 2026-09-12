@@ -78,10 +78,16 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_service_role_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
+    openai_api_key: SecretStr | None = None
     openrouter_api_key: SecretStr | None = None
     scorecard_judge_model: str = "anthropic/claude-sonnet-5"
     elevenlabs_api_key: SecretStr | None = None
+    ingest_token: SecretStr | None = None
     origami_api_key: SecretStr | None = None
+    reasoning_model: str = "gpt-5.4"
+    embedding_model: str = "text-embedding-3-small"
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    origami_base_url: str = "https://origami.chat/api/v3"
 
     @field_validator("log_level", mode="before")
     @classmethod
@@ -92,8 +98,10 @@ class Settings(BaseSettings):
         "supabase_url",
         "supabase_service_role_key",
         "anthropic_api_key",
+        "openai_api_key",
         "openrouter_api_key",
         "elevenlabs_api_key",
+        "ingest_token",
         "origami_api_key",
         mode="before",
     )
@@ -111,6 +119,12 @@ class Settings(BaseSettings):
             self.supabase_url = _canonical_http_origin(
                 self.supabase_url, production=self.environment == "production"
             )
+        if (
+            self.environment == "production"
+            and self.elevenlabs_api_key is not None
+            and self.ingest_token is None
+        ):
+            raise ValueError("INGEST_TOKEN is required with ELEVENLABS_API_KEY in production")
         return self
 
     @property
@@ -118,10 +132,21 @@ class Settings(BaseSettings):
         return "supabase" if self.supabase_url else "memory"
 
     @property
+    def reasoning_provider(self) -> Literal["anthropic", "openai", "openrouter"]:
+        model = self.reasoning_model.strip().lower()
+        if model.startswith("claude"):
+            return "anthropic"
+        if model.startswith("gpt") or (len(model) > 1 and model[0] == "o" and model[1].isdigit()):
+            return "openai"
+        return "openrouter"
+
+    @property
     def integration_flags(self) -> dict[str, bool]:
         return {
             "supabase": self.storage_mode == "supabase",
             "anthropic": self.anthropic_api_key is not None,
+            "openai": self.openai_api_key is not None,
+            "openrouter": self.openrouter_api_key is not None,
             "elevenlabs": self.elevenlabs_api_key is not None,
             "origami": self.origami_api_key is not None,
         }

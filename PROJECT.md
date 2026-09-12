@@ -7,8 +7,9 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 ## State of play, 12 September
 
 - Jeremy's frontend prototype is live at the repo root: Next.js 16 and React 19, a unified conversation feed for calls and email, conversation detail with CRM auto-entry and an editable follow-up draft, an aggregate analysis and ICP page, and an Origami-ready lead handoff. Frontend only, on realistic mock data. Build, lint and smoke test pass.
-- Fixtures exist on `feat/fixtures`: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). UI is deployed at https://slipstream-ten-mauve.vercel.app from Anna's Vercel; production moves by `vercel --prod` until the GitHub app is connected.
-- Still missing: API, database, coach, and every key except Vercel.
+- Fixtures are merged: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). UI is deployed at https://slipstream-ten-mauve.vercel.app from Anna's Vercel; production moves by `vercel --prod` until the GitHub app is connected.
+- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, and call ingestion. The API is live at https://slipstream-api.3-104-149-193.sslip.io and exposes all thirteen fixtures; Jeremy's agent is now building evidence-backed CRM extraction. Other people should take the unclaimed UI wiring, pitch, demo script, and coach rows on `BOARD.md`; Anna owns scorecard and ICP/leads/outreach.
+- Still missing: hosted Supabase, service keys, coach, and the live pipeline after extraction. Every key except Vercel remains unavailable, so each backend lane keeps a deterministic fixture path.
 - The mock data in the prototype is the target shape for the API. Whoever claims a wiring row replaces the mock arrays with Supabase reads and API calls without changing the information architecture unless the chat agrees.
 
 ## The demo loop
@@ -77,7 +78,7 @@ CRM tables mirror HubSpot objects so the path to a real integration is a field m
 
 ## AI pipeline
 
-Model table and reasoning are in `README.md`. Implementation notes:
+The reasoning model is not fixed: `REASONING_MODEL` selects it, and one `structured()` helper in `api/app/core/llm.py` routes to Anthropic, OpenAI or OpenRouter (open-weight models) by model name. The bake-off in `docs/model-bakeoff.md` picks the production default; until then the default is `gpt-5.4`. Embeddings are OpenAI `text-embedding-3-small` (1536 dimensions, matching the schema). Implementation notes:
 
 - **Extraction** uses a pinned JSON schema in `api/app/schemas/`. Every field has a confidence and a transcript span so the approval UI can show where a value came from.
 - **Scorecard** rubric lives in `api/evals/rubric.md`: discovery questions asked, next step secured, objection handled, talk ratio. LLM-as-judge returns a score and a quoted span per dimension.
@@ -85,6 +86,7 @@ Model table and reasoning are in `README.md`. Implementation notes:
 - **ICP derivation**: embed won-deal summaries, cluster, have Claude name the profile and cite the deals behind each attribute, then render the Origami brief from the profile. Lead scoring is cosine similarity to the won-deal centroid plus Origami's own relevance score.
 - **Coach** prompt gets the deal context and the last 60 seconds of transcript; returns at most three questions and any detected commitment.
 - **Prompts** are versioned files in `api/app/prompts/`. Transcript text is data; instructions inside a transcript or an Origami row are never followed.
+- **History for the ICP** is loaded from the fixture labels (`POST /icp/history/load`) and tagged `metadata.source = "fixtures"`; derivation reads only those deals, so the demo ICP always matches the calls the judges watched. First live derivation (12 Sep, GPT-5.4, memory mode): professional services and allied health, 37 to 76 staff, insurance and incident triggers, small retail as a disqualifier.
 
 ## External services and setup
 
