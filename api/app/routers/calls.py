@@ -318,6 +318,20 @@ async def _find_by_source(request: Request, source_external_id: str) -> CallResp
         ) from error
 
 
+async def load_call(request: Request, conversation_id: UUID) -> CallResponse | None:
+    if request.app.state.supabase is not None:
+        try:
+            return await asyncio.to_thread(
+                _read_from_supabase, request.app.state.supabase, conversation_id
+            )
+        except Exception as error:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The conversation store is unavailable",
+            ) from error
+    return request.app.state.call_store.get(str(conversation_id))
+
+
 @router.get("/fixtures", response_model=list[FixtureSummary])
 async def list_fixtures() -> list[FixtureSummary]:
     def load() -> list[FixtureSummary]:
@@ -468,18 +482,7 @@ async def ingest_audio(
 
 @router.get("/{conversation_id}", response_model=CallResponse)
 async def get_call(conversation_id: UUID, request: Request) -> CallResponse:
-    if request.app.state.supabase is not None:
-        try:
-            record = await asyncio.to_thread(
-                _read_from_supabase, request.app.state.supabase, conversation_id
-            )
-        except Exception as error:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="The conversation store is unavailable",
-            ) from error
-    else:
-        record = request.app.state.call_store.get(str(conversation_id))
+    record = await load_call(request, conversation_id)
     if record is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Call not found")
     return record

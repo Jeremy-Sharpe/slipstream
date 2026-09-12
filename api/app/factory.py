@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.database import create_supabase
 from app.core.readiness import StorageReadinessProbe
-from app.routers import calls, health
+from app.routers import calls, extractions, health
 
 
 @asynccontextmanager
@@ -39,8 +39,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.readiness = StorageReadinessProbe(runtime_settings)
     app.state.supabase = create_supabase(runtime_settings)
     app.state.call_store = {}
+    app.state.extraction_store = {}
     app.state.transcription_slots = asyncio.Semaphore(2)
     app.state.ingest_locks = [asyncio.Lock() for _ in range(32)]
+    app.state.extraction_locks = [asyncio.Lock() for _ in range(32)]
     app.add_middleware(calls.UploadSizeLimitMiddleware)
     app.add_middleware(
         CORSMiddleware,
@@ -57,4 +59,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health.router)
     app.include_router(health.router, prefix="/api/v1")
     app.include_router(calls.router, prefix="/api/v1")
+    app.include_router(extractions.router, prefix="/api/v1")
     return app
