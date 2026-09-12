@@ -31,7 +31,7 @@ Order matters. The foundation rows unblock everything else and should be claimed
 | `web-wire-leads` | Replace mock leads with live Origami results, similarity score, outreach approve | `app/leads` | | | unclaimed | |
 | `coach-shell` | Fork Cheating Daddy into `coach/`, remove Gemini, connect to the API WebSocket, keep overlay and audio capture | `coach/` | | | unclaimed | GPL-3.0 stays, own LICENSE |
 | `coach-brain` | WebSocket endpoint: Scribe realtime in, rolling Claude suggestions out with deal context, hand recording to ingest on call end | `api/app/ws/coach.py`, `api/app/prompts/coach-*.md` | | | unclaimed | |
-| `pitch` | `docs/pitch.md`: 400 to 700 spoken words plus a Q&A section, scored by evals F1 and F3 | `docs/pitch.md` | Jeremy's agent | feat/pitch | in progress | Writing from the production-proven loop, with team-assigned hard-question answers |
+| `pitch` | `docs/pitch.md`: 400 to 700 spoken words plus a Q&A section, scored by evals F1 and F3 | `docs/pitch.md` | Jeremy's agent | feat/pitch | done | 528 spoken words; model judges pass F1 at 5/6 and F3 at 6/6; questions split across all four teammates |
 | `demo-script` | `docs/demo-script.md`: step by step against the live app with a fallback, scored by eval F2 | `docs/demo-script.md` | Jeremy's agent | feat/demo-script | done | Live API fallback exercised; model judge F2 passes at 7/8 after production-evidence revision |
 | `video` | 3 to 5 minute demo video on the live URL, per-feature walkthroughs | `docs/video/` | | | unclaimed | Starts Sunday once the loop runs |
 | `submission` | README lines filled, `npm run evals:dry` green, form submitted before Monday 12:00pm | `README.md` | | | unclaimed | |
