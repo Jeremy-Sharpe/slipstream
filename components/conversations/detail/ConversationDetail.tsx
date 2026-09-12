@@ -37,6 +37,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
   const pipelineInFlight = useRef(false);
   const approvalInFlight = useRef(false);
   const draftIdRef = useRef<string | undefined>(undefined);
+  const syncedRef = useRef(status === "synced");
 
   const log = useCallback((title: string, meta: string, icon: TimelineEntry["icon"]) => {
     setTimeline((t) => [{ title, meta, at: new Date().toISOString(), icon }, ...t]);
@@ -78,6 +79,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
         return;
       }
     }
+    syncedRef.current = true;
     setSynced(true);
     patchConversation(call.id, { status: "synced" });
     log("CRM fields approved", "Live Slipstream staging record", "check");
@@ -94,7 +96,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
       await approveLiveDraft(draftId);
       if (draftIdRef.current === draftId) {
         setApprovedDraftId(draftId);
-        if (!synced) patchConversation(call.id, { status: "action_ready" });
+        if (!syncedRef.current) patchConversation(call.id, { status: "action_ready" });
         log("Follow-up approved", "Live API activity · delivery simulated", "mail");
       }
     } catch (error) {
@@ -106,7 +108,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
       setApproving(false);
     }
   };
-  const markDone = () => { setSynced(true); patchConversation(call.id, { status: "synced" }); log("Marked done", "Maxim", "check"); };
+  const markDone = () => { syncedRef.current = true; setSynced(true); patchConversation(call.id, { status: "synced" }); log("Marked done", "Maxim", "check"); };
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] flex-col bg-page">
