@@ -14,6 +14,7 @@ from app.schemas.icp import DealRecord, IcpEvidenceItem, IcpProfile, StoredIcpPr
 from app.schemas.leads import Draft, Lead, LeadIn, LeadStatus
 
 JsonDict = dict[str, Any]
+MAX_ICP_DEALS = 100
 
 
 class IcpLeadsStore(Protocol):
@@ -24,6 +25,12 @@ class IcpLeadsStore(Protocol):
     def upsert_deal(self, values: JsonDict) -> DealRecord: ...
 
     def list_fixture_deals(self, *, include_demo: bool = False) -> list[DealRecord]: ...
+
+    def list_icp_deals(self, *, include_demo: bool = False) -> list[DealRecord]: ...
+
+    def get_deal_by_external_id(self, external_id: str) -> DealRecord | None: ...
+
+    def get_contact_by_email(self, email: str) -> JsonDict | None: ...
 
     def update_deal_embedding(
         self, deal_id: str, embedding: list[float], embedding_model: str
@@ -128,6 +135,10 @@ def _deal_from_row(row: JsonDict) -> DealRecord:
         embedding=_vector(row.get("embedding")),
         embedding_model=row.get("embedding_model"),
         metadata=row.get("metadata") or {},
+        interactions=row.get("interactions")
+        or (row.get("metadata") or {}).get("fixture_interactions")
+        or [],
+        updated_at=row.get("updated_at"),
     )
 
 
@@ -175,9 +186,15 @@ class SupabaseIcpLeadsStore:
         )
 
     def upsert_deal(self, values: JsonDict) -> DealRecord:
+        payload = deepcopy(values)
+        interactions = payload.pop("interactions", None)
+        if interactions:
+            metadata = dict(payload.get("metadata") or {})
+            metadata["fixture_interactions"] = interactions
+            payload["metadata"] = metadata
         row = self._single(
             self._client.table("deals")
-            .upsert(deepcopy(values), on_conflict="crm_external_id")
+            .upsert(payload, on_conflict="crm_external_id")
             .select("*")
             .execute()
             .data
@@ -194,6 +211,36 @@ class SupabaseIcpLeadsStore:
         if not include_demo:
             deals = [deal for deal in deals if not deal.metadata.get("demo")]
         return sorted(deals, key=lambda deal: deal.crm_external_id or "")
+
+    def list_icp_deals(self, *, include_demo: bool = False) -> list[DealRecord]:
+        rows = self._client.rpc(
+            "read_icp_deals", {"include_demo": include_demo}
+        ).execute().data
+        if not isinstance(rows, list):
+            raise RuntimeError("ICP deal snapshot returned an invalid response")
+        return [_deal_from_row(row) for row in rows]
+
+    def get_deal_by_external_id(self, external_id: str) -> DealRecord | None:
+        rows = (
+            self._client.table("deals")
+            .select("*,companies(*),contacts(*)")
+            .eq("crm_external_id", external_id)
+            .limit(1)
+            .execute()
+            .data
+        )
+        return _deal_from_row(rows[0]) if rows else None
+
+    def get_contact_by_email(self, email: str) -> JsonDict | None:
+        rows = (
+            self._client.table("contacts")
+            .select("*")
+            .eq("email", email.strip().lower())
+            .limit(1)
+            .execute()
+            .data
+        )
+        return deepcopy(rows[0]) if rows else None
 
     def update_deal_embedding(
         self, deal_id: str, embedding: list[float], embedding_model: str
@@ -265,15 +312,33 @@ class SupabaseIcpLeadsStore:
     def source_deals_for_profile(self, profile_id: str) -> list[DealRecord]:
         source_rows = (
             self._client.table("icp_profile_source_deals")
-            .select("deal_id")
+            .select("deal_id,evidence")
             .eq("icp_profile_id", profile_id)
             .execute()
             .data
         )
-        deal_ids = {row["deal_id"] for row in source_rows}
-        return [
-            deal for deal in self.list_fixture_deals(include_demo=True) if str(deal.id) in deal_ids
+        snapshots = [
+            DealRecord.model_validate(row["evidence"]["deal_snapshot"])
+            for row in source_rows
+            if isinstance(row.get("evidence"), dict)
+            and isinstance(row["evidence"].get("deal_snapshot"), dict)
         ]
+        snapshot_ids = {str(deal.id) for deal in snapshots}
+        legacy_ids = {
+            str(row["deal_id"])
+            for row in source_rows
+            if str(row["deal_id"]) not in snapshot_ids
+        }
+        if not legacy_ids:
+            return snapshots
+        rows = (
+            self._client.table("deals")
+            .select("*,companies(*),contacts(*)")
+            .in_("id", list(legacy_ids))
+            .execute()
+            .data
+        )
+        return [*snapshots, *[_deal_from_row(row) for row in rows]]
 
     def log_activity(
         self,
@@ -434,6 +499,20 @@ class InMemoryIcpLeadsStore:
             deals = [deal for deal in deals if not deal.metadata.get("demo")]
         return sorted(deals, key=lambda deal: deal.crm_external_id or "")
 
+    def list_icp_deals(self, *, include_demo: bool = False) -> list[DealRecord]:
+        return _select_icp_deals(
+            [self._deal_from_memory_row(row) for row in self.deals.values()],
+            include_demo=include_demo,
+        )
+
+    def get_deal_by_external_id(self, external_id: str) -> DealRecord | None:
+        row = self.deals.get(external_id)
+        return self._deal_from_memory_row(row) if row else None
+
+    def get_contact_by_email(self, email: str) -> JsonDict | None:
+        row = self.contacts.get(email.strip().lower())
+        return deepcopy(row) if row else None
+
     def update_deal_embedding(
         self, deal_id: str, embedding: list[float], embedding_model: str
     ) -> DealRecord:
@@ -488,13 +567,30 @@ class InMemoryIcpLeadsStore:
         return _stored_profile(row) if row else None
 
     def source_deals_for_profile(self, profile_id: str) -> list[DealRecord]:
-        deal_ids = {
-            deal_id
-            for source_profile_id, deal_id in self.icp_source_deals
+        source_rows = [
+            row
+            for (source_profile_id, _), row in self.icp_source_deals.items()
             if source_profile_id == profile_id
+        ]
+        snapshots = [
+            DealRecord.model_validate(row["evidence"]["deal_snapshot"])
+            for row in source_rows
+            if isinstance(row.get("evidence"), dict)
+            and isinstance(row["evidence"].get("deal_snapshot"), dict)
+        ]
+        snapshot_ids = {str(deal.id) for deal in snapshots}
+        legacy_ids = {
+            str(row["deal_id"])
+            for row in source_rows
+            if str(row["deal_id"]) not in snapshot_ids
         }
         return [
-            deal for deal in self.list_fixture_deals(include_demo=True) if str(deal.id) in deal_ids
+            *snapshots,
+            *[
+                self._deal_from_memory_row(row)
+                for row in self.deals.values()
+                if str(row["id"]) in legacy_ids
+            ],
         ]
 
     def log_activity(
@@ -626,6 +722,31 @@ def _stored_profile(row: JsonDict) -> StoredIcpProfile:
         IcpEvidenceItem.model_validate(item) for item in payload.get("evidence", [])
     ]
     return StoredIcpProfile.model_validate(payload)
+
+
+def _select_icp_deals(
+    deals: list[DealRecord], *, include_demo: bool = False
+) -> list[DealRecord]:
+    unique = {str(deal.id): deal for deal in deals}
+    eligible = [
+        deal
+        for deal in unique.values()
+        if (deal.metadata.get("source") == "fixtures" or deal.interactions)
+        and (include_demo or not deal.metadata.get("demo"))
+    ]
+    fixtures = sorted(
+        (deal for deal in eligible if deal.metadata.get("source") == "fixtures"),
+        key=lambda deal: deal.crm_external_id or str(deal.id),
+    )
+    live = sorted(
+        (deal for deal in eligible if deal.metadata.get("source") != "fixtures"),
+        key=lambda deal: (
+            deal.updated_at.isoformat() if deal.updated_at else "",
+            str(deal.id),
+        ),
+        reverse=True,
+    )
+    return [*fixtures, *live][:MAX_ICP_DEALS]
 
 
 def split_name(name: str) -> tuple[str, str]:

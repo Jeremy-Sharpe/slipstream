@@ -37,6 +37,7 @@ export type Intelligence = {
   wonDeals: number;
   icpVersion: number;
   confidence: number;
+  sourceSummary?: { deals: number; calls: number; emails: number; outcomeLabelled: number } | null;
   tiles: Tile[];
   lens: LensRow[];
   icp: { summary: string; attributes: IcpAttribute[] };

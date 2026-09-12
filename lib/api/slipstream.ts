@@ -126,6 +126,7 @@ export type ApiIcpProfile = {
     triggers: string[];
     confidence: number;
     origami_brief: string;
+    source_summary?: { deals: number; calls: number; emails: number; outcome_labelled: number } | null;
   };
 };
 
@@ -246,6 +247,12 @@ function parseIcpProfile(value: unknown): ApiIcpProfile {
   }
   const profile = value.profile;
   const confidence = profile.confidence;
+  const sourceSummary = profile.source_summary;
+  const validSourceSummary = sourceSummary == null || (
+    isRecord(sourceSummary) &&
+    [sourceSummary.deals, sourceSummary.calls, sourceSummary.emails, sourceSummary.outcome_labelled]
+      .every((count) => Number.isInteger(count) && Number(count) >= 0)
+  );
   const validProfile =
     typeof profile.summary === "string" &&
     isStringArray(profile.industries) &&
@@ -255,7 +262,8 @@ function parseIcpProfile(value: unknown): ApiIcpProfile {
     typeof confidence === "number" &&
     Number.isFinite(confidence) &&
     confidence >= 0 && confidence <= 1 &&
-    typeof profile.origami_brief === "string";
+    typeof profile.origami_brief === "string" &&
+    validSourceSummary;
   const validEvidence = value.evidence.every((item) =>
     isRecord(item) &&
     typeof item.attribute === "string" &&

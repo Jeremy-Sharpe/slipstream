@@ -9,6 +9,8 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Header, HTTPException, Request, status
 
 from app.routers.drafts import _create_draft
+from app.schemas.icp import InteractionEvidence
+from app.services.crm_mirror import mirror_interaction
 from app.services.draft import DraftResponse
 from app.services.email import (
     EmailIngest,
@@ -215,6 +217,30 @@ async def ingest_email(
             if canonical != record:
                 raise HTTPException(status_code=409, detail="Email source ID already exists")
             return canonical
+        contact_email = record.contact_email
+        try:
+            mirror_interaction(
+                request.app.state.icp_leads_store,
+                deal_external_id=record.deal_external_id,
+                interaction=InteractionEvidence(
+                    source_external_id=record.namespaced_source_id,
+                    channel="email",
+                    direction=record.direction,
+                    occurred_at=record.occurred_at,
+                    subject=record.subject,
+                    content=record.body[:800],
+                ),
+                contact={"email": contact_email} if contact_email else None,
+                deal={
+                    "name": f"{record.subject} — email follow-up",
+                    "summary": f"Email thread: {record.subject}",
+                    "metadata": {"source": "live"},
+                },
+            )
+        except Exception as error:
+            raise HTTPException(
+                status_code=503, detail="The email could not be mirrored into the CRM"
+            ) from error
         request.app.state.email_store[str(record.id)] = record
         request.app.state.email_threads.setdefault(record.namespaced_thread_id, []).append(record)
         return record

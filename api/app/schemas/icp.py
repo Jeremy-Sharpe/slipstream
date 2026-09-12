@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 JsonDict = dict[str, Any]
 
@@ -11,6 +11,13 @@ class IcpEvidenceItem(BaseModel):
     attribute: str
     deal_ids: list[str]
     why: str
+
+
+class IcpSourceSummary(BaseModel):
+    deals: int = Field(ge=0)
+    calls: int = Field(ge=0)
+    emails: int = Field(ge=0)
+    outcome_labelled: int = Field(ge=0)
 
 
 class IcpProfile(BaseModel):
@@ -23,6 +30,7 @@ class IcpProfile(BaseModel):
     evidence: list[IcpEvidenceItem]
     confidence: float = Field(ge=0, le=1)
     origami_brief: str
+    source_summary: IcpSourceSummary | None = None
 
 
 class StoredIcpProfile(BaseModel):
@@ -50,6 +58,20 @@ class FixtureHistoryCounts(BaseModel):
     outcomes: dict[str, int]
 
 
+class InteractionEvidence(BaseModel):
+    source_external_id: str
+    channel: Literal["call", "email"]
+    direction: Literal["inbound", "outbound", "unknown"]
+    occurred_at: datetime
+    subject: str
+    content: str = Field(min_length=1, max_length=1200)
+
+    @field_validator("occurred_at")
+    @classmethod
+    def canonical_time(cls, value: datetime) -> datetime:
+        return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+
+
 class DealRecord(BaseModel):
     id: UUID | str
     company_id: UUID | str | None = None
@@ -73,3 +95,12 @@ class DealRecord(BaseModel):
     embedding: list[float] | None = None
     embedding_model: str | None = None
     metadata: JsonDict = Field(default_factory=dict)
+    interactions: list[InteractionEvidence] = Field(default_factory=list, max_length=20)
+    updated_at: datetime | None = None
+
+    @field_validator("updated_at")
+    @classmethod
+    def canonical_updated_time(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
