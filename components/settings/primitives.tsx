@@ -5,19 +5,19 @@ import { cn } from "@/lib/utils";
 
 export function Card({ title, description, children, className }: { title: string; description?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-lg border border-border bg-card", className)}>
-      <header className="border-b border-border px-5 py-4">
-        <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+    <section className={cn("rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)]", className)}>
+      <header className="border-b border-border px-6 py-5">
+        <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>
+        {description && <p className="mt-1 text-[15px] text-muted-foreground">{description}</p>}
       </header>
-      <div className="px-5 py-4">{children}</div>
+      <div className="px-6 py-5 text-[16px]">{children}</div>
     </section>
   );
 }
 
-export const primaryBtn = "flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50";
-export const outlineBtn = "flex h-9 items-center gap-1.5 rounded-lg border border-border px-3.5 text-sm text-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50";
-export const fieldLabel = "text-xs font-medium text-muted-foreground";
+export const primaryBtn = "flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50";
+export const outlineBtn = "flex h-9 items-center gap-1.5 rounded-md border border-border px-3.5 text-[15px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50";
+export const fieldLabel = "text-[14px] font-medium text-muted-foreground";
 
 export function Switch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (

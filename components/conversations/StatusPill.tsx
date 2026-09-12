@@ -12,13 +12,13 @@ const LABEL: Record<ConversationStatus, string> = {
 // Monochrome on purpose: state is carried by the dot, not by colour.
 export function StatusPill({ status }: { status: ConversationStatus }) {
   return (
-    <span className="inline-flex h-6 items-center gap-1.5 rounded-md border border-border bg-card px-2 text-xs text-foreground/80">
+    <span className="inline-flex h-7 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-[13px] text-foreground/80">
       {status === "synced" ? (
-        <Check className="size-3 text-muted-foreground" strokeWidth={2.5} />
+        <Check className="size-3.5 text-muted-foreground" strokeWidth={2.5} />
       ) : (
         <span
           className={cn(
-            "size-1.5 rounded-full",
+            "size-2 rounded-full",
             status === "processing" && "animate-pulse bg-primary",
             status === "needs_review" && "border-[1.5px] border-foreground/60 bg-transparent",
             status === "action_ready" && "bg-primary",

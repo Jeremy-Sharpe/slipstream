@@ -51,36 +51,36 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
 
   if (data.callsAnalysed === 0) {
     return (
-      <div className="px-9 pt-7">
+      <div className="px-11 pt-[34px]">
         <IntelligenceHeader query={query} onQuery={setQuery} />
-        <p className="mt-32 text-center text-sm text-muted-foreground">Nothing analysed yet. Add a call and the patterns appear here.</p>
+        <p className="mt-32 text-center text-[15px] text-muted-foreground">Nothing analysed yet. Add a call and the patterns appear here.</p>
       </div>
     );
   }
 
   return (
-    <div className="px-9 pt-7 pb-16">
+    <div className="px-11 pt-[34px] pb-16">
       <IntelligenceHeader query={query} onQuery={setQuery} />
 
-      <p className="mt-12 text-[15px] font-semibold text-foreground">Quick links</p>
-      <div className="mt-4 grid grid-cols-6 gap-4">
+      <p className="mt-[42px] text-[17px] font-semibold text-foreground">Quick links</p>
+      <div className="mt-4 grid grid-cols-6 gap-5">
         {QUICK_LINKS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => jump(id)}
-            className="flex h-[72px] items-center gap-3 rounded-xl border border-border bg-page px-5 text-left text-[15px] font-semibold text-foreground transition-colors hover:border-foreground/20 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="flex h-[76px] items-center gap-4 rounded-xl border border-border/70 bg-page px-6 text-left text-[20px] font-semibold text-foreground transition-colors hover:border-foreground/20 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           >
-            <Icon className="size-5 shrink-0 text-primary" strokeWidth={1.75} />
+            <Icon className="size-7 shrink-0 text-primary" strokeWidth={1.75} />
             <span className="truncate">{label}</span>
           </button>
         ))}
       </div>
 
       {visibleCount === 0 ? (
-        <p className="mt-24 text-center text-sm text-muted-foreground">Nothing matches “{query}”.</p>
+        <p className="mt-24 text-center text-[15px] text-muted-foreground">Nothing matches “{query}”.</p>
       ) : (
-        <div className="mt-10 flex flex-col gap-6">
+        <div className="mt-[42px] flex flex-col gap-6">
           {!q && <Tiles data={data} />}
           {show("patterns") && <TrainingLens data={data} active={active} />}
           {show("icp") && <DerivedIcp data={data} active={active} />}

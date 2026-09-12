@@ -24,8 +24,8 @@ export function NewCampaignDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<button type="button" className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none" />}>
-        <Plus className="size-4" strokeWidth={2.25} /> New campaign
+      <DialogTrigger render={<button type="button" className="flex h-10 items-center gap-1.5 rounded-md bg-primary px-3.5 text-[16px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none" />}>
+        <Plus className="size-[18px]" strokeWidth={2.25} /> New campaign
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

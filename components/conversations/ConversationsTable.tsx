@@ -31,20 +31,21 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
   ];
 
   return (
-    <div className="mt-5 flex min-h-0 flex-1 flex-col">
-      <div className="px-8 pb-4">
-        <div className="inline-flex h-9 items-center rounded-md border border-border bg-muted/70 p-0.5">
+    <div className="mt-[42px] flex min-h-0 flex-1 flex-col">
+      <div className="px-11 pb-[14px]">
+        <div className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
           {tabs.map((t) => (
             <button
               key={t.key}
+              type="button"
               onClick={() => setTab(t.key)}
               className={cn(
-                "flex h-full items-center gap-2 rounded-[5px] px-3.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
-                tab === t.key && "border border-border bg-card font-medium text-foreground shadow-xs",
+                "flex h-full items-center gap-2 rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors hover:text-foreground",
+                tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]",
               )}
             >
               {t.label}
-              <span className="text-xs tabular-nums text-muted-foreground">{counts[t.key]}</span>
+              <span className="text-[13px] tabular-nums text-muted-foreground">{counts[t.key]}</span>
             </button>
           ))}
         </div>
@@ -53,14 +54,14 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
       <div className="flex min-h-0 flex-1 flex-col border-t border-border bg-card">
         <div className="min-h-0 flex-1">
           {visible.length === 0 ? (
-            <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+            <div className="flex h-40 items-center justify-center text-[15px] text-muted-foreground">
               {rows.length === 0 ? "No conversations yet. Add a call to get started." : "Nothing matches."}
             </div>
           ) : (
             <ConversationsGrid rows={visible} onSelectionCount={setSelected} />
           )}
         </div>
-        <div className="flex items-center justify-between border-t border-border px-8 py-2.5 text-[13px] text-muted-foreground">
+        <div className="flex h-12 items-center justify-between border-t border-border px-11 text-[14px] text-muted-foreground">
           <span>Showing {visible.length} of {rows.length}</span>
           {selected > 0 && <span>{selected} selected</span>}
         </div>

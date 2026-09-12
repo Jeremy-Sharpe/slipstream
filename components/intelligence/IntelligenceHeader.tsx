@@ -10,13 +10,13 @@ export function IntelligenceHeader({ query, onQuery }: { query: string; onQuery:
   return (
     <header className="flex items-center justify-between gap-6">
       <div className="flex items-center gap-4">
-        <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-foreground"><BarChart3 className="size-5" strokeWidth={1.75} /></span>
-        <h1 className="text-[22px] font-bold tracking-tight text-foreground">Intelligence</h1>
+        <span className="flex size-[46px] items-center justify-center rounded-lg bg-icon-well text-foreground"><BarChart3 className="size-[22px]" strokeWidth={1.75} /></span>
+        <h1 className="text-[26px] leading-none font-bold tracking-[-0.02em] text-foreground">Intelligence</h1>
       </div>
-      <div className="flex items-center gap-3">
-        <label className="flex h-10 w-[280px] items-center gap-2.5 rounded-lg border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
+      <div className="flex items-center gap-2.5">
+        <label className="flex h-10 w-[273px] items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
           <Search className="size-4" strokeWidth={1.75} />
-          <input value={query} onChange={(e) => onQuery(e.target.value)} placeholder="Search" aria-label="Search analyses" className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+          <input value={query} onChange={(e) => onQuery(e.target.value)} aria-label="Search analyses" className="min-w-0 flex-1 bg-transparent text-[16px] text-foreground outline-none placeholder:text-muted-foreground" />
         </label>
         <NewAnalysis />
       </div>
@@ -41,8 +41,8 @@ function NewAnalysis() {
 
   return (
     <Dialog open={open} onOpenChange={reset}>
-      <DialogTrigger render={<Button className="h-10 rounded-lg px-3.5 text-sm font-medium" />}>
-        <Plus className="size-4" strokeWidth={2.25} /> New analysis
+      <DialogTrigger render={<Button className="h-10 rounded-md px-3.5 text-[16px] font-medium" />}>
+        <Plus className="size-[18px]" strokeWidth={2.25} /> New analysis
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

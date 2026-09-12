@@ -15,10 +15,10 @@ export function SequencePanel({ campaign }: { campaign: Campaign }) {
   const add = () => { campaignActions.addStep(campaign.id, channel, delay); setAdding(false); };
 
   return (
-    <aside className="flex w-[320px] shrink-0 flex-col border-r border-border">
-      <div className="flex h-12 items-center justify-between border-b border-border px-5">
-        <h2 className="text-[15px] font-semibold text-foreground">Sequence</h2>
-        <span className="text-xs text-muted-foreground">{campaign.steps.length} steps</span>
+    <aside className="flex w-[340px] shrink-0 flex-col border-r border-border">
+      <div className="flex h-14 items-center justify-between border-b border-border px-5">
+        <h2 className="text-[17px] font-semibold text-foreground">Sequence</h2>
+        <span className="text-[14px] text-muted-foreground">{campaign.steps.length} steps</span>
       </div>
       <ol className="relative flex flex-col gap-3 px-5 py-4">
         <span aria-hidden className="absolute top-6 bottom-6 left-[31px] w-px bg-border" />
@@ -27,14 +27,14 @@ export function SequencePanel({ campaign }: { campaign: Campaign }) {
           const open = editing === s.id;
           return (
             <li key={s.id} className="relative flex gap-3">
-              <span className="relative z-10 mt-2.5 flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-card text-[11px] font-semibold text-foreground">{i + 1}</span>
+              <span className="relative z-10 mt-3 flex size-7 shrink-0 items-center justify-center rounded-full border border-border bg-card text-[12px] font-semibold text-foreground">{i + 1}</span>
               <div className="min-w-0 flex-1 rounded-lg border border-border bg-card">
-                <div className="flex h-10 items-center gap-2 border-b border-border px-3">
-                  <Icon className="size-3.5 text-muted-foreground" strokeWidth={1.75} />
-                  <span className="text-[13px] font-medium text-foreground">Step {i + 1} · {s.channel === "email" ? "Email" : "LinkedIn"}</span>
-                  <span className="ml-auto text-xs text-muted-foreground">{i === 0 ? "Day 0" : `Day ${campaign.steps.slice(1, i + 1).reduce((a, x) => a + x.delayDays, 0)}`}</span>
+                <div className="flex h-11 items-center gap-2 border-b border-border px-3.5">
+                  <Icon className="size-4 text-muted-foreground" strokeWidth={1.75} />
+                  <span className="text-[14px] font-medium text-foreground">Step {i + 1} · {s.channel === "email" ? "Email" : "LinkedIn"}</span>
+                  <span className="ml-auto text-[13px] text-muted-foreground">{i === 0 ? "Day 0" : `Day ${campaign.steps.slice(1, i + 1).reduce((a, x) => a + x.delayDays, 0)}`}</span>
                 </div>
-                <div className="px-3 py-2.5">
+                <div className="px-3.5 py-3">
                   {open ? (
                     <div className="flex flex-col gap-2">
                       {s.channel === "email" && (
@@ -50,10 +50,10 @@ export function SequencePanel({ campaign }: { campaign: Campaign }) {
                     </div>
                   ) : (
                     <>
-                      {s.subject && <p className="truncate text-[13px] font-medium text-foreground">{s.subject}</p>}
-                      <p className="mt-1 line-clamp-3 text-[13px] leading-5 text-muted-foreground">{s.body}</p>
+                      {s.subject && <p className="truncate text-[15px] font-medium text-foreground">{s.subject}</p>}
+                      <p className="mt-1 line-clamp-3 text-[14px] leading-[22px] text-muted-foreground">{s.body}</p>
                       <div className="mt-2 flex items-center gap-3">
-                        <button type="button" onClick={() => setEditing(s.id)} className="text-xs font-medium text-primary hover:underline">Edit</button>
+                        <button type="button" onClick={() => setEditing(s.id)} className="text-[13px] font-medium text-primary hover:underline">Edit</button>
                         {campaign.steps.length > 1 && (
                           <button type="button" onClick={() => campaignActions.removeStep(campaign.id, s.id)} aria-label={`Remove step ${i + 1}`} className="ml-auto text-muted-foreground hover:text-foreground"><Trash2 className="size-3.5" strokeWidth={1.75} /></button>
                         )}

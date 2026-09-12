@@ -14,7 +14,7 @@ const LABEL: Record<CampaignStatus | PersonStatus, string> = {
 export function StatusBadge({ status, className }: { status: CampaignStatus | PersonStatus; className?: string }) {
   const lit = status === "active" || status === "approved";
   return (
-    <span className={cn("inline-flex h-6 items-center gap-1.5 rounded-full bg-muted px-2.5 text-xs font-medium text-foreground", status === "skipped" && "text-muted-foreground", className)}>
+    <span className={cn("inline-flex h-7 items-center gap-1.5 rounded-full bg-muted px-3 text-[13px] font-medium text-foreground", status === "skipped" && "text-muted-foreground", className)}>
       {lit && <span className="size-1.5 rounded-full bg-primary" />}
       {LABEL[status]}
     </span>

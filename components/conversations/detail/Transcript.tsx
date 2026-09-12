@@ -10,10 +10,10 @@ const initials = (name: string) => name.split(" ").map((p) => p[0]).slice(0, 2).
 
 export function Card({ title, aside, children, className }: { title?: React.ReactNode; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-lg border border-line bg-card", className)}>
+    <section className={cn("rounded-xl border border-line bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)]", className)}>
       {title && (
-        <header className="flex h-12 items-center justify-between border-b border-line px-5">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-ink">{title}</h3>
+        <header className="flex h-14 items-center justify-between border-b border-line px-6">
+          <h3 className="flex items-center gap-2 text-[17px] font-semibold text-ink">{title}</h3>
           {aside}
         </header>
       )}
@@ -32,15 +32,15 @@ export function AudioPlayer({ duration }: { duration: number }) {
   }, [playing, duration]);
   const pct = duration ? (t / duration) * 100 : 0;
   return (
-    <div className="flex h-16 items-center gap-4 rounded-lg border border-line bg-card px-4">
-      <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "Pause" : "Play"} className="flex size-9 shrink-0 items-center justify-center rounded-full bg-foreground text-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none">
+    <div className="flex h-[72px] items-center gap-4 rounded-xl border border-line bg-card px-5 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">
+      <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "Pause" : "Play"} className="flex size-10 shrink-0 items-center justify-center rounded-full bg-foreground text-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none">
         {playing ? <Pause className="size-4" strokeWidth={2} /> : <Play className="ml-0.5 size-4" strokeWidth={2} />}
       </button>
-      <span className="w-10 text-xs text-muted-foreground tabular-nums">{fmt(t)}</span>
+      <span className="w-12 text-[14px] text-muted-foreground tabular-nums">{fmt(t)}</span>
       <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.round(pct)}>
         <div className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${pct}%` }} />
       </div>
-      <span className="w-10 text-right text-xs text-muted-foreground tabular-nums">{fmt(duration)}</span>
+      <span className="w-12 text-right text-[14px] text-muted-foreground tabular-nums">{fmt(duration)}</span>
     </div>
   );
 }
@@ -52,7 +52,7 @@ export function Transcript({ call, highlight }: { call: CallRecord; highlight: n
   }, [highlight]);
   const risky = new Set(call.riskFlags.map((r) => r.turnIndex));
   return (
-    <Card title="Transcript" aside={<span className="text-xs text-muted-foreground">{call.turns.length} turns · diarised</span>}>
+    <Card title="Transcript" aside={<span className="text-[14px] text-muted-foreground">{call.turns.length} turns · diarised</span>}>
       <ol className="divide-y divide-line">
         {call.turns.map((t) => <TurnRow key={t.index} turn={t} active={highlight === t.index} risky={risky.has(t.index)} />)}
       </ol>
@@ -63,16 +63,16 @@ export function Transcript({ call, highlight }: { call: CallRecord; highlight: n
 function TurnRow({ turn, active, risky }: { turn: Turn; active: boolean; risky: boolean }) {
   const rep = turn.speaker === "rep";
   return (
-    <li id={`turn-${turn.index}`} className={cn("grid grid-cols-[32px_1fr_auto] gap-3 px-5 py-3 transition-colors", active && "bg-primary-soft")}>
-      <span className={cn("flex size-8 items-center justify-center rounded-md text-[11px] font-semibold", rep ? "bg-muted text-ink-2" : "bg-foreground text-background")}>{initials(turn.name)}</span>
+    <li id={`turn-${turn.index}`} className={cn("grid grid-cols-[36px_1fr_auto] gap-4 px-6 py-4 transition-colors", active && "bg-primary-soft")}>
+      <span className={cn("flex size-9 items-center justify-center rounded-md text-[12px] font-semibold", rep ? "bg-muted text-ink-2" : "bg-foreground text-background")}>{initials(turn.name)}</span>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-semibold text-ink">{turn.name}</span>
-          {risky && <span className="rounded-full bg-primary-soft px-1.5 py-px text-[11px] font-medium text-ink">Coach flag</span>}
+          <span className="text-[15px] font-semibold text-ink">{turn.name}</span>
+          {risky && <span className="rounded-full bg-primary-soft px-2 py-px text-[12px] font-medium text-ink">Coach flag</span>}
         </div>
-        <p className="mt-0.5 text-sm leading-6 text-ink-2">{turn.text}</p>
+        <p className="mt-1 text-[16px] leading-6 text-ink-2">{turn.text}</p>
       </div>
-      <time className="pt-0.5 font-mono text-xs text-muted-foreground tabular-nums">{fmt(turn.at)}</time>
+      <time className="pt-0.5 font-mono text-[15px] text-muted-foreground tabular-nums">{fmt(turn.at)}</time>
     </li>
   );
 }

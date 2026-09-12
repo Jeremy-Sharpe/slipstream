@@ -42,17 +42,17 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] flex-col bg-page">
+    <div className="flex min-h-[calc(100vh-64px)] flex-col bg-page">
       <DetailHeader call={call} others={others} status={synced ? "synced" : status} onMarkDone={markDone} onRerun={rerun} rerunning={rerunning} />
-      <div className="grid flex-1 grid-cols-[minmax(0,2fr)_minmax(320px,1fr)] gap-6 px-6 py-6">
-        <div className="grid content-start gap-4">
+      <div className="grid flex-1 grid-cols-[minmax(0,2fr)_minmax(360px,1fr)] gap-6 px-6 py-6">
+        <div className="grid content-start gap-5">
           <AudioPlayer duration={call.durationSeconds} />
           <Intelligence call={call} />
           <Transcript call={call} highlight={highlight} />
           <ScorecardCard call={call} onHover={setHighlight} />
           <FollowUpDraft call={call} approved={approved} onApprove={approveDraft} />
         </div>
-        <div className="sticky top-6 self-start rounded-lg border border-line bg-card p-5">
+        <div className="sticky top-6 self-start rounded-xl border border-line bg-card p-6 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">
           <CrmPanel call={call} synced={synced} onSync={sync} onHover={setHighlight} timeline={timeline} />
         </div>
       </div>

@@ -8,13 +8,13 @@ export function Section({ id, title, meta, active, children, className }: { id: 
   return (
     <section
       id={id}
-      className={cn("scroll-mt-6 rounded-xl border border-border bg-card transition-shadow", active && "ring-2 ring-primary", className)}
+      className={cn("scroll-mt-6 rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)] transition-shadow", active && "ring-2 ring-primary", className)}
     >
-      <header className="flex h-14 items-center justify-between border-b border-border px-5">
-        <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
-        {meta && <div className="text-[13px] text-muted-foreground">{meta}</div>}
+      <header className="flex h-16 items-center justify-between border-b border-border px-6">
+        <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>
+        {meta && <div className="text-[15px] text-muted-foreground">{meta}</div>}
       </header>
-      <div className="p-5">{children}</div>
+      <div className="p-6 text-[16px]">{children}</div>
     </section>
   );
 }
@@ -33,7 +33,7 @@ export function EvidenceChip({ call }: { call: CallRef }) {
   return (
     <Link
       href={`/conversations/${call.id}`}
-      className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border bg-page px-2 text-[13px] text-foreground transition-colors hover:border-foreground/30 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-page px-2.5 text-[14px] text-foreground transition-colors hover:border-foreground/30 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
     >
       <span className="size-1.5 rounded-full bg-primary" aria-hidden />
       {call.company}

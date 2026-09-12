@@ -38,12 +38,12 @@ const STATUS: Record<ConversationStatus, string> = {
 };
 
 const COLUMNS: GridColumn[] = [
-  { id: "contact", title: "Contact", width: 190 },
-  { id: "company", title: "Company", width: 210 },
-  { id: "title", title: "Title", width: 170 },
-  { id: "preview", title: "Preview", width: 240, grow: 1 },
-  { id: "time", title: "Time", width: 160 },
-  { id: "status", title: "Status", width: 140 },
+  { id: "contact", title: "Contact", width: 230 },
+  { id: "company", title: "Company", width: 250 },
+  { id: "title", title: "Title", width: 200 },
+  { id: "preview", title: "Preview", width: 260, grow: 1 },
+  { id: "time", title: "Time", width: 190 },
+  { id: "status", title: "Status", width: 170 },
 ];
 
 const dayFmt = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Melbourne", day: "numeric", month: "short" });
@@ -69,13 +69,13 @@ const contactRenderer: CustomRenderer<ContactCell> = {
   draw: ({ ctx, rect, theme }, cell) => {
     const x = rect.x + theme.cellHorizontalPadding;
     const cy = rect.y + rect.height / 2;
-    const r = 14;
+    const r = 16;
     ctx.beginPath(); ctx.arc(x + r, cy, r, 0, Math.PI * 2); ctx.fillStyle = C.avatar; ctx.fill();
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.font = `500 11px ${theme.fontFamily}`; ctx.fillStyle = C.ink;
+    ctx.font = `500 12px ${theme.fontFamily}`; ctx.fillStyle = C.ink;
     ctx.fillText(initials(cell.data.name), x + r, cy + 0.5);
     ctx.textAlign = "left";
-    ctx.font = `500 14px ${theme.fontFamily}`;
+    ctx.font = `500 16px ${theme.fontFamily}`;
     ctx.fillText(cell.data.name, x + r * 2 + 12, cy + 0.5);
     return true;
   },
@@ -89,10 +89,10 @@ const statusRenderer: CustomRenderer<StatusCell> = {
     const label = STATUS[s];
     const x = rect.x + theme.cellHorizontalPadding;
     const cy = rect.y + rect.height / 2;
-    const h = 24;
-    ctx.font = `12px ${theme.fontFamily}`;
+    const h = 28;
+    ctx.font = `500 13px ${theme.fontFamily}`;
     const w = 8 + 6 + 6 + ctx.measureText(label).width + 8;
-    ctx.beginPath(); roundRect(ctx, x, cy - h / 2, w, h, 5);
+    ctx.beginPath(); roundRect(ctx, x, cy - h / 2, w, h, 14);
     ctx.fillStyle = C.surface; ctx.fill(); ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.stroke();
     const dx = x + 8 + 3;
     if (s === "synced") {
@@ -116,7 +116,7 @@ const timeRenderer: CustomRenderer<TimeCell> = {
     const x = rect.x + theme.cellHorizontalPadding;
     const cy = rect.y + rect.height / 2;
     ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.font = `14px ${theme.fontFamily}`; ctx.fillStyle = C.muted;
+    ctx.font = `16px ${theme.fontFamily}`; ctx.fillStyle = C.muted;
     ctx.fillText(cell.data.when, x, cy + 0.5);
     if (cell.data.duration) {
       const w = ctx.measureText(cell.data.when).width;
@@ -132,12 +132,12 @@ const RENDERERS = [contactRenderer, statusRenderer, timeRenderer] as unknown as 
 const THEME: Partial<Theme> = {
   accentColor: C.primary, accentFg: "#182521", accentLight: C.hover,
   textDark: C.ink, textMedium: C.muted, textLight: "#9CA3AF", textBubble: C.ink,
-  bgIconHeader: C.muted, fgIconHeader: C.surface, textHeader: C.muted, textHeaderSelected: C.ink,
+  bgIconHeader: C.muted, fgIconHeader: C.surface, textHeader: C.ink, textHeaderSelected: C.ink,
   bgCell: C.surface, bgCellMedium: C.mist, bgHeader: C.surface, bgHeaderHasFocus: C.hover, bgHeaderHovered: C.hover,
   bgBubble: C.mist, bgBubbleSelected: C.hover, bgSearchResult: "#FFEDE7",
   borderColor: C.line, horizontalBorderColor: C.line, headerBottomBorderColor: C.line, drilldownBorder: C.line,
-  linkColor: C.ink, cellHorizontalPadding: 14, cellVerticalPadding: 8,
-  headerFontStyle: "500 13px", baseFontStyle: "14px", markerFontStyle: "13px", editorFontSize: "14px",
+  linkColor: C.ink, cellHorizontalPadding: 16, cellVerticalPadding: 8,
+  headerFontStyle: "600 14.5px", baseFontStyle: "16px", markerFontStyle: "14px", editorFontSize: "16px",
   lineHeight: 1.4, headerIconSize: 16, roundingRadius: 6,
 };
 
@@ -188,8 +188,8 @@ export function ConversationsGrid({ rows, onSelectionCount }: { rows: Conversati
       width="100%" height="100%"
       columns={COLUMNS} rows={rows.length} getCellContent={getCellContent}
       customRenderers={RENDERERS} theme={theme} getRowThemeOverride={getRowThemeOverride}
-      rowHeight={52} headerHeight={40}
-      rowMarkers={{ kind: "checkbox-visible", width: 48, checkboxStyle: "square" }}
+      rowHeight={61} headerHeight={48}
+      rowMarkers={{ kind: "checkbox-visible", width: 56, checkboxStyle: "square" }}
       gridSelection={selection} onGridSelectionChange={setSelection}
       rangeSelect="none" columnSelect="none" rowSelect="multi" rowSelectionMode="multi"
       verticalBorder={false} smoothScrollX smoothScrollY drawFocusRing={false}

@@ -27,22 +27,22 @@ export function SettingsView() {
 
   return (
     <div className="flex flex-col pb-10">
-      <header className="flex items-center justify-between px-9 pt-8 pb-6">
+      <header className="flex items-center justify-between px-11 pt-[34px] pb-7">
         <div className="flex items-center gap-4">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-foreground"><Settings className="size-5" strokeWidth={1.75} /></span>
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground">Settings</h1>
+          <span className="flex size-[46px] items-center justify-center rounded-lg bg-icon-well text-foreground"><Settings className="size-[22px]" strokeWidth={1.75} /></span>
+          <h1 className="text-[26px] leading-none font-bold tracking-[-0.02em] text-foreground">Settings</h1>
         </div>
       </header>
 
-      <div className="flex gap-8 border-t border-border px-9 pt-6">
-        <nav aria-label="Settings sections" className="flex w-[200px] shrink-0 flex-col gap-0.5">
+      <div className="flex gap-10 border-t border-border px-11 pt-7">
+        <nav aria-label="Settings sections" className="flex w-[220px] shrink-0 flex-col gap-0.5">
           {TABS.map((t) => (
-            <button key={t.key} type="button" onClick={() => go(t.key)} aria-current={tab === t.key ? "page" : undefined} className={cn("flex h-9 items-center rounded-md px-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", tab === t.key && "bg-muted font-medium text-foreground")}>
+            <button key={t.key} type="button" onClick={() => go(t.key)} aria-current={tab === t.key ? "page" : undefined} className={cn("flex h-10 items-center rounded-md px-3 text-left text-[16px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", tab === t.key && "bg-muted font-medium text-foreground")}>
               {t.label}
             </button>
           ))}
         </nav>
-        <div className="min-w-0 max-w-3xl flex-1">
+        <div className="min-w-0 max-w-[880px] flex-1">
           {tab === "workspace" && <WorkspacePanel />}
           {tab === "crm" && <CrmPanel />}
           {tab === "team" && <TeamPanel />}
