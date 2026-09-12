@@ -9,7 +9,7 @@ Who is on what, what the live environment actually holds, and what only a human 
 | Person | Lanes | Where they are up to |
 |---|---|---|
 | Anna | `fixtures`, `scorecard`, `icp`, `leads`, `outreach`, `live-extraction`, `model-bakeoff` | Fixtures, scorecard and ICP are done. ICP runs end to end on an OpenRouter key alone. Leads and outreach are built and unit-tested but have never run live because the Origami key is still a placeholder. `live-extraction` is in progress on its own branch and lands by PR because it touches Jeremy's done lanes. |
-| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, the three `web-wire-*` lanes, `coach-shell`, `submission` | Everything above is merged and deployed except `coach-shell`, claimed 12 September evening, and `submission`, which is auditing the repo and production URLs. Two migrations are merged but not applied to the hosted database, which is the single biggest live gap. |
+| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, the three `web-wire-*` lanes, `coach-shell`, `submission` | The secure coach shell is merged and packageable. `submission` is auditing production, with the 174-test API suite now isolated from credentials in developer shells. Two migrations are merged but not applied to the hosted database, which is the single biggest live gap. |
 | Max (Maxim Durand) | Clay-style conversations UI foundation | Merged into main on 12 September and since wired to the live pipeline by Jeremy's agent. |
 | Romain | Not recorded on the board | No commits under this name and no board rows. Confirm what he is building before Sunday, or reassign `video`, which is still unclaimed. |
 

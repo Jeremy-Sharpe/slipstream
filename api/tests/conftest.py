@@ -5,8 +5,9 @@ from app.core.config import Settings
 from app.factory import create_app
 
 
-@pytest.fixture
-def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+@pytest.fixture(autouse=True)
+def clean_external_service_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep tests deterministic when a developer shell contains real provider keys."""
     for name in (
         "SUPABASE_URL",
         "SUPABASE_SERVICE_ROLE_KEY",
@@ -20,6 +21,10 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         "WEB_ORIGINS",
     ):
         monkeypatch.delenv(name, raising=False)
+
+
+@pytest.fixture
+def client() -> TestClient:
     settings = Settings(_env_file=None, environment="test")
     with TestClient(create_app(settings)) as test_client:
         yield test_client
