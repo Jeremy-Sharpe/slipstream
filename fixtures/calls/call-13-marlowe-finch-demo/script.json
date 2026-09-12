@@ -36,7 +36,7 @@
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "Perfect, picture this: three firms on your street have already moved, and the onboarding price is gone Friday. You don't need another committee, you need Harbourline on the tools before the insurer decides accountants are this season's piñata."
+      "text": "Perfect, picture this: three firms on your street have already moved, and the onboarding price is gone Friday. You don't need another committee, you need Harbourline on the tools before the insurer decides accountants are this season's pi\u00f1ata."
     },
     {
       "speaker": "prospect",
@@ -166,12 +166,13 @@
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "Numbers only, fireworks in a separate attachment that mysteriously never arrives. Thanks Dev, you've moved fast, which is exactly how we keep the renewal from becoming a Friday-night spreadsheet séance."
+      "text": "Numbers only, fireworks in a separate attachment that mysteriously never arrives. Thanks Dev, you've moved fast, which is exactly how we keep the renewal from becoming a Friday-night spreadsheet s\u00e9ance."
     },
     {
       "speaker": "prospect",
       "name": "Dev Patel",
       "text": "Right. Send the proposal. Bye."
     }
-  ]
+  ],
+  "audio_seconds": 420.0
 }
