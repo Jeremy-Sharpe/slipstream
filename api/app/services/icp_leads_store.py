@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from datetime import UTC, datetime
 from typing import Any, Protocol
@@ -124,10 +125,25 @@ def _deal_from_row(row: JsonDict) -> DealRecord:
         summary=row.get("summary"),
         close_date=row.get("close_date"),
         crm_external_id=row.get("crm_external_id"),
-        embedding=row.get("embedding"),
+        embedding=_vector(row.get("embedding")),
         embedding_model=row.get("embedding_model"),
         metadata=row.get("metadata") or {},
     )
+
+
+def _vector(value: object) -> list[float] | None:
+    """PostgREST returns pgvector columns as text such as "[0.1,0.2]"; parse it back."""
+    if value is None or isinstance(value, list):
+        return value
+    if isinstance(value, str):
+        parsed = json.loads(value)
+        if isinstance(parsed, list):
+            return [float(item) for item in parsed]
+    raise ValueError("embedding column must be a vector literal or a list")
+
+
+def _lead_from_row(row: JsonDict) -> Lead:
+    return Lead.model_validate({**row, "embedding": _vector(row.get("embedding"))})
 
 
 class SupabaseIcpLeadsStore:
@@ -169,12 +185,7 @@ class SupabaseIcpLeadsStore:
         return _deal_from_row(row)
 
     def list_fixture_deals(self, *, include_demo: bool = False) -> list[DealRecord]:
-        rows = (
-            self._client.table("deals")
-            .select("*,companies(*),contacts(*)")
-            .execute()
-            .data
-        )
+        rows = self._client.table("deals").select("*,companies(*),contacts(*)").execute().data
         deals = [
             _deal_from_row(row)
             for row in rows
@@ -230,9 +241,7 @@ class SupabaseIcpLeadsStore:
         )
         return _stored_profile(row)
 
-    def insert_icp_source_deal(
-        self, *, profile_id: str, deal_id: str, evidence: JsonDict
-    ) -> None:
+    def insert_icp_source_deal(self, *, profile_id: str, deal_id: str, evidence: JsonDict) -> None:
         self._client.table("icp_profile_source_deals").insert(
             {"icp_profile_id": profile_id, "deal_id": deal_id, "evidence": evidence}
         ).execute()
@@ -263,9 +272,7 @@ class SupabaseIcpLeadsStore:
         )
         deal_ids = {row["deal_id"] for row in source_rows}
         return [
-            deal
-            for deal in self.list_fixture_deals(include_demo=True)
-            if str(deal.id) in deal_ids
+            deal for deal in self.list_fixture_deals(include_demo=True) if str(deal.id) in deal_ids
         ]
 
     def log_activity(
@@ -296,7 +303,7 @@ class SupabaseIcpLeadsStore:
             .execute()
             .data
         )
-        return Lead.model_validate(row)
+        return _lead_from_row(row)
 
     def list_leads(
         self, *, icp_profile_id: str | None = None, status: LeadStatus | None = None
@@ -307,11 +314,11 @@ class SupabaseIcpLeadsStore:
         if status:
             query = query.eq("status", status)
         rows = query.order("similarity_score", desc=True).execute().data
-        return [Lead.model_validate(row) for row in rows]
+        return [_lead_from_row(row) for row in rows]
 
     def get_lead(self, lead_id: str) -> Lead | None:
         rows = self._client.table("leads").select("*").eq("id", lead_id).execute().data
-        return Lead.model_validate(rows[0]) if rows else None
+        return _lead_from_row(rows[0]) if rows else None
 
     def update_lead_status(self, lead_id: str, status: LeadStatus) -> Lead:
         row = self._single(
@@ -322,7 +329,7 @@ class SupabaseIcpLeadsStore:
             .execute()
             .data
         )
-        return Lead.model_validate(row)
+        return _lead_from_row(row)
 
     def insert_draft(self, values: JsonDict) -> Draft:
         row = self._single(
@@ -462,9 +469,7 @@ class InMemoryIcpLeadsStore:
         self.icp_profiles[row["id"]] = row
         return _stored_profile(row)
 
-    def insert_icp_source_deal(
-        self, *, profile_id: str, deal_id: str, evidence: JsonDict
-    ) -> None:
+    def insert_icp_source_deal(self, *, profile_id: str, deal_id: str, evidence: JsonDict) -> None:
         self.icp_source_deals[(profile_id, deal_id)] = {
             "icp_profile_id": profile_id,
             "deal_id": deal_id,
@@ -489,9 +494,7 @@ class InMemoryIcpLeadsStore:
             if source_profile_id == profile_id
         }
         return [
-            deal
-            for deal in self.list_fixture_deals(include_demo=True)
-            if str(deal.id) in deal_ids
+            deal for deal in self.list_fixture_deals(include_demo=True) if str(deal.id) in deal_ids
         ]
 
     def log_activity(
