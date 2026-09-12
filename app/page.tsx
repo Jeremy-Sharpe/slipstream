@@ -9,13 +9,13 @@ import { conversations } from "@/lib/data/conversations";
 export default function ConversationsPage() {
   const [query, setQuery] = useState("");
   return (
-    <div className="flex flex-col">
-      <header className="px-8 pt-7">
+    <div className="flex h-[calc(100vh-56px)] flex-col">
+      <header className="shrink-0 px-8 pt-7">
         <h1 className="text-2xl font-bold tracking-tight">Conversations</h1>
         <p className="mt-1 text-sm text-muted-foreground">Your calls, emails and meetings, automatically analysed and turned into pipeline.</p>
       </header>
 
-      <div className="mt-8 flex items-center justify-between px-8">
+      <div className="mt-8 flex shrink-0 items-center justify-between px-8">
         <div className="flex items-center gap-4">
           <span className="flex size-9 items-center justify-center rounded-md bg-icon-well text-secondary"><MessageSquare className="size-[18px]" strokeWidth={1.75} /></span>
           <h2 className="text-xl font-bold tracking-tight">All conversations</h2>
