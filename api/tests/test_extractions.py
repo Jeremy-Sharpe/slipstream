@@ -427,3 +427,18 @@ def test_ground_repairs_and_drops_evidence_on_hand_built_payload() -> None:
     assert grounded.contact.phone.value is None
     assert grounded.contact.phone.confidence == 0
     assert grounded.contact.phone.evidence == []
+
+
+def test_null_fields_drop_stray_evidence_instead_of_failing() -> None:
+    data = _minimal_payload(None).model_dump()
+    data["contact"]["phone"] = {
+        "value": None,
+        "confidence": 0.4,
+        "evidence": [{"source": "transcript", "sequence": 0, "quote": "x"}],
+    }
+
+    payload = ExtractionPayload.model_validate(data)
+
+    assert payload.contact.phone.value is None
+    assert payload.contact.phone.evidence == []
+    assert payload.contact.phone.confidence == 0

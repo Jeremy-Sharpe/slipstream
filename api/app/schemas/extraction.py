@@ -98,7 +98,7 @@ class ExtractionPayload(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def evidence_quotes_must_match_segments_later(self) -> ExtractionPayload:
+    def null_fields_carry_no_evidence(self) -> ExtractionPayload:
         for field in (
             *self.promises,
             self.contact.name,
@@ -115,7 +115,8 @@ class ExtractionPayload(BaseModel):
             self.deal.outcome,
         ):
             if field.value is None and field.evidence:
-                raise ValueError("Null extracted fields cannot have evidence")
+                field.evidence = []
+                field.confidence = 0
         return self
 
 
