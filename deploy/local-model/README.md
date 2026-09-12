@@ -24,6 +24,7 @@ effect on its next restart:
 ```dotenv
 LOCAL_MODEL_BASE_URL=http://127.0.0.1:8081/v1
 LOCAL_MODEL_NAME=slipstream-qwen2.5-1.5b-instruct-q4-k-m
+LOCAL_MODEL_CONTEXT_TOKENS=16384
 ```
 
 Verify the boundary and API view:
@@ -35,5 +36,7 @@ ss -ltn '( sport = :8081 )'
 ```
 
 The final command must show loopback only. Do not proxy port 8081 through Caddy or another public
-listener. The local model does not provide embeddings, transcription, lead generation, CRM
+listener. Input tokens are counted by the loaded model before inference; a request that cannot fit
+alongside its declared output budget fails explicitly instead of overflowing the context. The
+local model does not provide embeddings, transcription, lead generation, CRM
 delivery or email delivery; those integration flags remain independently truthful.

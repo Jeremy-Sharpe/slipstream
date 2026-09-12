@@ -97,6 +97,7 @@ def test_checked_in_example_accepts_blank_optional_credentials(
         "OPENROUTER_API_KEY",
         "LOCAL_MODEL_BASE_URL",
         "LOCAL_MODEL_NAME",
+        "LOCAL_MODEL_CONTEXT_TOKENS",
         "ELEVENLABS_API_KEY",
         "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
@@ -364,6 +365,11 @@ def test_hosted_reasoning_provider_takes_priority_over_local_model(
 def test_local_model_url_rejects_non_loopback_or_ambiguous_endpoints(url: str) -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, local_model_base_url=url)
+
+
+def test_local_model_context_must_match_a_supported_runtime_size() -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, local_model_context_tokens=4096)
 
 
 @pytest.mark.parametrize(

@@ -263,6 +263,23 @@ def test_local_structured_rejects_an_empty_completion() -> None:
         )
 
 
+def test_local_structured_rejects_a_request_over_the_loaded_context() -> None:
+    client = FakeOpenRouterClient()
+    client.context_tokens = 100
+    client.count_input_tokens = lambda _: 80
+
+    with pytest.raises(ValueError, match="needs 120 tokens"):
+        structured(
+            ReasoningClient(provider="local", model="local-qwen", client=client),
+            system="System",
+            user="User",
+            schema=MiniOutput,
+            max_tokens=40,
+        )
+
+    assert client.chat.completions.kwargs == {}
+
+
 def test_structured_returns_no_usage_when_provider_omits_it() -> None:
     class ParsedWithoutUsage:
         parsed_output = MiniOutput(subject="A", body="B")
@@ -343,15 +360,16 @@ def test_create_reasoning_client_uses_explicit_local_model(
 ) -> None:
     _clear_provider_env(monkeypatch)
     FakeOpenAIClient.instances = []
-    captured_http_options: dict[str, object] = {}
-    local_http_client = object()
+    captured_local_options: dict[str, object] = {}
+    local_client = object()
 
-    def fake_http_client(**kwargs: object) -> object:
-        captured_http_options.update(kwargs)
-        return local_http_client
+    def fake_local_client(base_url: str, context_tokens: int) -> object:
+        captured_local_options.update(
+            {"base_url": base_url, "context_tokens": context_tokens}
+        )
+        return local_client
 
-    monkeypatch.setattr("app.core.llm.OpenAI", FakeOpenAIClient)
-    monkeypatch.setattr("app.core.llm.httpx.Client", fake_http_client)
+    monkeypatch.setattr("app.core.llm._LocalClient", fake_local_client)
     settings = Settings(
         _env_file=None,
         environment="test",
@@ -364,12 +382,11 @@ def test_create_reasoning_client_uses_explicit_local_model(
 
     assert client.provider == "local"
     assert client.model == "local-qwen"
-    assert FakeOpenAIClient.instances[-1].kwargs == {
-        "api_key": "loopback-only",
+    assert client.client is local_client
+    assert captured_local_options == {
         "base_url": "http://127.0.0.1:8081/v1",
-        "http_client": local_http_client,
+        "context_tokens": 16_384,
     }
-    assert captured_http_options == {"trust_env": False, "follow_redirects": False}
 
 
 def test_openrouter_embedding_client_prefixes_openai_models(

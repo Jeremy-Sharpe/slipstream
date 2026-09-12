@@ -162,6 +162,7 @@ class Settings(BaseSettings):
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     local_model_base_url: str | None = None
     local_model_name: str = "slipstream-qwen2.5-1.5b-instruct-q4-k-m"
+    local_model_context_tokens: int = Field(default=16_384, ge=8_192, le=131_072)
     origami_base_url: str = "https://origami.chat/api/v3"
     resend_base_url: str = "https://api.resend.com"
 
