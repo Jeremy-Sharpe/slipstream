@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
@@ -17,6 +18,62 @@ PROMPT_VERSION = "follow-up-v1"
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "follow-up-v1.md"
 SELLER_PATH = Path(__file__).resolve().parents[3] / "fixtures" / "seller.json"
 TEMPLATE_PROMPT_VERSION = "grounded-template-v1"
+GUARANTEE_PATTERN = re.compile(
+    r"\b(?:guarantee(?:d|s)?|guaranteeing)\b", re.IGNORECASE
+)
+SAFE_GUARANTEE_PATTERN = re.compile(
+    r"\b(?:cannot|can not|can't|do not|don't|no)\s+(?:make\s+)?guarantees?\b"
+    r"|\bwithout making guarantees?\b",
+    re.IGNORECASE,
+)
+SAFE_INSURANCE_PATTERN = re.compile(
+    r"\b(?:cannot|can not|can't|do not|don't)\b[^.!?]{0,80}"
+    r"\b(?:promise|guarantee)\b[^.!?]{0,80}"
+    r"\b(?:insurance|insurer|premiums?|sav(?:e|es|ed|ing))\b",
+    re.IGNORECASE,
+)
+SAVINGS_VERB = (
+    r"(?:halv(?:e|es|ed|ing)|reduc(?:e|es|ed|ing)|cut(?:s|ting)?|"
+    r"lower(?:s|ed|ing)?|fall(?:s|ing)?|fell|drop(?:s|ped|ping)?|sav(?:e|es|ed|ing))"
+)
+RISKY_DRAFT_PATTERNS = (
+    re.compile(
+        r"\b(?:breach[ -]?proof|never breached|100% secure|"
+        r"(?:completely|fully|totally|perfectly) secure)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        rf"\b(?:insurance|insurer|premiums?)\b.*\b{SAVINGS_VERB}\b"
+        rf"|\b{SAVINGS_VERB}\b.*\b(?:insurance|insurer|premiums?)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:competitor|incumbent|provider)\b.*"
+        r"\b(?:not(?:\s+\w+){0,4}\s+certified|uncertified|lose certification)\b",
+        re.IGNORECASE,
+    ),
+)
+
+
+def _contains_risky_claim(text: str) -> bool:
+    clauses = re.split(
+        r"(?<=[.!?;])\s+|,\s+|\s+\b(?:and|but)\b\s+",
+        " ".join(text.split()),
+        flags=re.IGNORECASE,
+    )
+    for clause in clauses:
+        without_safe_qualifications = SAFE_INSURANCE_PATTERN.sub("", clause)
+        without_safe_qualifications = SAFE_GUARANTEE_PATTERN.sub(
+            "", without_safe_qualifications
+        )
+        if GUARANTEE_PATTERN.search(without_safe_qualifications):
+            return True
+        if any(
+            pattern.search(without_safe_qualifications)
+            for pattern in RISKY_DRAFT_PATTERNS
+        ):
+            return True
+    return False
 
 
 class DraftUnavailableError(RuntimeError):
@@ -147,6 +204,8 @@ def draft_with_model(
     body = result.output.body.strip()
     if not subject or not body or len(body.split()) > 220:
         raise DraftUnavailableError("The follow-up draft failed validation")
+    if _contains_risky_claim(subject) or _contains_risky_claim(body):
+        raise DraftUnavailableError("The follow-up draft failed safety validation")
     return DraftResponse(
         id=draft_id(extraction.conversation_id),
         conversation_id=extraction.conversation_id,
