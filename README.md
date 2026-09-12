@@ -47,7 +47,7 @@ supabase/     Postgres migrations (pgvector enabled) and seed.
 evals/        Judge evals and submission checks (see docs/judging-evals.md).
 ```
 
-Supabase Postgres is the durable store design and the API owns access. The deployed VPS currently uses the same repository interface in memory because its Supabase credentials and two later migrations are not installed; that operational boundary is reported by `/ready`. The CRM tables mirror HubSpot objects (contacts, companies, deals, notes, tasks, activities) so a real HubSpot integration is a field mapping, not a redesign. Full data model and data flow in `PROJECT.md`.
+Supabase Postgres is the durable store design and the API owns access. The deployed VPS currently uses the same repository interface in memory because its Supabase credentials and three later migrations are not installed; that operational boundary is reported by `/ready`. The CRM tables mirror HubSpot objects (contacts, companies, deals, notes, tasks, activities) so a real HubSpot integration is a field mapping, not a redesign. Full data model and data flow in `PROJECT.md`.
 
 Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector clients, eval tooling); the UI half wants a hosted Next.js app; one API seam between them is what a telephony or CRM integration plugs into later.
 
