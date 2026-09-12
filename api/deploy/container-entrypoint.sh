@@ -10,4 +10,8 @@ if [ "${PORT:-8000}" -lt 1 ] || [ "${PORT:-8000}" -gt 65535 ]; then
   exit 1
 fi
 
-exec uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"
+export ENVIRONMENT="${ENVIRONMENT:-production}"
+export FORWARDED_ALLOW_IPS="${FORWARDED_ALLOW_IPS:-*}"
+exec uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" \
+  --proxy-headers --forwarded-allow-ips "$FORWARDED_ALLOW_IPS" \
+  --log-level "${LOG_LEVEL:-info}"

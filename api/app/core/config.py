@@ -1,6 +1,6 @@
 from functools import lru_cache
 from typing import Annotated, Literal
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from pydantic import (
     AliasChoices,
@@ -13,6 +13,33 @@ from pydantic import (
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
+def _canonical_http_origin(value: str, *, production: bool = False) -> str:
+    parsed = urlsplit(value.strip())
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError("URL must be an absolute HTTP(S) origin")
+    if production and parsed.scheme != "https":
+        raise ValueError("URL must use HTTPS in production")
+    has_disallowed_part = (
+        parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+        or parsed.path not in {"", "/"}
+    )
+    if has_disallowed_part:
+        raise ValueError("URL must not contain credentials, a path, query, or fragment")
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise ValueError("URL has an invalid port") from error
+    host = parsed.hostname.lower()
+    if ":" in host:
+        host = f"[{host}]"
+    default_port = 80 if parsed.scheme == "http" else 443
+    netloc = host if port in {None, default_port} else f"{host}:{port}"
+    return urlunsplit((parsed.scheme.lower(), netloc, "", "", ""))
+
+
 def _split_origins(value: object) -> list[str]:
     if isinstance(value, str):
         origins = [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
@@ -20,13 +47,9 @@ def _split_origins(value: object) -> list[str]:
         origins = [origin.strip().rstrip("/") for origin in value if origin.strip()]
     else:
         raise ValueError("WEB_ORIGINS must be a comma-separated string or a list of URLs")
-    for origin in origins:
-        parsed = urlsplit(origin)
-        if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.path:
-            raise ValueError(f"Invalid web origin: {origin}")
     if not origins:
         raise ValueError("At least one web origin is required")
-    return origins
+    return [_canonical_http_origin(origin) for origin in origins]
 
 
 Origins = Annotated[list[str], NoDecode, BeforeValidator(_split_origins)]
@@ -77,11 +100,9 @@ class Settings(BaseSettings):
         if bool(self.supabase_url) != bool(self.supabase_service_role_key):
             raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set together")
         if self.supabase_url:
-            parsed = urlsplit(self.supabase_url)
-            if parsed.scheme not in {"http", "https"} or not parsed.hostname:
-                raise ValueError("SUPABASE_URL must be an absolute HTTP(S) URL")
-            if self.environment == "production" and parsed.scheme != "https":
-                raise ValueError("SUPABASE_URL must use HTTPS in production")
+            self.supabase_url = _canonical_http_origin(
+                self.supabase_url, production=self.environment == "production"
+            )
         return self
 
     @property

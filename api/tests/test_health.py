@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from app.core.config import Settings
+from app.core.readiness import StorageReadinessProbe, StorageUnavailableError
 from app.factory import create_app
 
 
@@ -56,7 +57,11 @@ def test_readiness_fails_closed_when_configured_storage_is_missing(
         supabase_url="https://database.example",
         supabase_service_role_key=SecretStr("sentinel-secret"),
     )
-    monkeypatch.setattr("app.routers.health.get_supabase", lambda: None)
+
+    async def fail(_: StorageReadinessProbe) -> None:
+        raise StorageUnavailableError("sentinel-secret must not escape")
+
+    monkeypatch.setattr(StorageReadinessProbe, "check", fail)
 
     with TestClient(create_app(settings)) as configured_client:
         response = configured_client.get("/ready")

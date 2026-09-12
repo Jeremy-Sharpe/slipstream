@@ -1,14 +1,10 @@
-from functools import lru_cache
-
 from supabase import Client, create_client
 
-from app.core.config import get_settings
+from app.core.config import Settings
 
 
-@lru_cache
-def get_supabase() -> Client | None:
-    """Return the service-role client, or None in credential-free local mode."""
-    settings = get_settings()
+def create_supabase(settings: Settings) -> Client | None:
+    """Build the app-scoped service-role client, or None in local mode."""
     if not settings.supabase_url or not settings.supabase_service_role_key:
         return None
     return create_client(
