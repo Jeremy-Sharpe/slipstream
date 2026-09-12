@@ -15,8 +15,8 @@ def test_follow_up_is_grounded_and_idempotent(client: TestClient) -> None:
     repeated = client.post(f"/api/v1/drafts/from-call/{call['id']}")
 
     assert repeated.json() == draft
-    assert draft["recipient_name"] == "Dev Patel"
-    assert draft["recipient_email"] == "dev@marlowefinch.example"
+    assert draft["recipient_name"] == "Donnie Azoff"
+    assert draft["recipient_email"] == "donnie@marlowefinch.example"
     assert draft["subject"] == "Next steps — Marlowe & Finch Accounting"
     assert "proposal and 30-seat agreement" in draft["body"]
     assert "halve the premium" not in draft["body"]
