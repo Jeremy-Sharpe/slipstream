@@ -1,5 +1,5 @@
-import { CampaignsList } from "@/components/campaigns/CampaignsList";
+import { CampaignsLoading } from "@/components/campaigns/CampaignsLoading";
 
 export default function Loading() {
-  return <CampaignsList loading />;
+  return <CampaignsLoading />;
 }
