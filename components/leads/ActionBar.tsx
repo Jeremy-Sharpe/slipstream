@@ -28,7 +28,7 @@ function downloadCsv(leads: Lead[]) {
   URL.revokeObjectURL(url);
 }
 
-const BTN = "flex items-center bg-primary text-base font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50";
+const BTN = "flex cursor-pointer items-center bg-primary text-base font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/90 active:bg-primary/80 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-default disabled:opacity-50";
 
 export function ActionBar({ pending, onApproveAll, leads }: { pending: number; onApproveAll: () => void; leads: Lead[] }) {
   return (
@@ -39,7 +39,7 @@ export function ActionBar({ pending, onApproveAll, leads }: { pending: number; o
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger render={<button type="button" aria-label="More actions" className={`${BTN} rounded-r-md pr-3 pl-1.5`} />}>
-            <ChevronDown className="size-4" strokeWidth={2.25} />
+            <ChevronDown className="size-4" strokeWidth={2} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem disabled={pending === 0} onClick={onApproveAll}>Approve all drafts</DropdownMenuItem>

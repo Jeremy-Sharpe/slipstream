@@ -1,10 +1,9 @@
 import { Filter } from "lucide-react";
 import { IconButton } from "./IconButton";
 
-export function ResultBar({ count, total, dealCount, updatedAt, filtersHidden, onShowFilters }: {
+export function ResultBar({ count, total, updatedAt, filtersHidden, onShowFilters }: {
   count: number;
   total: number;
-  dealCount: number;
   updatedAt: Date | null;
   filtersHidden: boolean;
   onShowFilters: () => void;
@@ -22,12 +21,10 @@ export function ResultBar({ count, total, dealCount, updatedAt, filtersHidden, o
       <span className="font-semibold">Preview</span>
       <span className="mx-2 text-muted-foreground">·</span>
       <span className="tabular-nums text-ink">{count} of {total.toLocaleString("en-AU")} (~{total.toLocaleString("en-AU")} found)</span>
-      <span className="mx-2 text-muted-foreground">·</span>
-      <span className="text-muted-foreground">from the ICP derived across {dealCount} won deals</span>
       {updatedAt && (
         <>
           <span className="mx-2 text-muted-foreground">·</span>
-          <span className="text-sm text-muted-foreground">Updated just now</span>
+          <span className="text-[15px] text-muted-foreground">Updated just now</span>
         </>
       )}
     </div>

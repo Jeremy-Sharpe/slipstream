@@ -32,7 +32,7 @@ export function RuleRow({ filterKey, values, open, onOpenChange, onChange, onRem
         </span>
         <Token>current</Token>
         <span className="text-base text-ink">{meta.label.toLowerCase()} is:</span>
-        <button type="button" onClick={onRemove} aria-label={`Remove ${meta.label} filter`} className="ml-auto flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive">
+        <button type="button" onClick={onRemove} aria-label={`Remove ${meta.label} filter`} className="ml-auto flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
           <Trash2 className="size-4" strokeWidth={1.75} />
         </button>
       </div>
@@ -45,7 +45,7 @@ export function RuleRow({ filterKey, values, open, onOpenChange, onChange, onRem
               <button
                 type="button"
                 className={cn(
-                  "inline-flex min-h-[30px] max-w-full flex-wrap items-center gap-1 rounded-md border border-line bg-card px-2 py-0.5 text-left text-[15px] hover:border-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
+                  "inline-flex min-h-[30px] max-w-full cursor-pointer flex-wrap items-center gap-1 rounded-md border border-line bg-card px-2 py-0.5 text-left text-[15px] transition-[border-color,box-shadow] duration-150 hover:border-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                   open && "border-primary ring-2 ring-primary/30",
                 )}
               />
@@ -55,14 +55,14 @@ export function RuleRow({ filterKey, values, open, onOpenChange, onChange, onRem
               <span className="px-0.5 text-muted-foreground">{meta.placeholder}</span>
             ) : (
               values.map((v) => (
-                <span key={v} className="inline-flex h-[22px] items-center gap-1 rounded bg-primary-soft px-1.5 text-ink">
+                <span key={v} className="inline-flex h-[22px] items-center gap-1 rounded bg-muted px-1.5 text-ink">
                   {v}
                   <span
                     role="button"
                     tabIndex={-1}
                     aria-label={`Remove ${v}`}
                     onClick={(e) => { e.stopPropagation(); onChange(values.filter((x) => x !== v)); }}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground"
                   >
                     <X className="size-3" strokeWidth={2} />
                   </span>

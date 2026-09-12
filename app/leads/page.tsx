@@ -9,8 +9,7 @@ import { TopBar } from "@/components/leads/TopBar";
 import { defaultBrief } from "@/lib/data/brief";
 import { leads as seed } from "@/lib/data/leads";
 import type { Lead } from "@/lib/types";
-
-const WON_DEALS = 5;
+import { cn } from "@/lib/utils";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>(seed);
@@ -37,9 +36,11 @@ export default function LeadsPage() {
       <TopBar searching={searching} onRunSearch={runSearch} brief={brief} onBriefChange={setBrief} />
       <div className="flex min-h-0 flex-1 flex-col bg-background">
         <div className="flex min-h-0 flex-1">
-          {!filtersHidden && <FiltersPanel state={filters} onChange={setFilters} brief={brief} onHide={() => setFiltersHidden(true)} />}
+          <div className={cn("shrink-0 overflow-hidden transition-[width] duration-200 ease-out motion-reduce:transition-none", filtersHidden ? "w-0" : "w-[605px]")} aria-hidden={filtersHidden} inert={filtersHidden}>
+            <FiltersPanel state={filters} onChange={setFilters} brief={brief} onHide={() => setFiltersHidden(true)} />
+          </div>
           <div className="flex min-w-0 flex-1 flex-col">
-            <ResultBar count={visible.length} total={leads.length} dealCount={WON_DEALS} updatedAt={updatedAt} filtersHidden={filtersHidden} onShowFilters={() => setFiltersHidden(false)} />
+            <ResultBar count={visible.length} total={leads.length} updatedAt={updatedAt} filtersHidden={filtersHidden} onShowFilters={() => setFiltersHidden(false)} />
             <div className="h-5 shrink-0" />
             <LeadTable leads={visible} onChange={(next) => setLeads((cur) => cur.map((l) => next.find((n) => n.id === l.id) ?? l))} />
           </div>

@@ -1,7 +1,7 @@
 import { cloneElement, isValidElement, type ComponentProps, type ReactElement } from "react";
 import { cn } from "@/lib/utils";
 
-const BASE = "flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+const BASE = "flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground active:bg-line/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
 
 // 32×32, radius 6px. `bordered` for the back button; otherwise bare.
 // `render` swaps the element (a Link, a menu trigger) while keeping the styling,

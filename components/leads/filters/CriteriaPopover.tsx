@@ -43,10 +43,10 @@ export function CriteriaPopover({ filterKey, values, onChange, onRemove, onClose
     <PopoverContent align="start" sideOffset={6} className="w-[505px] gap-0 rounded-lg p-0">
       <header className="flex h-[46px] items-center gap-1 border-b border-line pr-2.5 pl-4">
         <span className="flex-1 text-base font-semibold text-ink">{meta.label}</span>
-        <button type="button" onClick={copy} aria-label="Copy values" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+        <button type="button" onClick={copy} aria-label="Copy values" className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
           {copied ? <Check className="size-4" strokeWidth={2} /> : <Copy className="size-4" strokeWidth={1.75} />}
         </button>
-        <button type="button" onClick={() => { onRemove(); onClose(); }} aria-label="Remove filter" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive">
+        <button type="button" onClick={() => { onRemove(); onClose(); }} aria-label="Remove filter" className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
           <Trash2 className="size-4" strokeWidth={1.75} />
         </button>
       </header>
@@ -60,10 +60,10 @@ export function CriteriaPopover({ filterKey, values, onChange, onRemove, onClose
             if (e.key === "Escape") onClose();
           }}
           placeholder={meta.placeholder}
-          className="h-11 w-full rounded-lg border border-line px-4 text-base text-ink outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
+          className="h-11 w-full rounded-lg border border-line px-4 text-base text-ink outline-none transition-[box-shadow,border-color] duration-150 placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
         />
       </div>
-      <ul className="max-h-[330px] overflow-y-auto pb-2" role="listbox" aria-label={`${meta.label} values`}>
+      <ul className="max-h-[330px] overflow-y-auto pb-2 [scrollbar-width:thin]" role="listbox" aria-label={`${meta.label} values`}>
         {options.length === 0 && <li className="px-8 py-3 text-base text-muted-foreground">No matches.</li>}
         {options.map((o) => {
           const on = values.some((x) => x.toLowerCase() === o.toLowerCase());
@@ -74,10 +74,10 @@ export function CriteriaPopover({ filterKey, values, onChange, onRemove, onClose
                 role="option"
                 aria-selected={on}
                 onClick={() => toggle(o)}
-                className={cn("flex h-11 w-full items-center gap-2 pr-4 pl-8 text-left text-base text-ink hover:bg-muted", on && "bg-primary-soft")}
+                className={cn("flex h-11 w-full cursor-pointer items-center gap-2 pr-4 pl-8 text-left text-base text-ink transition-colors duration-150 hover:bg-page focus-visible:bg-page focus-visible:outline-none", on && "bg-muted")}
               >
                 <span className="flex-1 truncate">{o}</span>
-                {on && <Check className="size-4 text-primary" strokeWidth={2} />}
+                {on && <Check className="size-4 text-ink" strokeWidth={2} />}
               </button>
             </li>
           );

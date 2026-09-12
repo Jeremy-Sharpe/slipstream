@@ -13,7 +13,7 @@ export function LeadExpansion({ lead, onDraftChange, onApprove }: { lead: Lead; 
       ) : (
         <div className="flex flex-col">
           <p className="mb-3 text-[13px] font-medium text-muted-foreground">Outreach draft</p>
-          <p className="text-sm text-muted-foreground">No draft yet. Run search drafts outreach for every lead above the similarity threshold.</p>
+          <p className="text-[15px] text-muted-foreground">No draft yet.</p>
         </div>
       )}
     </div>

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 const STYLE: Record<LeadStatus, string> = {
   new: "bg-muted text-ink-2",
-  drafted: "bg-primary-soft text-ink",
+  drafted: "bg-muted text-ink",
   approved: "bg-foreground text-background",
 };
 
@@ -11,7 +11,7 @@ const LABEL: Record<LeadStatus, string> = { new: "New", drafted: "Drafted", appr
 
 export function Badge({ status }: { status: LeadStatus }) {
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-[3px] text-[13px] font-medium", STYLE[status])}>
+    <span className={cn("inline-flex h-6 items-center rounded-md px-2 text-xs font-medium", STYLE[status])}>
       {LABEL[status]}
     </span>
   );

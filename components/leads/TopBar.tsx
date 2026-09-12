@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, BarChart3, Check, ChevronsUpDown, Database, Globe, HelpCircle, Loader2, MessageSquare, Settings, Sparkles, Target } from "lucide-react";
+import { ArrowLeft, BarChart3, Check, ChevronsUpDown, Database, Globe, HelpCircle, Loader2, MessageSquare, Search, Settings, Target } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -36,12 +36,12 @@ export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
 
   return (
     <header className="flex h-16 shrink-0 items-center border-b border-line bg-card pr-4 pl-3">
-      <Link href="/" aria-label="Back to conversations" className="flex size-9 shrink-0 items-center justify-center rounded-md border border-line text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+      <Link href="/" aria-label="Back to conversations" className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-line text-muted-foreground transition-colors duration-150 hover:bg-page hover:text-foreground active:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
         <ArrowLeft className="size-[18px]" strokeWidth={1.75} />
       </Link>
 
       <DropdownMenu>
-        <DropdownMenuTrigger render={<button type="button" className="ml-6 flex items-center gap-2 rounded-md px-1 py-1 text-[17px] font-semibold text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+        <DropdownMenuTrigger render={<button type="button" className="ml-6 flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-[17px] font-semibold text-ink transition-colors duration-150 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
           <Target className="size-5" strokeWidth={1.75} />
           Leads
           <ChevronsUpDown className="size-4 text-muted-foreground" strokeWidth={2} />
@@ -65,9 +65,9 @@ export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
           type="button"
           onClick={onRunSearch}
           disabled={searching}
-          className="mr-6 flex h-9 items-center gap-2 rounded-md bg-primary px-3.5 text-base font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-70"
+          className="mr-6 flex h-9 cursor-pointer items-center gap-2 rounded-md bg-primary px-3.5 text-base font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/90 active:bg-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-default disabled:opacity-70"
         >
-          {searching ? <Loader2 className="size-[18px] animate-spin" strokeWidth={2} /> : <Sparkles className="size-[18px]" strokeWidth={2} />}
+          {searching ? <Loader2 className="size-[18px] animate-spin" strokeWidth={2} /> : <Search className="size-[18px]" strokeWidth={2} />}
           {searching ? "Searching…" : "Run search"}
         </button>
 
@@ -107,7 +107,7 @@ export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
         <button
           type="button"
           onClick={() => { setDraftBrief(brief); setBriefOpen(true); }}
-          className="ml-2 flex h-9 items-center gap-2 rounded-md border border-line px-3.5 text-base text-ink transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="ml-2 flex h-9 cursor-pointer items-center gap-2 rounded-md border border-line px-3.5 text-base text-ink transition-colors duration-150 hover:bg-page active:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
         >
           <Globe className="size-5 text-muted-foreground" strokeWidth={1.75} />
           Brief
@@ -127,7 +127,7 @@ export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
             value={draftBrief}
             onChange={(e) => setDraftBrief(e.target.value)}
             rows={9}
-            className="w-full resize-y rounded-md border border-line bg-card p-3 text-sm leading-relaxed text-ink outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full resize-y rounded-md border border-line bg-card p-3 text-sm leading-relaxed text-ink outline-none transition-[box-shadow,border-color] duration-150 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 [scrollbar-width:thin]"
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setBriefOpen(false)}>Cancel</Button>

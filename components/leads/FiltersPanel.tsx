@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, Code2, PanelLeft, Plus, Save, Search, SlidersHorizontal, Trash2, Users, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, ChevronUp, Code2, Copy, PanelLeft, Plus, Save, Search, SlidersHorizontal, Trash2, Users, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -15,8 +15,8 @@ const STORAGE_KEY = "slipstream.leadsFilters";
 function Section({ title, open, onToggle, trailing, children }: { title: string; open: boolean; onToggle: () => void; trailing?: ReactNode; children?: ReactNode }) {
   return (
     <section className="border-b border-line">
-      <button type="button" onClick={onToggle} aria-expanded={open} className="flex h-[58px] w-full items-center gap-3.5 pr-[22px] pl-8 text-left text-base font-semibold text-ink focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none">
-        {open ? <ChevronDown className="size-4 text-muted-foreground" strokeWidth={2} /> : <ChevronRight className="size-4 text-muted-foreground" strokeWidth={2} />}
+      <button type="button" onClick={onToggle} aria-expanded={open} className="flex h-[58px] w-full cursor-pointer items-center gap-3.5 pr-[22px] pl-8 text-left text-base font-semibold text-ink transition-colors duration-150 hover:bg-page focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none">
+        <ChevronRight className={cn("size-4 text-muted-foreground transition-transform duration-150 motion-reduce:transition-none", open && "rotate-90")} strokeWidth={1.5} />
         <span className="flex-1">{title}</span>
         {trailing}
       </button>
@@ -52,9 +52,9 @@ function AddChips({ items, onAdd, onRemove, placeholder, label }: { items: strin
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {items.map((v) => (
-            <span key={v} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-muted px-2.5 text-sm text-ink">
+            <span key={v} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-card px-2.5 text-sm text-ink">
               {v}
-              <button type="button" onClick={() => onRemove(v)} aria-label={`Remove ${v}`} className="text-muted-foreground hover:text-foreground"><X className="size-3" strokeWidth={2} /></button>
+              <button type="button" onClick={() => onRemove(v)} aria-label={`Remove ${v}`} className="cursor-pointer rounded text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"><X className="size-3" strokeWidth={2} /></button>
             </span>
           ))}
         </div>
@@ -68,11 +68,11 @@ function AddChips({ items, onAdd, onRemove, placeholder, label }: { items: strin
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } if (e.key === "Escape") { setDraft(""); setEditing(false); } }}
           placeholder={placeholder}
           aria-label={label}
-          className="h-9 w-full rounded-md border border-primary px-3.5 text-base text-ink outline-none ring-2 ring-primary/30 placeholder:text-muted-foreground"
+          className="h-9 w-full rounded-md border border-line px-3.5 text-base text-ink outline-none transition-[box-shadow,border-color] duration-150 placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
         />
       ) : (
-        <button type="button" onClick={() => setEditing(true)} className="flex h-9 w-full items-center justify-center gap-2 rounded-md border border-line text-base text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
-          <Plus className="size-4" strokeWidth={2} /> Add
+        <button type="button" onClick={() => setEditing(true)} className="flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-md border border-line text-base text-muted-foreground transition-colors duration-150 hover:bg-page hover:text-foreground active:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+          <Plus className="size-4" strokeWidth={1.75} /> Add
         </button>
       )}
     </div>
@@ -84,13 +84,19 @@ function NumberField({ label, help, value, min, onChange }: { label: string; hel
     <label className="flex flex-col gap-2">
       <span className="text-base font-semibold text-ink">{label}</span>
       {help && <span className="text-base text-muted-foreground">{help}</span>}
-      <input
-        type="number"
-        min={min}
-        value={value}
-        onChange={(e) => onChange(Math.max(min, Number(e.target.value) || min))}
-        className="h-10 w-full rounded-lg border border-line px-3.5 text-base text-ink tabular-nums outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
-      />
+      <span className="relative flex">
+        <input
+          type="number"
+          min={min}
+          value={value}
+          onChange={(e) => onChange(Math.max(min, Number(e.target.value) || min))}
+          className="h-11 w-full rounded-lg border border-line pr-10 pl-3.5 text-base text-ink tabular-nums outline-none transition-[box-shadow,border-color] duration-150 [appearance:textfield] focus:border-primary focus:ring-2 focus:ring-primary/30 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <span className="absolute inset-y-1 right-1 flex w-7 flex-col overflow-hidden rounded-md">
+          <button type="button" tabIndex={-1} aria-label={`Increase ${label}`} onClick={() => onChange(value + 1)} className="flex flex-1 cursor-pointer items-center justify-center text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"><ChevronUp className="size-3.5" strokeWidth={2} /></button>
+          <button type="button" tabIndex={-1} aria-label={`Decrease ${label}`} onClick={() => onChange(Math.max(min, value - 1))} className="flex flex-1 cursor-pointer items-center justify-center text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"><ChevronDown className="size-3.5" strokeWidth={2} /></button>
+        </span>
+      </span>
     </label>
   );
 }
@@ -125,6 +131,12 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
   };
   const reset = () => { onChange({ ...defaultFilterState, total: state.total, perCompany: state.perCompany }); setOpenKey(null); };
   const saveView = () => { setSaved(true); window.setTimeout(() => setSaved(false), 2000); };
+  const [codeCopied, setCodeCopied] = useState(false);
+  const copyCode = async () => {
+    try { await navigator.clipboard.writeText(code); } catch {}
+    setCodeCopied(true);
+    window.setTimeout(() => setCodeCopied(false), 1200);
+  };
 
   const q = query.trim().toLowerCase();
   const suggested = CRITERIA.filter((f) => !active.includes(f.key) && (!q || f.label.toLowerCase().includes(q)));
@@ -143,7 +155,7 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
   );
 
   return (
-    <aside className="flex w-[605px] shrink-0 flex-col border-r border-line bg-card">
+    <aside className="flex h-full w-[605px] shrink-0 flex-col border-r border-line bg-card">
       <header className="flex h-[62px] shrink-0 items-center border-b border-line pr-[22px] pl-6">
         <IconButton aria-label="Hide filters" onClick={onHide}>
           <PanelLeft className="size-[18px]" strokeWidth={1.75} />
@@ -152,13 +164,13 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
         {saved && <span className="ml-2 text-sm text-muted-foreground" aria-live="polite">Saved</span>}
         <div className="ml-auto flex items-center gap-2.5">
           <div className="flex h-9 items-center rounded-md border border-line" role="group" aria-label="Panel view">
-            <button type="button" aria-pressed={view === "filters"} aria-label="Filters view" onClick={() => setView("filters")} className={cn("flex h-full w-[50px] items-center justify-center rounded-l-[5px] text-muted-foreground hover:bg-muted hover:text-foreground", view === "filters" && "bg-muted text-ink")}><SlidersHorizontal className="size-[18px]" strokeWidth={1.75} /></button>
+            <button type="button" aria-pressed={view === "filters"} aria-label="Filters view" onClick={() => setView("filters")} className={cn("flex h-full w-[50px] cursor-pointer items-center justify-center rounded-l-[5px] text-muted-foreground transition-colors duration-150 hover:bg-page hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none", view === "filters" && "bg-muted text-ink")}><SlidersHorizontal className="size-[18px]" strokeWidth={1.75} /></button>
             <span className="h-full w-px bg-line" />
-            <button type="button" aria-pressed={view === "code"} aria-label="Code view" onClick={() => setView("code")} className={cn("flex h-full w-[50px] items-center justify-center rounded-r-[5px] text-muted-foreground hover:bg-muted hover:text-foreground", view === "code" && "bg-muted text-ink")}><Code2 className="size-[18px]" strokeWidth={1.75} /></button>
+            <button type="button" aria-pressed={view === "code"} aria-label="Code view" onClick={() => setView("code")} className={cn("flex h-full w-[50px] cursor-pointer items-center justify-center rounded-r-[5px] text-muted-foreground transition-colors duration-150 hover:bg-page hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none", view === "code" && "bg-muted text-ink")}><Code2 className="size-[18px]" strokeWidth={1.75} /></button>
           </div>
           <IconButton bordered aria-label="Clear filters" onClick={reset} className="size-9 w-[38px]"><Trash2 className="size-[18px]" strokeWidth={1.75} /></IconButton>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" aria-label="Save filters" className="flex h-9 items-center gap-2 rounded-md border border-line px-3 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+            <DropdownMenuTrigger render={<button type="button" aria-label="Save filters" className="flex h-9 cursor-pointer items-center gap-2 rounded-md border border-line px-3 text-muted-foreground transition-colors duration-150 hover:bg-page hover:text-foreground active:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
               <Save className="size-[18px]" strokeWidth={1.75} /><ChevronDown className="size-4" strokeWidth={2} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
@@ -170,9 +182,15 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
       </header>
 
       {view === "code" ? (
-        <pre className="min-h-0 flex-1 overflow-auto p-[22px] font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-ink">{code}</pre>
+        <div className="relative min-h-0 flex-1 overflow-auto [scrollbar-width:thin]">
+          <button type="button" onClick={copyCode} aria-label="Copy" className="absolute top-3 right-4 flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-line bg-card px-2.5 text-[13px] text-muted-foreground transition-colors duration-150 hover:bg-page hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+            {codeCopied ? <Check className="size-3.5" strokeWidth={2} /> : <Copy className="size-3.5" strokeWidth={1.75} />}
+            {codeCopied ? "Copied" : "Copy"}
+          </button>
+          <pre className="p-[22px] font-mono text-[13px] leading-6 whitespace-pre-wrap text-ink-2">{code}</pre>
+        </div>
       ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]">
           <Section
             title="Criteria"
             open={!!open.criteria}
@@ -180,17 +198,17 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
             trailing={filterCount > 0 && <span className="text-[15px] font-normal text-ink">{filterCount} {filterCount === 1 ? "filter" : "filters"}</span>}
           >
             <div className="px-[22px] pb-[22px]">
-              <label className="flex h-11 items-center gap-2.5 rounded-lg border border-line px-4 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
+              <label className="flex h-11 items-center gap-2.5 rounded-lg border border-line px-4 text-muted-foreground transition-[box-shadow,border-color] duration-150 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30">
                 <Search className="size-4" strokeWidth={1.75} />
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search filters" className="w-full bg-transparent text-base text-ink outline-none placeholder:text-muted-foreground" />
-                {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="hover:text-foreground"><X className="size-3.5" strokeWidth={2} /></button>}
+                {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="cursor-pointer transition-colors duration-150 hover:text-foreground"><X className="size-3.5" strokeWidth={2} /></button>}
               </label>
 
               {(suggested.length > 0 || q) && (
                 <>
                   <div className="mt-5 flex items-center justify-between text-base">
                     <span className="text-muted-foreground">Suggested filters</span>
-                    <button type="button" onClick={() => setShowSuggested((v) => !v)} className="text-primary hover:underline">{showSuggested ? "Hide" : "Show"}</button>
+                    <button type="button" onClick={() => setShowSuggested((v) => !v)} className="cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">{showSuggested ? "Hide" : "Show"}</button>
                   </div>
                   {showSuggested && (
                     <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1.5">
@@ -198,8 +216,8 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
                       {suggested.map((f) => {
                         const Icon = f.icon;
                         return (
-                          <button key={f.key} type="button" onClick={() => add(f.key)} className="flex h-8 items-center gap-2 rounded-lg border border-primary/35 bg-primary-soft px-3 text-[15px] text-primary-foreground transition-colors hover:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
-                            <Icon className="size-4 text-primary" strokeWidth={2} />{f.label}
+                          <button key={f.key} type="button" onClick={() => add(f.key)} className="flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-primary/30 bg-primary-soft px-3 text-[15px] text-ink transition-colors duration-150 hover:border-primary/60 active:bg-primary/15 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+                            <Icon className="size-4 text-ink/70" strokeWidth={1.75} />{f.label}
                           </button>
                         );
                       })}
@@ -239,9 +257,9 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
                 {TARGET_MODES.map((m) => {
                   const on = state.targetMode === m.key;
                   return (
-                    <button key={m.key} type="button" role="radio" aria-checked={on} onClick={() => patch({ targetMode: m.key })} className="flex items-center gap-3 text-left text-base text-ink focus-visible:outline-none">
-                      <span className={cn("flex size-5 items-center justify-center rounded-full border", on ? "border-primary bg-primary" : "border-muted-foreground/50 bg-card")}>
-                        {on && <span className="size-2 rounded-full bg-card" />}
+                    <button key={m.key} type="button" role="radio" aria-checked={on} onClick={() => patch({ targetMode: m.key })} className="group flex cursor-pointer items-center gap-3 text-left text-base text-ink focus-visible:outline-none">
+                      <span className={cn("flex size-5 items-center justify-center rounded-full border-2 bg-card transition-colors duration-150 group-focus-visible:ring-2 group-focus-visible:ring-primary/40", on ? "border-primary" : "border-line group-hover:border-muted-foreground")}>
+                        <span className={cn("size-2.5 rounded-full bg-primary transition-transform duration-150", on ? "scale-100" : "scale-0")} />
                       </span>
                       {m.label}
                     </button>

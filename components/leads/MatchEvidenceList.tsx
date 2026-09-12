@@ -11,8 +11,8 @@ export function MatchEvidenceList({ evidence }: { evidence: MatchEvidence[] }) {
         {evidence.map((e, i) => (
           <li key={i} className="flex flex-col gap-1">
             <span className="text-[13px] text-muted-foreground">{e.attribute}</span>
-            <span className="text-sm text-ink">{e.value}</span>
-            <p className="mt-0.5 text-sm text-signal">
+            <span className="text-[15px] text-ink">{e.value}</span>
+            <p className="mt-0.5 text-[15px] text-signal">
               “{e.quote}”
               <span className="ml-2 text-[13px] text-muted-foreground">{e.call_label}</span>
               <span className="ml-2"><Timestamp ms={e.timestamp_ms} /></span>

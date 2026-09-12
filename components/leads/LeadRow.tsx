@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Draft, Lead } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "./Badge";
@@ -17,6 +18,10 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
   onDraftChange: (draft: Draft) => void;
   onApprove: () => void;
 }) {
+  // Mount the panel once it has been opened so the height transition can run
+  // on both open and close instead of snapping.
+  const [mounted, setMounted] = useState(open);
+  useEffect(() => { if (open) setMounted(true); }, [open]);
   return (
     <>
       <tr
@@ -25,11 +30,11 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
         aria-expanded={open}
         onClick={onToggle}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onToggle(); } }}
-        className="cursor-pointer outline-none hover:bg-page focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal"
+        className="cursor-pointer outline-none transition-colors duration-150 hover:bg-page focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
       >
         <td className={cn(CELL, "px-0")}>
           <span className="flex h-full items-center gap-1.5 pl-3 text-ink">
-            <ChevronRight className={cn("size-4 text-muted-foreground transition-transform duration-150", open && "rotate-90")} strokeWidth={2} />
+            <ChevronRight className={cn("size-4 text-muted-foreground transition-transform duration-150 motion-reduce:transition-none", open && "rotate-90")} strokeWidth={1.75} />
             <span className="text-base tabular-nums">{index + 1}</span>
           </span>
         </td>
@@ -46,7 +51,7 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
                   rel="noreferrer"
                   aria-label={`${lead.person} on LinkedIn`}
                   onClick={(e) => e.stopPropagation()}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
                 >
                   <ExternalLink className="size-4" strokeWidth={1.75} />
                 </a>
@@ -66,8 +71,8 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
           <div
             className={cn("grid overflow-hidden transition-[grid-template-rows] duration-150 motion-reduce:transition-none", open ? "grid-rows-[1fr] border-b border-line" : "grid-rows-[0fr]")}
           >
-            <div className="min-h-0">
-              {open && <LeadExpansion lead={lead} onDraftChange={onDraftChange} onApprove={onApprove} />}
+            <div className="sticky left-0 min-h-0 w-[var(--table-viewport)]" inert={!open}>
+              {mounted && <LeadExpansion lead={lead} onDraftChange={onDraftChange} onApprove={onApprove} />}
             </div>
           </div>
         </td>

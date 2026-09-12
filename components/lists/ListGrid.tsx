@@ -150,7 +150,9 @@ export function ListGrid({
   // The grid is sized to its columns and rows like Clay's, capped by the
   // space available; it scrolls inside when the cap applies.
   useEffect(() => {
-    const el = wrapRef.current;
+    // Measure the parent, not the wrapper: the wrapper takes the grid's own
+    // height so the controls under it sit right below the last row.
+    const el = wrapRef.current?.parentElement;
     if (!el) return;
     const ro = new ResizeObserver(([e]) => setBox({ w: e.contentRect.width, h: e.contentRect.height }));
     ro.observe(el);
@@ -224,7 +226,7 @@ export function ListGrid({
   };
 
   return (
-    <div ref={wrapRef} className="relative h-full w-full">
+    <div ref={wrapRef} className="relative w-full" style={{ height: height + 2 }}>
       <div className="relative border border-line bg-card" style={{ width: width + 2, height: height + 2 }}>
       <DataEditor
         width={width} height={height}
@@ -262,7 +264,7 @@ export function ListGrid({
             onClick={() => onRun(column.id)}
             disabled={busy}
             aria-label={`Run ${column.title}`}
-            className="absolute flex size-8 items-center justify-center rounded-md border border-line bg-card text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-60"
+            className="absolute flex size-8 cursor-pointer items-center justify-center rounded-md border border-line bg-card text-ink transition-colors duration-150 hover:bg-page active:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
             style={{ left: o.start + o.width - 42 + tx, top: (HEADER_H - 32) / 2 }}
           >
             {busy ? <span className="size-3.5 animate-spin rounded-full border-2 border-line border-t-ink" /> : <Play className="size-4" strokeWidth={1.75} />}
@@ -272,9 +274,9 @@ export function ListGrid({
       {addOffset && (
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<button type="button" className="absolute flex h-8 items-center gap-2 rounded-md px-2 text-[16px] font-medium whitespace-nowrap text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" style={{ left: addOffset.start + 6 + tx, top: (HEADER_H - 32) / 2 }} />}
+            render={<button type="button" className="absolute flex h-8 cursor-pointer items-center gap-2 rounded-md px-2 text-[15px] font-medium whitespace-nowrap text-ink transition-colors duration-150 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" style={{ left: addOffset.start + 6 + tx, top: (HEADER_H - 32) / 2 }} />}
           >
-            <Plus className="size-[18px]" strokeWidth={2} /> Add column <ChevronDown className="size-4 text-ink" strokeWidth={2} />
+            <Plus className="size-4" strokeWidth={2} /> Add column <ChevronDown className="size-4 text-ink" strokeWidth={1.75} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-52">
             <DropdownMenuItem onClick={() => onAddColumn("text")}>Text</DropdownMenuItem>
