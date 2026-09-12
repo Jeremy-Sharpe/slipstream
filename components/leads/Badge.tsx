@@ -11,7 +11,7 @@ const LABEL: Record<LeadStatus, string> = { new: "New", drafted: "Drafted", appr
 
 export function Badge({ status }: { status: LeadStatus }) {
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2 py-[3px] text-xs font-medium", STYLE[status])}>
+    <span className={cn("inline-flex items-center rounded-full px-2.5 py-[3px] text-[13px] font-medium", STYLE[status])}>
       {LABEL[status]}
     </span>
   );

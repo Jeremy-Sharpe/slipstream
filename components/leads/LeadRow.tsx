@@ -7,7 +7,7 @@ import { Badge } from "./Badge";
 import { LeadExpansion } from "./LeadExpansion";
 import { ScoreBar } from "./ScoreBar";
 
-const CELL = "h-11 border-r border-b border-line px-4 text-sm text-ink truncate";
+const CELL = "h-[49px] border-r border-b border-line px-3 text-base text-ink truncate";
 
 export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove }: {
   lead: Lead;
@@ -28,9 +28,9 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
         className="cursor-pointer outline-none hover:bg-page focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal"
       >
         <td className={cn(CELL, "px-0")}>
-          <span className="flex h-full items-center gap-1 pl-3 text-muted-foreground">
-            <ChevronRight className={cn("size-3.5 transition-transform duration-150", open && "rotate-90")} strokeWidth={2} />
-            <span className="text-sm tabular-nums">{index + 1}</span>
+          <span className="flex h-full items-center gap-1.5 pl-3 text-ink">
+            <ChevronRight className={cn("size-4 text-muted-foreground transition-transform duration-150", open && "rotate-90")} strokeWidth={2} />
+            <span className="text-base tabular-nums">{index + 1}</span>
           </span>
         </td>
         <td className={CELL}>{lead.company}</td>
@@ -48,7 +48,7 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
                   onClick={(e) => e.stopPropagation()}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  <ExternalLink className="size-3.5" strokeWidth={1.75} />
+                  <ExternalLink className="size-4" strokeWidth={1.75} />
                 </a>
               </>
             )}
@@ -59,7 +59,7 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
         <td className={CELL}><span className="flex h-full items-center"><ScoreBar value={lead.relevance_score} /></span></td>
         <td className={CELL}><span className="flex h-full items-center"><ScoreBar value={lead.similarity} /></span></td>
         <td className={CELL}><span className="flex h-full items-center"><Badge status={lead.status} /></span></td>
-        <td className="h-11 border-b border-line" />
+        <td className="h-[49px] border-b border-line" />
       </tr>
       <tr aria-hidden={!open}>
         <td colSpan={9} className="p-0">

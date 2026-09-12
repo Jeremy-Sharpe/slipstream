@@ -43,6 +43,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { AddCallDialog } from "@/components/shell/AddCallDialog";
+import { NotificationsMenu } from "@/components/shell/NotificationsMenu";
+import { UserMenu } from "@/components/shell/UserMenu";
 import { lists, runs } from "@/lib/data/lists";
 import type { List, ListColumn, ListRow } from "@/lib/types/lists";
 import { cn } from "@/lib/utils";
@@ -82,9 +85,11 @@ type ToolId = (typeof TOOLS)[number]["id"];
 type View = "table" | "overview";
 
 const outline =
-  "flex h-9 items-center gap-2 rounded-md border border-line bg-card px-3 text-sm font-medium text-ink transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:cursor-default disabled:opacity-50";
+  "flex h-10 items-center gap-2 rounded-md border border-line bg-card px-3.5 text-[15px] font-medium text-ink transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:cursor-default disabled:opacity-50";
 const iconBtn =
-  "flex h-9 items-center gap-2 rounded-md px-2 text-sm text-ink transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+  "flex h-10 items-center gap-2 rounded-md px-2 text-[15px] text-ink transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+const crumb =
+  "flex h-9 items-center gap-2 rounded-md px-1.5 text-[17px] text-ink transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
 
 const timeFmt = new Intl.DateTimeFormat("en-AU", {
   timeZone: "Australia/Melbourne",
@@ -223,20 +228,20 @@ export function ListWorkbook({ list: initial }: { list: List }) {
   const addView = () => setViews((v) => [...v, `View ${v.length + 1}`]);
 
   return (
-    <div className="flex h-[calc(100vh-56px)] min-w-0 flex-col bg-background">
-      {/* Breadcrumb */}
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-line px-4 text-[15px] font-semibold text-ink">
+    <div className="flex h-screen min-w-0 flex-col bg-background">
+      {/* Top bar: breadcrumb on the left, the shell's actions on the right */}
+      <header className="flex h-16 shrink-0 items-center gap-1.5 border-b border-line bg-card pr-4 pl-3">
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<button type="button" className={iconBtn} />}
+            render={<button type="button" className={crumb} />}
           >
             <Folder
-              className="size-4 text-muted-foreground"
+              className="size-[18px] text-ink"
               strokeWidth={1.75}
             />{" "}
             Home{" "}
             <ChevronDown
-              className="size-3.5 text-muted-foreground"
+              className="size-4 text-ink"
               strokeWidth={2}
             />
           </DropdownMenuTrigger>
@@ -252,13 +257,13 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <span className="text-muted-foreground">/</span>
+        <span className="px-1 text-[17px] text-muted-foreground">/</span>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<button type="button" className={iconBtn} />}
+            render={<button type="button" className={crumb} />}
           >
-            <Table2
-              className="size-4 text-muted-foreground"
+            <Rows3
+              className="size-[18px] text-ink"
               strokeWidth={1.75}
             />{" "}
             {list.name}
@@ -278,18 +283,18 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-        <span className="text-muted-foreground">/</span>
+        <span className="px-1 text-[17px] text-muted-foreground">/</span>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<button type="button" className={iconBtn} />}
+            render={<button type="button" className={cn(crumb, "font-semibold")} />}
           >
             <Table2
-              className="size-4 text-muted-foreground"
+              className="size-[18px] text-ink"
               strokeWidth={1.75}
             />{" "}
-            {view === "table" ? "Table" : "Overview"}{" "}
+            {view === "table" ? list.name : "Overview"}{" "}
             <ChevronDown
-              className="size-3.5 text-muted-foreground"
+              className="size-4 text-ink"
               strokeWidth={2}
             />
           </DropdownMenuTrigger>
@@ -303,16 +308,24 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+        <div className="ml-auto flex items-center">
+          <AddCallDialog />
+          <div className="ml-10 flex items-center gap-3">
+            <NotificationsMenu />
+            <span className="w-1" aria-hidden />
+            <UserMenu />
+          </div>
+        </div>
+      </header>
 
       {/* Toolbar */}
-      <div className="flex h-16 shrink-0 items-center gap-2 px-4">
-        <div className="flex h-9 items-center rounded-md border border-line bg-card">
+      <div className="flex h-[78px] shrink-0 items-center gap-2 px-4">
+        <div className="flex h-10 items-center rounded-lg border border-line bg-card">
           <button
             type="button"
             aria-pressed={autoRun}
             onClick={() => setAutoRun((v) => !v)}
-            className="flex h-full items-center gap-2 rounded-l-md px-3 text-sm font-medium text-ink hover:bg-muted"
+            className="flex h-full items-center gap-2 rounded-l-lg px-3.5 text-[15px] font-medium text-ink hover:bg-muted"
           >
             <RefreshCw
               className={cn(
@@ -325,15 +338,15 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             {autoRun && <span className="size-1.5 rounded-full bg-primary" />}
           </button>
           <span className="h-full w-px bg-line" />
-          <span className="flex h-full items-center gap-2 px-3 text-sm text-ink tabular-nums">
+          <span className="flex h-full items-center gap-2 px-3.5 text-[15px] text-ink tabular-nums">
             {selected > 0 ? (
               <SquareCheck
-                className="size-4 text-muted-foreground"
+                className="size-[18px] text-ink"
                 strokeWidth={1.75}
               />
             ) : (
               <Square
-                className="size-4 text-muted-foreground"
+                className="size-[18px] text-ink"
                 strokeWidth={1.75}
               />
             )}{" "}
@@ -342,17 +355,17 @@ export function ListWorkbook({ list: initial }: { list: List }) {
         </div>
         <button
           type="button"
-          className={cn(iconBtn, "size-9 justify-center px-0")}
+          className={cn(iconBtn, "size-10 justify-center px-0")}
           aria-label="Table view"
           onClick={() => setView("table")}
         >
-          <Rows3 className="size-[18px]" strokeWidth={1.75} />
+          <Rows3 className="size-5" strokeWidth={1.75} />
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<button type="button" className={iconBtn} />}
           >
-            <Columns3 className="size-[18px]" strokeWidth={1.75} />{" "}
+            <Columns3 className="size-5" strokeWidth={1.75} />{" "}
             <span className="tabular-nums">
               {visibleColumns}/{list.columns.length}
             </span>
@@ -380,7 +393,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
           </DropdownMenuContent>
         </DropdownMenu>
         <span className={cn(iconBtn, "cursor-default hover:bg-transparent")}>
-          <Table2 className="size-[18px]" strokeWidth={1.75} />{" "}
+          <Table2 className="size-5" strokeWidth={1.75} />{" "}
           <span className="tabular-nums">
             {rows.length}/{list.rows.length}
           </span>
@@ -399,7 +412,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
               />
             }
           >
-            <Filter className="size-[18px]" strokeWidth={1.75} />
+            <Filter className="size-5" strokeWidth={1.75} />
           </PopoverTrigger>
           <PopoverContent align="start" className="w-64 p-3">
             <label className="text-xs font-medium text-muted-foreground">
@@ -437,7 +450,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
               />
             }
           >
-            <ArrowDownUp className="size-[18px]" strokeWidth={1.75} />
+            <ArrowDownUp className="size-5" strokeWidth={1.75} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-60">
             <DropdownMenuGroup>
@@ -477,12 +490,12 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             type="button"
             aria-label="Search"
             onClick={() => setSearch("")}
-            className={cn(iconBtn, "size-9 justify-center px-0")}
+            className={cn(iconBtn, "size-10 justify-center px-0")}
           >
-            <Search className="size-[18px]" strokeWidth={1.75} />
+            <Search className="size-5" strokeWidth={1.75} />
           </button>
         ) : (
-          <label className="flex h-9 items-center gap-2 rounded-md border border-line px-2.5 text-sm">
+          <label className="flex h-10 items-center gap-2 rounded-md border border-line px-3 text-[15px]">
             <Search
               className="size-4 text-muted-foreground"
               strokeWidth={1.75}
@@ -512,7 +525,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
           >
             <FlaskConical
               className={cn(
-                "size-4",
+                "size-[18px]",
                 draftMode ? "text-primary" : "text-muted-foreground",
               )}
               strokeWidth={1.75}
@@ -521,7 +534,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
           </button>
           <Link href="/campaigns" className={outline}>
             <Headset
-              className="size-4 text-muted-foreground"
+              className="size-[18px] text-muted-foreground"
               strokeWidth={1.75}
             />{" "}
             Coach
@@ -530,13 +543,13 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             type="button"
             aria-pressed={tools}
             onClick={() => setTools((v) => !v)}
-            className="flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
+            className="flex h-10 items-center gap-2 rounded-md bg-primary px-3.5 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
           >
             Tools{" "}
             {tools ? (
-              <ArrowRightToLine className="size-4" strokeWidth={2} />
+              <ArrowRightToLine className="size-[18px]" strokeWidth={2} />
             ) : (
-              <ArrowLeftToLine className="size-4" strokeWidth={2} />
+              <ArrowLeftToLine className="size-[18px]" strokeWidth={2} />
             )}
           </button>
         </div>
@@ -544,13 +557,13 @@ export function ListWorkbook({ list: initial }: { list: List }) {
 
       {/* Body */}
       <div className="flex min-h-0 flex-1">
-        <div className="flex min-w-0 flex-1 flex-col px-4 pb-4">
+        <div className="flex min-w-0 flex-1 flex-col pb-4 pl-[2px]">
           {view === "table" ? (
             <>
               <div
                 className={cn(
-                  "min-h-0 flex-1 overflow-hidden rounded-lg border border-line bg-card",
-                  draftMode && "border-dashed",
+                  "mt-[26px] min-h-0 flex-1 overflow-hidden",
+                  draftMode && "opacity-90",
                 )}
               >
                 <ListGrid
@@ -566,9 +579,9 @@ export function ListWorkbook({ list: initial }: { list: List }) {
                   }
                 />
               </div>
-              <div className="mt-3 flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
-                <button type="button" onClick={addRows} className={outline}>
-                  <Plus className="size-4" strokeWidth={2} /> Add
+              <div className="mt-3 flex shrink-0 items-center gap-3 pl-4 text-[16px] text-muted-foreground">
+                <button type="button" onClick={addRows} className={cn(outline, "text-[16px]")}>
+                  <Plus className="size-[18px]" strokeWidth={2} /> Add
                 </button>
                 <input
                   type="number"
@@ -576,7 +589,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
                   max={100}
                   value={addCount}
                   onChange={(e) => setAddCount(Number(e.target.value) || 1)}
-                  className="h-9 w-24 rounded-md border border-line px-3 text-sm text-ink tabular-nums outline-none focus:ring-2 focus:ring-primary"
+                  className="h-10 w-[105px] rounded-md border border-line px-3.5 text-[16px] text-ink tabular-nums outline-none focus:ring-2 focus:ring-primary"
                   aria-label="Rows to add"
                 />
                 more rows at the bottom
@@ -668,17 +681,17 @@ export function ListWorkbook({ list: initial }: { list: List }) {
       </div>
 
       {/* Bottom tab strip */}
-      <div className="flex h-12 shrink-0 items-stretch border-t border-line bg-card">
+      <div className="flex h-[72px] shrink-0 items-stretch border-t border-line bg-card">
         <button
           type="button"
           onClick={() => setView("overview")}
           className={cn(
-            "flex items-center gap-2 border-r border-line px-4 text-sm font-medium text-ink hover:bg-muted",
+            "flex items-center gap-2.5 px-3 text-[16px] font-medium text-ink hover:bg-muted",
             view === "overview" &&
-              "text-primary shadow-[inset_0_2px_0_0_var(--primary)]",
+              "border-r border-line text-primary shadow-[inset_0_2px_0_0_var(--primary)]",
           )}
         >
-          <Share2 className="size-4 text-muted-foreground" strokeWidth={1.75} />{" "}
+          <Share2 className="size-5 text-ink" strokeWidth={1.75} />{" "}
           Overview
         </button>
         {views.map((v, i) => (
@@ -689,17 +702,17 @@ export function ListWorkbook({ list: initial }: { list: List }) {
                   type="button"
                   onClick={() => setView("table")}
                   className={cn(
-                    "flex items-center gap-2 border-r border-line px-4 text-sm font-medium hover:bg-muted",
+                    "flex items-center gap-2.5 px-3 text-[16px] font-medium hover:bg-muted",
                     view === "table" && i === 0
-                      ? "text-primary shadow-[inset_0_2px_0_0_var(--primary)]"
+                      ? "border-x border-line font-semibold text-primary shadow-[inset_0_2px_0_0_var(--primary)]"
                       : "text-ink",
                   )}
                 />
               }
             >
-              <Table2 className="size-4" strokeWidth={1.75} /> {v}{" "}
+              <Table2 className="size-5" strokeWidth={1.75} /> {v}{" "}
               <ChevronDown
-                className="size-3.5 text-muted-foreground"
+                className="size-4"
                 strokeWidth={2}
               />
             </DropdownMenuTrigger>
@@ -722,18 +735,20 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             </DropdownMenuContent>
           </DropdownMenu>
         ))}
-        <button
-          type="button"
-          onClick={addView}
-          className="flex items-center gap-1.5 px-4 text-sm font-medium text-ink hover:bg-muted"
-        >
-          <Plus className="size-4" strokeWidth={2} /> Add
-        </button>
+        <div className="flex items-center pl-3">
+          <button
+            type="button"
+            onClick={addView}
+            className={cn(outline, "text-[16px]")}
+          >
+            <Plus className="size-[18px]" strokeWidth={2} /> Add
+          </button>
+        </div>
 
-        <div className="ml-auto flex items-center gap-2 border-l border-line px-4">
-          <div className="flex flex-col items-end gap-1">
+        <div className="ml-auto flex items-center gap-3 border-l border-line px-4">
+          <div className="mr-2 flex flex-col items-end gap-1.5">
             <div className="flex items-center gap-2">
-              <span className="h-1.5 w-32 overflow-hidden rounded-full bg-muted">
+              <span className="h-1.5 w-[130px] overflow-hidden rounded-full bg-muted">
                 <span
                   className="block h-full rounded-full bg-ink transition-[width]"
                   style={{ width: `${completed}%` }}
@@ -743,7 +758,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
                 <Check className="size-4 text-ink" strokeWidth={2} />
               )}
             </div>
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <span className="text-[15px] text-muted-foreground tabular-nums">
               {completed}% of table completed
             </span>
           </div>
@@ -751,20 +766,20 @@ export function ListWorkbook({ list: initial }: { list: List }) {
             type="button"
             disabled={!running}
             onClick={() => setRunning(null)}
-            className={cn(outline, "h-8")}
+            className={cn(outline, "text-muted-foreground")}
           >
             <CircleStop
-              className="size-4 text-muted-foreground"
+              className="size-[18px]"
               strokeWidth={1.75}
             />{" "}
             Stop
           </button>
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<button type="button" className={cn(outline, "h-8")} />}
+              render={<button type="button" className={outline} />}
             >
               <History
-                className="size-4 text-muted-foreground"
+                className="size-[18px] text-ink"
                 strokeWidth={1.75}
               />{" "}
               History
@@ -789,9 +804,9 @@ export function ListWorkbook({ list: initial }: { list: List }) {
           <Link
             href="/settings"
             aria-label="List settings"
-            className="flex size-8 items-center justify-center rounded-md border border-line text-muted-foreground hover:bg-muted hover:text-ink"
+            className="flex size-10 items-center justify-center rounded-md border border-line text-ink hover:bg-muted"
           >
-            <Settings className="size-4" strokeWidth={1.75} />
+            <Settings className="size-5" strokeWidth={1.75} />
           </Link>
         </div>
       </div>

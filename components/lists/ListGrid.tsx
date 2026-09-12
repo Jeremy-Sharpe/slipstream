@@ -14,30 +14,39 @@ import {
   type Item,
   type Theme,
 } from "@glideapps/glide-data-grid";
-import { ChevronDown, Play, Plus } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronDown, Play, Plus, Square, SquareCheck } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { ColumnKind, ListColumn, ListRow } from "@/lib/types/lists";
 import { C, GRID_THEME } from "./gridTheme";
 
-export const HEADER_H = 48;
-export const ROW_H = 48;
-const MARKER_W = 44;
-const INDEX_W = 56;
-const ADD_COL_W = 160;
+// Clay's table metrics at 1×: 46px header, 33px status row, 46px rows, a
+// 130px number/checkbox column, 264px data columns, 196px add-column cell.
+export const HEADER_H = 46;
+export const STATUS_H = 33;
+export const ROW_H = 46;
+const INDEX_W = 130;
+const INDEX_PAD = 30;
+const ADD_COL_W = 196;
 
-const COLUMN_WIDTH: Record<ColumnKind, number> = { text: 200, enrichment: 230, link: 210, number: 110 };
+const COLUMN_WIDTH: Record<ColumnKind, number> = { text: 264, enrichment: 264, link: 264, number: 140 };
 
-// Building glyph for enrichment headers; Glide's built-ins cover text, number and link.
+// Plain glyphs like Clay's column-type icons: T, #, chain link, building.
 const HEADER_ICONS = {
-  enrich: (p: { fgColor: string; bgColor: string }) =>
-    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" rx="4" fill="${p.bgColor}"/><g fill="none" stroke="${p.fgColor}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15V6a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v9"/><path d="M4 15h12"/><path d="M8.5 8h3M8.5 10.5h3M8.5 13h3"/></g></svg>`,
+  text: (p: { fgColor: string }) =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><g fill="none" stroke="${p.fgColor}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V4.5h11V6"/><path d="M10 4.5v11"/><path d="M8 15.5h4"/></g></svg>`,
+  number: (p: { fgColor: string }) =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><g fill="none" stroke="${p.fgColor}" stroke-width="1.7" stroke-linecap="round"><path d="M8 3.5 6 16.5M14 3.5l-2 13M4 8h13M3 12h13"/></g></svg>`,
+  link: (p: { fgColor: string }) =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><g fill="none" stroke="${p.fgColor}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 11.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1"/><path d="M11.5 8.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1"/></g></svg>`,
+  enrich: (p: { fgColor: string }) =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><g fill="none" stroke="${p.fgColor}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v11"/><path d="M3 16h14"/><path d="M8 7.5h1.5M10.5 7.5H12M8 10h1.5M10.5 10H12M8 12.5h1.5M10.5 12.5H12"/></g></svg>`,
 };
 
 const ICON: Record<ColumnKind, GridColumnIcon | string> = {
-  text: GridColumnIcon.HeaderString,
-  number: GridColumnIcon.HeaderNumber,
-  link: GridColumnIcon.HeaderUri,
+  text: "text",
+  number: "number",
+  link: "link",
   enrichment: "enrich",
 };
 
@@ -54,9 +63,9 @@ const indexRenderer: CustomRenderer<IndexCell> = {
   kind: GridCellKind.Custom,
   isMatch: (c): c is IndexCell => (c.data as { kind?: string }).kind === "index",
   draw: ({ ctx, rect, theme }, cell) => {
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.font = `13px ${theme.fontFamily}`; ctx.fillStyle = C.muted;
-    ctx.fillText(cell.data.label, rect.x + rect.width / 2, rect.y + rect.height / 2 + 0.5);
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.font = `16px ${theme.fontFamily}`; ctx.fillStyle = C.muted;
+    ctx.fillText(cell.data.label, rect.x + INDEX_PAD, rect.y + rect.height / 2 + 0.5);
     return true;
   },
 };
@@ -70,8 +79,8 @@ const tickRenderer: CustomRenderer<TickCell> = {
     tick(ctx, x, cy, C.ink);
     if (cell.data.label) {
       ctx.textAlign = "left"; ctx.textBaseline = "middle";
-      ctx.font = `13px ${theme.fontFamily}`; ctx.fillStyle = C.muted;
-      ctx.fillText(cell.data.label, x + 18, cy + 0.5);
+      ctx.font = `16px ${theme.fontFamily}`; ctx.fillStyle = C.muted;
+      ctx.fillText(cell.data.label, x + 20, cy + 0.5);
     }
     return true;
   },
@@ -85,11 +94,11 @@ const enrichRenderer: CustomRenderer<EnrichCell> = {
     const cy = rect.y + rect.height / 2;
     tick(ctx, x, cy, C.muted);
     ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.font = `14px ${theme.fontFamily}`; ctx.fillStyle = C.ink;
-    const max = rect.width - theme.cellHorizontalPadding * 2 - 20;
+    ctx.font = `16px ${theme.fontFamily}`; ctx.fillStyle = C.ink;
+    const max = rect.width - theme.cellHorizontalPadding * 2 - 22;
     let text = cell.data.value;
     while (text.length > 1 && ctx.measureText(text).width > max) text = `${text.slice(0, -2).trimEnd()}…`;
-    ctx.fillText(text, x + 20, cy + 0.5);
+    ctx.fillText(text, x + 22, cy + 0.5);
     return true;
   },
 };
@@ -135,6 +144,18 @@ export function ListGrid({
   const [selection, setSelection] = useState<GridSelection>({ columns: CompactSelection.empty(), rows: CompactSelection.empty() });
   const [hoverRow, setHoverRow] = useState<number>();
   const [tx, setTx] = useState(0);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
+  // The grid is sized to its columns and rows like Clay's, capped by the
+  // space available; it scrolls inside when the cap applies.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setBox({ w: e.contentRect.width, h: e.contentRect.height }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => { onSelectionCount?.(selection.rows.length); }, [selection, onSelectionCount]);
 
@@ -184,27 +205,52 @@ export function ListGrid({
 
   // Header overlays: a ▶ on each enrichment column and the "+ Add column" cell.
   const offsets = useMemo(() => {
-    let x = MARKER_W;
+    let x = 0;
     return gridColumns.map((c) => { const start = x; x += c.width; return { id: c.id, start, width: c.width }; });
   }, [gridColumns]);
   const addOffset = offsets.find((o) => o.id === "__add");
+  const totalW = offsets.reduce((n, o) => n + o.width, 0) + 1;
+  const totalH = HEADER_H + STATUS_H + rows.length * ROW_H + 1;
+  const width = box.w ? Math.min(totalW, box.w) : totalW;
+  const height = box.h ? Math.min(totalH, box.h) : totalH;
+
+  const allSelected = rows.length > 0 && selection.rows.length === rows.length;
+  const toggleAll = () => {
+    const rowsSel = allSelected ? CompactSelection.empty() : CompactSelection.fromSingleSelection([1, rows.length + 1]);
+    setSelection({ columns: CompactSelection.empty(), rows: rowsSel });
+  };
+  const toggleRow = (row: number) => {
+    setSelection((sel) => ({ ...sel, rows: sel.rows.hasIndex(row) ? sel.rows.remove(row) : sel.rows.add(row) }));
+  };
 
   return (
-    <div className="relative h-full w-full">
+    <div ref={wrapRef} className="relative h-full w-full">
+      <div className="relative border border-line bg-card" style={{ width: width + 2, height: height + 2 }}>
       <DataEditor
-        width="100%" height="100%"
+        width={width} height={height}
         columns={gridColumns} rows={rows.length + 1} getCellContent={getCellContent}
         customRenderers={RENDERERS} headerIcons={HEADER_ICONS} theme={theme} getRowThemeOverride={getRowThemeOverride}
-        rowHeight={ROW_H} headerHeight={HEADER_H}
-        rowMarkers={{ kind: "checkbox", width: MARKER_W, checkboxStyle: "square" }}
+        rowHeight={(row) => (row === 0 ? STATUS_H : ROW_H)} headerHeight={HEADER_H}
+        rowMarkers="none"
         gridSelection={selection} onGridSelectionChange={setSelection}
         rangeSelect="none" columnSelect="none" rowSelect="multi" rowSelectionMode="multi"
         verticalBorder smoothScrollX smoothScrollY drawFocusRing={false}
         getCellsForSelection keybindings={{ search: true, selectAll: true }}
         onColumnResize={(col, w) => { if (col.id && !col.id.startsWith("__")) setWidths((s) => ({ ...s, [col.id as string]: w })); }}
+        onCellClicked={([col, row]) => { if (gridColumns[col]?.id === "__index" && row > 0) toggleRow(row); }}
         onItemHovered={(a) => setHoverRow(a.kind === "cell" ? a.location[1] : undefined)}
         onVisibleRegionChanged={(_r, x) => setTx(x)}
       />
+      <button
+        type="button"
+        onClick={toggleAll}
+        aria-pressed={allSelected}
+        aria-label={allSelected ? "Clear selection" : "Select all rows"}
+        className="absolute flex size-6 items-center justify-center rounded text-muted-foreground hover:text-ink focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        style={{ left: INDEX_PAD - 3 + tx, top: (HEADER_H - 24) / 2 }}
+      >
+        {allSelected ? <SquareCheck className="size-[18px] text-ink" strokeWidth={1.75} /> : <Square className="size-[18px]" strokeWidth={1.75} />}
+      </button>
       {offsets.map((o) => {
         const column = visible.find((c) => c.id === o.id);
         if (!column || column.kind !== "enrichment") return null;
@@ -217,18 +263,18 @@ export function ListGrid({
             disabled={busy}
             aria-label={`Run ${column.title}`}
             className="absolute flex size-8 items-center justify-center rounded-md border border-line bg-card text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-60"
-            style={{ left: o.start + o.width - 40 + tx, top: (HEADER_H - 32) / 2 }}
+            style={{ left: o.start + o.width - 42 + tx, top: (HEADER_H - 32) / 2 }}
           >
-            {busy ? <span className="size-3.5 animate-spin rounded-full border-2 border-line border-t-ink" /> : <Play className="size-3.5" strokeWidth={2} />}
+            {busy ? <span className="size-3.5 animate-spin rounded-full border-2 border-line border-t-ink" /> : <Play className="size-4" strokeWidth={1.75} />}
           </button>
         );
       })}
       {addOffset && (
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<button type="button" className="absolute flex h-8 items-center gap-1.5 rounded-md px-2 text-sm font-semibold whitespace-nowrap text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" style={{ left: addOffset.start + 8 + tx, top: (HEADER_H - 32) / 2 }} />}
+            render={<button type="button" className="absolute flex h-8 items-center gap-2 rounded-md px-2 text-[16px] font-medium whitespace-nowrap text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" style={{ left: addOffset.start + 6 + tx, top: (HEADER_H - 32) / 2 }} />}
           >
-            <Plus className="size-4" strokeWidth={2} /> Add column <ChevronDown className="size-3.5 text-muted-foreground" strokeWidth={2} />
+            <Plus className="size-[18px]" strokeWidth={2} /> Add column <ChevronDown className="size-4 text-ink" strokeWidth={2} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-52">
             <DropdownMenuItem onClick={() => onAddColumn("text")}>Text</DropdownMenuItem>
@@ -239,6 +285,7 @@ export function ListGrid({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
+      </div>
     </div>
   );
 }

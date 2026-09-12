@@ -28,18 +28,18 @@ function downloadCsv(leads: Lead[]) {
   URL.revokeObjectURL(url);
 }
 
-const BTN = "flex items-center bg-primary text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50";
+const BTN = "flex items-center bg-primary text-base font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50";
 
 export function ActionBar({ pending, onApproveAll, leads }: { pending: number; onApproveAll: () => void; leads: Lead[] }) {
   return (
-    <div className="flex h-16 shrink-0 items-center justify-end border-t border-line bg-card pr-6">
-      <div className="flex items-stretch">
-        <button type="button" onClick={onApproveAll} disabled={pending === 0} className={`${BTN} rounded-l-lg py-3 pr-4 pl-5`}>
+    <div className="flex h-[65px] shrink-0 items-center justify-end border-t border-line bg-card pr-[22px]">
+      <div className="flex h-10 items-stretch">
+        <button type="button" onClick={onApproveAll} disabled={pending === 0} className={`${BTN} rounded-l-md pr-3.5 pl-4`}>
           Approve all drafts
         </button>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<button type="button" aria-label="More actions" className={`${BTN} rounded-r-lg border-l border-primary-foreground/20 px-2.5`} />}>
-            <ChevronDown className="size-3.5" strokeWidth={2} />
+          <DropdownMenuTrigger render={<button type="button" aria-label="More actions" className={`${BTN} rounded-r-md pr-3 pl-1.5`} />}>
+            <ChevronDown className="size-4" strokeWidth={2.25} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem disabled={pending === 0} onClick={onApproveAll}>Approve all drafts</DropdownMenuItem>

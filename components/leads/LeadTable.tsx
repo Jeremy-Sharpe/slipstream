@@ -11,17 +11,17 @@ type Glyph = "text" | "url" | "number";
 
 const COLUMNS: { label: string; width: number; glyph?: Glyph }[] = [
   { label: "", width: 64 },
-  { label: "Company", width: 200, glyph: "text" },
-  { label: "Person", width: 180, glyph: "url" },
-  { label: "Title", width: 170, glyph: "text" },
-  { label: "Location", width: 150, glyph: "text" },
-  { label: "Relevance", width: 122, glyph: "number" },
-  { label: "Similarity", width: 122, glyph: "number" },
-  { label: "Status", width: 120, glyph: "text" },
+  { label: "Company", width: 236, glyph: "text" },
+  { label: "Person", width: 220, glyph: "url" },
+  { label: "Title", width: 220, glyph: "text" },
+  { label: "Location", width: 180, glyph: "text" },
+  { label: "Relevance", width: 152, glyph: "number" },
+  { label: "Similarity", width: 152, glyph: "number" },
+  { label: "Status", width: 132, glyph: "text" },
 ];
 
 function ColumnGlyph({ glyph }: { glyph: Glyph }) {
-  const cls = "size-3.5 text-muted-foreground";
+  const cls = "size-[18px] text-muted-foreground";
   if (glyph === "url") return <Link2 className={cls} strokeWidth={1.75} />;
   if (glyph === "number") return <Hash className={cls} strokeWidth={1.75} />;
   return <Type className={cls} strokeWidth={1.75} />;
@@ -34,14 +34,14 @@ export function LeadTable({ leads, onChange }: { leads: Lead[]; onChange: (next:
 
   if (leads.length === 0) {
     return (
-      <div className="mx-4 mb-4 flex-1 rounded-lg border border-line bg-card">
+      <div className="mx-[22px] mb-[22px] flex-1 rounded-lg border border-line bg-card">
         <EmptyState title="No leads yet" body="Run a search from the brief and companies land here as Origami finds them." />
       </div>
     );
   }
 
   return (
-    <div className="mx-4 mb-4 min-h-0 flex-1 overflow-hidden rounded-lg border border-line bg-card">
+    <div className="mx-[22px] mb-[22px] min-h-0 flex-1 overflow-hidden rounded-lg border border-line bg-card">
       <div className="h-full overflow-auto">
         <table className="w-full table-fixed border-collapse">
           <colgroup>
@@ -51,16 +51,16 @@ export function LeadTable({ leads, onChange }: { leads: Lead[]; onChange: (next:
           <thead className="sticky top-0 z-10 bg-card">
             <tr>
               {COLUMNS.map((c, i) => (
-                <th key={i} scope="col" className={cn("h-11 border-r border-b border-line text-left align-middle", c.glyph ? "px-4" : "px-0")}>
+                <th key={i} scope="col" className={cn("h-[46px] border-r border-b border-line text-left align-middle", c.glyph ? "px-4" : "px-0")}>
                   {c.glyph && (
-                    <span className="flex items-center gap-2 overflow-hidden">
+                    <span className="flex items-center gap-2.5 overflow-hidden">
                       <ColumnGlyph glyph={c.glyph} />
-                      <span className="truncate text-sm font-semibold text-ink">{c.label}</span>
+                      <span className="truncate text-base font-semibold text-ink">{c.label}</span>
                     </span>
                   )}
                 </th>
               ))}
-              <th className="h-11 border-b border-line" />
+              <th className="h-[46px] border-b border-line" />
             </tr>
           </thead>
           <tbody>

@@ -40,17 +40,17 @@ export function CriteriaPopover({ filterKey, values, onChange, onRemove, onClose
   };
 
   return (
-    <PopoverContent align="start" sideOffset={6} className="w-[340px] gap-0 p-0">
-      <header className="flex h-11 items-center gap-1 border-b border-line pr-2 pl-4">
-        <span className="flex-1 text-[15px] font-semibold text-ink">{meta.label}</span>
-        <button type="button" onClick={copy} aria-label="Copy values" className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
-          {copied ? <Check className="size-3.5" strokeWidth={2} /> : <Copy className="size-3.5" strokeWidth={1.75} />}
+    <PopoverContent align="start" sideOffset={6} className="w-[505px] gap-0 rounded-lg p-0">
+      <header className="flex h-[46px] items-center gap-1 border-b border-line pr-2.5 pl-4">
+        <span className="flex-1 text-base font-semibold text-ink">{meta.label}</span>
+        <button type="button" onClick={copy} aria-label="Copy values" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+          {copied ? <Check className="size-4" strokeWidth={2} /> : <Copy className="size-4" strokeWidth={1.75} />}
         </button>
-        <button type="button" onClick={() => { onRemove(); onClose(); }} aria-label="Remove filter" className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive">
-          <Trash2 className="size-3.5" strokeWidth={1.75} />
+        <button type="button" onClick={() => { onRemove(); onClose(); }} aria-label="Remove filter" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive">
+          <Trash2 className="size-4" strokeWidth={1.75} />
         </button>
       </header>
-      <div className="p-2.5 pb-1">
+      <div className="p-4 pb-2">
         <input
           autoFocus
           value={query}
@@ -60,11 +60,11 @@ export function CriteriaPopover({ filterKey, values, onChange, onRemove, onClose
             if (e.key === "Escape") onClose();
           }}
           placeholder={meta.placeholder}
-          className="h-10 w-full rounded-lg border border-line px-3 text-sm text-ink outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
+          className="h-11 w-full rounded-lg border border-line px-4 text-base text-ink outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30"
         />
       </div>
-      <ul className="max-h-[300px] overflow-y-auto pb-1.5" role="listbox" aria-label={`${meta.label} values`}>
-        {options.length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No matches.</li>}
+      <ul className="max-h-[330px] overflow-y-auto pb-2" role="listbox" aria-label={`${meta.label} values`}>
+        {options.length === 0 && <li className="px-8 py-3 text-base text-muted-foreground">No matches.</li>}
         {options.map((o) => {
           const on = values.some((x) => x.toLowerCase() === o.toLowerCase());
           return (
@@ -74,7 +74,7 @@ export function CriteriaPopover({ filterKey, values, onChange, onRemove, onClose
                 role="option"
                 aria-selected={on}
                 onClick={() => toggle(o)}
-                className={cn("flex h-10 w-full items-center gap-2 px-4 text-left text-[15px] text-ink hover:bg-muted", on && "bg-primary-soft")}
+                className={cn("flex h-11 w-full items-center gap-2 pr-4 pl-8 text-left text-base text-ink hover:bg-muted", on && "bg-primary-soft")}
               >
                 <span className="flex-1 truncate">{o}</span>
                 {on && <Check className="size-4 text-primary" strokeWidth={2} />}

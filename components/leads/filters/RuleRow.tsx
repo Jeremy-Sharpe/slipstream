@@ -7,7 +7,7 @@ import { CriteriaPopover } from "./CriteriaPopover";
 import { criterion, type FilterKey } from "./model";
 
 const Token = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <span className={cn("inline-flex h-7 items-center rounded-md border border-line bg-card px-2 text-[13px] text-ink", className)}>{children}</span>
+  <span className={cn("inline-flex h-[30px] items-center rounded-md border border-line bg-card px-2.5 text-[15px] text-ink", className)}>{children}</span>
 );
 
 // One active criterion, laid out like Clay's rule block: a condition line and
@@ -24,19 +24,19 @@ export function RuleRow({ filterKey, values, open, onOpenChange, onChange, onRem
   const Icon = meta.icon;
   return (
     <div className="rounded-lg border border-line">
-      <div className="flex h-[52px] items-center gap-2 border-b border-line px-3">
+      <div className="flex h-[54px] items-center gap-2.5 border-b border-line px-3.5">
         <Icon className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
-        <span className="inline-flex h-7 items-center overflow-hidden rounded-md border border-line text-[13px] text-ink">
-          <span className="flex h-full items-center border-r border-line px-2">≥</span>
-          <span className="flex h-full items-center px-2 tabular-nums">1</span>
+        <span className="inline-flex h-[30px] items-center overflow-hidden rounded-md border border-line text-[15px] text-ink">
+          <span className="flex h-full items-center border-r border-line px-2.5">≥</span>
+          <span className="flex h-full items-center px-2.5 tabular-nums">1</span>
         </span>
         <Token>current</Token>
-        <span className="text-sm text-ink">{meta.label.toLowerCase()} is:</span>
-        <button type="button" onClick={onRemove} aria-label={`Remove ${meta.label} filter`} className="ml-auto flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive">
-          <Trash2 className="size-3.5" strokeWidth={1.75} />
+        <span className="text-base text-ink">{meta.label.toLowerCase()} is:</span>
+        <button type="button" onClick={onRemove} aria-label={`Remove ${meta.label} filter`} className="ml-auto flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive">
+          <Trash2 className="size-4" strokeWidth={1.75} />
         </button>
       </div>
-      <div className="flex min-h-[52px] flex-wrap items-center gap-2 py-3 pr-3 pl-6">
+      <div className="flex min-h-[56px] flex-wrap items-center gap-2 py-3 pr-3.5 pl-7">
         <Token>{meta.label}</Token>
         <Token>is similar to</Token>
         <Popover open={open} onOpenChange={onOpenChange}>
@@ -45,7 +45,7 @@ export function RuleRow({ filterKey, values, open, onOpenChange, onChange, onRem
               <button
                 type="button"
                 className={cn(
-                  "inline-flex min-h-7 max-w-full flex-wrap items-center gap-1 rounded-md border border-line bg-card px-1.5 py-0.5 text-left text-[13px] hover:border-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
+                  "inline-flex min-h-[30px] max-w-full flex-wrap items-center gap-1 rounded-md border border-line bg-card px-2 py-0.5 text-left text-[15px] hover:border-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                   open && "border-primary ring-2 ring-primary/30",
                 )}
               />
@@ -55,7 +55,7 @@ export function RuleRow({ filterKey, values, open, onOpenChange, onChange, onRem
               <span className="px-0.5 text-muted-foreground">{meta.placeholder}</span>
             ) : (
               values.map((v) => (
-                <span key={v} className="inline-flex h-6 items-center gap-1 rounded bg-primary-soft px-1.5 text-ink">
+                <span key={v} className="inline-flex h-[22px] items-center gap-1 rounded bg-primary-soft px-1.5 text-ink">
                   {v}
                   <span
                     role="button"

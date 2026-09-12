@@ -16,11 +16,11 @@ export const C = {
 export const GRID_THEME: Partial<Theme> = {
   accentColor: C.primary, accentFg: "#182521", accentLight: "#FFEDE7",
   textDark: C.ink, textMedium: C.muted, textLight: "#9CA3AF", textBubble: C.ink,
-  bgIconHeader: C.muted, fgIconHeader: C.surface, textHeader: C.ink, textHeaderSelected: C.ink,
+  bgIconHeader: "transparent", fgIconHeader: C.muted, textHeader: C.ink, textHeaderSelected: C.ink,
   bgCell: C.surface, bgCellMedium: C.mist, bgHeader: C.surface, bgHeaderHasFocus: C.hover, bgHeaderHovered: C.hover,
   bgBubble: C.mist, bgBubbleSelected: C.hover, bgSearchResult: "#FFEDE7",
   borderColor: C.line, horizontalBorderColor: C.line, headerBottomBorderColor: C.line, drilldownBorder: C.line,
   linkColor: C.ink, cellHorizontalPadding: 12, cellVerticalPadding: 8,
-  headerFontStyle: "600 14px", baseFontStyle: "14px", markerFontStyle: "13px", editorFontSize: "14px",
-  lineHeight: 1.4, headerIconSize: 16, roundingRadius: 6,
+  headerFontStyle: "500 16px", baseFontStyle: "16px", markerFontStyle: "16px", editorFontSize: "16px",
+  lineHeight: 1.4, headerIconSize: 20, roundingRadius: 6,
 };
