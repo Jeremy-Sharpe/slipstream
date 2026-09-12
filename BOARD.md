@@ -32,7 +32,7 @@ Order matters. The foundation rows unblock everything else and should be claimed
 | `coach-shell` | Fork Cheating Daddy into `coach/`, remove Gemini, connect to the API WebSocket, keep overlay and audio capture | `coach/` | | | unclaimed | GPL-3.0 stays, own LICENSE |
 | `coach-brain` | WebSocket endpoint: Scribe realtime in, rolling Claude suggestions out with deal context, hand recording to ingest on call end | `api/app/ws/coach.py`, `api/app/prompts/coach-*.md` | | | unclaimed | |
 | `pitch` | `docs/pitch.md`: 400 to 700 spoken words plus a Q&A section, scored by evals F1 and F3 | `docs/pitch.md` | | | unclaimed | |
-| `demo-script` | `docs/demo-script.md`: step by step against the live app with a fallback, scored by eval F2 | `docs/demo-script.md` | Jeremy's agent | feat/demo-script | in progress | Writing and exercising the live API path plus no-key fallback |
+| `demo-script` | `docs/demo-script.md`: step by step against the live app with a fallback, scored by eval F2 | `docs/demo-script.md` | Jeremy's agent | feat/demo-script | done | Live API fallback exercised; model judge F2 passes at 7/8 after production-evidence revision |
 | `video` | 3 to 5 minute demo video on the live URL, per-feature walkthroughs | `docs/video/` | | | unclaimed | Starts Sunday once the loop runs |
 | `submission` | README lines filled, `npm run evals:dry` green, form submitted before Monday 12:00pm | `README.md` | | | unclaimed | |
 
