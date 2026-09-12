@@ -14,6 +14,7 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 - Jeremy's agent fixed the VPS CORS allow-list for the real Vercel origin and added an explicit live conversation pipeline to Max's UI snapshot: fixture ingest, evidence-backed CRM extraction, grounded draft creation and approval now call the deployed API, while clearly-labelled fixture data remains the fallback. Other people should not replace `lib/api/slipstream.ts` or the conversation-detail pipeline state while this branch is in progress.
 - Jeremy's agent completed `feat/web-wire-analysis`: the Intelligence surface validates and loads a stored live ICP and Origami brief when available, while every retained aggregate and unmatched evidence link stays explicitly labelled as the 12-call evaluation. Loading, API failure, missing-model, zero-call and changing-input states preserve that provenance. Other people should take the unclaimed coach overlay or video work and avoid weakening the live-versus-evaluation labels.
 - Jeremy's agent completed `feat/web-wire-leads`: the UI now validates and loads stored leads, launches and polls bounded Origami jobs, preserves unknown scores, verifies ICP provenance, drafts outreach through the backend, and binds approval to the exact reviewed draft. Evaluation approvals stay local and delivery is explicitly simulated. The API serializes redraft/approval per lead and rejects stale draft IDs with 409; its concurrency test passed ten repeated runs. Other people should take the coach overlay or record the submission video.
+- Anna's Supabase project `slipstream` (ref `ozfogqrawonkluckhksk`, region ap-southeast-2) now carries the initial schema, recorded in migration history via the CLI; the seed was not applied because its synthetic deals would join the fixture history. The ICP lane ran on that store on 12 September: 13 fixture deals loaded, 12 embedded, ICP version 1 persisted and read back after an API restart. The VPS still runs memory storage with no keys, so the demo needs `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY` and `ORIGAMI_API_KEY` in `/etc/slipstream/api.env`, then `POST /icp/history/load` and `POST /icp/derive` once against production. Leads and outreach stay unproven live until Jeremy's Origami key exists.
 - The mock data in the prototype is the target shape for the API. Whoever claims a wiring row replaces the mock arrays with Supabase reads and API calls without changing the information architecture unless the chat agrees.
 
 ## The demo loop
@@ -100,7 +101,7 @@ None of these accounts exist yet. All go on personal accounts, not company billi
 
 | Service | Needed for | Action |
 |---|---|---|
-| Supabase | The database, pgvector | Create project, enable `vector` extension, run migrations |
+| Supabase | The database, pgvector | Done on Anna's `slipstream` project (schema applied 12 September, history recorded with `supabase migration repair`). Link with `supabase link --project-ref ozfogqrawonkluckhksk`; `supabase/.temp` stays untracked |
 | Anthropic API | All reasoning | Key with enough credit for the weekend |
 | ElevenLabs | Text-to-dialogue, Scribe batch, Scribe realtime | Check the plan covers realtime concurrency |
 | Origami | Lead discovery | Paid plan, key from Settings, Developers. Start every search at `count: 10` and use fetch-more; credits are spent per row |
@@ -128,7 +129,7 @@ None of these accounts exist yet. All go on personal accounts, not company billi
 
 ## Open questions
 
-- Which embedding model, chosen by whoever claims the `icp` row.
+- Which Supabase project the VPS points at. Anna's `slipstream` project has the schema and a persisted ICP; Jeremy's VPS reports memory storage. Pick one before the demo so history load, ICP and leads survive a restart.
 - Does Cheating Daddy's macOS system-audio capture work on current macOS? If not, the coach uses microphone input and the demo plays the mock call through speakers.
 - Exact per-field shape of an Origami row (check the OpenAPI spec).
 - Whether email as a channel gets wired this weekend or stays mocked.
