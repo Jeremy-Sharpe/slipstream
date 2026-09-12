@@ -1,4 +1,4 @@
-// Generated from data/fixtures/*/{script,expected}.json — the thirteen
+// Generated from data/fixtures/*/{script,expected}.json, the thirteen
 // Harbourline IT calls. Timestamps are spread over the call by word count;
 // confidences are deterministic; spans point at the source turn.
 import type { CallRecord } from "./types";

@@ -25,7 +25,7 @@ const LABELS: Record<StepId, { working: string; done: string }> = {
   outreach: { working: "Drafting outreach", done: "Outreach drafted" },
 };
 
-const fmtAud = (n: number | null | undefined) => (n == null ? "—" : `$${n.toLocaleString("en-AU")}`);
+const fmtAud = (n: number | null | undefined) => (n == null ? "None" : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 
 export function RunTimeline({ call, steps, open, toggle, runId, onHighlight }: {
@@ -96,8 +96,8 @@ export function RunTimeline({ call, steps, open, toggle, runId, onHighlight }: {
               {field("Company", `${f.company.value} · ${call.headcount} staff · ${call.location}`, f.company.confidence, f.company.span)}
               {field("Deal stage", f.stage.value.replace("_", " "), f.stage.confidence, f.stage.span)}
               {field("Value", fmtAud(f.value.value), f.value.confidence, f.value.span)}
-              {field("Next step", f.next_step.value ?? "—", f.next_step.confidence, f.next_step.span)}
-              {field("Promises", f.promises.value.length ? f.promises.value.join(" · ") : "—", f.promises.confidence, f.promises.span)}
+              {field("Next step", f.next_step.value ?? "None", f.next_step.confidence, f.next_step.span)}
+              {field("Promises", f.promises.value.length ? f.promises.value.join(" · ") : "None", f.promises.confidence, f.promises.span)}
               {call.objections.length > 0 && field("Objection", `${call.objections[0].text} (${call.objections[0].handling.replace("_", " ")})`, 0.9, call.scorecard.spans.objection)}
             </div>
             <div className="mt-4">

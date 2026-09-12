@@ -63,6 +63,6 @@ export const leads: Lead[] = [
     ], draft: d("Aisha Rahman", "Docklands Immigration Lawyers", "Filing deadlines and a locked account", "Wattle Street Legal", "a locked account on a deadline day") },
   { id: "l12", company: "Meridian Engineering Consultants", contact: "Sarah Whitlock", title: "Office Manager", location: "Richmond, VIC", industry: "Engineering consultancy", headcount: 112, similarity: 54, status: "drafted",
     evidence: [
-      { attribute: "Company size", value: "112 staff — above the band", quote: "We're at one hundred and eighteen people and the tooling is catching up with us.", call: "Meridian AI", t: "0:16" },
+      { attribute: "Company size", value: "112 staff, above the band", quote: "We're at one hundred and eighteen people and the tooling is catching up with us.", call: "Meridian AI", t: "0:16" },
     ], draft: d("Sarah Whitlock", "Meridian Engineering Consultants", "Managed IT at 112 people", "Elm & Ledger Accounting", "a migration that could not be messy in the middle of busy season") },
 ];

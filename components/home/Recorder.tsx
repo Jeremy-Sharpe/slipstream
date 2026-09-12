@@ -21,7 +21,7 @@ const BARS = Math.floor(REC_TRACK / PITCH);
 
 type State = "idle" | "recording" | "stopped";
 
-export function Recorder({ onUse }: { onUse: () => void }) {
+export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?: React.ReactNode }) {
   const [state, setState] = useState<State>("idle");
   const [levels, setLevels] = useState<number[]>(() => Array(BARS).fill(0));
   const [seconds, setSeconds] = useState(0);
@@ -84,17 +84,20 @@ export function Recorder({ onUse }: { onUse: () => void }) {
   }, [state]);
 
   const stop = () => { setState("stopped"); release(); };
+  useEffect(() => { if (submitting) release(); }, [submitting]);
   const cancel = () => { setState("idle"); release(); };
 
   const circle = "flex size-8 shrink-0 items-center justify-center rounded-full transition-[background-color,transform] duration-150 active:scale-[.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40";
 
   return (
     <div className="relative flex w-full flex-col items-center justify-center gap-3">
-      <p className="h-5 text-[13px] leading-5 text-soft">
+      <p className="h-5 text-[13px] leading-5 text-soft" style={{ opacity: submitting ? 0 : 1, transition: "opacity 200ms" }}>
         {state === "idle" ? "Record the call" : <>{state === "stopped" ? "Recorded" : "Recording"} · <span className="tabular-nums">{mmss(seconds)}</span></>}
       </p>
       <div className="flex h-11 items-center rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,.08),inset_0_0_0_1px_#e8e8e8]" style={{ width: BAR_W, padding: PAD, gap: GAP }}>
-        {state === "idle" ? (
+        {submitting ? (
+          <div className="flex w-full items-center justify-center">{submitting}</div>
+        ) : state === "idle" ? (
           <>
             <div aria-hidden className="flex h-8 items-center" style={{ width: IDLE_TRACK, marginLeft: 16 - PAD, marginRight: 12 - GAP, gap: PITCH - 2 }}>
               {Array.from({ length: IDLE_DOTS }).map((_, i) => <span key={i} className="size-[2px] shrink-0 rounded-full bg-[#d4d4d4]" />)}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { CallRecord } from "@/lib/types";
 import { useRun } from "@/lib/useRun";
@@ -12,11 +13,12 @@ import { Transcript } from "./Transcript";
 import { Button, OutcomePill, fmtDate, fmtTime, mmss } from "./ui";
 
 export function RunView({ call }: { call: CallRecord }) {
-  const run = useRun(call);
+  const fromHome = useSearchParams().get("from") === "home";
+  const run = useRun(call, { fromHome });
   const [highlight, setHighlight] = useState<number | null>(null);
 
   return (
-    <div>
+    <div style={{ animation: "fade-up 200ms cubic-bezier(0.23,1,0.32,1) both" }}>
       <Link href="/calls" className="inline-flex items-center gap-1.5 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
         <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Calls
       </Link>

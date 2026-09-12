@@ -8,12 +8,13 @@ import { FileTiles } from "./home/FileTiles";
 import { Recorder } from "./home/Recorder";
 import { Segmented } from "./home/Segmented";
 import { TypedPlaceholder } from "./home/TypedPlaceholder";
+import { Submitting, type Source } from "./home/Submitting";
 import { Button, cn, mmss } from "./ui";
 
 type Mode = "upload" | "record" | "paste";
-type Phase = { kind: "idle" } | { kind: "transcribing"; name: string; at: number; total: number };
+type Phase = { kind: "idle" } | { kind: "submitting"; source: Source; error?: string; text?: string };
 
-const DEMO_DURATION = 425; // the demo recording's length, so the counter is honest
+const MEDIA = /\.(mp3|m4a|wav|mp4|mov|webm|ogg|aac|flac|m4v)$/i;
 const MODES: { key: Mode; label: string }[] = [
   { key: "upload", label: "Upload file" },
   { key: "record", label: "Record" },
@@ -30,34 +31,36 @@ export function DropZone() {
   const [over, setOver] = useState(false);
   const [text, setText] = useState("");
   const [pasteFocused, setPasteFocused] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const attach = useRef<HTMLInputElement>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  // Transcription is simulated: the counter runs over ~3s, then the run opens
-  // with step 1 already done. The API will stream the same progress.
-  const transcribe = (name: string) => {
-    setPhase({ kind: "transcribing", name, at: 0, total: DEMO_DURATION });
-    const ticks = 30;
-    for (let i = 1; i <= ticks; i++) {
-      timers.current.push(window.setTimeout(() => setPhase({ kind: "transcribing", name, at: Math.round((DEMO_DURATION * i) / ticks), total: DEMO_DURATION }), (3000 / ticks) * i));
-    }
-    timers.current.push(window.setTimeout(() => {
-      const c = actions.addUpload(name);
-      router.push(`/calls/${c.id}`);
-    }, 3200));
+  const isMedia = (f: File) => f.type.startsWith("audio/") || f.type.startsWith("video/") || MEDIA.test(f.name);
+
+  const submitFile = (f: File) => {
+    const source: Source = { kind: "file", name: f.name, bytes: f.size };
+    setPhase({ kind: "submitting", source, error: isMedia(f) ? undefined : "That file type isn't supported" });
   };
 
   const onFiles = (files: FileList | null) => {
     const f = files?.[0];
-    if (f) transcribe(f.name);
+    if (f) submitFile(f);
+  };
+
+  // Home fades out before the route changes; the run mounts with step 2 working.
+  const handoff = (make: () => { id: string }) => {
+    setLeaving(true);
+    timers.current.push(window.setTimeout(() => {
+      const c = make();
+      router.push(`/calls/${c.id}?from=home`);
+    }, 150));
   };
 
   const useRecording = () => {
-    const d = new Date();
-    transcribe(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
+    setPhase({ kind: "submitting", source: { kind: "recording" } });
   };
 
   // The "+" in Paste: media starts transcribing; a text transcript loads in.
@@ -65,30 +68,32 @@ export function DropZone() {
     const f = files?.[0];
     if (!f) return;
     if (/\.(txt|vtt|srt)$/i.test(f.name) || f.type.startsWith("text/")) setText(await f.text());
-    else transcribe(f.name);
+    else submitFile(f);
   };
 
   const run = () => {
     if (!text.trim()) return;
-    const c = actions.addTranscript(text);
-    router.push(`/calls/${c.id}`);
+    setPhase({ kind: "submitting", source: { kind: "paste", lines: text.split(/\n/).filter((l) => l.trim()).length }, text });
+  };
+
+  const onSubmitted = () => {
+    if (phase.kind !== "submitting") return;
+    const p = phase;
+    handoff(() => {
+      if (p.source.kind === "paste") return actions.addTranscript(p.text ?? "");
+      if (p.source.kind === "file") return actions.addUpload(p.source.name);
+      const d = new Date();
+      return actions.addUpload(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
+    });
   };
 
   return (
-    <div className="text-center">
-      <div className="mb-5"><Segmented value={mode} options={MODES} onChange={setMode} /></div>
+    <div className="text-center transition-opacity duration-150" style={{ opacity: leaving ? 0 : 1 }}>
+      <div className={cn("mb-5 transition-opacity duration-200", phase.kind === "submitting" && "pointer-events-none opacity-40")}><Segmented value={mode} options={MODES} onChange={setMode} /></div>
 
-      {phase.kind === "transcribing" ? (
-        <div key="transcribing" className={cn(CARD, "px-8 text-left")}>
-          <div className="w-full max-w-[400px]">
-            <p className="truncate text-[15px] font-semibold text-ink">{phase.name}</p>
-            <p className="mt-1 text-[13px] text-soft">
-              Transcribing… <span className="tabular-nums text-ink">{mmss(phase.at)} / {mmss(phase.total)}</span>
-            </p>
-            <div className="mt-4 h-1 overflow-hidden rounded-full bg-line">
-              <div className="h-full rounded-full bg-ink transition-[width] duration-100 ease-linear" style={{ width: `${Math.min(100, Math.round((phase.at / phase.total) * 100))}%` }} />
-            </div>
-          </div>
+      {phase.kind === "submitting" && phase.source.kind !== "recording" ? (
+        <div key="submitting" className={CARD}>
+          <Submitting source={phase.source} error={phase.error} onDone={onSubmitted} onReset={() => setPhase({ kind: "idle" })} />
         </div>
       ) : mode === "upload" ? (
         <div
@@ -112,7 +117,7 @@ export function DropZone() {
         </div>
       ) : mode === "record" ? (
         <div key="record" className={cn(CARD, "px-8")}>
-          <Recorder key={mode} onUse={useRecording} />
+          <Recorder key={mode} onUse={useRecording} submitting={phase.kind === "submitting" && phase.source.kind === "recording" ? <Submitting source={{ kind: "recording" }} onDone={onSubmitted} variant="bar" /> : null} />
         </div>
       ) : (
         <div key="paste" className={cn(CARD, "items-stretch justify-start p-5 text-left")}>

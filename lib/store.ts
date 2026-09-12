@@ -58,12 +58,15 @@ export const actions = {
   addTranscript(text: string): CallRecord {
     const source = seed.find((c) => c.id === "call-13-marlowe-finch-demo") ?? seed[0];
     const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
-    const parsed = lines.map((l) => l.match(/^([A-Z][\w .'-]{1,40}):\s*(.+)$/)).filter(Boolean) as RegExpMatchArray[];
+    const LINE = /^(?:\[(\d{1,2}:\d{2}(?::\d{2})?)\]\s*)?([A-Z][\w .'-]{1,40}?)(?:\s*\((\d{1,2}:\d{2}(?::\d{2})?)\))?:\s*(.+)$/;
+    const toSec = (s?: string) => { if (!s) return null; const p = s.split(":").map(Number); return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1]; };
+    const parsed = lines.map((l) => l.match(LINE)).filter(Boolean) as RegExpMatchArray[];
+    const speakers = [...new Set(parsed.map((m) => m[2]))];
     const turns = parsed.length >= 2
-      ? parsed.map((m, i) => ({ i, speaker: (i % 2 === 0 ? "rep" : "prospect") as "rep" | "prospect", name: m[1], text: m[2], t: i * 20 }))
+      ? parsed.map((m, i) => ({ i, speaker: (speakers.indexOf(m[2]) === 0 ? "rep" : "prospect") as "rep" | "prospect", name: m[2], text: m[4], t: toSec(m[1] ?? m[3]) ?? i * 20 }))
       : [{ i: 0, speaker: "prospect" as const, name: "Prospect", text: text.trim(), t: 0 }];
     const id = `call-new-${Date.now().toString(36)}`;
-    const c: CallRecord = { ...source, id, at: new Date().toISOString(), turns, duration: Math.max(60, turns.length * 20), contact: parsed.length >= 2 ? parsed.find((_, i) => i % 2 === 1)?.[1] ?? "Prospect" : "Prospect", company: "Pasted transcript", pasted: true };
+    const c: CallRecord = { ...source, id, at: new Date().toISOString(), turns, duration: Math.max(60, turns.length * 20), contact: speakers[1] ?? "Prospect", rep: speakers[0] ?? source.rep, company: "Pasted transcript", pasted: true };
     state.calls = [c, ...state.calls];
     state.runs[id] = "running";
     commit();

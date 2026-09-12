@@ -27,12 +27,12 @@ export const TRACE: Record<StepId, string[]> = {
 const DURATION: Record<StepId, number> = { transcribe: 900, extract: 1800, score: 1500, draft: 1200, icp: 1100, search: 3800, outreach: 1300 };
 
 function plan(call: CallRecord): { stop?: { after: StepId; note: string } } {
-  if (call.outcome === "no_show") return { stop: { after: "transcribe", note: "No conversation to extract — reschedule note drafted" } };
-  if (call.outcome === "lost") return { stop: { after: "icp", note: "Not a fit for the ICP — no leads searched" } };
+  if (call.outcome === "no_show") return { stop: { after: "transcribe", note: "No conversation to extract. Reschedule note drafted" } };
+  if (call.outcome === "lost") return { stop: { after: "icp", note: "Not a fit for the ICP. No leads searched" } };
   return {};
 }
 
-export function useRun(call: CallRecord) {
+export function useRun(call: CallRecord, opts: { fromHome?: boolean } = {}) {
   const [steps, setSteps] = useState<StepState[]>(() => ORDER.map((id) => ({ id, status: "pending" })));
   const [open, setOpen] = useState<StepId | null>(null);
   const [finished, setFinished] = useState(false);
@@ -54,16 +54,16 @@ export function useRun(call: CallRecord) {
     const { stop } = plan(call);
     const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
     const stopIndex = stop ? ORDER.indexOf(stop.after) : ORDER.length - 1;
-    let t = 250;
+    let t = opts.fromHome ? 0 : 250;
     ORDER.forEach((id, i) => {
       if (i > stopIndex) {
         at(t, () => set(id, { status: "skipped", note: i === stopIndex + 1 ? stop?.note : undefined }));
         return;
       }
-      const preDone = id === "transcribe" && (call.fileName || call.pasted);
+      const preDone = id === "transcribe" && (call.fileName || call.pasted || opts.fromHome);
       if (preDone) {
         at(t, () => set(id, { status: "done", elapsedMs: 0 }));
-        t += 150;
+        t += opts.fromHome ? 0 : 150;
         return;
       }
       const len = DURATION[id];
@@ -75,7 +75,7 @@ export function useRun(call: CallRecord) {
       t += len + 350;
     });
     at(t, () => { setFinished(true); setOpen(stop?.after === "transcribe" ? "transcribe" : "extract"); actions.setRun(call.id, "review"); });
-  }, [call, set]);
+  }, [call, set, opts.fromHome]);
 
   useEffect(() => {
     // Kick the stream off after mount, the way a subscription would.

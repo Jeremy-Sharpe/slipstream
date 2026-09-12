@@ -1,16 +1,28 @@
 /* Three portrait file cards fanned above the drop zone: video (ink), audio
-   (tangerine), music (warm grey). Folded top-right corner in a lighter tint,
-   white 20px glyphs. `lifted` opens the fan by 3° on drag-over. */
+   (tangerine), music (warm grey). Each card is one SVG path with the
+   top-right corner cut off; the fold is a lighter triangle on that diagonal.
+   No strokes: overlap reads from the colour difference. `lifted` opens the
+   fan by 3° on drag-over. */
+
+const W = 44, H = 54, R = 8, CUT = 14;
+
+// Pentagon with three rounded corners and a diagonal cut at the top right.
+const FILE = `M ${R} 0 H ${W - CUT} L ${W} ${CUT} V ${H - R} Q ${W} ${H} ${W - R} ${H} H ${R} Q 0 ${H} 0 ${H - R} V ${R} Q 0 0 ${R} 0 Z`;
+// The fold: right triangle on the cut, with a small rounded outer corner.
+const FOLD = `M ${W - CUT} 0 V ${CUT - 3} Q ${W - CUT} ${CUT} ${W - CUT + 3} ${CUT} H ${W} Z`;
+
 function Card({ fill, fold, rot, lift, z, raise = 0, children }: { fill: string; fold: string; rot: number; lift: boolean; z: number; raise?: number; children: React.ReactNode }) {
   const r = rot + Math.sign(rot) * (lift ? 3 : 0);
   return (
     <span
-      className="relative flex h-[54px] w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg text-white"
-      style={{ background: fill, zIndex: z, marginBottom: raise, transform: `rotate(${r}deg)`, transformOrigin: "50% 100%", transition: "transform 200ms cubic-bezier(0.23,1,0.32,1)" }}
+      className="relative flex shrink-0 items-center justify-center text-white"
+      style={{ width: W, height: H, zIndex: z, marginBottom: raise, transform: `rotate(${r}deg)`, transformOrigin: "50% 100%", transition: "transform 200ms cubic-bezier(0.23,1,0.32,1)" }}
     >
-      <span aria-hidden className="absolute top-0 right-0 size-3" style={{ background: fold, clipPath: "polygon(0 0, 100% 100%, 0 100%)" }} />
-      <span aria-hidden className="absolute top-0 right-0 size-3" style={{ background: "#f5f5f5", clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
-      {children}
+      <svg aria-hidden className="absolute inset-0" width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+        <path d={FILE} fill={fill} />
+        <path d={FOLD} fill={fold} />
+      </svg>
+      <span className="relative">{children}</span>
     </span>
   );
 }

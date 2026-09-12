@@ -15,7 +15,7 @@ export function Summary({ call, runId, ready, onHighlight }: { call: CallRecord;
 
   const base = summaryTokens(call);
   const view = mode === "why" ? whyTokens(call) : mode === "shorter"
-    ? { tokens: [{ text: "Shorter follow-up drafted below — two paragraphs, same promise, same next step." }], sources: [] }
+    ? { tokens: [{ text: "Shorter follow-up drafted below. Two paragraphs, same promise, same next step." }], sources: [] }
     : base;
 
   return (
