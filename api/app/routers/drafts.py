@@ -7,8 +7,17 @@ from uuid import UUID
 from fastapi import APIRouter, Body, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
+from app.core.llm import MissingReasoningProviderError
+from app.routers.calls import load_call
 from app.routers.extractions import load_extraction
-from app.services.draft import DraftResponse, draft_follow_up, mark_sent
+from app.services.draft import (
+    DraftResponse,
+    DraftUnavailableError,
+    draft_follow_up,
+    draft_id,
+    draft_with_model,
+    mark_sent,
+)
 
 router = APIRouter(prefix="/drafts", tags=["drafts"])
 
@@ -30,7 +39,13 @@ def _read_draft(client: Any, draft_id: UUID) -> DraftResponse | None:
         subject=row["subject"],
         body=row["body"],
         status=row["status"],
+        source=(
+            "deterministic"
+            if (row.get("prompt_version") or "grounded-template-v1") == "grounded-template-v1"
+            else "model"
+        ),
         model=row.get("model") or "grounded-template-v1",
+        prompt_version=row.get("prompt_version") or "grounded-template-v1",
         approved_by=row.get("approved_by"),
         approved_at=row.get("approved_at"),
         sent_at=row.get("sent_at"),
@@ -74,7 +89,7 @@ def _create_draft(client: Any, draft: DraftResponse) -> DraftResponse:
             "body": draft.body,
             "status": "draft",
             "model": draft.model,
-            "prompt_version": "grounded-template-v1",
+            "prompt_version": draft.prompt_version,
         },
         on_conflict="id",
         ignore_duplicates=True,
@@ -134,6 +149,31 @@ def _approve(client: Any, draft: DraftResponse, approved_by: str) -> DraftRespon
     return stored
 
 
+def _read_follow_up(client: Any, conversation_id: UUID) -> DraftResponse | None:
+    rows = (
+        client.table("drafts")
+        .select("id")
+        .eq("conversation_id", str(conversation_id))
+        .eq("kind", "follow_up")
+        .limit(1)
+        .execute()
+        .data
+    )
+    return _read_draft(client, UUID(rows[0]["id"])) if rows else None
+
+
+async def _existing_follow_up(request: Request, conversation_id: UUID) -> DraftResponse | None:
+    if request.app.state.supabase is None:
+        return request.app.state.draft_store.get(str(draft_id(conversation_id)))
+    try:
+        return await asyncio.to_thread(_read_follow_up, request.app.state.supabase, conversation_id)
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The draft store is unavailable",
+        ) from error
+
+
 async def _get(request: Request, draft_id: UUID) -> DraftResponse | None:
     if request.app.state.supabase is None:
         return request.app.state.draft_store.get(str(draft_id))
@@ -154,7 +194,23 @@ async def create_call_draft(conversation_id: UUID, request: Request) -> DraftRes
             status_code=status.HTTP_409_CONFLICT,
             detail="Extract CRM fields before drafting the follow-up",
         )
-    draft = draft_follow_up(extraction)
+    call = await load_call(request, conversation_id)
+    if call is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Call not found")
+    existing = await _existing_follow_up(request, conversation_id)
+    if existing is not None:
+        return existing
+    try:
+        draft = await asyncio.to_thread(
+            draft_with_model, extraction, call, request.app.state.settings
+        )
+    except MissingReasoningProviderError:
+        draft = draft_follow_up(extraction)
+    except DraftUnavailableError as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="The follow-up could not be drafted",
+        ) from error
     if request.app.state.supabase is None:
         request.app.state.draft_store.setdefault(str(draft.id), draft)
         return request.app.state.draft_store[str(draft.id)]

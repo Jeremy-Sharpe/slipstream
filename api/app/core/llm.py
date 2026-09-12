@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from anthropic import Anthropic
-from openai import OpenAI
+from openai import BadRequestError, NotFoundError, OpenAI
 from pydantic import BaseModel
 
 from app.core.config import Settings
@@ -32,10 +32,18 @@ class ReasoningClient:
 
 
 @dataclass(frozen=True)
+class Usage:
+    input_tokens: int
+    output_tokens: int
+    cost_usd: float | None = None
+
+
+@dataclass(frozen=True)
 class ReasoningResult[SchemaT: BaseModel]:
     output: SchemaT
     model: str
     provider: ReasoningProvider
+    usage: Usage | None = None
 
 
 class _OpenRouterEmbeddings:
@@ -125,7 +133,7 @@ def structured[SchemaT: BaseModel](
 ) -> ReasoningResult[SchemaT]:
     client = create_reasoning_client(reasoning) if isinstance(reasoning, Settings) else reasoning
     if client.provider == "anthropic":
-        output = _anthropic_structured(
+        output, usage = _anthropic_structured(
             client.client,
             client.model,
             system,
@@ -135,11 +143,11 @@ def structured[SchemaT: BaseModel](
             timeout,
         )
     elif client.provider == "openai":
-        output = _openai_structured(
+        output, usage = _openai_structured(
             client.client, client.model, system, user, schema, max_tokens, timeout
         )
     else:
-        output = _openrouter_structured(
+        output, usage = _openrouter_structured(
             client.client,
             client.model,
             system,
@@ -148,7 +156,7 @@ def structured[SchemaT: BaseModel](
             max_tokens,
             timeout,
         )
-    return ReasoningResult(output=output, model=client.model, provider=client.provider)
+    return ReasoningResult(output=output, model=client.model, provider=client.provider, usage=usage)
 
 
 def _anthropic_structured[SchemaT: BaseModel](
@@ -159,7 +167,7 @@ def _anthropic_structured[SchemaT: BaseModel](
     schema: type[SchemaT],
     max_tokens: int,
     timeout: float | None,
-) -> SchemaT:
+) -> tuple[SchemaT, Usage | None]:
     request_options = {} if timeout is None else {"timeout": timeout}
     parsed_response = client.messages.parse(
         model=model,
@@ -172,7 +180,7 @@ def _anthropic_structured[SchemaT: BaseModel](
     parsed = parsed_response.parsed_output
     if parsed is None:
         raise ValueError("Anthropic returned no parsed structured output")
-    return parsed
+    return parsed, _parsed_usage(parsed_response)
 
 
 def _openai_structured[SchemaT: BaseModel](
@@ -183,7 +191,7 @@ def _openai_structured[SchemaT: BaseModel](
     schema: type[SchemaT],
     max_tokens: int,
     timeout: float | None,
-) -> SchemaT:
+) -> tuple[SchemaT, Usage | None]:
     request_options = {} if timeout is None else {"timeout": timeout}
     parsed_response = client.responses.parse(
         model=model,
@@ -196,7 +204,7 @@ def _openai_structured[SchemaT: BaseModel](
     parsed = parsed_response.output_parsed
     if parsed is None:
         raise ValueError("OpenAI returned no parsed structured output")
-    return parsed
+    return parsed, _parsed_usage(parsed_response)
 
 
 def _openrouter_structured[SchemaT: BaseModel](
@@ -207,7 +215,7 @@ def _openrouter_structured[SchemaT: BaseModel](
     schema: type[SchemaT],
     max_tokens: int,
     timeout: float | None,
-) -> SchemaT:
+) -> tuple[SchemaT, Usage | None]:
     request_options = {} if timeout is None else {"timeout": timeout}
     messages = [
         {"role": "system", "content": _json_system_prompt(system, schema)},
@@ -227,16 +235,54 @@ def _openrouter_structured[SchemaT: BaseModel](
             messages=messages,
             max_tokens=max_tokens,
             response_format=response_format,
+            extra_body={"usage": {"include": True}},
             **request_options,
         )
-    except Exception:
+    except (BadRequestError, NotFoundError):
+        # The provider rejected the schema or the response_format parameter; ask for plain
+        # JSON instead. Every other failure (auth, credit, rate limit, timeout) propagates.
         completion = client.chat.completions.create(
             model=model,
             messages=messages,
             max_tokens=max_tokens,
+            extra_body={"usage": {"include": True}},
             **request_options,
         )
-    return schema.model_validate_json(_strip_code_fences(_completion_text(completion)))
+    return (
+        schema.model_validate_json(_strip_code_fences(_completion_text(completion))),
+        _openrouter_usage(completion),
+    )
+
+
+def _parsed_usage(response: object) -> Usage | None:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return None
+    input_tokens = getattr(usage, "input_tokens", None)
+    output_tokens = getattr(usage, "output_tokens", None)
+    if input_tokens is None or output_tokens is None:
+        return None
+    return Usage(input_tokens=int(input_tokens), output_tokens=int(output_tokens))
+
+
+def _openrouter_usage(completion: object) -> Usage | None:
+    usage = getattr(completion, "usage", None)
+    if usage is None:
+        return None
+    input_tokens = getattr(usage, "prompt_tokens", None)
+    output_tokens = getattr(usage, "completion_tokens", None)
+    if input_tokens is None or output_tokens is None:
+        return None
+    cost = getattr(usage, "cost", None)
+    if cost is None:
+        model_extra = getattr(usage, "model_extra", None)
+        if isinstance(model_extra, dict):
+            cost = model_extra.get("cost")
+    return Usage(
+        input_tokens=int(input_tokens),
+        output_tokens=int(output_tokens),
+        cost_usd=float(cost) if cost is not None else None,
+    )
 
 
 def _json_system_prompt(system: str, schema: type[BaseModel]) -> str:

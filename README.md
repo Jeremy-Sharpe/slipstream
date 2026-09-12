@@ -56,11 +56,12 @@ Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector
 | Mock call generation | ElevenLabs text-to-dialogue, `eleven_v3` | Multi-voice, expressive, one request per call |
 | Batch transcription | ElevenLabs Scribe, `scribe_v2`, diarised | Word timestamps and speaker labels feed the scorecard (talk ratio, who committed to what) |
 | Live transcription | ElevenLabs Scribe v2 Realtime over WebSocket | About 150 ms latency; same vendor as batch so the coach and the record agree |
-| Extraction, scorecard, drafting, ICP naming, coach suggestions | Claude via the Anthropic API, structured outputs against a pinned JSON schema | Strong instruction following on long transcripts; one vendor for all reasoning keeps prompts and evals in one place |
+| Extraction and follow-up draft | The model named by `REASONING_MODEL` through one provider-agnostic structured-output helper (Anthropic, OpenAI or OpenRouter open-weight models), pinned JSON schema, then a deterministic grounding pass that repairs or drops any quote that is not verbatim in the transcript | Runs on whichever key the team has, so the demo never falls back to canned labels; the grounding pass makes evidence a property of the pipeline rather than a hope about the model. The extraction eval in `api/evals/extraction-eval.md` picks the cheapest model within one call of the best on every judged field |
+| Scorecard, ICP naming, coach suggestions | Same helper; scorecard judge chosen by its own bake-off | One helper for all reasoning keeps prompts and evals in one place |
 | Embeddings | Chosen at build time, stored in pgvector | Won-deal similarity for ICP derivation and lead scoring |
 | Lead discovery | Origami v3 Leads API | Agent-driven sourcing from a natural-language brief generated from the derived ICP |
 
-**Evaluation.** The scorecard rubric is a written document in the repo. Ten fixture calls are hand-labelled for the rubric dimensions and the extraction fields, and an eval script reports agreement. Judge evals in `evals/` score this README and the live app against the hackathon rubric.
+**Evaluation.** The scorecard rubric is a written document in the repo. All thirteen fixture calls are hand-labelled for the rubric dimensions and the extraction fields. `api/evals/run_extraction_eval.py` runs the live extraction path per model and reports per-field agreement, grounding repairs, latency and billed cost, with the results and the model decision recorded in `api/evals/extraction-eval.md`; the scorecard eval does the same for the judge. Judge evals in `evals/` score this README and the live app against the hackathon rubric.
 
 ## Alternatives and differentiation
 
@@ -92,6 +93,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 - No phone system integration. Audio arrives as a file or through the coach overlay.
 - Approving a draft marks it sent and logs it; no email is actually delivered.
 - Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
+- Extraction is grounded but not perfect: a value whose quote cannot be found verbatim in the transcript is dropped rather than shown, so a rep can see a null where the model paraphrased. Deal outcome and stage are model judgement calls scored against hand labels in the eval, not ground truth.
 - Single tenant, no auth, no billing.
 
 ## Run locally

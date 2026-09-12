@@ -1,0 +1,4432 @@
+{
+  "model": "openai/gpt-5.4-mini",
+  "provider": "openai",
+  "records": [
+    {
+      "call_id": "call-01-northstar-labs",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Maya Chen",
+          "role": "Managing Partner",
+          "email": "maya@northstarlabs.example",
+          "phone": "+61 3 7010 1101"
+        },
+        "company": {
+          "name": "Northstar Labs",
+          "industry": "Architecture and lab planning consultancy",
+          "headcount": 42,
+          "location": "Southbank, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 58400,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the mapped Essential Eight gap summary by Thursday",
+          "I will include the onboarding sequence and the fixed project range"
+        ],
+        "objections": [
+          {
+            "text": "Our insurer is asking for Essential Eight evidence, and I am worried we will pay for a managed service but still fail the questionnaire",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.",
+          "due": "2026-09-03"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Maya Chen",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "are you Maya Chen from Northstar Labs in Southbank?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Yes, that's me."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Northstar Labs",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "are you Maya Chen from Northstar Labs in Southbank?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're a lab planning and architecture practice"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": "lab planning and architecture",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're a lab planning and architecture practice"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 42,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "forty-two people now"
+              }
+            ]
+          },
+          "location": {
+            "value": "Southbank",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Northstar Labs in Southbank"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "evaluation",
+            "confidence": 0.74,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the mapped Essential Eight gap summary by Thursday so you can see exactly what is covered and what remains your risk."
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "review the proposal and the evidence pack?"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "If the proposal matches this discussion, I'm comfortable moving ahead."
+              },
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "Speak Thursday."
+              }
+            ]
+          },
+          "amount": {
+            "value": 8000,
+            "confidence": 0.55,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I would expect the project to sit around $8,000 to $11,000"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the mapped Essential Eight gap summary by Thursday so you can see exactly what is covered and what remains your risk.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the mapped Essential Eight gap summary by Thursday"
+              }
+            ]
+          },
+          {
+            "value": "I will include the onboarding sequence and the fixed project range.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will include the onboarding sequence and the fixed project range."
+              }
+            ]
+          },
+          {
+            "value": "I will send the invite, the gap summary and the commercial proposal by Thursday morning.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the invite, the gap summary and the commercial proposal by Thursday morning."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "I'm worried we will pay for a managed service but still fail the questionnaire.",
+            "handling": "handled",
+            "confidence": 0.89,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "I am worried we will pay for a managed service but still fail the questionnaire."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "We would separate the promise into two parts: first the evidence you can use with the broker, then the ongoing support model."
+              }
+            ]
+          },
+          {
+            "text": "The finance partner will ask whether there's a large project fee on top.",
+            "handling": "partial",
+            "confidence": 0.85,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "The finance partner will ask whether there's a large project fee on top"
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I would expect the project to sit around $8,000 to $11,000"
+              }
+            ]
+          },
+          {
+            "text": "Support is the quiet frustration. New starters wait too long, password resets go to whichever admin is free, and site laptops get forgotten until they refuse to update during a deadline.",
+            "handling": "partial",
+            "confidence": 0.84,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "support is the quiet frustration."
+              },
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "New starters wait too long, password resets go to whichever admin is free"
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Meet Thursday 3 September at 2pm with Maya and the finance partner to review the proposal and evidence pack.",
+          "due_date": "2026-09-03",
+          "owner": "Sam Whitfield and Maya Chen",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "Can we meet Thursday 3 September at 2pm with you and the finance partner to review the proposal and the evidence pack?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, Thursday 3 September at 2pm works."
+            }
+          ]
+        },
+        "summary": "Northstar Labs, a 42-person lab planning and architecture practice in Southbank, is reviewing cyber controls for an insurance renewal. Maya said the insurer wants Essential Eight-style evidence, and she is concerned about both questionnaire success and project fees. Sam proposed an onboarding project and managed services, quoted a project range of $8k-$11k, and promised to send a gap summary and proposal by Thursday. They scheduled a review meeting for Thursday 3 September at 2pm with Maya and finance.",
+        "conversation_id": "e9981868-623b-5b59-ab18-5e0c342f2c15",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": false,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": true,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": true,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 2965,
+        "output": 1273
+      },
+      "latency_ms": 9251,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-02-arcwell-health",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Felix Morgan",
+          "role": "Operations Manager",
+          "email": "felix@arcwellhealth.example",
+          "phone": "+61 3 7010 1102"
+        },
+        "company": {
+          "name": "Arcwell Health",
+          "industry": "Multi-site allied health clinic",
+          "headcount": 64,
+          "location": "Brunswick and Essendon, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 103600,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the incident-response checklist and onboarding proposal by Friday",
+          "I will include the two clinic rollout plan and the cyber insurance evidence register"
+        ],
+        "objections": [
+          {
+            "text": "Data sovereignty is the thing our clinical director will ask about",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send proposal and meet Felix plus clinical director for rollout approval.",
+          "due": "2026-09-04"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Felix Morgan",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Felix Morgan, Sam Whitfield from Harbourline IT."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": "operations",
+            "confidence": 0.84,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Arcwell Health as a two-site allied health group with you looking after operations"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Arcwell Health",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Arcwell Health as a two-site allied health group"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": "allied health",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Arcwell Health as a two-site allied health group"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We've physios, occupational therapists, reception and a small finance team"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 64,
+            "confidence": 0.56,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "For sixty-four staff, Harbourline would likely be $128 per seat per month"
+              }
+            ]
+          },
+          "location": {
+            "value": "Brunswick and Essendon",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "across Brunswick and Essendon"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "evaluation",
+            "confidence": 0.8,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "If the checklist answers her privacy questions, I think we will proceed."
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "walk through the proposal before it goes to the board"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "I think we will proceed."
+              }
+            ]
+          },
+          "amount": {
+            "value": 128,
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "$128 per seat per month"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the incident-response checklist and onboarding proposal by Friday so she can see the detail.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the incident-response checklist and onboarding proposal by Friday"
+              }
+            ]
+          },
+          {
+            "value": "I will include the two clinic rollout plan and the cyber insurance evidence register.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will include the two clinic rollout plan and the cyber insurance evidence register."
+              }
+            ]
+          },
+          {
+            "value": "I will send the invite, proposal and checklist by Thursday afternoon so you've time to read it before Friday.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will send the invite, proposal and checklist by Thursday afternoon"
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Data sovereignty is the thing our clinical director will ask about.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Data sovereignty is the thing our clinical director will ask about."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "We keep Microsoft 365 data in your Australian tenant, document where backup metadata sits, and make any remote access auditable."
+              }
+            ]
+          },
+          {
+            "text": "We can't close both clinics or interrupt appointments.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "We can't close both clinics or interrupt appointments."
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "The first week is discovery and identity controls, then we schedule endpoint work in reception gaps and after-hours windows."
+              }
+            ]
+          },
+          {
+            "text": "The price is higher than our current person",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "The price is higher than our current person"
+              }
+            ]
+          },
+          {
+            "text": "If clinicians feel the security work is being done to them rather than with them, I will spend a month smoothing frustration instead of running the clinics.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "If clinicians feel the security work is being done to them rather than with them, I will spend a month smoothing frustration instead of running the clinics."
+              },
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "We can make the first staff message plain: why the changes are happening, what will change this week, and where to get help if a login prompt appears before an appointment."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Meet on Friday 4 September at 11am to walk through the proposal before it goes to the board.",
+          "due_date": "2026-09-04",
+          "owner": "Felix Morgan and Sam Whitfield",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, Friday 4 September at 11am is good."
+            },
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "Can we book Friday 4 September at 11am for you, the clinical director and me to walk through the proposal before it goes to the board?"
+            }
+          ]
+        },
+        "summary": "Arcwell Health, a two-site allied health group in Brunswick and Essendon, discussed a recent phishing incident and current support gaps. Felix wants MFA, better joiner/leaver processes, backup testing, security awareness, and a single helpdesk number. Harbourline quoted $128 per seat per month and proposed an onboarding project. Felix agreed to a meeting on Friday 4 September at 11am with the clinical director before the proposal goes to the board.",
+        "conversation_id": "0f18a2e0-985b-55a5-bb59-96a104d54c1e",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": false,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3009,
+        "output": 1329
+      },
+      "latency_ms": 7857,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-03-afterglow-studio",
+      "repeat": 1,
+      "outcome": "lost",
+      "expected": {
+        "contact": {
+          "name": "Priya Shah",
+          "role": "Founder",
+          "email": "priya@afterglowstudio.example",
+          "phone": "+61 3 7010 1103"
+        },
+        "company": {
+          "name": "Afterglow Studio",
+          "industry": "Creative branding studio",
+          "headcount": 12,
+          "location": "Collingwood, VIC"
+        },
+        "deal": {
+          "stage": "closed_lost",
+          "value_aud": 15400,
+          "outcome": "lost"
+        },
+        "promises": [
+          "I will send some info this afternoon"
+        ],
+        "objections": [
+          {
+            "text": "We are probably too small for a monthly managed service",
+            "handling": "ignored"
+          },
+          {
+            "text": "That is more than double what we pay now",
+            "handling": "ignored"
+          }
+        ],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Priya Shah",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Hi Priya Shah, Jordan from Harbourline IT."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Afterglow Studio",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Great to speak with Afterglow Studio."
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "employee_count": {
+            "value": 12,
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're only twelve people"
+              }
+            ]
+          },
+          "location": {
+            "value": "Melbourne",
+            "confidence": 0.62,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "We help Melbourne firms move from ad hoc IT to a proper managed service"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.91,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I was mostly curious"
+              },
+              {
+                "source": "transcript",
+                "sequence": 29,
+                "quote": "it's a no for now"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "lost",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 29,
+                "quote": "it's a no for now"
+              },
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "That's probably not for us then."
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send some info this afternoon.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will send some info this afternoon."
+              }
+            ]
+          },
+          {
+            "value": "I will send the overview.",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "I will send the overview"
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "We're only twelve people, so I was mostly curious.",
+            "handling": "partial",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're only twelve people, so I was mostly curious."
+              }
+            ]
+          },
+          {
+            "text": "Our computers are fine most weeks, and we use a local break-fix person when something annoying happens.",
+            "handling": "partial",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Our computers are fine most weeks, and we use a local break-fix person when something annoying happens."
+              }
+            ]
+          },
+          {
+            "text": "We are probably too small for a monthly managed service.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 3,
+                "quote": "We are probably too small for a monthly managed service."
+              }
+            ]
+          },
+          {
+            "text": "The designers are on Macs, the account team uses Google Workspace, and there is not much infrastructure.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 3,
+                "quote": "The designers are on Macs, the account team uses Google Workspace, and there is not much infrastructure."
+              }
+            ]
+          },
+          {
+            "text": "That is more than double what we pay now.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "That is more than double what we pay now."
+              }
+            ]
+          },
+          {
+            "text": "I understand the argument, but there's not a burning problem.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "I understand the argument, but there's not a burning problem."
+              }
+            ]
+          },
+          {
+            "text": "We're watching costs this quarter, and I don't want another subscription unless it removes a daily headache.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "We're watching costs this quarter, and I don't want another subscription unless it removes a daily headache."
+              }
+            ]
+          },
+          {
+            "text": "Maybe, but I'd need to see a very small plan.",
+            "handling": "partial",
+            "confidence": 0.91,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Maybe, but I'd need to see a very small plan."
+              }
+            ]
+          },
+          {
+            "text": "That's probably not for us then.",
+            "handling": "handled",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "That's probably not for us then."
+              }
+            ]
+          },
+          {
+            "text": "I was hoping there might be a light-touch option or an annual check-up.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "I was hoping there might be a light-touch option or an annual check-up."
+              }
+            ]
+          },
+          {
+            "text": "Unless the price is much closer to what we pay casually, I can't see us moving.",
+            "handling": "partial",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "Unless the price is much closer to what we pay casually, I can't see us moving."
+              }
+            ]
+          },
+          {
+            "text": "Those are real things, but they aren't things I'm ready to put a monthly contract around.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "Those are real things, but they aren't things I'm ready to put a monthly contract around."
+              }
+            ]
+          },
+          {
+            "text": "A benchmark is fine. I just don't want the benchmark to turn into pressure to buy something we've already said is too heavy.",
+            "handling": "partial",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "A benchmark is fine. I just don't want the benchmark to turn into pressure to buy something we've already said is too heavy."
+              }
+            ]
+          },
+          {
+            "text": "I understand, but that still feels like buying ahead of a problem.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "I understand, but that still feels like buying ahead of a problem."
+              }
+            ]
+          },
+          {
+            "text": "it's a no for now.",
+            "handling": "handled",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 29,
+                "quote": "it's a no for now."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Send the overview/information about service inclusions, onboarding project, and benchmark/security baseline.",
+          "due_date": null,
+          "owner": "Jordan",
+          "confidence": 0.97,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 16,
+              "quote": "I will send some info this afternoon."
+            },
+            {
+              "source": "transcript",
+              "sequence": 28,
+              "quote": "I will send the overview and you can come back if anything changes or if a client asks for security evidence."
+            }
+          ]
+        },
+        "summary": "Jordan from Harbourline IT spoke with Priya Shah of Afterglow Studio, a 12-person studio. Jordan pitched a managed IT service with onboarding and a benchmark/security overview. Priya said they are mostly fine, use break-fix support, want a very small or light-touch option, and are watching costs. Jordan promised to send information. Priya ended by saying it is a no for now.",
+        "conversation_id": "83b51506-bc58-5a00-bba4-2d6127dbeae9",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": false,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": true,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3227,
+        "output": 1689
+      },
+      "latency_ms": 9843,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-04-kite-and-co",
+      "repeat": 1,
+      "outcome": "stalled",
+      "expected": {
+        "contact": {
+          "name": "Daniel Ortiz",
+          "role": "Operations Lead",
+          "email": "daniel@kiteandco.example",
+          "phone": "+61 3 7010 1104"
+        },
+        "company": {
+          "name": "Kite & Co",
+          "industry": "Commercial law firm",
+          "headcount": 95,
+          "location": "Melbourne CBD, VIC"
+        },
+        "deal": {
+          "stage": "evaluation",
+          "value_aud": 132000,
+          "outcome": "stalled"
+        },
+        "promises": [
+          "I will send the security pack and a sample service schedule"
+        ],
+        "objections": [
+          {
+            "text": "Procurement will not let us progress without the full questionnaire and insurance certificates",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send security pack and sample service schedule for Daniel to circulate.",
+          "due": null
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Daniel Ortiz",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have you as Daniel Ortiz"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "title": {
+            "value": "operations lead",
+            "confidence": 0.91,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Daniel Ortiz, operations lead at Kite & Co"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Kite & Co",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "operations lead at Kite & Co"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "industry": {
+            "value": "commercial law firm",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "a commercial law firm in the CBD"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 95,
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "We're ninety-five staff"
+              }
+            ]
+          },
+          "location": {
+            "value": "CBD",
+            "confidence": 0.72,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "a commercial law firm in the CBD"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "procurement",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're reviewing our panel of suppliers after a procurement refresh"
+              },
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Procurement will not let us progress without the full questionnaire and insurance certificates"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "I'm interested, but I need the process to move first"
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the security pack and a sample service schedule",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the security pack and a sample service schedule so you can test whether procurement is comfortable."
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "I will send the pack and service schedule today"
+              }
+            ]
+          },
+          {
+            "value": "I will keep it concise and label the parts procurement usually wants first",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "I will keep it concise and label the parts procurement usually wants first."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Procurement will not let us progress without the full questionnaire and insurance certificates.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Procurement will not let us progress without the full questionnaire and insurance certificates."
+              }
+            ]
+          },
+          {
+            "text": "I don't want to put a date in before procurement accepts the documents.",
+            "handling": "ignored",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "I don't want to put a date in before procurement accepts the documents."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Sam will send the security pack and sample service schedule today, and Daniel will report back on procurement's response.",
+          "due_date": "2026-09-02",
+          "owner": "Sam Whitfield",
+          "confidence": 0.94,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "I will send the pack and service schedule today, and you can tell me what procurement comes back with."
+            },
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, send it through. I'm interested, but I need the process to move first."
+            }
+          ]
+        },
+        "summary": "Daniel Ortiz, operations lead at Kite & Co, said the firm is reviewing suppliers after a procurement refresh and wants clearer security reporting. Procurement controls the process and requires a questionnaire plus insurance certificates before any shortlist. Key concerns are confidentiality, response times, change management, and messy joiner/leaver and mailbox processes. Sam will send a security pack and sample service schedule today. No meeting date was set; Daniel said a partner call is premature until procurement accepts the documents.",
+        "conversation_id": "e751ce19-7b62-5ece-822a-7b98ff58392e",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": true,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": true,
+        "company_industry_exact": true,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": true,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3061,
+        "output": 898
+      },
+      "latency_ms": 5769,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-05-craftwork",
+      "repeat": 1,
+      "outcome": "lost",
+      "expected": {
+        "contact": {
+          "name": "Lucy Beck",
+          "role": "Owner",
+          "email": "lucy@craftwork.example",
+          "phone": "+61 3 7010 1105"
+        },
+        "company": {
+          "name": "Craftwork",
+          "industry": "Independent craft retail and workshops",
+          "headcount": 8,
+          "location": "Northcote, VIC"
+        },
+        "deal": {
+          "stage": "closed_lost",
+          "value_aud": 9800,
+          "outcome": "lost"
+        },
+        "promises": [
+          "I will send a one-page managed services overview"
+        ],
+        "objections": [
+          {
+            "text": "My cousin helps us for cheap when the till or Wi-Fi plays up",
+            "handling": "ignored"
+          }
+        ],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Lucy Beck",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Hi Jordan. I should say upfront we're a small shop in Northcote with eight people, some casual."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Craftwork",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Thanks for speaking with me about Craftwork."
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "we're a small shop in Northcote with eight people, some casual."
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": "retail / workshops",
+            "confidence": 0.72,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We run workshops, sell online a bit"
+              },
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "Retail downtime is expensive"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 8,
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "we're a small shop in Northcote with eight people, some casual."
+              }
+            ]
+          },
+          "location": {
+            "value": "Northcote",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "we're a small shop in Northcote with eight people, some casual."
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "I mostly answered your email because I wondered if there was an affordable health check."
+              },
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Then I think we're not your customer right now."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "stalled",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Then I think we're not your customer right now."
+              },
+              {
+                "source": "transcript",
+                "sequence": 31,
+                "quote": "for now we will stay as we're."
+              }
+            ]
+          },
+          "amount": {
+            "value": 3500,
+            "confidence": 0.78,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 6,
+                "quote": "For Craftwork, onboarding would likely be around $3,500"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send a one-page managed services overview.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send a one-page managed services overview."
+              }
+            ]
+          },
+          {
+            "value": "I will include the minimum controls, the support inclusions, the onboarding assumptions and the reasons we usually avoid tiny retainers that can't be properly accountable.",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will include the minimum controls, the support inclusions, the onboarding assumptions and the reasons we usually avoid tiny retainers that can't be properly accountable."
+              }
+            ]
+          },
+          {
+            "value": "I will send the overview and check back down the track.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 30,
+                "quote": "I will send the overview and check back down the track."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "That would be a lot for us.",
+            "handling": "handled",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "That would be a lot for us."
+              },
+              {
+                "source": "transcript",
+                "sequence": 8,
+                "quote": "Instead of a surprise emergency bill and lost trading time, you pay a smaller monthly amount"
+              }
+            ]
+          },
+          {
+            "text": "Our surprise emergency bills have been pretty small.",
+            "handling": "handled",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "But our surprise emergency bills have been pretty small."
+              }
+            ]
+          },
+          {
+            "text": "We don't have cyber insurance, and nobody has asked us about Essential Eight.",
+            "handling": "partial",
+            "confidence": 0.84,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "We don't have cyber insurance, and nobody has asked us about Essential Eight."
+              }
+            ]
+          },
+          {
+            "text": "I think we're not your customer right now.",
+            "handling": "ignored",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Then I think we're not your customer right now."
+              }
+            ]
+          },
+          {
+            "text": "please don't put me into a heavy follow-up sequence.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "please don't put me into a heavy follow-up sequence."
+              }
+            ]
+          },
+          {
+            "text": "we're not your customer right now",
+            "handling": "ignored",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Then I think we're not your customer right now."
+              }
+            ]
+          },
+          {
+            "text": "I can fix that with a password manager without signing up to a whole IT service.",
+            "handling": "partial",
+            "confidence": 0.86,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "I can fix that with a password manager without signing up to a whole IT service."
+              }
+            ]
+          },
+          {
+            "text": "That sounds thorough, just bigger than the problem I have.",
+            "handling": "handled",
+            "confidence": 0.87,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "That sounds thorough, just bigger than the problem I have."
+              }
+            ]
+          },
+          {
+            "text": "I'd rather wait until there's something urgent enough to justify it.",
+            "handling": "handled",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "I'd rather wait until there's something urgent enough to justify it."
+              }
+            ]
+          },
+          {
+            "text": "we will stay as we're.",
+            "handling": "ignored",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 31,
+                "quote": "for now we will stay as we're."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Send the one-page managed services overview and check back down the track.",
+          "due_date": null,
+          "owner": "Jordan Lee",
+          "confidence": 0.97,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 14,
+              "quote": "I will send a one-page managed services overview."
+            },
+            {
+              "source": "transcript",
+              "sequence": 30,
+              "quote": "I will send the overview and check back down the track."
+            }
+          ]
+        },
+        "summary": "Craftwork, a small Northcote shop with eight people, discussed Harbourline IT managed services. Jordan proposed ongoing support and quoted onboarding around $3,500 AUD. Lucy said the business mainly needs basic support, found the cost high, and said they are not looking to change right now. Jordan will send a one-page overview and follow up later, but no firm buying commitment or date was made.",
+        "conversation_id": "a446344e-de36-5636-8552-e72a82aa039a",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": false,
+        "next_step": false,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3240,
+        "output": 1569
+      },
+      "latency_ms": 8877,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-06-meridian-ai",
+      "repeat": 1,
+      "outcome": "stalled",
+      "expected": {
+        "contact": {
+          "name": "Tom Reid",
+          "role": "Head of Engineering",
+          "email": "tom@meridianai.example",
+          "phone": "+61 3 7010 1106"
+        },
+        "company": {
+          "name": "Meridian AI",
+          "industry": "AI software company",
+          "headcount": 118,
+          "location": "Richmond, VIC"
+        },
+        "deal": {
+          "stage": "discovery",
+          "value_aud": 174000,
+          "outcome": "stalled"
+        },
+        "promises": [
+          "Let me send a capability deck and a rough migration outline"
+        ],
+        "objections": [
+          {
+            "text": "Budget sits with finance next financial year, not with me this month",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send capability deck and rough migration outline for Tom to share internally.",
+          "due": null
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Tom Reid",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Tom Reid, it's Jordan from Harbourline IT."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Meridian AI",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I know Meridian AI has grown quickly in Richmond."
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "employee_count": {
+            "value": 118,
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're at one hundred and eighteen people"
+              }
+            ]
+          },
+          "location": {
+            "value": "Richmond",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Meridian AI has grown quickly in Richmond."
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "Where is that mess causing the most friction today?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "One option is a discovery workshop rather than a full proposal."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "There's interest, just no firm path yet."
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I can show examples in a deck.",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "I can show examples in a deck."
+              }
+            ]
+          },
+          {
+            "value": "Let me send a capability deck and a rough migration outline.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "Let me send a capability deck and a rough migration outline."
+              }
+            ]
+          },
+          {
+            "value": "I will also include an indicative timeline and the questions we'd need answered before pricing the onboarding project.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will also include an indicative timeline and the questions we'd need answered before pricing the onboarding project."
+              }
+            ]
+          },
+          {
+            "value": "I will frame the outline as a decision brief rather than a sales proposal, with the risks of doing nothing, a staged migration path and the questions finance should answer.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "I will frame the outline as a decision brief rather than a sales proposal, with the risks of doing nothing, a staged migration path and the questions finance should answer."
+              }
+            ]
+          },
+          {
+            "value": "I will keep the brief anchored to your growth problem rather than pretending this is an emergency.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will keep the brief anchored to your growth problem rather than pretending this is an emergency."
+              }
+            ]
+          },
+          {
+            "value": "I will keep it to the essentials and follow up after you've had a chance to circulate it.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will keep it to the essentials and follow up after you've had a chance to circulate it."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Budget sits with finance next financial year, not with me this month.",
+            "handling": "handled",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "Budget sits with finance next financial year, not with me this month."
+              }
+            ]
+          },
+          {
+            "text": "I do not want a proposal that assumes authority I do not have.",
+            "handling": "handled",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "I do not want a proposal that assumes authority I do not have."
+              }
+            ]
+          },
+          {
+            "text": "My bigger concern is whether an external provider can work with engineers without slowing us down.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "My bigger concern is whether an external provider can work with engineers without slowing us down."
+              }
+            ]
+          },
+          {
+            "text": "We'd unusual device needs, Linux boxes, lab environments and a strong preference for not being locked down blindly.",
+            "handling": "partial",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "We've unusual device needs, Linux boxes, lab environments and a strong preference for not being locked down blindly."
+              }
+            ]
+          },
+          {
+            "text": "I still need the COO to agree it's worth a workshop.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "I still need the COO to agree it's worth a workshop."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Send a capability deck and rough migration outline / decision brief for internal circulation; follow up after they've had a chance to circulate it.",
+          "due_date": null,
+          "owner": "Jordan Lee",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 14,
+              "quote": "Let me send a capability deck and a rough migration outline."
+            },
+            {
+              "source": "transcript",
+              "sequence": 20,
+              "quote": "I will frame the outline as a decision brief rather than a sales proposal"
+            },
+            {
+              "source": "transcript",
+              "sequence": 26,
+              "quote": "I will keep it to the essentials and follow up after you've had a chance to circulate it."
+            }
+          ]
+        },
+        "summary": "Meridian AI (118 employees, Richmond) is considering managed IT support and a cleaner Microsoft 365 setup. Tom Reid said budget sits with finance next financial year and that the COO and platform lead need to be involved before anything progresses. Main concerns are engineering workflows, unusual device needs, and avoiding lock-down. Jordan agreed to send a brief capability deck/decision brief with a rough migration outline and follow up after internal circulation.",
+        "conversation_id": "ab1bfd39-67a7-5723-a11e-c94c755fea7d",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": true,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 2955,
+        "output": 1420
+      },
+      "latency_ms": 7679,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-07-wattle-street-legal",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Olivia Hart",
+          "role": "Practice Manager",
+          "email": "olivia@wattlestreetlegal.example",
+          "phone": "+61 3 7010 1107"
+        },
+        "company": {
+          "name": "Wattle Street Legal",
+          "industry": "Family law firm",
+          "headcount": 37,
+          "location": "Hawthorn, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 59600,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the transition plan and fixed onboarding quote by Tuesday",
+          "I will include the leaver checklist and after-hours file migration window"
+        ],
+        "objections": [
+          {
+            "text": "I am nervous about changing provider while our internal IT coordinator is leaving",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send transition plan and meet Olivia plus principal solicitor for sign-off.",
+          "due": "2026-09-08"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Olivia Hart",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Olivia Hart, Sam from Harbourline IT."
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Yes."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": "practice manager",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "are you still the practice manager at Wattle Street Legal in Hawthorn?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Yes."
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Wattle Street Legal",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Wattle Street Legal in Hawthorn?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I booked the call because our internal IT coordinator resigned and leaves in three weeks."
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": "legal",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "mostly solicitors, paralegals and admin."
+              },
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "The principal will ask whether you can handle after-hours work, because file migrations during business hours aren't acceptable."
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 37,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're thirty-seven people"
+              }
+            ]
+          },
+          "location": {
+            "value": "Hawthorn",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Wattle Street Legal in Hawthorn?"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "evaluation",
+            "confidence": 0.8,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "Can we review the plan Tuesday 8 September at 10am with you and the principal solicitor?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "Yes, Tuesday 8 September at 10am works."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "The principal is practical, but she hates open-ended projects with no sense of priority."
+              }
+            ]
+          },
+          "amount": {
+            "value": 132,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "about $132 per seat per month"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the transition plan and fixed onboarding quote by Tuesday.",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the transition plan and fixed onboarding quote by Tuesday."
+              }
+            ]
+          },
+          {
+            "value": "I will include the leaver checklist and after-hours file migration window.",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will include the leaver checklist and after-hours file migration window."
+              }
+            ]
+          },
+          {
+            "value": "Done. I will send the invite now, then the transition plan and fixed quote by Monday afternoon.",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "Done. I will send the invite now, then the transition plan and fixed quote by Monday afternoon."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "I am nervous about changing provider while our internal IT coordinator is leaving.",
+            "handling": "handled",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "I am nervous about changing provider while our internal IT coordinator is leaving."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I would not suggest a big-bang change. We would run a two-week shadow handover"
+              }
+            ]
+          },
+          {
+            "text": "The monthly fee isn't the cheapest option",
+            "handling": "partial",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "The monthly fee isn't the cheapest option"
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Review the plan with Olivia Hart and the principal solicitor.",
+          "due_date": "2026-09-08",
+          "owner": "Sam Whitfield",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "Can we review the plan Tuesday 8 September at 10am with you and the principal solicitor?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, Tuesday 8 September at 10am works."
+            }
+          ]
+        },
+        "summary": "Wattle Street Legal (37 staff) is considering Harbourline IT for managed services as their internal IT coordinator leaves in three weeks. Olivia Hart, the practice manager, wants stable helpdesk coverage, leavers/joiners, backups, court certificates and Microsoft 365 documentation. Sam quoted $132 per seat per month and proposed a two-week shadow handover. Olivia agreed to review the plan with the principal solicitor on Tuesday 8 September at 10am.",
+        "conversation_id": "f3f596b9-5f25-5d29-aead-56d0551f2e11",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": false,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": true,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": true,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3092,
+        "output": 1135
+      },
+      "latency_ms": 6393,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-08-elm-and-ledger-accounting",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Ben Wallace",
+          "role": "Director",
+          "email": "ben@elmandledger.example",
+          "phone": "+61 3 7010 1108"
+        },
+        "company": {
+          "name": "Elm & Ledger Accounting",
+          "industry": "Accounting practice",
+          "headcount": 52,
+          "location": "Geelong, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 78200,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the office move checklist and migration proposal by Wednesday",
+          "I will include the Xero access review and the busy-season support plan"
+        ],
+        "objections": [
+          {
+            "text": "We cannot have a messy migration in the middle of tax planning work",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send migration proposal and run site walk-through with Ben and office manager.",
+          "due": "2026-09-09"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Ben Wallace",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Ben Wallace, thanks for taking the call."
+              },
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you're one of the directors, correct?"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "Director",
+            "confidence": 0.84,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you're one of the directors, correct?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "Me, another director, and our office manager."
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Elm & Ledger Accounting",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Elm & Ledger Accounting as a fifty-two person practice in Geelong"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "Accounting",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "Accounting firms are an obvious target"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 52,
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "a fifty-two person practice"
+              }
+            ]
+          },
+          "location": {
+            "value": "Geelong",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "in Geelong"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "evaluation",
+            "confidence": 0.8,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "staged, tested with a pilot group"
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "finalise the proposal"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 31,
+                "quote": "we're ready to move quickly"
+              },
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "Yes, Wednesday 9 September at 10am works."
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the office move checklist and migration proposal by Wednesday so you can see the exact order.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the office move checklist and migration proposal by Wednesday so you can see the exact order."
+              }
+            ]
+          },
+          {
+            "value": "I will include the Xero access review and the busy-season support plan.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will include the Xero access review and the busy-season support plan."
+              }
+            ]
+          },
+          {
+            "value": "I will send the invite, checklist and proposal outline before then.",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 30,
+                "quote": "I will send the invite, checklist and proposal outline before then."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "We cannot have a messy migration in the middle of tax planning work.",
+            "handling": "handled",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "We cannot have a messy migration in the middle of tax planning work."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "The migration should be staged, tested with a pilot group and frozen around key lodgement dates."
+              }
+            ]
+          },
+          {
+            "text": "Price is within range if the migration is fixed fee and we can hold you to the run sheet.",
+            "handling": "partial",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "Price is within range if the migration is fixed fee and we can hold you to the run sheet."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Site walk-through with Ben Wallace and the office manager, then finalise the proposal that afternoon.",
+          "due_date": "2026-09-09",
+          "owner": "Sam Whitfield",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "Can we do a site walk-through Wednesday 9 September at 10am with you and the office manager, then finalise the proposal that afternoon?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, Wednesday 9 September at 10am works."
+            }
+          ]
+        },
+        "summary": "Elm & Ledger Accounting, a 52-person accounting practice in Geelong, is considering managed services plus an office move and Microsoft 365 migration. Ben Wallace said the move at the end of September is forcing an IT decision, with concerns around file confusion, Xero access, security, and avoiding disruption during tax planning. Sam will send a checklist, proposal, and support plan. A site walk-through is scheduled for Wednesday 9 September at 10am, after which the proposal will be finalised.",
+        "conversation_id": "7b58e931-97f8-5f0b-b649-3c3e817f27c8",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": true,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": true,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": true,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3149,
+        "output": 1069
+      },
+      "latency_ms": 6781,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-09-port-phillip-physio-group",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Aisha Rahman",
+          "role": "General Manager",
+          "email": "aisha@portphillipphysio.example",
+          "phone": "+61 3 7010 1109"
+        },
+        "company": {
+          "name": "Port Phillip Physio Group",
+          "industry": "Multi-site physiotherapy clinic",
+          "headcount": 76,
+          "location": "St Kilda and Cheltenham, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 109400,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the Essential Eight evidence plan and commercial proposal by Thursday",
+          "I will include the staged clinic rollout and receptionist training plan"
+        ],
+        "objections": [
+          {
+            "text": "Our current provider says they already do security, so I need to understand why this is different",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send proposal and meet Aisha plus clinic director for decision.",
+          "due": "2026-09-10"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Aisha Rahman",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Aisha Rahman"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": "general manager",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you run operations as general manager, right?"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Port Phillip Physio Group",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Port Phillip Physio Group"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": "physiotherapy",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We've physios, reception, admin and a small leadership team."
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 76,
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Port Phillip Physio Group as seventy-six people"
+              }
+            ]
+          },
+          "location": {
+            "value": "St Kilda and Cheltenham",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "across St Kilda and Cheltenham"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "evaluation",
+            "confidence": 0.75,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "The immediate issue is our cyber insurance renewal"
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the Essential Eight evidence plan and commercial proposal by Thursday."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "Yes, Thursday 10 September at 3pm works."
+              }
+            ]
+          },
+          "amount": {
+            "value": 126,
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "around $126 per seat per month"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the Essential Eight evidence plan and commercial proposal by Thursday.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the Essential Eight evidence plan and commercial proposal by Thursday."
+              }
+            ]
+          },
+          {
+            "value": "I will include the staged clinic rollout and receptionist training plan.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will include the staged clinic rollout and receptionist training plan."
+              }
+            ]
+          },
+          {
+            "value": "I will send the proposal the morning of the meeting so you've time to skim it.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "I will send the proposal the morning of the meeting so you've time to skim it."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Our current provider says they already do security, so I need to understand why this is different. I do not want to pay twice for the same promise.",
+            "handling": "handled",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Our current provider says they already do security"
+              },
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "I do not want to pay twice for the same promise."
+              }
+            ]
+          },
+          {
+            "text": "The clinic director will also ask how you avoid disruption during appointment hours.",
+            "handling": "handled",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "The clinic director will also ask how you avoid disruption during appointment hours."
+              }
+            ]
+          },
+          {
+            "text": "The price is workable if the onboarding project is clear and if finance can see what risk is reduced.",
+            "handling": "partial",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "The price is workable if the onboarding project is clear and if finance can see what risk is reduced."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Meet with Aisha Rahman, the clinic director and finance to review the proposal and evidence plan.",
+          "due_date": "2026-09-10",
+          "owner": "Jordan Lee",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "Can we meet Thursday 10 September at 3pm with you, the clinic director and finance to review the proposal and evidence plan?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, Thursday 10 September at 3pm works."
+            }
+          ]
+        },
+        "summary": "Port Phillip Physio Group (76 staff, St Kilda and Cheltenham) is renewing cyber insurance and needs evidence for MFA, patching, backups and admin controls. Aisha Rahman, the general manager, wants a clear answer on why the service differs from their current provider and wants to avoid disruption to appointments. Jordan quoted $126 per seat per month and promised to send an Essential Eight evidence plan, commercial proposal, staged rollout, and receptionist training. A review meeting is set for Thursday 10 September at 3pm with the clinic director and finance.",
+        "conversation_id": "cee5c7c3-bd26-5b96-9509-edbc0af37a3e",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 1
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": false,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": true,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 1
+      },
+      "tokens": {
+        "input": 3062,
+        "output": 1162
+      },
+      "latency_ms": 6818,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-10-lumen-lane-retail",
+      "repeat": 1,
+      "outcome": "lost",
+      "expected": {
+        "contact": {
+          "name": "Noah Spencer",
+          "role": "Co-owner",
+          "email": "noah@lumenlaneretail.example",
+          "phone": "+61 3 7010 1110"
+        },
+        "company": {
+          "name": "Lumen Lane Retail",
+          "industry": "Boutique lighting retailer",
+          "headcount": 10,
+          "location": "Prahran, VIC"
+        },
+        "deal": {
+          "stage": "closed_lost",
+          "value_aud": 11200,
+          "outcome": "lost"
+        },
+        "promises": [
+          "I will send the managed IT brochure"
+        ],
+        "objections": [
+          {
+            "text": "We are comparing you to a break-fix provider who charges by the hour",
+            "handling": "ignored"
+          }
+        ],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Noah Spencer",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Noah Spencer, thanks for the call."
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Thanks Jordan. Lumen Lane Retail is ten people if you count casuals."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Lumen Lane Retail",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Lumen Lane Retail is ten people if you count casuals."
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": "retail",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We sell lighting from a Prahran showroom and online."
+              },
+              {
+                "source": "transcript",
+                "sequence": 6,
+                "quote": "Retailers hold customer details, supplier records and payment systems."
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 10,
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Lumen Lane Retail is ten people if you count casuals."
+              }
+            ]
+          },
+          "location": {
+            "value": "Prahran",
+            "confidence": 0.86,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We sell lighting from a Prahran showroom and online."
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I'm mostly checking prices because our current arrangement is informal."
+              },
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "I wanted to know whether you could beat the hourly provider or offer a small retainer."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "lost",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "Then I think we will go with the other provider."
+              },
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "Sure, but no need to follow up hard."
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the managed IT brochure in case you want to revisit it later.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will send the managed IT brochure in case you want to revisit it later."
+              }
+            ]
+          },
+          {
+            "value": "I will also include a comparison table between hourly break-fix and managed services.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will also include a comparison table between hourly break-fix and managed services."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "They quoted a lower rate, and we only call when something is actually wrong.",
+            "handling": "handled",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 3,
+                "quote": "They quoted a lower rate, and we only call when something is actually wrong."
+              }
+            ]
+          },
+          {
+            "text": "We're not keen to add another subscription while foot traffic is uneven.",
+            "handling": "handled",
+            "confidence": 0.91,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 5,
+                "quote": "We're not keen to add another subscription while foot traffic is uneven."
+              }
+            ]
+          },
+          {
+            "text": "That's too much for what we need.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "That's too much for what we need."
+              }
+            ]
+          },
+          {
+            "text": "The cable restart isn't worth ten grand a year.",
+            "handling": "handled",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "The cable restart isn't worth ten grand a year."
+              }
+            ]
+          },
+          {
+            "text": "Trust and reaction time are mostly enough for us right now.",
+            "handling": "handled",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "Trust and reaction time are mostly enough for us right now."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Send the managed IT brochure and include a comparison table between hourly break-fix and managed services.",
+          "due_date": null,
+          "owner": "Jordan Lee",
+          "confidence": 0.96,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 16,
+              "quote": "I will send the managed IT brochure in case you want to revisit it later."
+            },
+            {
+              "source": "transcript",
+              "sequence": 26,
+              "quote": "I will also include a comparison table between hourly break-fix and managed services."
+            }
+          ]
+        },
+        "summary": "Noah Spencer from Lumen Lane Retail said they are mainly price-checking and comparing Harbourline IT against an hourly break-fix provider. The business has about 10 people, operates from Prahran, and is not ready for a managed services subscription or onboarding fee. Noah said they will go with the other provider for now and requested no hard follow-up. Jordan committed to send a brochure and comparison table.",
+        "conversation_id": "b7525e70-7bf4-553c-ae27-095c87827bb3",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": false,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": true,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3057,
+        "output": 1208
+      },
+      "latency_ms": 7139,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-11-banksia-architects",
+      "repeat": 1,
+      "outcome": "stalled",
+      "expected": {
+        "contact": {
+          "name": "Grace Kim",
+          "role": "Studio Operations Manager",
+          "email": "grace@banksiaarchitects.example",
+          "phone": "+61 3 7010 1111"
+        },
+        "company": {
+          "name": "Banksia Architects",
+          "industry": "Architecture studio",
+          "headcount": 44,
+          "location": "Fitzroy, VIC"
+        },
+        "deal": {
+          "stage": "evaluation",
+          "value_aud": 66400,
+          "outcome": "stalled"
+        },
+        "promises": [
+          "I will send a short findings note and an office move risk checklist"
+        ],
+        "objections": [
+          {
+            "text": "The directors will not approve anything until the new financial year budget is clearer",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send findings note and risk checklist for Grace to discuss with directors.",
+          "due": null
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Grace Kim",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Grace Kim, thanks for speaking with me."
+              },
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you manage studio operations"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "title": {
+            "value": "Studio operations",
+            "confidence": 0.84,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you manage studio operations"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Banksia Architects",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Banksia Architects"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "industry": {
+            "value": "Architecture",
+            "confidence": 0.77,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "architecture workflows"
+              },
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Banksia Architects"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 44,
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "a forty-four person studio"
+              },
+              {
+                "source": "transcript",
+                "sequence": 3,
+                "quote": "We've grown from twenty-eight to forty-four people"
+              }
+            ]
+          },
+          "location": {
+            "value": "Fitzroy",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "in Fitzroy"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I'm gathering options before the directors decide what to fund."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "The useful first step may be a low-commitment risk note"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 31,
+                "quote": "I'm interested, but I need the internal timing to catch up."
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.1,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send a short findings note and an office move risk checklist.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "I will send a short findings note and an office move risk checklist."
+              }
+            ]
+          },
+          {
+            "value": "In the note, I will separate must-fix items from decisions that can safely wait.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "I will separate must-fix items from decisions that can safely wait."
+              }
+            ]
+          },
+          {
+            "value": "I will also give you a small evidence checklist for cyber insurance.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "I will also give you a small evidence checklist for cyber insurance"
+              }
+            ]
+          },
+          {
+            "value": "I will make the risk note specific to architecture workflows: large files, consultant deadlines, site laptops, printing, SharePoint structure and access for contractors.",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will make the risk note specific to architecture workflows: large files, consultant deadlines, site laptops, printing, SharePoint structure and access for contractors."
+              }
+            ]
+          },
+          {
+            "value": "I will include a small section on what to ask any provider, including us, so the directors can compare options without needing to be technical.",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "I will include a small section on what to ask any provider, including us, so the directors can compare options without needing to be technical."
+              }
+            ]
+          },
+          {
+            "value": "I will keep it to the move, cyber insurance evidence and the support model choices.",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 30,
+                "quote": "I will keep it to the move, cyber insurance evidence and the support model choices."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "The directors will not approve anything until the new financial year budget is clearer.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "The directors will not approve anything until the new financial year budget is clearer."
+              }
+            ]
+          },
+          {
+            "text": "I can't promise they will prioritise it, but they will listen if it ties directly to the move and insurance.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "I can't promise they will prioritise it, but they will listen if it ties directly to the move and insurance."
+              }
+            ]
+          },
+          {
+            "text": "Maybe. I don't have the meeting date yet, and I'd rather not lock something in until I know whether they want to engage.",
+            "handling": "ignored",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "Maybe. I don't have the meeting date yet, and I'd rather not lock something in until I know whether they want to engage."
+              }
+            ]
+          },
+          {
+            "text": "I'm interested, but I need the internal timing to catch up.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 31,
+                "quote": "I'm interested, but I need the internal timing to catch up."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Send a short findings note, office move risk checklist, and cyber insurance evidence checklist for internal review; revisit a director meeting or workshop if the directors want detail.",
+          "due_date": null,
+          "owner": "Sam Whitfield",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "I will send a short findings note and an office move risk checklist."
+            },
+            {
+              "source": "transcript",
+              "sequence": 22,
+              "quote": "I will also give you a small evidence checklist for cyber insurance"
+            },
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, send that."
+            },
+            {
+              "source": "transcript",
+              "sequence": 17,
+              "quote": "I don't have the meeting date yet"
+            }
+          ]
+        },
+        "summary": "Banksia Architects is considering managed services ahead of an office move, but Grace Kim says directors are waiting on clearer FY budget timing. The studio has security and process gaps around admin accounts, MFA, backups, shared files, and help ownership. Sam committed to send a practical findings note, office move risk checklist, and cyber insurance evidence checklist. Grace is interested, but decision timing and director engagement are still unresolved.",
+        "conversation_id": "18ffc284-806b-5be8-b44e-704afa7d5c55",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 1,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": true,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": true,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 1,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3104,
+        "output": 1365
+      },
+      "latency_ms": 7801,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-12-dockside-dental",
+      "repeat": 1,
+      "outcome": "no_show",
+      "expected": {
+        "contact": {
+          "name": "Ethan Clarke",
+          "role": "Practice Owner",
+          "email": "ethan@docksidedental.example",
+          "phone": "+61 3 7010 1112"
+        },
+        "company": {
+          "name": "Dockside Dental",
+          "industry": "Dental practice",
+          "headcount": 18,
+          "location": "Williamstown, VIC"
+        },
+        "deal": {
+          "stage": "discovery",
+          "value_aud": 0,
+          "outcome": "no_show"
+        },
+        "promises": [
+          "I will send a quick email with a couple of times to reschedule"
+        ],
+        "objections": [],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Ethan Clarke",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Jordan Lee from Harbourline IT calling for Ethan Clarke at Dockside Dental"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Dockside Dental",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "for Ethan Clarke at Dockside Dental"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "industry": {
+            "value": "dental",
+            "confidence": 0.86,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Dockside Dental"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "location": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.62,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "We had a 9am phone appointment about managed IT and cyber insurance questions."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "I will send a quick email with a couple of times to reschedule"
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send a quick email with a couple of times to reschedule",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "I will send a quick email with a couple of times to reschedule"
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Ethan has been pulled into a patient issue and won't make the call.",
+            "handling": "handled",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Ethan has been pulled into a patient issue and won't make the call."
+              },
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "I will send a quick email with a couple of times to reschedule"
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Send a quick email with a couple of times to reschedule",
+          "due_date": null,
+          "owner": "Jordan Lee",
+          "confidence": 0.97,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 2,
+              "quote": "I will send a quick email with a couple of times to reschedule"
+            },
+            {
+              "source": "transcript",
+              "sequence": 3,
+              "quote": "Email is best today."
+            }
+          ]
+        },
+        "summary": "Jordan Lee called Ethan Clarke at Dockside Dental for a 9am appointment about managed IT and cyber insurance questions. Ethan was unavailable due to a patient issue. Jordan said he would email a few reschedule times and ask Ethan to choose what works. Reception said email is best today.",
+        "conversation_id": "6ca21111-c7df-5753-a759-2e7275013055",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": false,
+        "deal_amount": true,
+        "next_step": false,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": true,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": true,
+        "objections": true,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 1435,
+        "output": 783
+      },
+      "latency_ms": 4385,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-13-marlowe-finch-demo",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Donnie Azoff",
+          "role": "CFO",
+          "email": "donnie@marlowefinch.example",
+          "phone": "+61 3 7010 1113"
+        },
+        "company": {
+          "name": "Marlowe & Finch Accounting",
+          "industry": "Accounting practice",
+          "headcount": 34,
+          "location": "Hawthorn, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 48600,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will get a proposal in your inbox today",
+          "I will send the proposal and 30-seat agreement by 5pm today"
+        ],
+        "objections": [
+          {
+            "text": "Price is my first concern",
+            "handling": "ignored"
+          },
+          {
+            "text": "our current provider knows the practice and the partners trust them",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send the proposal and 30-seat agreement by 5pm for Donnie and the managing partner to review and sign.",
+          "due": "2026-09-11"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Donnie Azoff",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I'm Donnie, CFO"
+              }
+            ]
+          },
+          "email": {
+            "value": "donnie@marlowefinch.example",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I'll send it to donnie@marlowefinch.example"
+              }
+            ]
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.0,
+            "evidence": []
+          },
+          "title": {
+            "value": "CFO",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I'm Donnie, CFO"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Marlowe & Finch Accounting",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Marlowe & Finch Accounting"
+              }
+            ]
+          },
+          "domain": {
+            "value": "marlowefinch.example",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "donnie@marlowefinch.example"
+              }
+            ]
+          },
+          "industry": {
+            "value": "Accounting",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Marlowe & Finch Accounting"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 34,
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 5,
+                "quote": "we've thirty-four people including casual admin and seasonal tax support."
+              }
+            ]
+          },
+          "location": {
+            "value": "Hawthorn",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "practice in Hawthorn"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "evaluation",
+            "confidence": 0.84,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "What would happen today if I said yes to reviewing it?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "I said review it, not definitely sign it."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "I said review it, not definitely sign it."
+              },
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "I'll review it with the managing partner"
+              }
+            ]
+          },
+          "amount": {
+            "value": 48600,
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 6,
+                "quote": "The annual figure is $48,600"
+              },
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "$48,600 annual managed service"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will get a proposal in your inbox today",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "I will get a proposal in your inbox today"
+              }
+            ]
+          },
+          {
+            "value": "I will send the proposal and 30-seat agreement by 5pm today",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the proposal and 30-seat agreement by 5pm today"
+              }
+            ]
+          },
+          {
+            "value": "I'll send it to donnie@marlowefinch.example",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I'll send it to donnie@marlowefinch.example"
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Price is my first concern. Our incumbent charges less, and the partners are already grumpy about insurance premiums.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "Price is my first concern. Our incumbent charges less, and the partners are already grumpy about insurance premiums."
+              },
+              {
+                "source": "transcript",
+                "sequence": 8,
+                "quote": "Price is smoke, Donnie, premium is fire."
+              }
+            ]
+          },
+          {
+            "text": "I still need the managing partner to be comfortable before anyone signs.",
+            "handling": "handled",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "I still need the managing partner to be comfortable before anyone signs."
+              },
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "Give the managing partner the tidy version"
+              }
+            ]
+          },
+          {
+            "text": "I said review it, not definitely sign it.",
+            "handling": "handled",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "I said review it, not definitely sign it."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Send proposal and 30-seat agreement for review; buyer to review with managing partner and possibly sign/start onboarding Monday if terms match.",
+          "due_date": "2026-09-11",
+          "owner": "Jordan Belfort / Donnie Azoff",
+          "confidence": 0.96,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 25,
+              "quote": "Send it by 5pm today, 11 September."
+            },
+            {
+              "source": "transcript",
+              "sequence": 25,
+              "quote": "I'll review it with the managing partner"
+            },
+            {
+              "source": "transcript",
+              "sequence": 25,
+              "quote": "if the terms match what you've said, we'll sign the 30-seat agreement and start with onboarding Monday."
+            }
+          ]
+        },
+        "summary": "Donnie Azoff, CFO at Marlowe & Finch Accounting in Hawthorn, said they need options for a cyber insurance renewal before quarter close. Jordan proposed a 30-seat managed IT package at $135 per seat per month, with onboarding at cost and $48,600 annual managed service. Donnie raised price concerns and said the managing partner must be comfortable before signing. Jordan promised to email a proposal and 30-seat agreement by 5pm today. Donnie agreed to review it with the managing partner and sign only if the terms match.",
+        "conversation_id": "20b80221-c2e4-5b95-8165-81f352027c64",
+        "source": "model",
+        "model": "gpt-5.4-mini",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": true,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": true,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3308,
+        "output": 1195
+      },
+      "latency_ms": 6291,
+      "model": "gpt-5.4-mini",
+      "cost_usd": null,
+      "failed": false,
+      "error": null
+    }
+  ],
+  "summary": {
+    "checks": {
+      "contact_name": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "contact_email": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "company_name": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "company_headcount": {
+        "passed": 12,
+        "total": 13,
+        "pct": 0.9230769230769231,
+        "mean_pct": 0.9230769230769231,
+        "min": 0.9230769230769231,
+        "max": 0.9230769230769231,
+        "mean_passed": 12.0,
+        "max_passed": 12
+      },
+      "deal_amount": {
+        "passed": 8,
+        "total": 13,
+        "pct": 0.6153846153846154,
+        "mean_pct": 0.6153846153846154,
+        "min": 0.6153846153846154,
+        "max": 0.6153846153846154,
+        "mean_passed": 8.0,
+        "max_passed": 8
+      },
+      "next_step": {
+        "passed": 9,
+        "total": 13,
+        "pct": 0.6923076923076923,
+        "mean_pct": 0.6923076923076923,
+        "min": 0.6923076923076923,
+        "max": 0.6923076923076923,
+        "mean_passed": 9.0,
+        "max_passed": 9
+      },
+      "promises": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "objection_handling": {
+        "passed": 6,
+        "total": 13,
+        "pct": 0.46153846153846156,
+        "mean_pct": 0.46153846153846156,
+        "min": 0.46153846153846156,
+        "max": 0.46153846153846156,
+        "mean_passed": 6.0,
+        "max_passed": 6
+      },
+      "deal_outcome": {
+        "passed": 2,
+        "total": 13,
+        "pct": 0.15384615384615385,
+        "mean_pct": 0.15384615384615385,
+        "min": 0.15384615384615385,
+        "max": 0.15384615384615385,
+        "mean_passed": 2.0,
+        "max_passed": 2
+      },
+      "promises_count": {
+        "passed": 10,
+        "total": 13,
+        "pct": 0.7692307692307693,
+        "mean_pct": 0.7692307692307693,
+        "min": 0.7692307692307693,
+        "max": 0.7692307692307693,
+        "mean_passed": 10.0,
+        "max_passed": 10
+      },
+      "contact_phone": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "contact_title": {
+        "passed": 5,
+        "total": 13,
+        "pct": 0.38461538461538464,
+        "mean_pct": 0.38461538461538464,
+        "min": 0.38461538461538464,
+        "max": 0.38461538461538464,
+        "mean_passed": 5.0,
+        "max_passed": 5
+      },
+      "company_industry": {
+        "passed": 6,
+        "total": 13,
+        "pct": 0.46153846153846156,
+        "mean_pct": 0.46153846153846156,
+        "min": 0.46153846153846156,
+        "max": 0.46153846153846156,
+        "mean_passed": 6.0,
+        "max_passed": 6
+      },
+      "company_industry_exact": {
+        "passed": 1,
+        "total": 13,
+        "pct": 0.07692307692307693,
+        "mean_pct": 0.07692307692307693,
+        "min": 0.07692307692307693,
+        "max": 0.07692307692307693,
+        "mean_passed": 1.0,
+        "max_passed": 1
+      },
+      "company_location": {
+        "passed": 0,
+        "total": 13,
+        "pct": 0.0,
+        "mean_pct": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "mean_passed": 0.0,
+        "max_passed": 0
+      },
+      "deal_stage": {
+        "passed": 2,
+        "total": 13,
+        "pct": 0.15384615384615385,
+        "mean_pct": 0.15384615384615385,
+        "min": 0.15384615384615385,
+        "max": 0.15384615384615385,
+        "mean_passed": 2.0,
+        "max_passed": 2
+      },
+      "objections": {
+        "passed": 5,
+        "total": 13,
+        "pct": 0.38461538461538464,
+        "mean_pct": 0.38461538461538464,
+        "min": 0.38461538461538464,
+        "max": 0.38461538461538464,
+        "mean_passed": 5.0,
+        "max_passed": 5
+      },
+      "grounded": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      }
+    },
+    "parse_failures": 0,
+    "mean_latency_ms": 7298.7692307692305,
+    "total_cost_usd": 0,
+    "cost_per_call_usd": null,
+    "cost_billed": false,
+    "grounding_repaired": 1,
+    "grounding_dropped": 1,
+    "records": 13,
+    "repeats": 1
+  },
+  "rescored_from": "evals/results/extraction-openai-gpt-5-4-mini-20260912-2053.json"
+}

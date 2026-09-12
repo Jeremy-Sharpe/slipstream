@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
-import httpx
-
+from app.core.config import Settings
+from app.core.llm import MissingReasoningProviderError, ReasoningClient, structured
 from app.routers.calls import CallResponse
 from app.schemas.extraction import (
     CompanyFields,
@@ -14,6 +15,7 @@ from app.schemas.extraction import (
     EvidenceSpan,
     ExtractionPayload,
     ExtractionResult,
+    GroundingReport,
     IntegerField,
     NextStep,
     Objection,
@@ -22,10 +24,8 @@ from app.schemas.extraction import (
     StringField,
 )
 
-ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages"
-MODEL = "claude-sonnet-5"
-PROMPT_VERSION = "extract-v1"
-PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "extract-v1.md"
+PROMPT_VERSION = "extract-v2"
+PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "extract-v2.md"
 FIXTURES_ROOT = Path(__file__).resolve().parents[3] / "fixtures" / "calls"
 
 
@@ -156,129 +156,202 @@ def extract_fixture(call: CallResponse) -> ExtractionResult:
     )
 
 
-def _verify_evidence(payload: ExtractionPayload, call: CallResponse) -> None:
-    segments = {segment.sequence: segment.body for segment in call.segments}
-    attributed_fields = [
-        *payload.promises,
-        *payload.contact.__dict__.values(),
-        *payload.company.__dict__.values(),
-        payload.deal.amount,
-        payload.deal.stage,
-        payload.deal.outcome,
-    ]
-    for field in attributed_fields:
-        if field.value is not None and not field.evidence:
-            raise ExtractionUnavailableError("Every extracted value requires transcript evidence")
-    if any(not objection.evidence for objection in payload.objections) or (
-        payload.next_step is not None and not payload.next_step.evidence
-    ):
-        raise ExtractionUnavailableError("Every extracted claim requires transcript evidence")
-    evidence_groups = [
-        *(field.evidence for field in payload.promises),
-        *(objection.evidence for objection in payload.objections),
-        *(field.evidence for field in payload.contact.__dict__.values()),
-        *(field.evidence for field in payload.company.__dict__.values()),
-        payload.deal.amount.evidence,
-        payload.deal.stage.evidence,
-        payload.deal.outcome.evidence,
-        payload.next_step.evidence if payload.next_step else [],
-    ]
-    for evidence_list in evidence_groups:
-        for evidence in evidence_list:
-            if evidence.source != "transcript":
-                raise ExtractionUnavailableError("Claude evidence must come from the transcript")
-            if (
-                evidence.sequence not in segments
-                or evidence.quote not in segments[evidence.sequence]
-            ):
-                raise ExtractionUnavailableError(
-                    "Extraction evidence does not match the transcript"
-                )
-
-
-def _anthropic_schema() -> dict[str, Any]:
-    unsupported = {
-        "minimum",
-        "maximum",
-        "exclusiveMinimum",
-        "exclusiveMaximum",
-        "minLength",
-        "maxLength",
-        "pattern",
-        "format",
-    }
-
-    def transform(value: Any) -> Any:
-        if isinstance(value, dict):
-            result = {key: transform(item) for key, item in value.items() if key not in unsupported}
-            if result.get("type") == "object" or "properties" in result:
-                result["additionalProperties"] = False
-            return result
-        if isinstance(value, list):
-            return [transform(item) for item in value]
-        return value
-
-    return transform(ExtractionPayload.model_json_schema())
-
-
-async def extract_with_claude(
-    call: CallResponse,
-    *,
-    api_key: str,
-    client: httpx.AsyncClient,
+def extract_with_model(
+    call: CallResponse, reasoning: Settings | ReasoningClient
 ) -> ExtractionResult:
-    try:
-        prompt = PROMPT_PATH.read_text(encoding="utf-8")
-        transcript = json.dumps(
-            {"segments": [segment.model_dump() for segment in call.segments]},
-            ensure_ascii=False,
-        )
-        response = await client.post(
-            ANTHROPIC_MESSAGES_URL,
-            headers={
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            json={
-                "model": MODEL,
-                "max_tokens": 5000,
-                "system": prompt,
-                "messages": [{"role": "user", "content": transcript}],
-                "output_config": {
-                    "format": {
-                        "type": "json_schema",
-                        "schema": _anthropic_schema(),
-                    }
-                },
-            },
-        )
-        response.raise_for_status()
-        body = response.json()
-        if not isinstance(body, dict):
-            raise ExtractionUnavailableError("Claude returned an invalid extraction response")
-        if body.get("stop_reason") not in {"end_turn", "stop_sequence"}:
-            raise ExtractionUnavailableError("Claude did not complete the extraction")
-        content = body.get("content")
-        if not isinstance(content, list):
-            raise ExtractionUnavailableError("Claude returned an invalid extraction response")
-        text_blocks = [
-            block["text"]
-            for block in content
-            if isinstance(block, dict)
-            and block.get("type") == "text"
-            and isinstance(block.get("text"), str)
-        ]
-        if len(text_blocks) != 1:
-            raise ExtractionUnavailableError("Claude returned an invalid extraction response")
-        payload = ExtractionPayload.model_validate_json(text_blocks[0])
-        _verify_evidence(payload, call)
-    except (httpx.HTTPError, ValueError, KeyError, TypeError) as error:
-        raise ExtractionUnavailableError("Claude extraction failed") from error
-    return ExtractionResult(
-        **payload.model_dump(),
-        conversation_id=call.id,
-        source="claude",
-        model=body.get("model", MODEL),
-        prompt_version=PROMPT_VERSION,
+    system = PROMPT_PATH.read_text()
+    user = json.dumps(
+        {
+            "call_date": call.occurred_at.isoformat(),
+            "segments": [segment.model_dump() for segment in call.segments],
+        },
+        ensure_ascii=False,
     )
+    try:
+        result = structured(
+            reasoning,
+            system=system,
+            user=user,
+            schema=ExtractionPayload,
+            max_tokens=5000,
+        )
+    except MissingReasoningProviderError:
+        raise
+    except Exception as error:
+        raise ExtractionUnavailableError("Model extraction failed") from error
+    try:
+        payload, report = ground(result.output, call)
+        return ExtractionResult(
+            **payload.model_dump(),
+            conversation_id=call.id,
+            source="model",
+            model=result.model,
+            prompt_version=PROMPT_VERSION,
+            grounding=report,
+        )
+    except Exception as error:
+        raise ExtractionUnavailableError("Model extraction failed") from error
+
+
+AttributedField = StringField | IntegerField | StageField | OutcomeField
+
+
+def ground(
+    payload: ExtractionPayload, call: CallResponse
+) -> tuple[ExtractionPayload, GroundingReport]:
+    segments = {segment.sequence: segment.body for segment in call.segments}
+    ordered_segments = [(segment.sequence, segment.body) for segment in call.segments]
+    report = GroundingReport()
+    data = payload.model_dump()
+
+    for name in ("name", "email", "phone", "title"):
+        field, repaired, dropped = _ground_field(
+            getattr(payload.contact, name), segments, ordered_segments
+        )
+        data["contact"][name] = field.model_dump()
+        report.repaired += repaired
+        report.dropped += dropped
+
+    for name in ("name", "domain", "industry", "employee_count", "location"):
+        field, repaired, dropped = _ground_field(
+            getattr(payload.company, name), segments, ordered_segments
+        )
+        data["company"][name] = field.model_dump()
+        report.repaired += repaired
+        report.dropped += dropped
+
+    for name in ("amount", "stage", "outcome"):
+        field, repaired, dropped = _ground_field(
+            getattr(payload.deal, name), segments, ordered_segments
+        )
+        data["deal"][name] = field.model_dump()
+        report.repaired += repaired
+        report.dropped += dropped
+
+    data["promises"] = []
+    for promise in payload.promises:
+        evidence, repaired, dropped = _ground_evidence_list(
+            promise.evidence, segments, ordered_segments
+        )
+        report.repaired += repaired
+        report.dropped += dropped
+        if evidence:
+            data["promises"].append(promise.model_copy(update={"evidence": evidence}).model_dump())
+
+    data["objections"] = []
+    for objection in payload.objections:
+        evidence, repaired, dropped = _ground_evidence_list(
+            objection.evidence, segments, ordered_segments
+        )
+        report.repaired += repaired
+        report.dropped += dropped
+        if evidence:
+            data["objections"].append(
+                objection.model_copy(update={"evidence": evidence}).model_dump()
+            )
+
+    data["next_step"] = None
+    if payload.next_step is not None:
+        evidence, repaired, dropped = _ground_evidence_list(
+            payload.next_step.evidence, segments, ordered_segments
+        )
+        report.repaired += repaired
+        report.dropped += dropped
+        if evidence:
+            data["next_step"] = payload.next_step.model_copy(
+                update={"evidence": evidence}
+            ).model_dump()
+
+    return ExtractionPayload.model_validate(data), report
+
+
+def _ground_field(
+    field: AttributedField,
+    segments: dict[int, str],
+    ordered_segments: list[tuple[int, str]],
+) -> tuple[AttributedField, int, int]:
+    evidence, repaired, dropped = _ground_evidence_list(field.evidence, segments, ordered_segments)
+    update: dict[str, Any] = {"evidence": evidence}
+    if field.value is not None and not evidence:
+        update = {"value": None, "confidence": 0, "evidence": []}
+    return field.model_copy(update=update), repaired, dropped
+
+
+def _ground_evidence_list(
+    evidence_list: list[EvidenceSpan],
+    segments: dict[int, str],
+    ordered_segments: list[tuple[int, str]],
+) -> tuple[list[EvidenceSpan], int, int]:
+    evidence: list[EvidenceSpan] = []
+    repaired = 0
+    dropped = 0
+    for span in evidence_list:
+        grounded, was_repaired = _ground_evidence(span, segments, ordered_segments)
+        if grounded is None:
+            dropped += 1
+            continue
+        if was_repaired:
+            repaired += 1
+        evidence.append(grounded)
+    return evidence, repaired, dropped
+
+
+def _ground_evidence(
+    evidence: EvidenceSpan,
+    segments: dict[int, str],
+    ordered_segments: list[tuple[int, str]],
+) -> tuple[EvidenceSpan | None, bool]:
+    if (
+        evidence.source == "transcript"
+        and evidence.sequence in segments
+        and evidence.quote in segments[evidence.sequence]
+    ):
+        return evidence, False
+
+    match = _tolerant_match(evidence.quote, evidence.sequence, segments, ordered_segments)
+    if match is None:
+        return None, False
+    sequence, quote = match
+    return EvidenceSpan(source="transcript", sequence=sequence, quote=quote[:500]), True
+
+
+def _tolerant_match(
+    quote: str,
+    cited_sequence: int | None,
+    segments: dict[int, str],
+    ordered_segments: list[tuple[int, str]],
+) -> tuple[int, str] | None:
+    pattern = _quote_pattern(quote)
+    if pattern is None:
+        return None
+    if cited_sequence in segments:
+        match = re.search(pattern, segments[cited_sequence], re.IGNORECASE)
+        if match is not None:
+            return cited_sequence, match.group(0)
+    for sequence, body in ordered_segments:
+        match = re.search(pattern, body, re.IGNORECASE)
+        if match is not None:
+            return sequence, match.group(0)
+    return None
+
+
+def _quote_pattern(quote: str) -> str | None:
+    tokens = quote.rstrip(".,;:!?").split()
+    if not tokens:
+        return None
+    return r"\s+".join(_quote_token_pattern(token) for token in tokens)
+
+
+def _quote_token_pattern(token: str) -> str:
+    replacements = {
+        "'": "['‘’]",
+        "‘": "['‘’]",
+        "’": "['‘’]",
+        '"': '["“”]',
+        "“": '["“”]',
+        "”": '["“”]',
+        "-": "[-–—]",
+        "–": "[-–—]",
+        "—": "[-–—]",
+    }
+    return "".join(replacements.get(char, re.escape(char)) for char in token)

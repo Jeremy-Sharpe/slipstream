@@ -1,4 +1,6 @@
+import httpx
 import pytest
+from openai import BadRequestError, PermissionDeniedError
 from pydantic import BaseModel
 
 from app.core.config import Settings
@@ -6,6 +8,7 @@ from app.core.llm import (
     MissingEmbeddingProviderError,
     MissingReasoningProviderError,
     ReasoningClient,
+    Usage,
     create_embedding_client,
     create_reasoning_client,
     openrouter_model_id,
@@ -23,8 +26,14 @@ class MiniOutput(BaseModel):
     body: str
 
 
+class FakeParsedUsage:
+    input_tokens = 11
+    output_tokens = 7
+
+
 class ParsedAnthropic:
     parsed_output = MiniOutput(subject="A", body="B")
+    usage = FakeParsedUsage()
 
 
 class FakeAnthropicMessages:
@@ -43,6 +52,7 @@ class FakeAnthropicClient:
 
 class ParsedOpenAI:
     output_parsed = MiniOutput(subject="O", body="P")
+    usage = FakeParsedUsage()
 
 
 class FakeResponses:
@@ -81,8 +91,15 @@ class FakeChoice:
     message = FakeMessage()
 
 
+class FakeOpenRouterUsage:
+    prompt_tokens = 13
+    completion_tokens = 5
+    cost = "0.0017"
+
+
 class FakeCompletion:
     choices = [FakeChoice()]
+    usage = FakeOpenRouterUsage()
 
 
 class FakeCompletions:
@@ -116,6 +133,7 @@ def test_structured_uses_anthropic_messages_parse() -> None:
 
     assert result.output == MiniOutput(subject="A", body="B")
     assert result.model == "claude-opus-5"
+    assert result.usage == Usage(input_tokens=11, output_tokens=7)
     assert client.messages.kwargs["output_format"] is MiniOutput
     assert "timeout" not in client.messages.kwargs
 
@@ -132,6 +150,7 @@ def test_structured_uses_openai_responses_parse() -> None:
 
     assert result.output == MiniOutput(subject="O", body="P")
     assert result.model == "gpt-5.4"
+    assert result.usage == Usage(input_tokens=11, output_tokens=7)
     assert client.responses.kwargs["text_format"] is MiniOutput
     assert "timeout" not in client.responses.kwargs
 
@@ -166,7 +185,31 @@ def test_structured_validates_openrouter_fenced_json() -> None:
 
     assert result.output == MiniOutput(subject="R", body="S")
     assert result.model == "meta-llama/llama-4-maverick"
+    assert result.usage == Usage(input_tokens=13, output_tokens=5, cost_usd=0.0017)
     assert client.chat.completions.kwargs["response_format"]["type"] == "json_schema"
+    assert client.chat.completions.kwargs["extra_body"] == {"usage": {"include": True}}
+
+
+def test_structured_returns_no_usage_when_provider_omits_it() -> None:
+    class ParsedWithoutUsage:
+        parsed_output = MiniOutput(subject="A", body="B")
+
+    class MessagesWithoutUsage:
+        def parse(self, **kwargs: object) -> ParsedWithoutUsage:
+            return ParsedWithoutUsage()
+
+    class ClientWithoutUsage:
+        messages = MessagesWithoutUsage()
+
+    result = structured(
+        ReasoningClient(provider="anthropic", model="claude-opus-5", client=ClientWithoutUsage()),
+        system="System",
+        user="User",
+        schema=MiniOutput,
+    )
+
+    assert result.output == MiniOutput(subject="A", body="B")
+    assert result.usage is None
 
 
 def test_structured_missing_selected_provider_key_names_provider(
@@ -263,3 +306,51 @@ def test_create_embedding_client_raises_without_provider(
     assert str(error.value) == (
         "No embedding provider is configured (set OPENAI_API_KEY or OPENROUTER_API_KEY)"
     )
+
+
+class _RaisingCompletions:
+    def __init__(self, error: Exception) -> None:
+        self.error = error
+        self.calls: list[dict[str, object]] = []
+
+    def create(self, **kwargs: object) -> FakeCompletion:
+        self.calls.append(kwargs)
+        if len(self.calls) == 1:
+            raise self.error
+        return FakeCompletion()
+
+
+def _openai_error(cls: type, status_code: int) -> Exception:
+    response = httpx.Response(status_code, request=httpx.Request("POST", "https://x"))
+    return cls("boom", response=response, body=None)
+
+
+def test_openrouter_falls_back_to_plain_json_only_on_schema_rejection() -> None:
+    client = FakeOpenRouterClient()
+    client.chat.completions = _RaisingCompletions(_openai_error(BadRequestError, 400))
+
+    result = structured(
+        ReasoningClient(provider="openrouter", model="x/y", client=client),
+        system="System",
+        user="User",
+        schema=MiniOutput,
+    )
+
+    assert result.output == MiniOutput(subject="R", body="S")
+    assert len(client.chat.completions.calls) == 2
+    assert "response_format" not in client.chat.completions.calls[1]
+
+
+def test_openrouter_does_not_retry_on_credit_or_rate_limit_errors() -> None:
+    client = FakeOpenRouterClient()
+    client.chat.completions = _RaisingCompletions(_openai_error(PermissionDeniedError, 402))
+
+    with pytest.raises(PermissionDeniedError):
+        structured(
+            ReasoningClient(provider="openrouter", model="x/y", client=client),
+            system="System",
+            user="User",
+            schema=MiniOutput,
+        )
+
+    assert len(client.chat.completions.calls) == 1

@@ -98,7 +98,7 @@ class ExtractionPayload(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def evidence_quotes_must_match_segments_later(self) -> ExtractionPayload:
+    def null_fields_carry_no_evidence(self) -> ExtractionPayload:
         for field in (
             *self.promises,
             self.contact.name,
@@ -115,12 +115,19 @@ class ExtractionPayload(BaseModel):
             self.deal.outcome,
         ):
             if field.value is None and field.evidence:
-                raise ValueError("Null extracted fields cannot have evidence")
+                field.evidence = []
+                field.confidence = 0
         return self
+
+
+class GroundingReport(BaseModel):
+    repaired: int = 0
+    dropped: int = 0
 
 
 class ExtractionResult(ExtractionPayload):
     conversation_id: UUID
-    source: Literal["fixture_labels", "claude"]
+    source: Literal["fixture_labels", "model"]
     model: str
     prompt_version: str
+    grounding: GroundingReport = Field(default_factory=GroundingReport)
