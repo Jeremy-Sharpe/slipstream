@@ -16,7 +16,8 @@ finished video was verified on 12 September 2026.
 - The email migration executes against PostgreSQL and its committed Supabase test
   covers permissions, idempotency, rollback, CRM-field preservation, and message and
   byte boundaries. The scorecard migration adds a service-role-only, stale-write-safe
-  conversation update and its own pgTAP permission and concurrency regression.
+  conversation update. The playbook migration adds an atomic revision-checked cohort
+  upsert. All four migrations and all three pgTAP suites pass in ephemeral Supabase CI.
 - The deterministic rubric-sync eval passes. Every deterministic submission check
   except the required demo-video URL passes.
 

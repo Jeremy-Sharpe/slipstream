@@ -42,7 +42,7 @@ Order matters. The foundation rows unblock everything else and should be claimed
 | `video` | 3 to 5 minute demo video on the live URL, per-feature walkthroughs | `docs/video/` | | | unclaimed | Starts Sunday once the loop runs |
 | `submission` | README lines filled, `npm run evals:dry` green, form submitted before Monday 12:00pm | `README.md` | Jeremy's agent | feat/submission-readiness | in progress | Production-readiness pass active; 176 API tests pass. A teammate must add the final video URL and submit the external form |
 | `ci` | Protect main with credential-free web, API, fixture and coach checks | `.github/workflows/` | Jeremy's agent | feat/ci | done | Exact main revision `d876e5c` passed all four clean-runner jobs without annotations in Actions run `34694007012`; action versions are immutable commit pins. Other people should record the public demo video and avoid adding provider secrets to CI. |
-| `database-ci` | Apply all migrations and run pgTAP tests in ephemeral Supabase on pull requests | `.github/workflows/`, `supabase/` | Jeremy's agent | feat/database-ci | in progress | Jeremy's agent is adding a credential-free database gate so the three unapplied hosted migrations are executable evidence, not parser-only claims. Other people should record the public demo video and avoid changing migrations in parallel. |
+| `database-ci` | Apply all migrations and run pgTAP tests in ephemeral Supabase on pull requests | `.github/workflows/`, `supabase/` | Jeremy's agent | feat/database-ci | done | PR #8 applied all four migrations and passed all three pgTAP suites in ephemeral Supabase (run `34695291147`), catching and fixing the pre-existing pgcrypto schema bug. Other people should record the public demo video. |
 
 ## Blocked and parked
 

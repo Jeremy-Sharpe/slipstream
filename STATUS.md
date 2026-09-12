@@ -22,7 +22,7 @@ Who is on what, what the live environment actually holds, and what only a human 
 | API environment file | `/etc/slipstream/api.env` on the VPS, root owned, 0600 | Loaded by the systemd unit. Every key the API needs has to exist here as well as locally |
 | Local API environment | `api/.env`, 0600, gitignored | Created 12 September. Supabase and ElevenLabs filled, Origami and OpenAI blank |
 | Hosted database | Supabase | Only migration `20260912000000` is applied. The email, scorecard and playbook persistence migrations are merged but unapplied, so those later tables/functions do not exist live |
-| Repository CI | GitHub Actions | Main revision `d876e5c` passed web lint/build, 174 API tests plus Ruff, fixture validation plus six tests, and coach tests/build without annotations in run `34694007012` |
+| Repository CI | GitHub Actions | PR #8 passed web lint/build, 176 API tests plus Ruff, fixture validation plus six tests, coach tests/build, all four migrations and all three pgTAP suites in run `34695291147` |
 | Coach installers | GitHub Actions | Main revision `d876e5c` produced retained unsigned Linux, macOS and Windows artifacts in run `34694011356`; signing/notarisation remains intentionally unconfigured |
 
 ## Keys
