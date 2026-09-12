@@ -15,6 +15,7 @@ from app.core.database import create_supabase
 from app.core.readiness import StorageReadinessProbe
 from app.routers import (
     calls,
+    campaigns,
     crm,
     deliveries,
     drafts,
@@ -25,6 +26,7 @@ from app.routers import (
     leads,
     scorecards,
 )
+from app.services.campaigns import create_campaign_store
 from app.services.icp_leads_store import create_icp_leads_store
 from app.services.score import build_judge
 from app.ws import coach
@@ -57,6 +59,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await app.state.email_delivery_client.aclose()
         await app.state.readiness.close()
         app.state.email_delivery_db_executor.shutdown(wait=False, cancel_futures=True)
+        app.state.campaign_store_executor.shutdown(wait=False, cancel_futures=True)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -72,6 +75,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.readiness = StorageReadinessProbe(runtime_settings)
     app.state.icp_leads_store = create_icp_leads_store(runtime_settings)
     app.state.supabase = create_supabase(runtime_settings)
+    app.state.campaign_store = create_campaign_store(runtime_settings, app.state.supabase)
     app.state.call_store = {}
     app.state.extraction_store = {}
     app.state.draft_store = {}
@@ -95,6 +99,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.email_delivery_db_slots = asyncio.Semaphore(4)
     app.state.email_delivery_db_executor = ThreadPoolExecutor(
         max_workers=4, thread_name_prefix="slipstream-email-delivery"
+    )
+    app.state.campaign_store_slots = asyncio.Semaphore(4)
+    app.state.campaign_store_executor = ThreadPoolExecutor(
+        max_workers=4, thread_name_prefix="slipstream-campaign-store"
     )
     app.state.coach_slots = asyncio.Semaphore(4)
     app.state.coach_handshake_slots = asyncio.Semaphore(16)
@@ -142,6 +150,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(extractions.router, prefix="/api/v1")
     app.include_router(crm.router, prefix="/api/v1")
     app.include_router(deliveries.router, prefix="/api/v1")
+    app.include_router(campaigns.router, prefix="/api/v1")
     app.include_router(drafts.router, prefix="/api/v1")
     app.include_router(emails.router, prefix="/api/v1")
     app.include_router(icp.router)
