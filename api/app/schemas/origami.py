@@ -12,6 +12,8 @@ class Job(BaseModel):
     result: dict[str, Any] | None = None
     credits: dict[str, Any] | None = None
     error: str | dict[str, Any] | None = None
+    needs_input: dict[str, Any] | None = None
+    retry_after_seconds: float | None = Field(default=None, exclude=True, ge=0)
 
 
 class OrigamiSearchRequest(BaseModel):

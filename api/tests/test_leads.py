@@ -40,6 +40,8 @@ def fake_structured(**_: object) -> IcpProfile:
 
 
 class FakeOrigami:
+    exported_ids: list[str] | None = None
+
     async def read_rows(self, list_id: str, ids: list[str]) -> list[dict[str, object]]:
         assert list_id == "list-1"
         assert ids == ["row-1", "row-2", "row-3"]
@@ -49,7 +51,9 @@ class FakeOrigami:
             {"id": "row-3", "is_excluded": True, "cells": {"company_name": "Excluded Co"}},
         ]
 
-    async def export_csv(self, list_id: str) -> str:
+    async def export_csv(self, list_id: str, ids: list[str]) -> str:
+        assert list_id == "list-1"
+        self.exported_ids = ids
         return ""
 
 
@@ -70,9 +74,10 @@ async def test_complete_search_orders_by_similarity_and_skips_excluded(
 
     monkeypatch.setattr("app.services.leads.poll_until_done", done)
 
+    origami = FakeOrigami()
     await complete_search(
         store,
-        FakeOrigami(),  # type: ignore[arg-type]
+        origami,  # type: ignore[arg-type]
         fake_embed,
         Settings(_env_file=None),
         icp_profile_id=str(profile.id),
@@ -82,3 +87,38 @@ async def test_complete_search_orders_by_similarity_and_skips_excluded(
     leads = store.list_leads(icp_profile_id=str(profile.id))
     assert [lead.company_name for lead in leads] == ["Best Fit Advisory", "Lower Fit Studio"]
     assert leads[0].origami_relevance_score == 0.95
+    assert origami.exported_ids == ["row-1", "row-2", "row-3"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "result",
+    [
+        {},
+        {"list_id": "list-1", "row_ids": "row-1"},
+        {"list_id": "list-1", "row_ids": ["row-1", "row-1"]},
+        {"list_id": "list-1", "row_ids": [""]},
+        {"list_id": "list-1", "row_ids": [f"row-{index}" for index in range(101)]},
+    ],
+)
+async def test_complete_search_rejects_malformed_provider_results(
+    monkeypatch: pytest.MonkeyPatch, result: dict[str, object]
+) -> None:
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, FIXTURES_DIR)
+    profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
+
+    async def done(*_: object, **__: object) -> Job:
+        return Job(id="job-1", status="succeeded", result=result)
+
+    monkeypatch.setattr("app.services.leads.poll_until_done", done)
+
+    with pytest.raises(RuntimeError, match="malformed search result"):
+        await complete_search(
+            store,
+            FakeOrigami(),  # type: ignore[arg-type]
+            fake_embed,
+            Settings(_env_file=None),
+            icp_profile_id=str(profile.id),
+            job_id="job-1",
+        )

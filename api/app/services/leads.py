@@ -8,6 +8,8 @@ from app.services.icp import cosine_similarity, won_centroid
 from app.services.icp_leads_store import IcpLeadsStore
 from app.services.origami import OrigamiClient, map_rows_to_leads, poll_until_done
 
+MAX_SEARCH_RESULT_ROWS = 100
+
 
 async def start_search(
     store: IcpLeadsStore,
@@ -40,10 +42,20 @@ async def complete_search(
         raise ValueError("ICP profile not found")
     job = await poll_until_done(origami, job_id)
     result = job.result or {}
-    list_id = str(result.get("list_id") or "")
-    row_ids = [str(row_id) for row_id in result.get("row_ids", [])]
+    list_id = result.get("list_id")
+    raw_row_ids = result.get("row_ids")
+    if not isinstance(list_id, str) or not list_id.strip():
+        raise RuntimeError("Origami returned a malformed search result")
+    if (
+        not isinstance(raw_row_ids, list)
+        or len(raw_row_ids) > MAX_SEARCH_RESULT_ROWS
+        or not all(isinstance(row_id, str) and row_id.strip() for row_id in raw_row_ids)
+        or len(set(raw_row_ids)) != len(raw_row_ids)
+    ):
+        raise RuntimeError("Origami returned a malformed search result")
+    row_ids = raw_row_ids
     rows = await origami.read_rows(list_id, row_ids) if list_id and row_ids else []
-    csv_text = await origami.export_csv(list_id) if list_id else None
+    csv_text = await origami.export_csv(list_id, row_ids) if row_ids else None
     leads = map_rows_to_leads(rows, csv_text)
     if not leads:
         store.log_activity(
@@ -69,7 +81,7 @@ async def complete_search(
         lead.embedding_model = settings.embedding_model
         lead.similarity_score = max(-1.0, min(1.0, cosine_similarity(vector, centroid)))
         lead.origami_relevance_score = _normalise_relevance(lead.origami_relevance_score)
-        lead.metadata["source"] = "fixtures"
+        lead.metadata["source"] = "origami"
         stored.append(store.upsert_lead(lead))
     store.log_activity(
         "leads.sourced",
