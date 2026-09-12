@@ -50,17 +50,42 @@ def test_outreach_approve_sets_lifecycle_fields_and_refuses_second_approve() -> 
         lead_id=str(lead.id),
         rep_name="Sam",
     )
-    sent = approve_outreach(store, draft_id=str(draft.id), actor="anna")
+    approved = approve_outreach(store, draft_id=str(draft.id), actor="anna")
 
-    assert sent.status == "sent"
-    assert sent.approved_by == "anna"
-    assert sent.approved_at is not None
-    assert sent.sent_at is not None
-    assert sent.sent_at >= sent.approved_at
-    assert store.get_lead(str(lead.id)).status == "contacted"  # type: ignore[union-attr]
+    assert approved.status == "approved"
+    assert approved.approved_by == "anna"
+    assert approved.approved_at is not None
+    assert approved.sent_at is None
+    assert store.get_lead(str(lead.id)).status == "approved"  # type: ignore[union-attr]
     try:
         approve_outreach(store, draft_id=str(draft.id), actor="anna")
     except ValueError as error:
         assert "Only draft outreach" in str(error)
     else:
         raise AssertionError("Second approve should fail")
+
+
+def test_outreach_approval_preserves_an_already_contacted_lead() -> None:
+    store = InMemoryIcpLeadsStore()
+    lead = store.upsert_lead(
+        LeadIn(
+            company_name="Existing Customer",
+            email="customer@example.com",
+            origami_row_id="already-contacted",
+        )
+    )
+    store.update_lead_status(str(lead.id), "contacted")
+    draft = store.insert_draft(
+        {
+            "lead_id": str(lead.id),
+            "kind": "outreach",
+            "subject": "A new note",
+            "body": "Would another conversation help?",
+            "status": "draft",
+        }
+    )
+
+    approved = approve_outreach(store, draft_id=str(draft.id), actor="anna")
+
+    assert approved.status == "approved"
+    assert store.get_lead(str(lead.id)).status == "contacted"  # type: ignore[union-attr]

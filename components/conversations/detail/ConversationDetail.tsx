@@ -82,7 +82,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
       setPipelineRevision((revision) => revision + 1);
       setDraftId(live.draft.id);
       draftIdRef.current = live.draft.id;
-      setApprovedDraftId(live.draft.status === "sent" ? live.draft.id : undefined);
+      setApprovedDraftId(["approved", "sent"].includes(live.draft.status) ? live.draft.id : undefined);
       setPipelineStatus("live");
       log("Live pipeline completed", "API · transcript → CRM fields → draft", "sparkles");
 
@@ -150,7 +150,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
       if (draftIdRef.current === draftId) {
         setApprovedDraftId(draftId);
         if (!syncedRef.current) patchConversation(call.id, { status: "action_ready" });
-        log("Follow-up approved", "Live API activity · delivery simulated", "mail");
+        log("Follow-up approved", "Live API activity · not sent", "mail");
       }
     } catch (error) {
       setPipelineError(

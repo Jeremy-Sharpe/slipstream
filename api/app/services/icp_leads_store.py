@@ -83,7 +83,9 @@ class IcpLeadsStore(Protocol):
 
     def get_draft(self, draft_id: str) -> Draft | None: ...
 
-    def update_draft_sent(self, draft_id: str, *, actor: str, when: datetime) -> Draft: ...
+    def approve_outreach_draft(self, draft_id: str, *, actor: str, when: datetime) -> Draft: ...
+
+    def update_draft_delivered(self, draft_id: str, *, when: datetime) -> Draft: ...
 
 
 def _now() -> str:
@@ -419,17 +421,25 @@ class SupabaseIcpLeadsStore:
         rows = self._client.table("drafts").select("*").eq("id", draft_id).execute().data
         return Draft.model_validate(rows[0]) if rows else None
 
-    def update_draft_sent(self, draft_id: str, *, actor: str, when: datetime) -> Draft:
-        payload = {
-            "status": "sent",
-            "approved_by": actor,
-            "approved_at": when.isoformat(),
-            "sent_at": when.isoformat(),
-        }
+    def approve_outreach_draft(self, draft_id: str, *, actor: str, when: datetime) -> Draft:
+        row = (
+            self._client.rpc(
+                "approve_outreach_draft",
+                {"requested_draft_id": draft_id, "requested_actor": actor},
+            )
+            .execute()
+            .data
+        )
+        if not isinstance(row, dict):
+            raise RuntimeError("Outreach approval returned an invalid response")
+        return Draft.model_validate(row)
+
+    def update_draft_delivered(self, draft_id: str, *, when: datetime) -> Draft:
         row = self._single(
             self._client.table("drafts")
-            .update(payload)
+            .update({"status": "sent", "sent_at": when.isoformat()})
             .eq("id", draft_id)
+            .eq("status", "approved")
             .select("*")
             .execute()
             .data
@@ -672,11 +682,34 @@ class InMemoryIcpLeadsStore:
         row = self.drafts.get(draft_id)
         return Draft.model_validate(deepcopy(row)) if row else None
 
-    def update_draft_sent(self, draft_id: str, *, actor: str, when: datetime) -> Draft:
+    def approve_outreach_draft(self, draft_id: str, *, actor: str, when: datetime) -> Draft:
         row = deepcopy(self.drafts[draft_id])
-        row["status"] = "sent"
+        if row.get("status") != "draft":
+            return Draft.model_validate(row)
+        row["status"] = "approved"
         row["approved_by"] = actor
         row["approved_at"] = when
+        row["sent_at"] = None
+        row["updated_at"] = _now()
+        self.drafts[draft_id] = row
+        lead = self.get_lead(str(row["lead_id"]))
+        if lead is None:
+            raise RuntimeError("Outreach draft lead disappeared")
+        if lead.status != "contacted":
+            self.update_lead_status(str(row["lead_id"]), "approved")
+        self.log_activity(
+            "outreach.approved",
+            actor=actor,
+            lead_id=str(row["lead_id"]),
+            details={"draft_id": draft_id, "delivery": "not_sent"},
+        )
+        return Draft.model_validate(deepcopy(row))
+
+    def update_draft_delivered(self, draft_id: str, *, when: datetime) -> Draft:
+        row = deepcopy(self.drafts[draft_id])
+        if row.get("status") != "approved":
+            raise RuntimeError("Only approved drafts can be delivered")
+        row["status"] = "sent"
         row["sent_at"] = when
         row["updated_at"] = _now()
         self.drafts[draft_id] = row

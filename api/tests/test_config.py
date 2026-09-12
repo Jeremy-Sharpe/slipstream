@@ -95,6 +95,9 @@ def test_checked_in_example_accepts_blank_optional_credentials(
         "ORIGAMI_API_KEY",
         "CRM_WEBHOOK_URL",
         "CRM_WEBHOOK_SECRET",
+        "RESEND_API_KEY",
+        "RESEND_FROM",
+        "RESEND_BASE_URL",
         "WEB_ORIGIN",
         "WEB_ORIGINS",
     ):
@@ -164,6 +167,61 @@ def test_crm_webhook_configuration_is_canonical_and_visible() -> None:
     ],
 )
 def test_invalid_crm_webhook_configuration_is_rejected(kwargs: dict[str, str]) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, **kwargs)
+
+
+def test_resend_configuration_is_canonical_and_visible() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        ingest_token="server-mutation-secret",
+        supabase_url="https://database.example",
+        supabase_service_role_key="service-role-secret",
+        resend_api_key="re_test_secret",
+        resend_from="Slipstream <sales@example.com>",
+        resend_base_url="HTTPS://API.RESEND.COM:443/",
+    )
+
+    assert settings.resend_base_url == "https://api.resend.com"
+    assert settings.integration_flags["email_delivery"] is True
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"resend_api_key": "re_test_secret"},
+        {"resend_from": "sales@example.com"},
+        {
+            "resend_api_key": "re_test_secret",
+            "resend_from": "not-an-address",
+            "ingest_token": "server-secret",
+        },
+        {
+            "resend_api_key": "re_test_secret",
+            "resend_from": "one@example.com, two@example.com",
+            "ingest_token": "server-secret",
+        },
+        {
+            "resend_api_key": "re_test_secret",
+            "resend_from": "sales@example.com",
+        },
+        {
+            "environment": "production",
+            "resend_api_key": "re_test_secret",
+            "resend_from": "sales@example.com",
+            "resend_base_url": "http://api.resend.test",
+            "ingest_token": "server-secret",
+        },
+        {
+            "environment": "production",
+            "resend_api_key": "re_test_secret",
+            "resend_from": "sales@example.com",
+            "ingest_token": "server-secret",
+        },
+    ],
+)
+def test_invalid_resend_configuration_is_rejected(kwargs: dict[str, str]) -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, **kwargs)
 

@@ -29,7 +29,7 @@ function senderLabel(message: ApiEmailRecord | DemoEmailThread["messages"][numbe
 export function EmailConversationDetail({ thread }: { thread: DemoEmailThread }) {
   const [messages, setMessages] = useState<Array<ApiEmailRecord | DemoEmailThread["messages"][number]>>(thread.messages);
   const [draft, setDraft] = useState<ApiDraft>();
-  const [phase, setPhase] = useState<"evaluation" | "running" | "live" | "approving" | "approved" | "error">("evaluation");
+  const [phase, setPhase] = useState<"evaluation" | "running" | "live" | "approving" | "approved" | "sent" | "error">("evaluation");
   const [error, setError] = useState<string>();
   const controller = useRef<AbortController | null>(null);
   const inFlight = useRef(false);
@@ -63,7 +63,7 @@ export function EmailConversationDetail({ thread }: { thread: DemoEmailThread })
       if (signal.aborted) return;
       setMessages(liveMessages);
       setDraft(liveDraft);
-      setPhase(liveDraft.status === "sent" ? "approved" : "live");
+      setPhase(liveDraft.status === "sent" ? "sent" : liveDraft.status === "approved" ? "approved" : "live");
     } catch (caught) {
       if (signal.aborted) return;
       setError(caught instanceof Error ? caught.message : "The live email pipeline did not complete");
@@ -81,7 +81,7 @@ export function EmailConversationDetail({ thread }: { thread: DemoEmailThread })
     try {
       const approved = await approveDraft(draft.id);
       setDraft(approved);
-      setPhase("approved");
+      setPhase(approved.status === "sent" ? "sent" : "approved");
     } catch (caught) {
       const message = caught instanceof ApiError && caught.status === 409
         ? "This draft changed before approval. Run the email pipeline again to review the latest version."
@@ -94,7 +94,7 @@ export function EmailConversationDetail({ thread }: { thread: DemoEmailThread })
   };
 
   const isBusy = phase === "running" || phase === "approving";
-  const isLive = phase === "live" || phase === "approving" || phase === "approved";
+  const isLive = phase === "live" || phase === "approving" || phase === "approved" || phase === "sent";
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-page">
@@ -127,7 +127,7 @@ export function EmailConversationDetail({ thread }: { thread: DemoEmailThread })
         {isBusy ? <Loader2 className="size-4 animate-spin text-primary" /> : isLive ? <Check className="size-4 text-primary" /> : <Server className="size-4 text-muted-foreground" />}
         <div className="min-w-0 flex-1">
           <p className="text-[14px] font-medium text-ink">
-            {phase === "running" ? "Ingesting the thread and drafting from its history…" : phase === "approved" ? "Reply approved · delivery simulated" : isLive ? "Live API email thread" : phase === "error" ? "Live API needs attention" : "Labelled email example ready"}
+            {phase === "running" ? "Ingesting the thread and drafting from its history…" : phase === "approved" ? "Reply approved · not sent" : phase === "sent" ? "Reply sent · provider delivery recorded" : isLive ? "Live API email thread" : phase === "error" ? "Live API needs attention" : "Labelled email example ready"}
           </p>
           <p className="truncate text-[12px] text-muted-foreground">{error ?? (isLive ? "Provider-scoped history and grounded reply returned by the deployed API" : API_BASE_URL)}</p>
         </div>
@@ -172,10 +172,10 @@ export function EmailConversationDetail({ thread }: { thread: DemoEmailThread })
               <div className="space-y-3">
                 <div className="rounded-md border border-line bg-page px-3 py-2 text-[13px] font-medium text-ink">{draft.subject}</div>
                 <div className="whitespace-pre-wrap rounded-md border border-line bg-page px-3 py-3 text-[13px] leading-5 text-foreground">{draft.body}</div>
-                <p className="text-[11px] text-muted-foreground">Drafted only from this thread. Approval records an activity; no email is delivered.</p>
+                <p className="text-[11px] text-muted-foreground">Drafted only from this thread. Approval records an activity but does not send.</p>
                 <Button onClick={() => void approve()} disabled={phase !== "live" || draft.status !== "draft"} className="w-full">
                   {phase === "approving" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
-                  {phase === "approved" ? "Approved · simulated" : "Approve reply"}
+                  {phase === "sent" ? "Sent · delivered" : phase === "approved" ? "Approved · not sent" : "Approve reply"}
                 </Button>
               </div>
             ) : (

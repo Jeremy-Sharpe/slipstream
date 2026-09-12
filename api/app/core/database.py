@@ -1,4 +1,4 @@
-from supabase import Client, create_client
+from supabase import Client, ClientOptions, create_client
 
 from app.core.config import Settings
 
@@ -10,4 +10,8 @@ def create_supabase(settings: Settings) -> Client | None:
     return create_client(
         settings.supabase_url,
         settings.supabase_service_role_key.get_secret_value(),
+        options=ClientOptions(
+            postgrest_client_timeout=10,
+            function_client_timeout=10,
+        ),
     )

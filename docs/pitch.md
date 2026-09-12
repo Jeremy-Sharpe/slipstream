@@ -10,7 +10,7 @@ We built Slipstream: an AI sales layer that sits beside the CRM a team already h
 
 A call enters Slipstream as audio. ElevenLabs Scribe transcribes it and separates the speakers. Slipstream turns that conversation into structured contact, company and deal fields, including promises, objections and the agreed next step. Every extracted field carries confidence and evidence, so a rep can jump back to the exact words before approving the update.
 
-Then Slipstream drafts the follow-up. It uses what was actually agreed, not a generic template. In our demo call, the rep makes an unsupported claim that cyber insurance will be cut in half. Slipstream records the risk but does not repeat it in the email. One click approves the draft, records who approved it and marks delivery as simulated for this hackathon. The action is idempotent, so a refresh cannot send twice.
+Then Slipstream drafts the follow-up. It uses what was actually agreed, not a generic template. In our demo call, the rep makes an unsupported claim that cyber insurance will be cut in half. Slipstream records the risk but does not repeat it in the email. One click approves the draft and records who approved it without pretending it was sent. A separate server-side Resend adapter can deliver only that approved copy with a stable idempotency key.
 
 That already saves over an hour a day for a rep doing eight calls. But the real difference is what happens across the whole team.
 
@@ -30,7 +30,7 @@ Enterprise teams can stitch together Gong, a CRM, Clay and a RevOps person. A tw
 
 ### What is real, and what is mocked? — Jeremy
 
-The businesses and calls are synthetic, so no customer data is exposed. The demo audio is a real two-voice ElevenLabs file. Ingestion, diarised transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval state, ICP services and production API are executable. Email delivery is intentionally simulated. Origami sourcing requires its paid key; when that integration is unavailable, only the explicitly labelled evaluation leads remain displayable.
+The businesses and calls are synthetic, so no customer data is exposed. The demo audio is a real two-voice ElevenLabs file. Ingestion, diarised transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval state, ICP services and production API are executable. The public deployment intentionally has no email-provider key, so delivery fails closed instead of being simulated. Origami sourcing requires its paid key; when that integration is unavailable, only the explicitly labelled evaluation leads remain displayable.
 
 ### How accurate is the extraction? — Anna
 

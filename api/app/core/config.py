@@ -1,3 +1,5 @@
+import re
+from email.utils import parseaddr
 from functools import lru_cache
 from typing import Annotated, Literal
 from urllib.parse import urlsplit, urlunsplit
@@ -80,6 +82,23 @@ def _split_origins(value: object) -> list[str]:
     return [_canonical_http_origin(origin) for origin in origins]
 
 
+def _valid_mailbox(value: str) -> str:
+    candidate = value.strip()
+    if not candidate or len(candidate) > 320 or "\r" in candidate or "\n" in candidate:
+        raise ValueError("RESEND_FROM must be a bounded email mailbox")
+    display_name, address = parseaddr(candidate)
+    address_pattern = r"[^\s@<>]+@[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?\.[A-Za-z]{2,}"
+    exact_address = candidate == address
+    exact_named_address = (
+        bool(display_name)
+        and candidate.endswith(f"<{address}>")
+        and candidate[: -len(f"<{address}>")].strip() == display_name
+    )
+    if not re.fullmatch(address_pattern, address) or not (exact_address or exact_named_address):
+        raise ValueError("RESEND_FROM must contain a valid email address")
+    return candidate
+
+
 Origins = Annotated[list[str], NoDecode, BeforeValidator(_split_origins)]
 
 
@@ -114,10 +133,13 @@ class Settings(BaseSettings):
     origami_api_key: SecretStr | None = None
     crm_webhook_url: str | None = None
     crm_webhook_secret: SecretStr | None = None
+    resend_api_key: SecretStr | None = None
+    resend_from: str | None = None
     reasoning_model: str = "gpt-5.4"
     embedding_model: str = "text-embedding-3-small"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     origami_base_url: str = "https://origami.chat/api/v3"
+    resend_base_url: str = "https://api.resend.com"
 
     @field_validator("log_level", mode="before")
     @classmethod
@@ -135,6 +157,8 @@ class Settings(BaseSettings):
         "origami_api_key",
         "crm_webhook_url",
         "crm_webhook_secret",
+        "resend_api_key",
+        "resend_from",
         mode="before",
     )
     @classmethod
@@ -167,6 +191,17 @@ class Settings(BaseSettings):
                 raise ValueError("CRM_WEBHOOK_SECRET must contain at least 32 bytes")
             if self.ingest_token is None:
                 raise ValueError("INGEST_TOKEN is required with CRM_WEBHOOK_URL")
+        if bool(self.resend_api_key) != bool(self.resend_from):
+            raise ValueError("RESEND_API_KEY and RESEND_FROM must be set together")
+        self.resend_base_url = _canonical_http_origin(
+            self.resend_base_url, production=self.environment == "production"
+        )
+        if self.resend_from:
+            self.resend_from = _valid_mailbox(self.resend_from)
+            if self.ingest_token is None:
+                raise ValueError("INGEST_TOKEN is required with RESEND_API_KEY")
+            if self.environment == "production" and self.supabase_url is None:
+                raise ValueError("Supabase is required with RESEND_API_KEY in production")
         return self
 
     @property
@@ -212,6 +247,7 @@ class Settings(BaseSettings):
             "elevenlabs": self.elevenlabs_api_key is not None,
             "origami": self.origami_api_key is not None,
             "crm_webhook": self.crm_webhook_url is not None,
+            "email_delivery": self.resend_api_key is not None,
         }
 
 
