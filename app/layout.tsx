@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import { Sidebar } from "@/components/shell/Sidebar";
+import { Topbar } from "@/components/shell/Topbar";
 import "./globals.css";
 
-const sans = Geist({ variable: "--font-sans", subsets: ["latin"] });
+const sans = Inter({ variable: "--font-sans", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -14,10 +15,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+      <body className="min-h-screen bg-background font-sans text-[15px] text-foreground antialiased">
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="min-w-0 flex-1">{children}</main>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <Topbar />
+            <main className="min-w-0 flex-1">{children}</main>
+          </div>
         </div>
       </body>
     </html>

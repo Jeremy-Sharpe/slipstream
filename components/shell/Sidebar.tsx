@@ -1,59 +1,63 @@
 "use client";
 
-import { BarChart3, Calendar, Home, MessageSquare, Send, Settings, Target, Zap } from "lucide-react";
+import { BarChart3, Calendar, Home, MessageSquare, PanelLeft, Send, Settings, Target, Zap, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+type Item = { href: string; label: string; icon: LucideIcon; count?: number };
+
+const MAIN: Item[] = [
   { href: "/home", label: "Home", icon: Home },
   { href: "/", label: "Conversations", icon: MessageSquare, count: 13 },
   { href: "/leads", label: "Leads", icon: Target },
   { href: "/intelligence", label: "Intelligence", icon: BarChart3 },
   { href: "/campaigns", label: "Campaigns", icon: Send },
   { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
+
+const BOTTOM: Item[] = [{ href: "/settings", label: "Settings", icon: Settings }];
+
+function NavItem({ item, active }: { item: Item; active: boolean }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex h-10 items-center gap-3 rounded-lg px-3 text-[15px] text-foreground/80 transition-colors hover:bg-muted hover:text-foreground",
+        active && "bg-muted font-medium text-foreground",
+      )}
+    >
+      <Icon className="size-5" strokeWidth={1.75} />
+      <span className="flex-1">{item.label}</span>
+      {item.count != null && (
+        <span className="rounded-full border border-border px-2 py-px text-xs tabular-nums text-muted-foreground">{item.count}</span>
+      )}
+    </Link>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-border bg-background px-3 py-4">
-      <Link href="/" className="flex items-center gap-2 px-2 py-1.5 text-sm font-semibold tracking-tight">
-        <Zap className="size-4" strokeWidth={2.25} />
-        Slipstream
-      </Link>
+    <aside className="sticky top-0 flex h-screen w-[250px] shrink-0 flex-col border-r border-border bg-background">
+      <div className="flex h-16 items-center justify-between border-b border-border pr-3 pl-5">
+        <Link href="/" className="flex items-center gap-2 text-[17px] font-semibold tracking-tight">
+          <Zap className="size-5" strokeWidth={2.25} />
+          Slipstream
+        </Link>
+        <button className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Collapse sidebar">
+          <PanelLeft className="size-4" strokeWidth={1.75} />
+        </button>
+      </div>
 
-      <nav className="mt-6 flex flex-col gap-0.5">
-        {NAV.map(({ href, label, icon: Icon, count }) => {
-          const active = pathname === href;
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex h-8 items-center gap-2.5 rounded-md px-2 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                active && "bg-muted font-medium text-foreground",
-              )}
-            >
-              <Icon className="size-4" strokeWidth={1.75} />
-              <span className="flex-1">{label}</span>
-              {count != null && <span className="rounded-sm bg-foreground/[.06] px-1.5 py-px text-[11px] tabular-nums text-foreground/70">{count}</span>}
-            </Link>
-          );
-        })}
+      <nav className="flex flex-col gap-0.5 p-3">
+        {MAIN.map((item) => <NavItem key={item.href} item={item} active={pathname === item.href} />)}
       </nav>
 
-      <div className="mt-auto rounded-md border border-border p-3">
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="font-medium">Pro plan</span>
-          <span className="text-muted-foreground">Upgrade</span>
-        </div>
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted">
-          <div className="h-full w-[7%] rounded-full bg-foreground" />
-        </div>
-        <p className="mt-1.5 text-[11px] text-muted-foreground">72 / 1,000 calls this month</p>
-      </div>
+      <nav className="mt-auto flex flex-col gap-0.5 border-t border-border p-3">
+        {BOTTOM.map((item) => <NavItem key={item.href} item={item} active={pathname === item.href} />)}
+      </nav>
     </aside>
   );
 }
