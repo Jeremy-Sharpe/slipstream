@@ -144,3 +144,16 @@
     @apply font-sans;
     }
 }
+/* The Clay references were measured at ~1.39x (Retina captures) and the
+   layout is specified in those units, so the whole app is scaled back to
+   Clay's real density here. Viewport-height utilities have to compensate,
+   because 100vh inside a zoomed element is scaled too. */
+:root { --ui-scale: 0.72; }
+body { zoom: var(--ui-scale); }
+@layer utilities {
+  .h-screen { height: calc(100vh / var(--ui-scale)); }
+  .min-h-screen { min-height: calc(100vh / var(--ui-scale)); }
+  .h-\[calc\(100vh-56px\)\] { height: calc(100vh / var(--ui-scale) - 56px); }
+  .h-\[calc\(100vh-64px\)\] { height: calc(100vh / var(--ui-scale) - 64px); }
+  .min-h-\[calc\(100vh-64px\)\] { min-height: calc(100vh / var(--ui-scale) - 64px); }
+}
