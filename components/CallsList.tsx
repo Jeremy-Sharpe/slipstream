@@ -6,11 +6,14 @@ import { useStore } from "@/lib/store";
 import { Avatar, CompanyTile } from "./Avatar";
 import { OutcomePill, fmtDate, fmtTime } from "./ui";
 
-export function CallsList() {
+export function CallsList({ query = "" }: { query?: string }) {
   const { calls, runs } = useStore();
+  const q = query.trim().toLowerCase();
+  const rows = q ? calls.filter((c) => `${c.contact} ${c.company} ${c.title}`.toLowerCase().includes(q)) : calls;
   return (
     <ul className="divide-y divide-line-soft border-y border-line-soft">
-      {calls.map((c) => {
+      {rows.length === 0 && <li className="py-16 text-center text-[14px] text-faint">Nothing matches.</li>}
+      {rows.map((c) => {
         const run = runs[c.id];
         return (
           <li key={c.id}>

@@ -16,8 +16,8 @@ export function RunView({ call }: { call: CallRecord }) {
 
   return (
     <div>
-      <Link href="/" className="inline-flex items-center gap-1.5 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
-        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Home
+      <Link href="/calls" className="inline-flex items-center gap-1.5 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
+        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Calls
       </Link>
       <div className="mt-4 flex items-center gap-3">
         <Avatar name={call.contact} size={36} />
