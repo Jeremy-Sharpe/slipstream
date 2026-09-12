@@ -37,6 +37,14 @@ require `X-Slipstream-Ingest-Token` when `INGEST_TOKEN` is configured.
 
 The ICP lane loads the labelled fixture calls as CRM history, derives the ideal customer profile from fixture-sourced won deals, starts an Origami lead search from the generated brief, scores returned leads against the won-deal centroid, and drafts one-click outreach emails that are marked sent on approval.
 
+Approved call extraction can also leave Slipstream's HubSpot-shaped staging store through
+the provider-neutral CRM webhook. Configure `CRM_WEBHOOK_URL`, a 32-byte-or-longer
+`CRM_WEBHOOK_SECRET`, and `INGEST_TOKEN`, then call
+`POST /api/v1/calls/{conversation_id}/crm-sync` with the ingest-token header. The exact
+receiver contract, signature verification and idempotency requirements are documented in
+[`../docs/crm-webhook.md`](../docs/crm-webhook.md). The webhook excludes transcripts,
+evidence quotes, objections and promises; a receiver gets only bounded CRM fields.
+
 Every row written by this lane carries `metadata.source = "fixtures"` where the table has metadata, and ICP derivation reads only deals with that marker. The demo call is loaded with `metadata.demo = true` and is excluded from ICP derivation by default.
 
 Embeddings use `EMBEDDING_MODEL`, defaulting to OpenAI `text-embedding-3-small`, matching the schema's 1536-dimensional vectors. Reasoning uses `REASONING_MODEL`, defaulting to `gpt-5.4`, and selects the provider from the model name.

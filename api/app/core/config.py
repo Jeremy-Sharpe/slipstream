@@ -40,6 +40,34 @@ def _canonical_http_origin(value: str, *, production: bool = False) -> str:
     return urlunsplit((parsed.scheme.lower(), netloc, "", "", ""))
 
 
+def _canonical_webhook_url(value: str, *, production: bool = False) -> str:
+    parsed = urlsplit(value.strip())
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError("CRM_WEBHOOK_URL must be an absolute HTTP(S) URL")
+    if production and parsed.scheme != "https":
+        raise ValueError("CRM_WEBHOOK_URL must use HTTPS in production")
+    if parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise ValueError("CRM_WEBHOOK_URL must not contain credentials, a query, or a fragment")
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise ValueError("CRM_WEBHOOK_URL has an invalid port") from error
+    host = parsed.hostname.lower()
+    if ":" in host:
+        host = f"[{host}]"
+    default_port = 80 if parsed.scheme == "http" else 443
+    netloc = host if port in {None, default_port} else f"{host}:{port}"
+    return urlunsplit(
+        (
+            parsed.scheme.lower(),
+            netloc,
+            parsed.path or "/",
+            "",
+            "",
+        )
+    )
+
+
 def _split_origins(value: object) -> list[str]:
     if isinstance(value, str):
         origins = [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
@@ -84,6 +112,8 @@ class Settings(BaseSettings):
     elevenlabs_api_key: SecretStr | None = None
     ingest_token: SecretStr | None = None
     origami_api_key: SecretStr | None = None
+    crm_webhook_url: str | None = None
+    crm_webhook_secret: SecretStr | None = None
     reasoning_model: str = "gpt-5.4"
     embedding_model: str = "text-embedding-3-small"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
@@ -103,6 +133,8 @@ class Settings(BaseSettings):
         "elevenlabs_api_key",
         "ingest_token",
         "origami_api_key",
+        "crm_webhook_url",
+        "crm_webhook_secret",
         mode="before",
     )
     @classmethod
@@ -125,6 +157,16 @@ class Settings(BaseSettings):
             and self.ingest_token is None
         ):
             raise ValueError("INGEST_TOKEN is required with ELEVENLABS_API_KEY in production")
+        if bool(self.crm_webhook_url) != bool(self.crm_webhook_secret):
+            raise ValueError("CRM_WEBHOOK_URL and CRM_WEBHOOK_SECRET must be set together")
+        if self.crm_webhook_url:
+            self.crm_webhook_url = _canonical_webhook_url(
+                self.crm_webhook_url, production=self.environment == "production"
+            )
+            if len(self.crm_webhook_secret.get_secret_value().encode()) < 32:  # type: ignore[union-attr]
+                raise ValueError("CRM_WEBHOOK_SECRET must contain at least 32 bytes")
+            if self.ingest_token is None:
+                raise ValueError("INGEST_TOKEN is required with CRM_WEBHOOK_URL")
         return self
 
     @property
@@ -169,6 +211,7 @@ class Settings(BaseSettings):
             "embeddings": self.embedding_provider is not None,
             "elevenlabs": self.elevenlabs_api_key is not None,
             "origami": self.origami_api_key is not None,
+            "crm_webhook": self.crm_webhook_url is not None,
         }
 
 

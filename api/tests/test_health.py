@@ -21,6 +21,7 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
         "embeddings": False,
         "elevenlabs": False,
         "origami": False,
+        "crm_webhook": False,
     }
 
 
