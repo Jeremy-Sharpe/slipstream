@@ -10,7 +10,12 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 from pydantic import BaseModel, Field
 
 from app.core.config import Settings
-from app.core.llm import MissingReasoningProviderError, ReasoningClient, structured
+from app.core.llm import (
+    MissingReasoningProviderError,
+    ReasoningClient,
+    ReasoningResult,
+    structured,
+)
 from app.routers.calls import CallResponse
 from app.schemas.extraction import ExtractionResult
 
@@ -130,7 +135,12 @@ def draft_follow_up(extraction: ExtractionResult) -> DraftResponse:
     )
 
 
-def _model_payload(extraction: ExtractionResult, call: CallResponse) -> str:
+def _model_payload(
+    extraction: ExtractionResult,
+    call: CallResponse,
+    *,
+    include_transcript: bool = True,
+) -> str:
     with SELLER_PATH.open(encoding="utf-8") as seller_file:
         seller = json.load(seller_file)
     rep_name = (
@@ -172,9 +182,14 @@ def _model_payload(extraction: ExtractionResult, call: CallResponse) -> str:
             if extraction.next_step
             else None
         ),
-        "transcript": [
-            {"speaker": segment.speaker, "body": segment.body} for segment in call.segments
-        ],
+        "transcript": (
+            [
+                {"speaker": segment.speaker, "body": segment.body}
+                for segment in call.segments
+            ]
+            if include_transcript
+            else []
+        ),
         "seller": {
             "name": seller["name"],
             "description": seller["description"],
@@ -187,14 +202,25 @@ def _model_payload(extraction: ExtractionResult, call: CallResponse) -> str:
 def draft_with_model(
     extraction: ExtractionResult, call: CallResponse, reasoning: Settings | ReasoningClient
 ) -> DraftResponse:
-    try:
-        result = structured(
+    def generate(*, include_transcript: bool) -> ReasoningResult[FollowUpDraftContent]:
+        return structured(
             reasoning,
             system=PROMPT_PATH.read_text(encoding="utf-8"),
-            user=_model_payload(extraction, call),
+            user=_model_payload(
+                extraction,
+                call,
+                include_transcript=include_transcript,
+            ),
             schema=FollowUpDraftContent,
             max_tokens=1200,
         )
+
+    try:
+        result = generate(include_transcript=True)
+        subject = result.output.subject.strip()
+        body = result.output.body.strip()
+        if _contains_risky_claim(subject) or _contains_risky_claim(body):
+            result = generate(include_transcript=False)
     except MissingReasoningProviderError:
         raise
     except Exception as error:

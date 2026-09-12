@@ -205,6 +205,34 @@ def test_risky_model_claim_returns_502(
     assert response.status_code == 502
 
 
+def test_risky_model_claim_gets_one_transcript_free_regeneration(
+    client: TestClient, monkeypatch
+) -> None:
+    payloads: list[dict[str, object]] = []
+
+    def fake(reasoning, *, system, user, schema, max_tokens=4000, timeout=None):
+        payloads.append(json.loads(user))
+        body = (
+            "I guarantee Essential Eight compliance inside a week."
+            if len(payloads) == 1
+            else "Thanks for your time. I will send the proposal for review."
+        )
+        return ReasoningResult(
+            output=FollowUpDraftContent(subject="Proposal follow-up", body=body),
+            model="fake/model",
+            provider="openrouter",
+        )
+
+    monkeypatch.setattr("app.services.draft.structured", fake)
+    call, _ = _ingest_and_extract(client)
+
+    response = client.post(f"/api/v1/drafts/from-call/{call['id']}")
+
+    assert response.status_code == 200
+    assert len(payloads[0]["transcript"]) > 0
+    assert payloads[1]["transcript"] == []
+
+
 @pytest.mark.parametrize(
     "body",
     [
