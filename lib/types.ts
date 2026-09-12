@@ -27,6 +27,8 @@ export type Conversation = {
   /** One line from the conversation, shown in the feed. */
   preview: string;
   status: ConversationStatus;
+  /** For a call added from a recorded fixture: the fixture it was copied from. */
+  sourceId?: string;
 };
 
 // Leads surface. snake_case because these mirror the Supabase `leads` row and

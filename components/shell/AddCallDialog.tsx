@@ -22,7 +22,7 @@ export function AddCallDialog() {
     } else {
       const src = fixtures.find((f) => f.id === pick);
       if (!src) return;
-      addConversation({ ...src, id, at: now, status: "processing", preview: "Transcribing…" });
+      addConversation({ ...src, id, sourceId: src.sourceId ?? src.id, at: now, status: "processing", preview: "Transcribing…" });
     }
     setFile(null);
     setOpen(false);

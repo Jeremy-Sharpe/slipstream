@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
 import { ConversationDetail } from "@/components/conversations/detail/ConversationDetail";
+import { PendingConversation } from "@/components/conversations/detail/PendingConversation";
 import { callById, calls } from "@/lib/data/calls";
 
 export function generateStaticParams() {
@@ -8,8 +8,9 @@ export function generateStaticParams() {
 
 export default async function ConversationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const call = callById(id);
-  if (!call) notFound();
   const others = calls.map((c) => ({ id: c.id, company: c.company, prospect: c.prospect }));
-  return <ConversationDetail call={call} others={others} />;
+  const call = callById(id);
+  if (call) return <ConversationDetail call={call} others={others} />;
+  // Not a fixture: it may be a call added in this session (client store only).
+  return <PendingConversation id={id} others={others} />;
 }

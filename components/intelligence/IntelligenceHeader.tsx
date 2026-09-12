@@ -11,7 +11,7 @@ export function IntelligenceHeader({ query, onQuery }: { query: string; onQuery:
     <header className="flex items-center justify-between gap-6">
       <div className="flex items-center gap-4">
         <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-foreground"><BarChart3 className="size-5" strokeWidth={1.75} /></span>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Intelligence</h1>
+        <h1 className="text-[22px] font-bold tracking-tight text-foreground">Intelligence</h1>
       </div>
       <div className="flex items-center gap-3">
         <label className="flex h-10 w-[280px] items-center gap-2.5 rounded-lg border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">

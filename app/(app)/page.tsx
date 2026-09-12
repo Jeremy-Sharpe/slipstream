@@ -18,8 +18,8 @@ export default function ConversationsPage() {
 
       <div className="mt-8 flex shrink-0 items-center justify-between px-8">
         <div className="flex items-center gap-4">
-          <span className="flex size-9 items-center justify-center rounded-md bg-icon-well text-foreground"><MessageSquare className="size-[18px]" strokeWidth={1.75} /></span>
-          <h2 className="text-xl font-bold tracking-tight">All conversations</h2>
+          <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-foreground"><MessageSquare className="size-5" strokeWidth={1.75} /></span>
+          <h2 className="text-[22px] font-bold tracking-tight text-foreground">All conversations</h2>
         </div>
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
