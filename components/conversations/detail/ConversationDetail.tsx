@@ -62,7 +62,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
 
   const runPipeline = useCallback(async () => {
     if (pipelineInFlight.current || approvalInFlight.current) {
-      throw new Error("Another live action is still running");
+      throw new Error("Another demo action is still running");
     }
     pipelineInFlight.current = true;
     scoreGenerationRef.current += 1;
@@ -84,11 +84,11 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
       draftIdRef.current = live.draft.id;
       setApprovedDraftId(["approved", "sent"].includes(live.draft.status) ? live.draft.id : undefined);
       setPipelineStatus("live");
-      log("Live pipeline completed", "API · transcript → CRM fields → draft", "sparkles");
+      log("Verified demo pipeline completed", "Deployed API · labelled transcript → CRM fields → draft", "sparkles");
 
       return live.draft.id;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "The live pipeline did not complete";
+      const message = error instanceof Error ? error.message : "The verified demo pipeline did not complete";
       setPipelineError(message);
       setPipelineStatus("error");
       throw error;
@@ -135,7 +135,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
     syncedRef.current = true;
     setSynced(true);
     patchConversation(call.id, { status: "synced" });
-    log("CRM fields approved", "Live Slipstream staging record", "check");
+    log("CRM fields approved", "Deployed Slipstream staging record", "check");
   };
   const approveDraft = async () => {
     if (pipelineInFlight.current || approvalInFlight.current) return;
@@ -170,22 +170,22 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
         {rerunning ? <Loader2 className="size-4 animate-spin text-primary" /> : pipelineError ? <AlertCircle className="size-4 text-destructive" /> : pipelineStatus === "live" ? <CheckCircle2 className="size-4 text-primary" /> : <Server className="size-4 text-muted-foreground" />}
         <div className="min-w-0 flex-1">
           <p className="text-[14px] font-medium text-ink">
-            {rerunning ? "Running the live sales pipeline…" : pipelineError ? (pipelineStatus === "live" ? "Live API action needs attention" : "Live API unavailable — showing labelled demo data") : pipelineStatus === "live" ? "Live API result" : "Labelled demo data ready"}
+            {rerunning ? "Running the verified API demo…" : pipelineError ? (pipelineStatus === "live" ? "Deployed API action needs attention" : "Deployed API unavailable — showing labelled demo data") : pipelineStatus === "live" ? "Verified deployed API result" : "Labelled demo data ready"}
           </p>
           <p className="truncate text-[12px] text-muted-foreground">
             {pipelineError ?? (pipelineStatus === "live"
               ? scorecardState.source === "live"
-                ? `Live transcript, CRM extraction, draft and ${scorecardState.model} scorecard.`
+                ? `Deployed API transcript, CRM extraction, draft and ${scorecardState.model} scorecard.`
                 : scorecardState.scoring
-                  ? "Live transcript, CRM extraction and draft · scoring against the rubric…"
+                  ? "Deployed API transcript, CRM extraction and draft · scoring against the rubric…"
                   : scorecardState.error
-                    ? `Live transcript, CRM extraction and draft · labelled evaluation scorecard (${scorecardState.error}).`
-                    : "Live transcript, CRM extraction and draft · labelled evaluation scorecard."
+                    ? `Deployed API transcript, CRM extraction and draft · labelled evaluation scorecard (${scorecardState.error}).`
+                    : "Deployed API labelled transcript, CRM extraction and draft · labelled evaluation scorecard."
               : API_BASE_URL)}
           </p>
         </div>
         <Button variant="outline" className="h-9 rounded-md px-3 text-[13px]" onClick={() => void runPipeline().catch(() => undefined)} disabled={rerunning || approving}>
-          {pipelineStatus === "live" ? "Run again" : "Run live pipeline"}
+          {pipelineStatus === "live" ? "Run again" : "Run verified API demo"}
         </Button>
       </div>
       <div className="grid flex-1 grid-cols-[minmax(0,2fr)_minmax(360px,1fr)] gap-6 px-6 py-6">

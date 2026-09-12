@@ -81,7 +81,7 @@ export function FollowUpDraft({ call, onApprove, approved, locked, busy }: { cal
       <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={approved || locked} className="h-12 w-full border-b border-line bg-transparent px-6 text-[16px] font-medium text-ink outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Subject" />
       <textarea value={body} onChange={(e) => setBody(e.target.value)} disabled={approved || locked} rows={10} className="block w-full resize-y bg-transparent px-6 py-5 text-[16px] leading-7 text-ink-2 outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Draft body" />
       <footer className="flex items-center justify-between border-t border-line px-5 py-3.5">
-        <span className="text-[14px] text-muted-foreground">{locked ? "Exact backend draft · approval is logged without sending." : "Run the live pipeline before approval; fixture text is editable."}</span>
+        <span className="text-[14px] text-muted-foreground">{locked ? "Exact backend draft · approval is logged without sending." : "Run the verified API demo before approval; fixture text is editable."}</span>
         {approved ? <span className="flex items-center gap-1.5 text-[15px] font-medium text-ink"><Check className="size-4" strokeWidth={2} /> Approved · logged</span> : <Button className="h-10 rounded-md px-4 text-[15px] font-medium" onClick={onApprove} disabled={busy}><Check className="size-4" strokeWidth={2} /> {busy ? "Approving…" : locked ? "Approve" : "Generate live draft"}</Button>}
       </footer>
     </Card>
