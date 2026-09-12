@@ -40,6 +40,7 @@ Order matters. The foundation rows unblock everything else and should be claimed
 | `demo-script` | `docs/demo-script.md`: step by step against the live app with a fallback, scored by eval F2 | `docs/demo-script.md` | Jeremy's agent | feat/demo-script | done | Live API fallback exercised; model judge F2 passes at 7/8 after production-evidence revision |
 | `video` | 3 to 5 minute demo video on the live URL, per-feature walkthroughs | `docs/video/` | | | unclaimed | Starts Sunday once the loop runs |
 | `submission` | README lines filled, `npm run evals:dry` green, form submitted before Monday 12:00pm | `README.md` | Jeremy's agent | feat/submission-readiness | in progress | Production-readiness pass active; 174 API tests now stay deterministic even when developer shells contain provider keys. A teammate must add the final video URL and submit the external form |
+| `ci` | Protect main with credential-free web, API, fixture and coach checks | `.github/workflows/` | Jeremy's agent | feat/ci | in progress | Jeremy's agent is adding locked, least-privilege pull-request and main-branch checks. Other people should record the public demo video and avoid adding provider secrets to CI. |
 
 ## Blocked and parked
 
