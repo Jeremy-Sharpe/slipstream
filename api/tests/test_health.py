@@ -5,6 +5,8 @@ from pydantic import SecretStr
 
 from app.core.config import Settings
 from app.core.readiness import (
+    EmbeddingUnavailableError,
+    LocalEmbeddingReadinessProbe,
     LocalModelReadinessProbe,
     ReasoningUnavailableError,
     StorageReadinessProbe,
@@ -22,6 +24,8 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
     assert response.json()["reasoning_provider"] == "openai"
     assert response.json()["reasoning_model"] == "gpt-5.4"
     assert response.json()["reasoning_configured"] is False
+    assert response.json()["embedding_provider"] is None
+    assert response.json()["embedding_configured"] is False
     assert response.json()["integrations"] == {
         "supabase": False,
         "anthropic": False,
@@ -130,5 +134,119 @@ async def test_local_readiness_does_not_follow_an_external_redirect() -> None:
     probe = LocalModelReadinessProbe(settings, transport=httpx.MockTransport(redirect))
 
     with pytest.raises(ReasoningUnavailableError):
+        await probe.check()
+    await probe.close()
+
+
+def test_readiness_fails_closed_when_configured_local_embedding_is_missing() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        local_embedding_base_url="http://127.0.0.1:1/v1",
+    )
+
+    with TestClient(create_app(settings)) as configured_client:
+        response = configured_client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Configured embedding model is unavailable"}
+
+
+@pytest.mark.asyncio
+async def test_local_embedding_readiness_rejects_wrong_model() -> None:
+    def wrong_model(_: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"data": [{"id": "wrong-model"}]})
+
+    settings = Settings(
+        _env_file=None,
+        local_embedding_base_url="http://127.0.0.1:8082/v1",
+        local_embedding_name="local-nomic",
+    )
+    probe = LocalEmbeddingReadinessProbe(
+        settings, transport=httpx.MockTransport(wrong_model)
+    )
+
+    with pytest.raises(EmbeddingUnavailableError):
+        await probe.check()
+    await probe.close()
+
+
+@pytest.mark.asyncio
+async def test_local_embedding_readiness_proves_vector_and_caches_success() -> None:
+    calls: list[str] = []
+
+    def embedding(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.path)
+        if request.url.path == "/v1/models":
+            return httpx.Response(200, json={"data": [{"id": "local-nomic"}]})
+        assert request.url.path == "/v1/embeddings"
+        return httpx.Response(
+            200,
+            json={
+                "model": "local-nomic",
+                "data": [{"object": "embedding", "embedding": [0.1] * 768}],
+            },
+        )
+
+    settings = Settings(
+        _env_file=None,
+        local_embedding_base_url="http://127.0.0.1:8082/v1",
+        local_embedding_name="local-nomic",
+    )
+    probe = LocalEmbeddingReadinessProbe(
+        settings, transport=httpx.MockTransport(embedding)
+    )
+
+    await probe.check()
+    await probe.check()
+
+    assert calls == ["/v1/models", "/v1/embeddings"]
+    await probe.close()
+
+
+@pytest.mark.asyncio
+async def test_local_embedding_readiness_translates_malformed_json_shape() -> None:
+    def malformed(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/v1/models":
+            return httpx.Response(200, json={"data": [{"id": "local-nomic"}]})
+        return httpx.Response(200, json=None)
+
+    settings = Settings(
+        _env_file=None,
+        local_embedding_base_url="http://127.0.0.1:8082/v1",
+        local_embedding_name="local-nomic",
+    )
+    probe = LocalEmbeddingReadinessProbe(
+        settings, transport=httpx.MockTransport(malformed)
+    )
+
+    with pytest.raises(EmbeddingUnavailableError):
+        await probe.check()
+    await probe.close()
+
+
+@pytest.mark.asyncio
+async def test_local_embedding_readiness_rejects_response_model_mismatch() -> None:
+    def mismatch(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/v1/models":
+            return httpx.Response(200, json={"data": [{"id": "local-nomic"}]})
+        return httpx.Response(
+            200,
+            json={
+                "model": "wrong-model",
+                "data": [{"embedding": [0.1] * 768}],
+            },
+        )
+
+    settings = Settings(
+        _env_file=None,
+        local_embedding_base_url="http://127.0.0.1:8082/v1",
+        local_embedding_name="local-nomic",
+    )
+    probe = LocalEmbeddingReadinessProbe(
+        settings, transport=httpx.MockTransport(mismatch)
+    )
+
+    with pytest.raises(EmbeddingUnavailableError):
         await probe.check()
     await probe.close()

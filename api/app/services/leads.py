@@ -14,6 +14,7 @@ MAX_SEARCH_RESULT_ROWS = 100
 async def start_search(
     store: IcpLeadsStore,
     origami: OrigamiClient,
+    settings: Settings,
     *,
     icp_profile_id: str | None = None,
     count: int = 10,
@@ -24,6 +25,7 @@ async def start_search(
     )
     if profile is None:
         raise ValueError("No ready ICP profile found")
+    _require_matching_embedding_model(profile.embedding_model, settings)
     job = await origami.create_search(profile.origami_brief, count, quality)
     return job, str(profile.id)
 
@@ -40,6 +42,8 @@ async def complete_search(
     profile = store.get_icp_profile(icp_profile_id)
     if profile is None:
         raise ValueError("ICP profile not found")
+    embedding_model = settings.effective_embedding_model
+    _require_matching_embedding_model(profile.embedding_model, settings)
     job = await poll_until_done(origami, job_id)
     result = job.result or {}
     list_id = result.get("list_id")
@@ -70,7 +74,7 @@ async def complete_search(
         return []
     vectors = _embed(
         embedder,
-        settings.embedding_model,
+        embedding_model,
         [_lead_summary_text(lead) for lead in leads],
     )
     centroid = won_centroid(store, icp_profile_id)
@@ -78,7 +82,7 @@ async def complete_search(
     for lead, vector in zip(leads, vectors, strict=True):
         lead.icp_profile_id = icp_profile_id
         lead.embedding = vector
-        lead.embedding_model = settings.embedding_model
+        lead.embedding_model = embedding_model
         lead.similarity_score = max(-1.0, min(1.0, cosine_similarity(vector, centroid)))
         lead.origami_relevance_score = _normalise_relevance(lead.origami_relevance_score)
         lead.metadata["source"] = "origami"
@@ -106,7 +110,12 @@ async def source_leads(
     quality: str = "fast",
 ) -> list[Lead]:
     job, profile_id = await start_search(
-        store, origami, icp_profile_id=icp_profile_id, count=count, quality=quality
+        store,
+        origami,
+        settings,
+        icp_profile_id=icp_profile_id,
+        count=count,
+        quality=quality,
     )
     return await complete_search(
         store, origami, embedder, settings, icp_profile_id=profile_id, job_id=job.id
@@ -117,6 +126,14 @@ def _embed(embedder: object, model: str, texts: list[str]) -> list[list[float]]:
     if callable(embedder):
         return list(embedder(texts))
     return embed_texts(embedder, model, texts)
+
+
+def _require_matching_embedding_model(profile_model: str, settings: Settings) -> None:
+    if profile_model != settings.effective_embedding_model:
+        raise ValueError(
+            "ICP embedding model does not match the configured embedding model; "
+            "derive a new ICP before sourcing leads"
+        )
 
 
 def _lead_summary_text(lead: LeadIn) -> str:

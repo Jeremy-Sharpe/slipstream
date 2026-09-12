@@ -8,7 +8,7 @@ from app.schemas.origami import Job
 from app.services.fixture_history import load_fixture_history
 from app.services.icp import derive_icp
 from app.services.icp_leads_store import InMemoryIcpLeadsStore
-from app.services.leads import complete_search
+from app.services.leads import complete_search, start_search
 
 FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures"
 
@@ -122,3 +122,60 @@ async def test_complete_search_rejects_malformed_provider_results(
             icp_profile_id=str(profile.id),
             job_id="job-1",
         )
+
+
+@pytest.mark.asyncio
+async def test_complete_search_rejects_embedding_model_drift(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, FIXTURES_DIR)
+    profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
+    polled = False
+
+    async def done(*_: object, **__: object) -> Job:
+        nonlocal polled
+        polled = True
+        return Job(id="job-1", status="succeeded", result={})
+
+    monkeypatch.setattr("app.services.leads.poll_until_done", done)
+
+    with pytest.raises(ValueError, match="derive a new ICP"):
+        await complete_search(
+            store,
+            FakeOrigami(),  # type: ignore[arg-type]
+            fake_embed,
+            Settings(
+                _env_file=None,
+                local_embedding_base_url="http://127.0.0.1:8082/v1",
+            ),
+            icp_profile_id=str(profile.id),
+            job_id="job-1",
+        )
+    assert polled is False
+
+
+@pytest.mark.asyncio
+async def test_start_search_rejects_embedding_model_drift_before_provider_call() -> None:
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, FIXTURES_DIR)
+    profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
+    create_called = False
+
+    class TrackingOrigami:
+        async def create_search(self, *_: object) -> Job:
+            nonlocal create_called
+            create_called = True
+            return Job(id="job-1", status="running")
+
+    with pytest.raises(ValueError, match="derive a new ICP"):
+        await start_search(
+            store,
+            TrackingOrigami(),  # type: ignore[arg-type]
+            Settings(
+                _env_file=None,
+                local_embedding_base_url="http://127.0.0.1:8082/v1",
+            ),
+            icp_profile_id=str(profile.id),
+        )
+    assert create_called is False

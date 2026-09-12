@@ -5,7 +5,11 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
 
 from app.core.config import Settings
-from app.core.readiness import ReasoningUnavailableError, StorageUnavailableError
+from app.core.readiness import (
+    EmbeddingUnavailableError,
+    ReasoningUnavailableError,
+    StorageUnavailableError,
+)
 
 router = APIRouter(tags=["operations"])
 
@@ -21,6 +25,9 @@ class HealthResponse(BaseModel):
     reasoning_provider: Literal["anthropic", "openai", "openrouter", "local"]
     reasoning_model: str
     reasoning_configured: bool
+    embedding_provider: Literal["openai", "openrouter", "local"] | None
+    embedding_model: str
+    embedding_configured: bool
     timestamp: datetime
 
 
@@ -41,6 +48,9 @@ async def health(request: Request) -> HealthResponse:
         reasoning_provider=settings.reasoning_provider,
         reasoning_model=settings.effective_reasoning_model,
         reasoning_configured=settings.reasoning_configured,
+        embedding_provider=settings.embedding_provider,
+        embedding_model=settings.effective_embedding_model,
+        embedding_configured=settings.integration_flags["embeddings"],
         timestamp=datetime.now(UTC),
     )
 
@@ -50,6 +60,7 @@ async def readiness(request: Request) -> HealthResponse:
     try:
         await request.app.state.readiness.check()
         await request.app.state.reasoning_readiness.check()
+        await request.app.state.embedding_readiness.check()
     except StorageUnavailableError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -59,5 +70,10 @@ async def readiness(request: Request) -> HealthResponse:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Configured reasoning model is unavailable",
+        ) from error
+    except EmbeddingUnavailableError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Configured embedding model is unavailable",
         ) from error
     return await health(request)

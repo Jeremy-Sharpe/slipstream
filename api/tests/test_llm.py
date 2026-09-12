@@ -22,6 +22,7 @@ def _clear_provider_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "OPENAI_API_KEY",
         "OPENROUTER_API_KEY",
         "LOCAL_MODEL_BASE_URL",
+        "LOCAL_EMBEDDING_BASE_URL",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -72,10 +73,16 @@ class FakeResponses:
 class FakeEmbeddings:
     def __init__(self) -> None:
         self.kwargs: dict[str, object] = {}
+        self.response_model: str | None = None
 
     def create(self, **kwargs: object) -> object:
         self.kwargs = kwargs
-        return object()
+        item = type("EmbeddingItem", (), {"embedding": [0.1] * 768})()
+        return type(
+            "EmbeddingResponse",
+            (),
+            {"model": self.response_model or kwargs["model"], "data": [item]},
+        )()
 
 
 class FakeOpenAIClient:
@@ -86,6 +93,25 @@ class FakeOpenAIClient:
         self.responses = FakeResponses()
         self.embeddings = FakeEmbeddings()
         self.instances.append(self)
+
+    def close(self) -> None:
+        pass
+
+
+class FakeLocalHttpClient:
+    trust_env = False
+
+    def __init__(self) -> None:
+        self.token_count = 3
+        self.calls: list[dict[str, object]] = []
+
+    def post(self, path: str, *, json: dict[str, object]) -> httpx.Response:
+        self.calls.append({"path": path, "json": json})
+        return httpx.Response(
+            200,
+            json={"tokens": list(range(self.token_count))},
+            request=httpx.Request("POST", f"http://127.0.0.1:8082/{path}"),
+        )
 
 
 class FakeMessage:
@@ -418,6 +444,83 @@ def test_openrouter_embedding_client_prefixes_openai_models(
     }
 
 
+def test_local_embedding_client_uses_loopback_without_environment_proxy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    FakeOpenAIClient.instances = []
+    local_http = FakeLocalHttpClient()
+    monkeypatch.setattr("app.core.llm.OpenAI", FakeOpenAIClient)
+    monkeypatch.setattr("app.core.llm.httpx.Client", lambda **_: local_http)
+    settings = Settings(
+        _env_file=None,
+        local_embedding_base_url="http://127.0.0.1:8082/v1",
+        local_embedding_name="local-nomic",
+    )
+
+    client = create_embedding_client(settings)
+    inner = FakeOpenAIClient.instances[-1]
+
+    assert inner.kwargs["api_key"] == "loopback-only"
+    assert inner.kwargs["base_url"] == "http://127.0.0.1:8082/v1"
+    assert inner.kwargs["http_client"].trust_env is False
+    client.embeddings.create(model="local-nomic", input=["accounting firm"])
+    assert inner.embeddings.kwargs == {
+        "model": "local-nomic",
+        "input": ["search_document: accounting firm"],
+    }
+    assert local_http.calls == [
+        {
+            "path": "tokenize",
+            "json": {
+                "content": "search_document: accounting firm",
+                "add_special": True,
+                "parse_special": False,
+            },
+        }
+    ]
+
+
+def test_local_embedding_client_rejects_input_beyond_model_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    FakeOpenAIClient.instances = []
+    local_http = FakeLocalHttpClient()
+    local_http.token_count = 2049
+    monkeypatch.setattr("app.core.llm.OpenAI", FakeOpenAIClient)
+    monkeypatch.setattr("app.core.llm.httpx.Client", lambda **_: local_http)
+    client = create_embedding_client(
+        Settings(
+            _env_file=None,
+            local_embedding_base_url="http://127.0.0.1:8082/v1",
+        )
+    )
+
+    with pytest.raises(ValueError, match="2048-token"):
+        client.embeddings.create(model="local-nomic", input=["too long"])
+    assert FakeOpenAIClient.instances[-1].embeddings.kwargs == {}
+
+
+def test_local_embedding_client_rejects_response_model_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    FakeOpenAIClient.instances = []
+    local_http = FakeLocalHttpClient()
+    monkeypatch.setattr("app.core.llm.OpenAI", FakeOpenAIClient)
+    monkeypatch.setattr("app.core.llm.httpx.Client", lambda **_: local_http)
+    client = create_embedding_client(
+        Settings(
+            _env_file=None,
+            local_embedding_base_url="http://127.0.0.1:8082/v1",
+        )
+    )
+    FakeOpenAIClient.instances[-1].embeddings.response_model = "wrong-model"
+
+    with pytest.raises(ValueError, match="unexpected model"):
+        client.embeddings.create(model="local-nomic", input=["accounting firm"])
+
 def test_create_embedding_client_raises_without_provider(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -428,7 +531,7 @@ def test_create_embedding_client_raises_without_provider(
         create_embedding_client(settings)
 
     assert str(error.value) == (
-        "No embedding provider is configured (set OPENAI_API_KEY or OPENROUTER_API_KEY)"
+        "No embedding provider is configured (set a hosted key or local embedding URL)"
     )
 
 

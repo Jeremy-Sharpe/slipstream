@@ -18,4 +18,8 @@ def get_store(request: Request) -> IcpLeadsStore:
 
 
 def get_embedding_client(request: Request) -> object:
-    return create_embedding_client(request.app.state.settings)
+    client = getattr(request.app.state, "embedding_client", None)
+    if client is None:
+        client = create_embedding_client(request.app.state.settings)
+        request.app.state.embedding_client = client
+    return client

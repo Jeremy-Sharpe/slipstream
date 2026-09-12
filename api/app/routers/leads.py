@@ -40,6 +40,7 @@ async def source(
         job, profile_id = await start_search(
             store,
             origami,
+            settings,
             icp_profile_id=str(body.icp_profile_id) if body.icp_profile_id else None,
             count=body.count,
             quality=body.quality,

@@ -1,4 +1,5 @@
 import asyncio
+import math
 from time import monotonic
 
 import httpx
@@ -11,6 +12,10 @@ class StorageUnavailableError(RuntimeError):
 
 
 class ReasoningUnavailableError(RuntimeError):
+    pass
+
+
+class EmbeddingUnavailableError(RuntimeError):
     pass
 
 
@@ -45,6 +50,112 @@ class LocalModelReadinessProbe:
                 raise ValueError("Configured local model is not loaded")
         except (httpx.HTTPError, ValueError) as error:
             raise ReasoningUnavailableError("Configured local model is unavailable") from error
+
+    async def close(self) -> None:
+        if self._client:
+            await self._client.aclose()
+
+
+class LocalEmbeddingReadinessProbe:
+    def __init__(
+        self, settings: Settings, transport: httpx.AsyncBaseTransport | None = None
+    ) -> None:
+        self._model = settings.local_embedding_name
+        self._lock = asyncio.Lock()
+        self._last_checked = 0.0
+        self._last_result = True
+        self._client = (
+            httpx.AsyncClient(
+                base_url=settings.local_embedding_base_url,
+                timeout=httpx.Timeout(3.0, connect=1.0),
+                transport=transport,
+                trust_env=False,
+                follow_redirects=False,
+            )
+            if settings.embedding_provider == "local"
+            and settings.local_embedding_base_url
+            else None
+        )
+
+    async def check(self) -> None:
+        if self._client is None:
+            return
+        if self._cached_result_applies():
+            self._raise_if_failed()
+            return
+        async with self._lock:
+            if self._cached_result_applies():
+                self._raise_if_failed()
+                return
+            try:
+                models_response = await self._client.get("models")
+                models_response.raise_for_status()
+                models_payload = models_response.json()
+                models = (
+                    models_payload.get("data")
+                    if isinstance(models_payload, dict)
+                    else None
+                )
+                if not isinstance(models, list) or not any(
+                    isinstance(item, dict) and item.get("id") == self._model
+                    for item in models
+                ):
+                    raise ValueError(
+                        "Configured local embedding model is not loaded"
+                    )
+                response = await self._client.post(
+                    "embeddings",
+                    json={
+                        "model": self._model,
+                        "input": ["search_document: readiness probe"],
+                    },
+                )
+                response.raise_for_status()
+                payload = response.json()
+                if not isinstance(payload, dict):
+                    raise ValueError(
+                        "Configured local embedding model returned invalid output"
+                    )
+                data = payload.get("data")
+                vector = (
+                    data[0].get("embedding")
+                    if isinstance(data, list)
+                    and len(data) == 1
+                    and isinstance(data[0], dict)
+                    else None
+                )
+                if (
+                    payload.get("model") != self._model
+                    or not isinstance(vector, list)
+                    or len(vector) != 768
+                    or not all(
+                        type(value) in (int, float) and math.isfinite(value)
+                        for value in vector
+                    )
+                ):
+                    raise ValueError(
+                        "Configured local embedding model returned invalid output"
+                    )
+            except (httpx.HTTPError, ValueError) as error:
+                self._record_result(False)
+                raise EmbeddingUnavailableError(
+                    "Configured local embedding model is unavailable"
+                ) from error
+            self._record_result(True)
+
+    def _cached_result_applies(self) -> bool:
+        ttl = 5 if self._last_result else 2
+        return monotonic() - self._last_checked < ttl
+
+    def _raise_if_failed(self) -> None:
+        if not self._last_result:
+            raise EmbeddingUnavailableError(
+                "Configured local embedding model is unavailable"
+            )
+
+    def _record_result(self, success: bool) -> None:
+        self._last_result = success
+        self._last_checked = monotonic()
 
     async def close(self) -> None:
         if self._client:

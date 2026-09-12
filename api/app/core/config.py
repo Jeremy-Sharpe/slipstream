@@ -163,6 +163,8 @@ class Settings(BaseSettings):
     local_model_base_url: str | None = None
     local_model_name: str = "slipstream-qwen2.5-1.5b-instruct-q4-k-m"
     local_model_context_tokens: int = Field(default=16_384, ge=8_192, le=131_072)
+    local_embedding_base_url: str | None = None
+    local_embedding_name: str = "slipstream-nomic-embed-text-v1.5-q4-k-m"
     origami_base_url: str = "https://origami.chat/api/v3"
     resend_base_url: str = "https://api.resend.com"
 
@@ -185,6 +187,7 @@ class Settings(BaseSettings):
         "resend_api_key",
         "resend_from",
         "local_model_base_url",
+        "local_embedding_base_url",
         mode="before",
     )
     @classmethod
@@ -233,6 +236,13 @@ class Settings(BaseSettings):
             if not self.local_model_name.strip() or len(self.local_model_name) > 160:
                 raise ValueError("LOCAL_MODEL_NAME must be between 1 and 160 characters")
             self.local_model_name = self.local_model_name.strip()
+        if self.local_embedding_base_url:
+            self.local_embedding_base_url = _canonical_local_model_url(
+                self.local_embedding_base_url
+            )
+            if not self.local_embedding_name.strip() or len(self.local_embedding_name) > 160:
+                raise ValueError("LOCAL_EMBEDDING_NAME must be between 1 and 160 characters")
+            self.local_embedding_name = self.local_embedding_name.strip()
         return self
 
     @property
@@ -282,12 +292,20 @@ class Settings(BaseSettings):
         return self.reasoning_model
 
     @property
-    def embedding_provider(self) -> Literal["openai", "openrouter"] | None:
+    def embedding_provider(self) -> Literal["openai", "openrouter", "local"] | None:
         if self.openai_api_key is not None:
             return "openai"
         if self.openrouter_api_key is not None:
             return "openrouter"
+        if self.local_embedding_base_url is not None:
+            return "local"
         return None
+
+    @property
+    def effective_embedding_model(self) -> str:
+        if self.embedding_provider == "local":
+            return self.local_embedding_name
+        return self.embedding_model
 
     @property
     def integration_flags(self) -> dict[str, bool]:

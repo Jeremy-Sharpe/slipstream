@@ -1,0 +1,42 @@
+[Unit]
+Description=Slipstream local embedding model
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=180
+TimeoutStopSec=30
+ExecStartPre=-/usr/bin/docker rm -f slipstream-local-embedding
+ExecStart=/usr/bin/docker run --rm --name slipstream-local-embedding \
+  --read-only \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges \
+  --pids-limit=128 \
+  --memory=768m \
+  --cpus=1 \
+  --tmpfs /tmp:size=32m,noexec,nosuid,nodev \
+  --network slipstream-models \
+  --publish 127.0.0.1:8082:8080 \
+  --volume /var/lib/slipstream-models:/models:ro \
+  ghcr.io/ggml-org/llama.cpp@sha256:cbcdcb52d484e08e23bfc0135afa5beadd2d540513bbb7c65b233231fa033ff4 \
+  --model /models/nomic-embed-text-v1.5.Q4_K_M.gguf \
+  --alias slipstream-nomic-embed-text-v1.5-q4-k-m \
+  --host 0.0.0.0 \
+  --port 8080 \
+  --ctx-size 2048 \
+  --batch-size 2048 \
+  --ubatch-size 2048 \
+  --parallel 1 \
+  --threads 1 \
+  --threads-batch 1 \
+  --embeddings \
+  --pooling mean \
+  --no-webui
+ExecStop=-/usr/bin/docker stop --time=20 slipstream-local-embedding
+
+[Install]
+WantedBy=docker.service multi-user.target
