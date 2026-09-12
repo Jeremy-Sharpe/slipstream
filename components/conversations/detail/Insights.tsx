@@ -68,7 +68,7 @@ export function ScorecardCard({ call, onHover }: { call: CallRecord; onHover: (s
   );
 }
 
-export function FollowUpDraft({ call, onApprove, approved }: { call: CallRecord; onApprove: () => void; approved: boolean }) {
+export function FollowUpDraft({ call, onApprove, approved, locked, busy }: { call: CallRecord; onApprove: () => void; approved: boolean; locked: boolean; busy: boolean }) {
   const [subject, setSubject] = useState(call.draft.subject);
   const [body, setBody] = useState(call.draft.body);
   return (
@@ -77,11 +77,11 @@ export function FollowUpDraft({ call, onApprove, approved }: { call: CallRecord;
         <span className="text-muted-foreground">To</span>
         <span className="text-ink">{call.prospect} &lt;{call.extraction.contact.email.value}&gt;</span>
       </div>
-      <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={approved} className="h-12 w-full border-b border-line bg-transparent px-6 text-[16px] font-medium text-ink outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Subject" />
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} disabled={approved} rows={10} className="block w-full resize-y bg-transparent px-6 py-5 text-[16px] leading-7 text-ink-2 outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Draft body" />
+      <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={approved || locked} className="h-12 w-full border-b border-line bg-transparent px-6 text-[16px] font-medium text-ink outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Subject" />
+      <textarea value={body} onChange={(e) => setBody(e.target.value)} disabled={approved || locked} rows={10} className="block w-full resize-y bg-transparent px-6 py-5 text-[16px] leading-7 text-ink-2 outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Draft body" />
       <footer className="flex items-center justify-between border-t border-line px-5 py-3.5">
-        <span className="text-[14px] text-muted-foreground">Nothing is sent. Approving marks it and logs an activity.</span>
-        {approved ? <span className="flex items-center gap-1.5 text-[15px] font-medium text-ink"><Check className="size-4" strokeWidth={2} /> Approved · logged</span> : <Button className="h-10 rounded-md px-4 text-[15px] font-medium" onClick={onApprove}><Check className="size-4" strokeWidth={2} /> Approve</Button>}
+        <span className="text-[14px] text-muted-foreground">{locked ? "Exact backend draft · approving logs a simulated delivery." : "Run the live pipeline before approval; fixture text is editable."}</span>
+        {approved ? <span className="flex items-center gap-1.5 text-[15px] font-medium text-ink"><Check className="size-4" strokeWidth={2} /> Approved · logged</span> : <Button className="h-10 rounded-md px-4 text-[15px] font-medium" onClick={onApprove} disabled={busy}><Check className="size-4" strokeWidth={2} /> {busy ? "Approving…" : locked ? "Approve" : "Generate live draft"}</Button>}
       </footer>
     </Card>
   );
