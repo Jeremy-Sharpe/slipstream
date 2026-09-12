@@ -70,8 +70,13 @@ function ConfidenceRing({ value }: { value: number }) {
 }
 
 export function DerivedIcp({ data, active }: Props) {
+  const provenance = data.sourceSummary
+    ? `${data.sourceSummary.calls} calls + ${data.sourceSummary.emails} emails across ${data.sourceSummary.deals} CRM deals · ${data.sourceSummary.outcomeLabelled} outcome-labelled`
+    : data.sourceSummary === null
+      ? "source provenance unavailable"
+      : `derived from ${data.wonDeals} won deals`;
   return (
-    <Section id="icp" title="Derived ICP" meta={<span className="flex items-center gap-3">derived from {data.wonDeals} won deals · v{data.icpVersion}<ConfidenceRing value={data.confidence} /></span>} active={active === "icp"}>
+    <Section id="icp" title="Derived ICP" meta={<span className="flex items-center gap-3">{provenance} · v{data.icpVersion}<ConfidenceRing value={data.confidence} /></span>} active={active === "icp"}>
       <p className="max-w-[820px] text-[20px] leading-snug font-medium text-foreground">{data.icp.summary}</p>
       <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border">
         {data.icp.attributes.map((a) => (

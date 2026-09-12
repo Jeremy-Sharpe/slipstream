@@ -9,6 +9,8 @@ from fastapi import APIRouter, HTTPException, Request, status
 from app.core.llm import MissingReasoningProviderError
 from app.routers.calls import load_call
 from app.schemas.extraction import ExtractionResult
+from app.schemas.icp import InteractionEvidence
+from app.services.crm_mirror import mirror_interaction
 from app.services.extract import (
     ExtractionUnavailableError,
     extract_fixture,
@@ -131,8 +133,71 @@ async def load_extraction(request: Request, conversation_id: UUID) -> Extraction
         ) from error
 
 
-async def _save(request: Request, result: ExtractionResult) -> None:
+async def _save(request: Request, result: ExtractionResult, call: Any | None = None) -> None:
     if request.app.state.supabase is None:
+        if call is not None and not call.fixture:
+            mirror_interaction(
+                request.app.state.icp_leads_store,
+                deal_external_id=f"slipstream-conversation:{result.conversation_id}",
+                interaction=InteractionEvidence(
+                    source_external_id=call.source_external_id,
+                    channel="call",
+                    direction="unknown",
+                    occurred_at=call.occurred_at,
+                    subject=call.subject,
+                    content=(result.summary or call.transcript)[:800],
+                ),
+                company={
+                    "name": result.company.name.value,
+                    **(
+                        {"domain": result.company.domain.value.casefold()}
+                        if result.company.domain.value
+                        else {
+                            "crm_external_id": (
+                                f"slipstream-company:{result.company.name.value.casefold()}"
+                            )
+                        }
+                    ),
+                    **(
+                        {"industry": result.company.industry.value}
+                        if result.company.industry.value
+                        else {}
+                    ),
+                    **(
+                        {"employee_count": result.company.employee_count.value}
+                        if result.company.employee_count.value is not None
+                        else {}
+                    ),
+                    **(
+                        {"location": result.company.location.value}
+                        if result.company.location.value
+                        else {}
+                    ),
+                }
+                if result.company.name.value
+                else None,
+                contact={
+                    "name": result.contact.name.value,
+                    "email": result.contact.email.value,
+                    "phone": result.contact.phone.value,
+                    "title": result.contact.title.value,
+                },
+                deal={
+                    "name": (
+                        f"{result.company.name.value or result.contact.name.value or 'Unqualified'}"
+                        " — follow-up"
+                    ),
+                    "stage": result.deal.stage.value,
+                    "outcome": result.deal.outcome.value,
+                    "amount": result.deal.amount.value,
+                    "currency": result.deal.currency,
+                    "summary": result.summary,
+                    "metadata": {
+                        "source": "live",
+                        "fixture": bool(call.fixture),
+                    },
+                },
+            )
         request.app.state.extraction_store[str(result.conversation_id)] = result
         return
     try:
@@ -172,7 +237,7 @@ async def extract_call(conversation_id: UUID, request: Request) -> ExtractionRes
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="The call could not be converted into CRM fields",
             ) from error
-        await _save(request, result)
+        await _save(request, result, call)
         return result
 
 

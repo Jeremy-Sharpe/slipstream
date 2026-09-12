@@ -70,6 +70,16 @@ def test_email_thread_ingests_idempotently_and_drafts_reply(client: TestClient) 
     thread = client.get(THREAD).json()
     assert [message["source_external_id"] for message in thread] == ["email-1", "email-2"]
     assert all(message["contact_email"] == "buyer@acme.example" for message in thread)
+    crm_deals = client.app.state.icp_leads_store.list_icp_deals()
+    email_deal = next(
+        deal for deal in crm_deals if deal.crm_external_id == first.json()["deal_external_id"]
+    )
+    assert email_deal.contact_name == "buyer"
+    assert [item.source_external_id for item in email_deal.interactions] == [
+        scoped_email_id("source", "demo", "sales", "email-2"),
+        scoped_email_id("source", "demo", "sales", "email-1"),
+    ]
+    assert email_deal.metadata["channels"] == ["email"]
 
     response = client.post(f"{THREAD}/draft-reply")
     assert response.status_code == 200
@@ -111,6 +121,55 @@ def test_email_source_collision_is_rejected(client: TestClient) -> None:
     assert client.post("/api/v1/emails", json=message).status_code == 200
     message["body"] = "Different"
     assert client.post("/api/v1/emails", json=message).status_code == 409
+
+
+def test_email_mirror_failure_does_not_commit_and_retry_repairs(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    message = _email(
+        "mirror-retry", "inbound", "buyer@acme.example", "rep@slipstream.example", "Hi"
+    )
+    original = emails.mirror_interaction
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise RuntimeError("CRM unavailable")
+
+    monkeypatch.setattr(emails, "mirror_interaction", fail)
+    failed = client.post("/api/v1/emails", json=message)
+    assert failed.status_code == 503
+    assert client.app.state.email_store == {}
+    assert client.app.state.email_threads == {}
+
+    monkeypatch.setattr(emails, "mirror_interaction", original)
+    assert client.post("/api/v1/emails", json=message).status_code == 200
+    assert len(client.app.state.icp_leads_store.list_icp_deals()) == 1
+
+
+def test_email_mirror_preserves_curated_contact_name(client: TestClient) -> None:
+    store = client.app.state.icp_leads_store
+    store.upsert_contact(
+        {
+            "first_name": "Curated",
+            "last_name": "Buyer",
+            "email": "buyer@acme.example",
+        }
+    )
+
+    response = client.post(
+        "/api/v1/emails",
+        json=_email(
+            "curated-contact",
+            "inbound",
+            "buyer@acme.example",
+            "rep@slipstream.example",
+            "Hello",
+        ),
+    )
+
+    assert response.status_code == 200
+    contact = store.get_contact_by_email("buyer@acme.example")
+    assert contact["first_name"] == "Curated"
+    assert contact["last_name"] == "Buyer"
 
 
 def test_draft_versions_when_new_message_arrives(client: TestClient) -> None:

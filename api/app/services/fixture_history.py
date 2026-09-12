@@ -59,6 +59,7 @@ def _load_call(store: IcpLeadsStore, expected: dict[str, Any], script: dict[str,
     close_date = None
     if outcome in {"won", "lost"}:
         close_date = str(script["scheduled_at"]).split("T", 1)[0]
+    summary = _summary(expected, script)
     store.upsert_deal(
         {
             "company_id": company["id"],
@@ -69,7 +70,7 @@ def _load_call(store: IcpLeadsStore, expected: dict[str, Any], script: dict[str,
             "amount": extraction["deal"].get("value_aud"),
             "currency": "AUD",
             "owner_name": script.get("rep"),
-            "summary": _summary(expected, script),
+            "summary": summary,
             "close_date": close_date,
             "crm_external_id": f"fixture:{call_id}",
             "metadata": {
@@ -80,6 +81,16 @@ def _load_call(store: IcpLeadsStore, expected: dict[str, Any], script: dict[str,
                 "demo": bool(script.get("demo")),
                 "original_outcome": original_outcome,
             },
+            "interactions": [
+                {
+                    "source_external_id": call_id,
+                    "channel": "call",
+                    "direction": "unknown",
+                    "occurred_at": script["scheduled_at"],
+                    "subject": f"{extraction['company']['name']} sales call",
+                    "content": summary,
+                }
+            ],
         }
     )
 

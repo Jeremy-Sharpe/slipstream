@@ -68,6 +68,12 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
       ...data,
       icpVersion: liveProfile.version,
       confidence: Math.round(liveProfile.profile.confidence * 100),
+      sourceSummary: liveProfile.profile.source_summary ? {
+        deals: liveProfile.profile.source_summary.deals,
+        calls: liveProfile.profile.source_summary.calls,
+        emails: liveProfile.profile.source_summary.emails,
+        outcomeLabelled: liveProfile.profile.source_summary.outcome_labelled,
+      } : null,
       icp: {
         summary: liveProfile.profile.summary,
         attributes: [

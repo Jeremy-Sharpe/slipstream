@@ -5,13 +5,14 @@ from typing import Any
 
 from app.core.config import Settings
 from app.core.llm import ReasoningResult, structured
-from app.schemas.icp import DealRecord, IcpProfile, StoredIcpProfile
+from app.schemas.icp import DealRecord, IcpProfile, IcpSourceSummary, StoredIcpProfile
 from app.services.embeddings import embed_texts
 from app.services.icp_leads_store import IcpLeadsStore
 
 PROMPT = (Path(__file__).resolve().parents[1] / "prompts" / "icp-derive-v1.md").read_text(
     encoding="utf-8"
 )
+MAX_MODEL_INPUT_CHARS = 120_000
 
 
 def derive_icp(
@@ -22,23 +23,17 @@ def derive_icp(
     *,
     include_demo: bool = False,
 ) -> StoredIcpProfile:
-    deals = store.list_fixture_deals(include_demo=include_demo)
+    deals = _fit_model_budget(store.list_icp_deals(include_demo=include_demo))
     won = [deal for deal in deals if deal.outcome == "won"]
     if len(won) < 2:
-        raise ValueError("At least two fixture won deals are required to derive an ICP")
+        raise ValueError("At least two eligible won deals are required to derive an ICP")
     summaries = [_deal_summary_text(deal) for deal in deals]
     vectors = _embed(embedder, settings.embedding_model, summaries)
     for deal, vector in zip(deals, vectors, strict=True):
         store.update_deal_embedding(str(deal.id), vector, settings.embedding_model)
         deal.embedding = vector
         deal.embedding_model = settings.embedding_model
-    user = json.dumps(
-        {
-            "won_deals": [_deal_payload(deal) for deal in won],
-            "contrast_deals": [_deal_payload(deal) for deal in deals if deal.outcome != "won"],
-        },
-        indent=2,
-    )
+    user = json.dumps(_cohort_payload(deals), separators=(",", ":"))
     reasoning = _structured(
         llm,
         settings=settings,
@@ -46,7 +41,7 @@ def derive_icp(
         user=user,
         schema=IcpProfile,
     )
-    profile = reasoning.output
+    profile = reasoning.output.model_copy(update={"source_summary": _source_summary(deals)})
     stored = store.insert_icp_profile(
         version=store.max_icp_version() + 1,
         profile=profile,
@@ -62,7 +57,10 @@ def derive_icp(
         store.insert_icp_source_deal(
             profile_id=str(stored.id),
             deal_id=str(deal.id),
-            evidence={"attributes": attributes},
+            evidence={
+                "attributes": attributes,
+                "deal_snapshot": deal.model_dump(mode="json"),
+            },
         )
     store.log_activity(
         "icp.derived",
@@ -95,7 +93,7 @@ def _centroid(vectors: list[list[float]]) -> list[float]:
 
 def _deal_summary_text(deal: DealRecord) -> str:
     signals = deal.metadata.get("icp_signals", {})
-    return " ".join(
+    return _bounded(" ".join(
         part
         for part in [
             f"Company: {deal.company_name}",
@@ -107,25 +105,87 @@ def _deal_summary_text(deal: DealRecord) -> str:
             f"Outcome: {deal.outcome}",
             f"Amount: {deal.amount}",
             f"Summary: {deal.summary}",
+            *[
+                f"{item.channel.title()} {item.direction}: {item.content}"
+                for item in deal.interactions
+            ],
         ]
         if part and not part.endswith("None")
-    )
+    ), 4000)
 
 
 def _deal_payload(deal: DealRecord) -> dict[str, Any]:
     signals = deal.metadata.get("icp_signals", {})
     return {
         "id": str(deal.id),
-        "company": deal.company_name,
-        "industry": deal.industry or signals.get("industry"),
+        "company": _bounded(deal.company_name, 200),
+        "industry": _bounded(deal.industry or signals.get("industry"), 120),
         "headcount": deal.employee_count,
-        "location": deal.location,
-        "contact_role": deal.contact_role or signals.get("role"),
-        "trigger": deal.metadata.get("trigger") or signals.get("trigger"),
-        "summary": deal.summary,
+        "location": _bounded(deal.location, 120),
+        "contact_role": _bounded(deal.contact_role or signals.get("role"), 120),
+        "trigger": _bounded(deal.metadata.get("trigger") or signals.get("trigger"), 500),
+        "summary": _bounded(deal.summary, 1200),
         "amount": deal.amount,
         "outcome": deal.outcome,
+        "interactions": [
+            {
+                **item.model_dump(mode="json"),
+                "source_external_id": _bounded(item.source_external_id, 300),
+                "subject": _bounded(item.subject, 300),
+                "content": _bounded(item.content, 800),
+            }
+            for item in deal.interactions[:10]
+        ],
     }
+
+
+def _cohort_payload(deals: list[DealRecord]) -> dict[str, list[dict[str, Any]]]:
+    return {
+        "won_deals": [_deal_payload(deal) for deal in deals if deal.outcome == "won"],
+        "contrast_deals": [
+            _deal_payload(deal) for deal in deals if deal.outcome in {"lost", "stalled"}
+        ],
+        "active_deals": [_deal_payload(deal) for deal in deals if deal.outcome == "open"],
+    }
+
+
+def _fit_model_budget(deals: list[DealRecord]) -> list[DealRecord]:
+    ordered = sorted(
+        [deal.model_copy(update={"interactions": deal.interactions[:10]}) for deal in deals],
+        key=lambda deal: (
+            {"won": 0, "lost": 1, "stalled": 1, "open": 2}.get(deal.outcome, 3),
+            deal.crm_external_id or str(deal.id),
+        ),
+    )
+    selected: list[DealRecord] = []
+    size = len('{"won_deals":[],"contrast_deals":[],"active_deals":[]}')
+    for deal in ordered:
+        candidate_size = len(json.dumps(_deal_payload(deal), separators=(",", ":"))) + 1
+        if size + candidate_size > MAX_MODEL_INPUT_CHARS:
+            continue
+        selected.append(deal)
+        size += candidate_size
+    return selected
+
+
+def _bounded(value: object, limit: int) -> str | None:
+    if value is None:
+        return None
+    return str(value)[:limit]
+
+
+def _source_summary(deals: list[DealRecord]) -> IcpSourceSummary:
+    sources = {
+        (item.channel, item.source_external_id)
+        for deal in deals
+        for item in deal.interactions
+    }
+    return IcpSourceSummary(
+        deals=len(deals),
+        calls=sum(channel == "call" for channel, _ in sources),
+        emails=sum(channel == "email" for channel, _ in sources),
+        outcome_labelled=sum(deal.outcome in {"won", "lost", "stalled"} for deal in deals),
+    )
 
 
 def _embed(embedder: object, model: str, texts: list[str]) -> list[list[float]]:
