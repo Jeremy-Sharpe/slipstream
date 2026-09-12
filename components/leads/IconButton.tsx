@@ -1,17 +1,16 @@
-import type { ComponentProps } from "react";
+import { cloneElement, isValidElement, type ComponentProps, type ReactElement } from "react";
 import { cn } from "@/lib/utils";
 
+const BASE = "flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none";
+
 // 32×32, radius 6px. `bordered` for the back button; otherwise bare.
-export function IconButton({ className, bordered, ...props }: ComponentProps<"button"> & { bordered?: boolean }) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
-        bordered && "border border-line",
-        className,
-      )}
-      {...props}
-    />
-  );
+// `render` swaps the element (a Link, a menu trigger) while keeping the styling,
+// the same contract Base UI triggers use.
+export function IconButton({ className, bordered, render, children, ...props }: ComponentProps<"button"> & { bordered?: boolean; render?: ReactElement }) {
+  const cls = cn(BASE, bordered && "border border-line", className);
+  if (render && isValidElement(render)) {
+    const el = render as ReactElement<Record<string, unknown>>;
+    return cloneElement(el, { ...props, ...el.props, className: cn(cls, el.props.className as string | undefined) }, children);
+  }
+  return <button type="button" className={cls} {...props}>{children}</button>;
 }

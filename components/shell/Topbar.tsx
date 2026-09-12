@@ -1,19 +1,15 @@
-import { Bell, Plus } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { AddCallDialog } from "./AddCallDialog";
+import { NotificationsMenu } from "./NotificationsMenu";
+import { UserMenu } from "./UserMenu";
 
-// Shared across every surface. Right-aligned like Clay's top bar.
+// Shared across every surface, actions right-aligned.
 export function Topbar() {
   return (
     <header className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-border bg-card px-6">
-      <Button className="h-8 rounded-md px-3 text-sm font-medium">
-        <Plus className="size-4" strokeWidth={2.25} /> Add a call
-      </Button>
+      <AddCallDialog />
       <span className="mx-1 h-6 w-px bg-border" aria-hidden />
-      <Button size="icon" variant="ghost" className="size-8 rounded-md" aria-label="Notifications">
-        <Bell className="size-[18px]" strokeWidth={1.75} />
-      </Button>
-      <Avatar className="size-7"><AvatarFallback className="bg-avatar text-[11px] font-medium text-foreground">MD</AvatarFallback></Avatar>
+      <NotificationsMenu />
+      <UserMenu />
     </header>
   );
 }

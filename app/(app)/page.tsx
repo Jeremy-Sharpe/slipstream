@@ -4,10 +4,11 @@ import { MessageSquare, Search } from "lucide-react";
 import { useState } from "react";
 import { ConversationsTable } from "@/components/conversations/ConversationsTable";
 import { Input } from "@/components/ui/input";
-import { conversations } from "@/lib/data/conversations";
+import { useConversations } from "@/lib/store/conversations";
 
 export default function ConversationsPage() {
   const [query, setQuery] = useState("");
+  const conversations = useConversations();
   return (
     <div className="flex h-[calc(100vh-56px)] flex-col">
       <header className="shrink-0 px-8 pt-7">

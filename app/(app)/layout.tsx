@@ -1,8 +1,8 @@
 import { Sidebar } from "@/components/shell/Sidebar";
 import { Topbar } from "@/components/shell/Topbar";
 
-// The standard shell: wide sidebar plus top bar. /leads has its own layout
-// with the compact rail, the way Clay switches chrome on Find People.
+// The standard shell: wide sidebar plus top bar. /leads renders its own
+// top bar so the page can own search state.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
