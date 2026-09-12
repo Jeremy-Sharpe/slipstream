@@ -8,8 +8,8 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 
 - Jeremy's frontend prototype is live at the repo root: Next.js 16 and React 19, a unified conversation feed for calls and email, conversation detail with CRM auto-entry and an editable follow-up draft, an aggregate analysis and ICP page, and an Origami-ready lead handoff. Frontend only, on realistic mock data. Build, lint and smoke test pass.
 - Fixtures are merged: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). UI is deployed at https://slipstream-ten-mauve.vercel.app from Anna's Vercel; production moves by `vercel --prod` until the GitHub app is connected.
-- Jeremy's agent shipped the database migration and the reviewed FastAPI foundation. The API is live at https://slipstream-api.3-104-149-193.sslip.io; Jeremy's agent is now building fixture and Scribe ingestion. Other people should take the unclaimed extraction, scorecard, ICP, UI wiring, pitch, demo script, and coach rows on `BOARD.md`.
-- Still missing: hosted Supabase, service keys, coach, and the live pipeline after ingestion. Every key except Vercel remains unavailable, so each backend lane must keep a deterministic fixture path.
+- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, and call ingestion. The API is live at https://slipstream-api.3-104-149-193.sslip.io and exposes all thirteen fixtures; Jeremy's agent is now building evidence-backed CRM extraction. Other people should take the unclaimed UI wiring, pitch, demo script, and coach rows on `BOARD.md`; Anna owns scorecard and ICP/leads/outreach.
+- Still missing: hosted Supabase, service keys, coach, and the live pipeline after extraction. Every key except Vercel remains unavailable, so each backend lane keeps a deterministic fixture path.
 - The mock data in the prototype is the target shape for the API. Whoever claims a wiring row replaces the mock arrays with Supabase reads and API calls without changing the information architecture unless the chat agrees.
 
 ## The demo loop
