@@ -39,6 +39,19 @@ def test_production_supabase_requires_https() -> None:
         )
 
 
+@pytest.mark.parametrize("host", ["127.0.0.1", "localhost", "[::1]"])
+def test_production_supabase_allows_loopback_http(host: str) -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        supabase_url=f"http://{host}:54321",
+        supabase_service_role_key="sentinel-secret",
+    )
+
+    assert settings.storage_mode == "supabase"
+    assert settings.supabase_url == f"http://{host}:54321"
+
+
 def test_log_level_is_case_insensitive() -> None:
     settings = Settings(_env_file=None, log_level="debug")
 
