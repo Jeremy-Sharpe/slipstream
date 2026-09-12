@@ -7,7 +7,7 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Slipstream",
-  description: "Every call, written into HubSpot and turned into the next lead.",
+  description: "Drop the recording. Slipstream files it, drafts the follow-up, and finds companies like the one you just spoke to.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
