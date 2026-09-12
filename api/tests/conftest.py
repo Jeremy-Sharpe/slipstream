@@ -14,6 +14,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         "OPENAI_API_KEY",
         "OPENROUTER_API_KEY",
         "ELEVENLABS_API_KEY",
+        "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
         "WEB_ORIGIN",
         "WEB_ORIGINS",

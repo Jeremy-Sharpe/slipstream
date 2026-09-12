@@ -86,6 +86,7 @@ def test_checked_in_example_accepts_blank_optional_credentials(
         "OPENAI_API_KEY",
         "OPENROUTER_API_KEY",
         "ELEVENLABS_API_KEY",
+        "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
         "WEB_ORIGIN",
         "WEB_ORIGINS",
@@ -96,6 +97,15 @@ def test_checked_in_example_accepts_blank_optional_credentials(
 
     assert settings.storage_mode == "memory"
     assert settings.web_origins == ["http://localhost:3000"]
+
+
+def test_paid_transcription_requires_production_ingest_token() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            environment="production",
+            elevenlabs_api_key="paid-key",
+        )
 
 
 @pytest.mark.parametrize(

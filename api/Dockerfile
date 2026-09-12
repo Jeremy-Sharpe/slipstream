@@ -5,13 +5,14 @@ ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
-WORKDIR /app
+WORKDIR /app/api
 
-COPY pyproject.toml uv.lock ./
+COPY api/pyproject.toml api/uv.lock ./
 RUN uv sync --frozen --no-dev
 
-COPY app ./app
-COPY deploy/container-entrypoint.sh /usr/local/bin/slipstream-api
+COPY api/app ./app
+COPY fixtures /app/fixtures
+COPY api/deploy/container-entrypoint.sh /usr/local/bin/slipstream-api
 
 RUN chmod 0555 /usr/local/bin/slipstream-api \
     && useradd --system --uid 10001 --no-create-home --home-dir /nonexistent slipstream

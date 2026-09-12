@@ -81,6 +81,7 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     openrouter_api_key: SecretStr | None = None
     elevenlabs_api_key: SecretStr | None = None
+    ingest_token: SecretStr | None = None
     origami_api_key: SecretStr | None = None
     reasoning_model: str = "gpt-5.4"
     embedding_model: str = "text-embedding-3-small"
@@ -99,6 +100,7 @@ class Settings(BaseSettings):
         "openai_api_key",
         "openrouter_api_key",
         "elevenlabs_api_key",
+        "ingest_token",
         "origami_api_key",
         mode="before",
     )
@@ -116,6 +118,12 @@ class Settings(BaseSettings):
             self.supabase_url = _canonical_http_origin(
                 self.supabase_url, production=self.environment == "production"
             )
+        if (
+            self.environment == "production"
+            and self.elevenlabs_api_key is not None
+            and self.ingest_token is None
+        ):
+            raise ValueError("INGEST_TOKEN is required with ELEVENLABS_API_KEY in production")
         return self
 
     @property
