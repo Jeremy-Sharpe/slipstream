@@ -68,9 +68,10 @@ begin
   );
   claim := public.claim_due_email_campaign(owner_one, 2, test_campaign_id);
   competing := public.claim_due_email_campaign(owner_two, 2, test_campaign_id);
-  if jsonb_array_length(claim->'draft_ids') <> 2
-    or claim->'draft_ids'->>0 <> draft_one::text
-    or claim->'draft_ids'->>1 <> draft_two::text
+  if claim is null
+    or jsonb_array_length(claim->'draft_ids') is distinct from 2
+    or claim->'draft_ids'->>0 is distinct from draft_one::text
+    or claim->'draft_ids'->>1 is distinct from draft_two::text
     or competing is not null
   then
     raise exception 'campaign claim was not ordered or exclusively leased';
@@ -89,14 +90,15 @@ begin
       jsonb_build_object(
         'draft_id', draft_two, 'state', 'retryable', 'outcome', 'unknown',
         'http_status', 504, 'retryable', true,
-        'reconciliation_required', true,
+        'reconciliation_required', true, 'receipt', null,
         'next_attempt_at', now() + interval '5 minutes'
       )
     )
   );
   claim := public.claim_due_email_campaign(owner_two, 8, test_campaign_id);
-  if jsonb_array_length(claim->'draft_ids') <> 1
-    or claim->'draft_ids'->>0 <> draft_three::text
+  if claim is null
+    or jsonb_array_length(claim->'draft_ids') is distinct from 1
+    or claim->'draft_ids'->>0 is distinct from draft_three::text
   then
     raise exception 'campaign did not resume at the next due item';
   end if;
@@ -105,7 +107,8 @@ begin
     owner_two,
     jsonb_build_array(jsonb_build_object(
       'draft_id', draft_three, 'state', 'failed', 'outcome', 'not_deliverable',
-      'http_status', 409, 'retryable', false, 'reconciliation_required', false
+      'http_status', 409, 'retryable', false, 'reconciliation_required', false,
+      'receipt', null
     ))
   );
   update public.email_campaign_items
@@ -120,7 +123,8 @@ begin
     owner_three,
     jsonb_build_array(jsonb_build_object(
       'draft_id', draft_two, 'state', 'reconcile', 'outcome', 'not_deliverable',
-      'http_status', 409, 'retryable', false, 'reconciliation_required', true
+      'http_status', 409, 'retryable', false, 'reconciliation_required', true,
+      'receipt', null
     ))
   );
   select status into strict stored_status
@@ -156,7 +160,9 @@ begin
   exception
     when sqlstate 'PT409' then null;
   end;
-  if competing->'draft_ids'->>0 <> draft_three::text then
+  if competing is null
+    or competing->'draft_ids'->>0 is distinct from draft_three::text
+  then
     raise exception 'expired campaign lease was not reclaimed';
   end if;
 end;

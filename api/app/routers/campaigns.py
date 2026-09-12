@@ -95,10 +95,7 @@ async def _store_call(request: Request, method: str, *args: Any, **kwargs: Any) 
         ) from error
     release_on_completion = False
     loop = asyncio.get_running_loop()
-    function = getattr(request.app.state.campaign_store, method)
-    future = loop.run_in_executor(
-        request.app.state.campaign_store_executor, partial(function, *args, **kwargs)
-    )
+    future: asyncio.Future[Any] | None = None
 
     def release_after_background_work(done: asyncio.Future[Any]) -> None:
         try:
@@ -109,18 +106,25 @@ async def _store_call(request: Request, method: str, *args: Any, **kwargs: Any) 
 
     try:
         try:
+            function = getattr(request.app.state.campaign_store, method)
+            future = loop.run_in_executor(
+                request.app.state.campaign_store_executor,
+                partial(function, *args, **kwargs),
+            )
             async with asyncio.timeout(CAMPAIGN_STORE_SECONDS):
                 return await asyncio.shield(future)
         except TimeoutError as error:
-            future.add_done_callback(release_after_background_work)
-            release_on_completion = True
+            if future is not None:
+                future.add_done_callback(release_after_background_work)
+                release_on_completion = True
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="The campaign store timed out",
             ) from error
         except asyncio.CancelledError:
-            future.add_done_callback(release_after_background_work)
-            release_on_completion = True
+            if future is not None:
+                future.add_done_callback(release_after_background_work)
+                release_on_completion = True
             raise
         except CampaignConflictError as error:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
@@ -188,6 +192,16 @@ async def create_campaign(
     ingest_token: Annotated[str | None, Header(alias="X-Slipstream-Ingest-Token")] = None,
 ) -> CampaignResponse:
     deliveries._authorise(request, ingest_token)
+    existing = await _store_call(request, "get", body.campaign_id)
+    if existing is not None:
+        if (
+            existing.name != body.name
+            or existing.created_by != body.created_by
+            or existing.requested_scheduled_for != body.scheduled_for
+            or [item.draft_id for item in existing.items] != body.draft_ids
+        ):
+            raise HTTPException(status_code=409, detail="Campaign ID has different enrollment")
+        return CampaignResponse.from_campaign(existing)
     await _validate_membership(request, body.draft_ids)
     try:
         campaign = await _store_call(
@@ -207,7 +221,7 @@ async def create_campaign(
             existing is None
             or existing.name != body.name
             or existing.created_by != body.created_by
-            or existing.scheduled_for != body.scheduled_for
+            or existing.requested_scheduled_for != body.scheduled_for
             or [item.draft_id for item in existing.items] != body.draft_ids
         ):
             raise

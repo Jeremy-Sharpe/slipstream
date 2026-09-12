@@ -4,6 +4,7 @@ create table public.email_campaigns (
   status text not null default 'scheduled'
     check (status in ('scheduled', 'running', 'paused', 'completed', 'attention')),
   scheduled_for timestamptz not null,
+  requested_scheduled_for timestamptz not null,
   created_by text not null check (char_length(btrim(created_by)) between 1 and 120),
   run_owner uuid,
   lease_until timestamptz,
@@ -90,9 +91,10 @@ begin
   end if;
 
   insert into public.email_campaigns (
-    id, name, scheduled_for, created_by
+    id, name, scheduled_for, requested_scheduled_for, created_by
   ) values (
     requested_campaign_id, btrim(requested_name), requested_scheduled_for,
+    requested_scheduled_for,
     btrim(requested_created_by)
   );
   insert into public.email_campaign_items (
@@ -244,7 +246,7 @@ begin
         reconciliation_required = coalesce(
           (result->>'reconciliation_required')::boolean, false
         ),
-        receipt = result->'receipt',
+        receipt = nullif(result->'receipt', 'null'::jsonb),
         next_attempt_at = (result->>'next_attempt_at')::timestamptz,
         last_attempt_at = recorded_at, updated_at = recorded_at
     where campaign_id = requested_campaign_id

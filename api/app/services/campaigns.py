@@ -35,6 +35,7 @@ class Campaign(BaseModel):
     name: str
     status: CampaignStatus
     scheduled_for: datetime
+    requested_scheduled_for: datetime
     created_by: str
     created_at: datetime
     updated_at: datetime
@@ -128,6 +129,7 @@ class InMemoryCampaignStore:
             name=name,
             status="scheduled",
             scheduled_for=scheduled_for,
+            requested_scheduled_for=scheduled_for,
             created_by=created_by,
             created_at=now,
             updated_at=now,
@@ -149,9 +151,9 @@ class InMemoryCampaignStore:
 
     def list(self, *, limit: int) -> list[Campaign]:
         with self._lock:
-            rows = sorted(
-                self._campaigns.values(), key=lambda row: row.created_at, reverse=True
-            )[:limit]
+            rows = sorted(self._campaigns.values(), key=lambda row: row.created_at, reverse=True)[
+                :limit
+            ]
             return [row.model_copy(deep=True) for row in rows]
 
     def get(self, campaign_id: UUID) -> Campaign | None:
@@ -194,8 +196,18 @@ class InMemoryCampaignStore:
                     and (item.next_attempt_at is None or item.next_attempt_at <= now)
                 ][:limit]
                 if not due:
-                    campaign.status = self._terminal_status(campaign.items)
+                    campaign.status = self._next_status(campaign.items)
+                    retry_times = [
+                        item.next_attempt_at
+                        for item in campaign.items
+                        if item.state in {"queued", "retryable"}
+                        and item.next_attempt_at is not None
+                    ]
+                    if retry_times:
+                        campaign.scheduled_for = min(retry_times)
                     campaign.updated_at = now
+                    self._owners.pop(campaign.id, None)
+                    self._lease_until.pop(campaign.id, None)
                     continue
                 for item in due:
                     item.state = "running"
@@ -227,9 +239,7 @@ class InMemoryCampaignStore:
             if self._owners.get(campaign_id) != owner:
                 raise CampaignConflictError("Campaign run is no longer owned by this worker")
             by_draft = {item.draft_id: item for item in campaign.items}
-            running_ids = {
-                item.draft_id for item in campaign.items if item.state == "running"
-            }
+            running_ids = {item.draft_id for item in campaign.items if item.state == "running"}
             result_ids = [result.draft_id for result in results]
             if len(result_ids) != len(set(result_ids)) or set(result_ids) != running_ids:
                 raise CampaignConflictError("Campaign results do not match the owned run")
@@ -329,14 +339,18 @@ class SupabaseCampaignStore:
         limit: int,
         campaign_id: UUID | None = None,
     ) -> CampaignClaim | None:
-        data = self._client.rpc(
-            "claim_due_email_campaign",
-            {
-                "requested_owner": str(owner),
-                "requested_limit": limit,
-                "requested_campaign_id": str(campaign_id) if campaign_id else None,
-            },
-        ).execute().data
+        data = (
+            self._client.rpc(
+                "claim_due_email_campaign",
+                {
+                    "requested_owner": str(owner),
+                    "requested_limit": limit,
+                    "requested_campaign_id": str(campaign_id) if campaign_id else None,
+                },
+            )
+            .execute()
+            .data
+        )
         return CampaignClaim.model_validate(data) if data else None
 
     def record(

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 from threading import Event
 from uuid import uuid4
@@ -13,6 +14,7 @@ from pydantic import SecretStr
 
 from app.routers import campaigns
 from app.schemas.leads import LeadIn
+from app.services.campaigns import InMemoryCampaignStore, new_campaign_id
 from app.services.outreach import approve_outreach
 
 
@@ -93,9 +95,7 @@ def test_campaign_create_is_authenticated_exact_and_idempotent(client: TestClien
         scheduled_for=scheduled_for,
         token="wrong",
     )
-    created = _create(
-        client, [first, second], campaign_id=campaign_id, scheduled_for=scheduled_for
-    )
+    created = _create(client, [first, second], campaign_id=campaign_id, scheduled_for=scheduled_for)
     repeated = _create(
         client, [first, second], campaign_id=campaign_id, scheduled_for=scheduled_for
     )
@@ -201,10 +201,17 @@ def test_retryable_campaign_item_keeps_exact_provider_identity(
     ).json()
 
     first = _run(client, campaign["id"]).json()
+    replay = _create(
+        client,
+        [draft_id],
+        campaign_id=campaign["id"],
+        scheduled_for=datetime.fromisoformat(campaign["scheduled_for"]),
+    )
     second = _run(client, campaign["id"]).json()
 
     assert first["campaign"]["counts"]["retryable"] == 1
     assert first["campaign"]["items"][0]["reconciliation_required"] is True
+    assert replay.status_code == 201
     assert second["campaign"]["status"] == "completed"
     assert second["campaign"]["counts"]["sent"] == 1
     assert len(requests) == 2
@@ -276,3 +283,51 @@ def test_store_timeout_keeps_capacity_until_blocking_work_finishes(
     assert first.status_code == 503
     assert second.status_code == 429
     release.set()
+
+
+def test_memory_store_preserves_future_retry_and_exclusive_claim() -> None:
+    store = InMemoryCampaignStore()
+    campaign_id = new_campaign_id()
+    draft_id = new_campaign_id()
+    first_owner = new_campaign_id()
+    store.create(
+        campaign_id=campaign_id,
+        name="Lease contract",
+        scheduled_for=datetime.now(UTC) - timedelta(minutes=1),
+        created_by="test",
+        draft_ids=[draft_id],
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        claims = list(
+            executor.map(
+                lambda owner: store.claim_due(owner=owner, limit=1, campaign_id=campaign_id),
+                [first_owner, new_campaign_id()],
+            )
+        )
+
+    claim = next(item for item in claims if item is not None)
+    assert sum(item is not None for item in claims) == 1
+    retry_at = datetime.now(UTC) + timedelta(minutes=5)
+    stored = store.record(
+        campaign_id=campaign_id,
+        owner=claim.owner,
+        results=[
+            campaigns.CampaignItemResult(
+                draft_id=draft_id,
+                state="retryable",
+                outcome="unknown",
+                http_status=504,
+                retryable=True,
+                reconciliation_required=True,
+                next_attempt_at=retry_at,
+            )
+        ],
+    )
+
+    assert store.claim_due(owner=new_campaign_id(), limit=1, campaign_id=campaign_id) is None
+    scheduled = store.get(campaign_id)
+    assert scheduled is not None
+    assert scheduled.status == "scheduled"
+    assert scheduled.scheduled_for == retry_at
+    assert stored.requested_scheduled_for < retry_at
