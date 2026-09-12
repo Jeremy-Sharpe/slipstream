@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import Settings, get_settings
 from app.core.database import create_supabase
-from app.core.readiness import StorageReadinessProbe
+from app.core.readiness import LocalModelReadinessProbe, StorageReadinessProbe
 from app.routers import (
     calls,
     campaigns,
@@ -58,6 +58,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await app.state.crm_webhook_client.aclose()
         await app.state.email_delivery_client.aclose()
         await app.state.readiness.close()
+        await app.state.reasoning_readiness.close()
         app.state.email_delivery_db_executor.shutdown(wait=False, cancel_futures=True)
         app.state.campaign_store_executor.shutdown(wait=False, cancel_futures=True)
 
@@ -73,6 +74,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = runtime_settings
     app.state.readiness = StorageReadinessProbe(runtime_settings)
+    app.state.reasoning_readiness = LocalModelReadinessProbe(runtime_settings)
     app.state.icp_leads_store = create_icp_leads_store(runtime_settings)
     app.state.supabase = create_supabase(runtime_settings)
     app.state.campaign_store = create_campaign_store(runtime_settings, app.state.supabase)

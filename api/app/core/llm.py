@@ -2,13 +2,14 @@ import json
 from dataclasses import dataclass
 from typing import Literal
 
+import httpx
 from anthropic import Anthropic
 from openai import BadRequestError, NotFoundError, OpenAI
 from pydantic import BaseModel
 
 from app.core.config import Settings
 
-ReasoningProvider = Literal["anthropic", "openai", "openrouter"]
+ReasoningProvider = Literal["anthropic", "openai", "openrouter", "local"]
 
 
 class MissingReasoningProviderError(RuntimeError):
@@ -62,6 +63,32 @@ class _OpenRouterEmbeddingClient:
         self.embeddings = _OpenRouterEmbeddings(client)
 
 
+class _LocalClient:
+    def __init__(self, base_url: str, context_tokens: int) -> None:
+        self.context_tokens = context_tokens
+        self._http = httpx.Client(
+            base_url=base_url.rstrip("/") + "/",
+            trust_env=False,
+            follow_redirects=False,
+            timeout=httpx.Timeout(30.0, connect=1.0),
+        )
+        self._openai = OpenAI(
+            api_key="loopback-only",
+            base_url=base_url,
+            http_client=self._http,
+        )
+        self.chat = self._openai.chat
+
+    def count_input_tokens(self, payload: dict[str, object]) -> int:
+        response = self._http.post("chat/completions/input_tokens", json=payload)
+        response.raise_for_status()
+        body = response.json()
+        input_tokens = body.get("input_tokens") if isinstance(body, dict) else None
+        if not isinstance(input_tokens, int) or input_tokens < 0:
+            raise ValueError("Local model returned an invalid input-token count")
+        return input_tokens
+
+
 def openrouter_model_id(model: str, native: str) -> str:
     if "/" in model or native not in {"openai", "anthropic"}:
         return model
@@ -89,6 +116,15 @@ def create_openrouter_client(settings: Settings) -> OpenAI:
     )
 
 
+def create_local_client(settings: Settings) -> _LocalClient:
+    if settings.local_model_base_url is None:
+        raise MissingReasoningProviderError("local")
+    return _LocalClient(
+        settings.local_model_base_url,
+        settings.local_model_context_tokens,
+    )
+
+
 def create_reasoning_client(settings: Settings) -> ReasoningClient:
     provider = settings.reasoning_provider
     native = settings._native_reasoning_provider
@@ -97,10 +133,13 @@ def create_reasoning_client(settings: Settings) -> ReasoningClient:
         client = create_anthropic_client(settings)
     elif provider == "openai":
         client = create_openai_client(settings)
-    else:
+    elif provider == "openrouter":
         client = create_openrouter_client(settings)
         if native != provider:
             model = openrouter_model_id(model, native)
+    else:
+        client = create_local_client(settings)
+        model = settings.local_model_name
     return ReasoningClient(provider=provider, model=model, client=client)
 
 
@@ -146,8 +185,18 @@ def structured[SchemaT: BaseModel](
         output, usage = _openai_structured(
             client.client, client.model, system, user, schema, max_tokens, timeout
         )
-    else:
+    elif client.provider == "openrouter":
         output, usage = _openrouter_structured(
+            client.client,
+            client.model,
+            system,
+            user,
+            schema,
+            max_tokens,
+            timeout,
+        )
+    else:
+        output, usage = _local_structured(
             client.client,
             client.model,
             system,
@@ -248,6 +297,53 @@ def _openrouter_structured[SchemaT: BaseModel](
             extra_body={"usage": {"include": True}},
             **request_options,
         )
+    return (
+        schema.model_validate_json(_strip_code_fences(_completion_text(completion))),
+        _openrouter_usage(completion),
+    )
+
+
+def _local_structured[SchemaT: BaseModel](
+    client: object,
+    model: str,
+    system: str,
+    user: str,
+    schema: type[SchemaT],
+    max_tokens: int,
+    timeout: float | None,
+) -> tuple[SchemaT, Usage | None]:
+    request_options = {"timeout": 600.0 if timeout is None else timeout}
+    request_payload: dict[str, object] = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": _json_system_prompt(system, schema)},
+            {"role": "user", "content": user},
+        ],
+        "max_tokens": max_tokens,
+        "temperature": 0,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": schema.__name__,
+                "strict": True,
+                "schema": schema.model_json_schema(),
+            },
+        },
+    }
+    count_tokens = getattr(client, "count_input_tokens", None)
+    context_tokens = getattr(client, "context_tokens", None)
+    if callable(count_tokens) and isinstance(context_tokens, int):
+        input_tokens = count_tokens(request_payload)
+        if input_tokens + max_tokens > context_tokens:
+            raise ValueError(
+                f"Local model request needs {input_tokens + max_tokens} tokens but its "
+                f"context supports {context_tokens}"
+            )
+    completion = client.chat.completions.create(**request_payload, **request_options)
+    if not completion.choices:
+        raise ValueError("Local model returned no completion choices")
+    if getattr(completion.choices[0], "finish_reason", None) == "length":
+        raise ValueError("Local model output exceeded the requested token budget")
     return (
         schema.model_validate_json(_strip_code_fences(_completion_text(completion))),
         _openrouter_usage(completion),

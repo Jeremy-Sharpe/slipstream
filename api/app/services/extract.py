@@ -163,6 +163,7 @@ def extract_with_model(
     user = json.dumps(
         {
             "call_date": call.occurred_at.isoformat(),
+            "call_subject": call.subject,
             "segments": [segment.model_dump() for segment in call.segments],
         },
         ensure_ascii=False,

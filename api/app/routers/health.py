@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
 
 from app.core.config import Settings
-from app.core.readiness import StorageUnavailableError
+from app.core.readiness import ReasoningUnavailableError, StorageUnavailableError
 
 router = APIRouter(tags=["operations"])
 
@@ -18,6 +18,9 @@ class HealthResponse(BaseModel):
     environment: str
     storage: Literal["supabase", "memory"]
     integrations: dict[str, bool]
+    reasoning_provider: Literal["anthropic", "openai", "openrouter", "local"]
+    reasoning_model: str
+    reasoning_configured: bool
     timestamp: datetime
 
 
@@ -35,6 +38,9 @@ async def health(request: Request) -> HealthResponse:
         environment=settings.environment,
         storage=settings.storage_mode,
         integrations=settings.integration_flags,
+        reasoning_provider=settings.reasoning_provider,
+        reasoning_model=settings.effective_reasoning_model,
+        reasoning_configured=settings.reasoning_configured,
         timestamp=datetime.now(UTC),
     )
 
@@ -43,9 +49,15 @@ async def health(request: Request) -> HealthResponse:
 async def readiness(request: Request) -> HealthResponse:
     try:
         await request.app.state.readiness.check()
+        await request.app.state.reasoning_readiness.check()
     except StorageUnavailableError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Configured storage is unavailable",
+        ) from error
+    except ReasoningUnavailableError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Configured reasoning model is unavailable",
         ) from error
     return await health(request)

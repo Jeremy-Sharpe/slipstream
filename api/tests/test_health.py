@@ -1,9 +1,15 @@
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from app.core.config import Settings
-from app.core.readiness import StorageReadinessProbe, StorageUnavailableError
+from app.core.readiness import (
+    LocalModelReadinessProbe,
+    ReasoningUnavailableError,
+    StorageReadinessProbe,
+    StorageUnavailableError,
+)
 from app.factory import create_app
 
 
@@ -13,11 +19,15 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
     assert response.json()["storage"] == "memory"
+    assert response.json()["reasoning_provider"] == "openai"
+    assert response.json()["reasoning_model"] == "gpt-5.4"
+    assert response.json()["reasoning_configured"] is False
     assert response.json()["integrations"] == {
         "supabase": False,
         "anthropic": False,
         "openai": False,
         "openrouter": False,
+        "local_model": False,
         "embeddings": False,
         "elevenlabs": False,
         "origami": False,
@@ -74,3 +84,51 @@ def test_readiness_fails_closed_when_configured_storage_is_missing(
     assert response.status_code == 503
     assert response.json() == {"detail": "Configured storage is unavailable"}
     assert "sentinel-secret" not in response.text
+
+
+def test_readiness_fails_closed_when_configured_local_model_is_missing() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        local_model_base_url="http://127.0.0.1:1/v1",
+    )
+
+    with TestClient(create_app(settings)) as configured_client:
+        response = configured_client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Configured reasoning model is unavailable"}
+
+
+def test_readiness_ignores_an_unused_local_fallback() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        openrouter_api_key="hosted-key",
+        local_model_base_url="http://127.0.0.1:1/v1",
+    )
+
+    with TestClient(create_app(settings)) as configured_client:
+        response = configured_client.get("/ready")
+
+    assert response.status_code == 200
+    assert response.json()["reasoning_provider"] == "openrouter"
+    assert response.json()["reasoning_configured"] is True
+
+
+@pytest.mark.asyncio
+async def test_local_readiness_does_not_follow_an_external_redirect() -> None:
+    def redirect(request: httpx.Request) -> httpx.Response:
+        assert request.url.host == "127.0.0.1"
+        return httpx.Response(302, headers={"location": "https://external.example/models"})
+
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        local_model_base_url="http://127.0.0.1:8081/v1",
+    )
+    probe = LocalModelReadinessProbe(settings, transport=httpx.MockTransport(redirect))
+
+    with pytest.raises(ReasoningUnavailableError):
+        await probe.check()
+    await probe.close()
