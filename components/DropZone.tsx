@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { actions } from "@/lib/store";
 import { FileTiles } from "./home/FileTiles";
 import { Recorder } from "./home/Recorder";
+import { Segmented } from "./home/Segmented";
+import { TypedPlaceholder } from "./home/TypedPlaceholder";
 import { Button, cn, mmss } from "./ui";
 
 type Mode = "upload" | "record" | "paste";
@@ -18,7 +21,7 @@ const MODES: { key: Mode; label: string }[] = [
 ];
 
 // One card, one size: 300px tall in every state so switching never moves the page.
-const CARD = "relative mx-auto flex h-[220px] w-full max-w-[560px] flex-col items-center justify-center rounded-2xl bg-surface";
+const CARD = "relative mx-auto flex h-[220px] w-full max-w-[560px] flex-col items-center justify-center rounded-2xl bg-surface motion-safe:animate-[fade-up_200ms_cubic-bezier(0.23,1,0.32,1)_both]";
 
 export function DropZone() {
   const router = useRouter();
@@ -26,7 +29,9 @@ export function DropZone() {
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [over, setOver] = useState(false);
   const [text, setText] = useState("");
+  const [pasteFocused, setPasteFocused] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const attach = useRef<HTMLInputElement>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -55,6 +60,14 @@ export function DropZone() {
     transcribe(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
   };
 
+  // The "+" in Paste: media starts transcribing; a text transcript loads in.
+  const onAttach = async (files: FileList | null) => {
+    const f = files?.[0];
+    if (!f) return;
+    if (/\.(txt|vtt|srt)$/i.test(f.name) || f.type.startsWith("text/")) setText(await f.text());
+    else transcribe(f.name);
+  };
+
   const run = () => {
     if (!text.trim()) return;
     const c = actions.addTranscript(text);
@@ -63,26 +76,10 @@ export function DropZone() {
 
   return (
     <div className="text-center">
-      <div role="tablist" className="mb-5 inline-flex h-9 items-center rounded-full bg-surface p-1">
-        {MODES.map((m) => (
-          <button
-            key={m.key}
-            role="tab"
-            type="button"
-            aria-selected={mode === m.key}
-            onClick={() => setMode(m.key)}
-            className={cn(
-              "h-7 rounded-full px-3.5 text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
-              mode === m.key ? "bg-white text-ink shadow-[var(--shadow-card)]" : "text-soft hover:text-ink",
-            )}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
+      <div className="mb-5"><Segmented value={mode} options={MODES} onChange={setMode} /></div>
 
       {phase.kind === "transcribing" ? (
-        <div className={cn(CARD, "px-8 text-left")}>
+        <div key="transcribing" className={cn(CARD, "px-8 text-left")}>
           <div className="w-full max-w-[400px]">
             <p className="truncate text-[15px] font-semibold text-ink">{phase.name}</p>
             <p className="mt-1 text-[13px] text-soft">
@@ -95,6 +92,7 @@ export function DropZone() {
         </div>
       ) : mode === "upload" ? (
         <div
+          key="upload"
           role="button"
           tabIndex={0}
           aria-label="Drop a call recording or choose a file"
@@ -103,7 +101,7 @@ export function DropZone() {
           onDragOver={(e) => { e.preventDefault(); setOver(true); }}
           onDragLeave={() => setOver(false)}
           onDrop={(e) => { e.preventDefault(); setOver(false); onFiles(e.dataTransfer.files); }}
-          className={cn(CARD, "cursor-pointer border border-dashed transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40", over ? "border-solid border-ink" : "border-line hover:border-[#d4d4d4]")}
+          className={cn(CARD, "cursor-pointer border border-dashed outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2", over ? "border-solid border-ink" : "border-line hover:border-[#d4d4d4]")}
         >
           <FileTiles lifted={over} />
           <p className="mt-4 text-[15px] font-semibold text-ink">Drop a call recording</p>
@@ -113,24 +111,35 @@ export function DropZone() {
           <input ref={input} type="file" accept="audio/*,video/*" className="sr-only" tabIndex={-1} onChange={(e) => onFiles(e.target.files)} />
         </div>
       ) : mode === "record" ? (
-        <div className={cn(CARD, "px-8")}>
+        <div key="record" className={cn(CARD, "px-8")}>
           <Recorder key={mode} onUse={useRecording} />
         </div>
       ) : (
-        <div className={cn(CARD, "items-stretch justify-start p-5 text-left")}>
+        <div key="paste" className={cn(CARD, "items-stretch justify-start p-5 text-left")}>
+          <TypedPlaceholder active={!pasteFocused && text.length === 0} />
           <textarea
-            autoFocus
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Paste the transcript…"
-            className="min-h-0 w-full flex-1 resize-none bg-transparent pb-10 text-[15px] leading-6 text-ink outline-none placeholder:text-faint"
+            onFocus={() => setPasteFocused(true)}
+            onBlur={() => setPasteFocused(false)}
+            aria-label="Paste the transcript"
+            className="relative min-h-0 w-full flex-1 resize-none bg-transparent pb-10 text-[15px] leading-6 text-ink outline-none"
           />
+          <button
+            type="button"
+            aria-label="Attach a recording or transcript"
+            onClick={() => attach.current?.click()}
+            className="absolute bottom-3 left-3 flex size-7 items-center justify-center rounded-full bg-white text-ink shadow-[inset_0_0_0_1px_#e8e8e8] outline-none transition-colors duration-150 hover:bg-surface focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          >
+            <Plus className="size-3.5" strokeWidth={2} />
+          </button>
+          <input ref={attach} type="file" accept="audio/*,video/*,.txt,.vtt,.srt" className="sr-only" tabIndex={-1} onChange={(e) => onAttach(e.target.files)} />
           <button
             type="button"
             onClick={run}
             disabled={!text.trim()}
             className={cn(
-              "absolute right-4 bottom-4 inline-flex h-7 items-center rounded-full px-3.5 text-[12.5px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+              "absolute right-3 bottom-3 inline-flex h-7 items-center rounded-full px-3.5 text-[12.5px] font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
               text.trim() ? "bg-accent text-accent-ink hover:bg-[#ff7d61]" : "cursor-default bg-line text-faint",
             )}
           >

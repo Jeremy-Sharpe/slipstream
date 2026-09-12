@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { DropZone } from "@/components/DropZone";
 
 export default function HomePage() {
@@ -10,9 +9,6 @@ export default function HomePage() {
         <div className="mt-7">
           <DropZone />
         </div>
-        <p className="mt-5">
-          <Link href="/calls" className="text-[13px] text-faint underline-offset-2 transition-colors duration-150 hover:text-ink hover:underline">See recent calls →</Link>
-        </p>
       </section>
     </div>
   );

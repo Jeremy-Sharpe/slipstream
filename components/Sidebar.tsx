@@ -19,7 +19,7 @@ export function Sidebar() {
       <Link href="/" className="flex items-center gap-2 px-3 text-[16px] font-semibold tracking-[-0.04em] text-ink">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/slipstream-mark.svg" alt="" width={22} height={22} className="rounded-md" />
-        <span>Slipstream<span className="text-accent">.</span></span>
+        <span>Slipstream</span>
       </Link>
       <nav className="mt-8 flex flex-col gap-1">
         {NAV.map((n) => {
