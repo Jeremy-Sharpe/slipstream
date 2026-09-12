@@ -6,12 +6,13 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Request, status
 
+from app.core.llm import MissingReasoningProviderError
 from app.routers.calls import load_call
 from app.schemas.extraction import ExtractionResult
 from app.services.extract import (
     ExtractionUnavailableError,
     extract_fixture,
-    extract_with_claude,
+    extract_with_model,
 )
 
 router = APIRouter(prefix="/calls", tags=["extraction"])
@@ -158,22 +159,14 @@ async def extract_call(conversation_id: UUID, request: Request) -> ExtractionRes
         if call is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Call not found")
         try:
-            if call.fixture:
-                result = await asyncio.to_thread(extract_fixture, call)
-            else:
-                api_key = request.app.state.settings.anthropic_api_key
-                if api_key is None:
-                    raise HTTPException(
-                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                        detail=(
-                            "Claude extraction is not configured; fixture calls remain available"
-                        ),
-                    )
-                result = await extract_with_claude(
-                    call,
-                    api_key=api_key.get_secret_value(),
-                    client=request.app.state.transcription_client,
-                )
+            result = await asyncio.to_thread(extract_with_model, call, request.app.state.settings)
+        except MissingReasoningProviderError as error:
+            if not call.fixture:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="No reasoning provider is configured; fixture calls remain available",
+                ) from error
+            result = await asyncio.to_thread(extract_fixture, call)
         except ExtractionUnavailableError as error:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,

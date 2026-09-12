@@ -119,8 +119,14 @@ class ExtractionPayload(BaseModel):
         return self
 
 
+class GroundingReport(BaseModel):
+    repaired: int = 0
+    dropped: int = 0
+
+
 class ExtractionResult(ExtractionPayload):
     conversation_id: UUID
-    source: Literal["fixture_labels", "claude"]
+    source: Literal["fixture_labels", "model"]
     model: str
     prompt_version: str
+    grounding: GroundingReport = Field(default_factory=GroundingReport)
