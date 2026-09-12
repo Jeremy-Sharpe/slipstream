@@ -1,12 +1,12 @@
 # Vercel ships only the Next.js application. Keep backend, desktop and local
 # build/test artefacts out of the upload even when they are present locally.
-api/
-coach/
-fixtures/
-supabase/
-docs/
-.hg-evals-reports/
-.claude/
+/api/
+/coach/
+/fixtures/
+/supabase/
+/docs/
+/.hg-evals-reports/
+/.claude/
 **/.venv/
 **/.pytest_cache/
 **/node_modules/
