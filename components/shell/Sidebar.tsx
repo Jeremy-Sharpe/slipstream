@@ -15,8 +15,6 @@ const NAV = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-// Only Conversations exists today. The other items render so the shell reads
-// as the full product; they point at the home page until their surface lands.
 export function Sidebar() {
   const pathname = usePathname();
   return (
@@ -29,16 +27,12 @@ export function Sidebar() {
       <nav className="mt-6 flex flex-col gap-0.5">
         {NAV.map(({ href, label, icon: Icon, count }) => {
           const active = pathname === href;
-          const live = href === "/";
           return (
             <Link
               key={href}
-              href={live ? href : "/"}
-              aria-disabled={!live}
+              href={href}
               className={cn(
-                "flex h-8 items-center gap-2.5 rounded-md px-2 text-[13px] text-muted-foreground transition-colors",
-                live && "hover:bg-muted hover:text-foreground",
-                !live && "cursor-default",
+                "flex h-8 items-center gap-2.5 rounded-md px-2 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
                 active && "bg-muted font-medium text-foreground",
               )}
             >
