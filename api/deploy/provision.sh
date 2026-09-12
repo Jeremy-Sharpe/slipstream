@@ -43,6 +43,9 @@ fi
 if [[ ! -d "$SOURCE_DIR/.git" ]]; then
   install -d -m 0755 -o slipstream-deploy -g slipstream-deploy "$SOURCE_DIR"
   runuser -u slipstream-deploy -- git clone --filter=blob:none "$REPOSITORY_URL" "$SOURCE_DIR"
+else
+  runuser -u slipstream-deploy -- git -C "$SOURCE_DIR" fetch --quiet --prune origin main
+  runuser -u slipstream-deploy -- git -C "$SOURCE_DIR" checkout --quiet -B main origin/main
 fi
 
 install -m 0755 "$SOURCE_DIR/api/deploy/deploy.sh" /usr/local/sbin/slipstream-deploy
