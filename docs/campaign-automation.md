@@ -58,7 +58,7 @@ Only scheduled campaigns can be paused, and only paused campaigns with unfinishe
 
 ## Run due work from Railway or Marcel
 
-Configure a cron job to call this endpoint every minute. Required secrets are `SLIPSTREAM_API_URL` and `SLIPSTREAM_INGEST_TOKEN`; the API itself additionally needs `RESEND_API_KEY` and `RESEND_FROM`.
+Configure a cron job to call this endpoint on a short interval. Required secrets are `SLIPSTREAM_API_URL` and `SLIPSTREAM_INGEST_TOKEN`; the API itself additionally needs `RESEND_API_KEY` and `RESEND_FROM`. The dependency-free container in `scheduler/` is preconfigured as a one-shot Railway cron service every five minutes and is preferable to maintaining an ad hoc shell command.
 
 ```bash
 curl --fail-with-body \
