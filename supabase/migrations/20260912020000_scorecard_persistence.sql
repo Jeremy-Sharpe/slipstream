@@ -6,7 +6,7 @@ security definer
 set search_path = ''
 as $$
   select encode(
-    public.digest(
+    extensions.digest(
       jsonb_build_object(
         'conversation_updated_at', conversation.updated_at,
         'rep', coalesce(conversation.metadata->>'rep', deal.owner_name),
