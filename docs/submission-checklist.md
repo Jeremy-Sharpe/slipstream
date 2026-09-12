@@ -6,7 +6,8 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 ## Verified now
 
 - Public repository: `https://github.com/Jeremy-Sharpe/slipstream`
-- Production UI: `https://slipstream-hackathon.vercel.app` responds with HTTP 200.
+- Production UI: `https://slipstream-hackathon.vercel.app` responds with HTTP 200;
+  Campaigns includes the live “Delivery execution” card.
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
@@ -27,9 +28,6 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 
 ## Deployment-only gaps
 
-- Vercel has intermittently refused new production promotions after the project exceeded
-  100 free deployments in one day. The existing production URL remains healthy; show the
-  Campaigns beat only after its “Delivery execution” card is visible there.
 - The installed Railway CLI is unauthenticated. `scheduler/` is deploy-ready, but the
   service and its `SLIPSTREAM_INGEST_TOKEN` variable still need an account owner.
 - The VPS has no Supabase, Resend, Origami or model credentials. Do not add them to Git,
@@ -45,9 +43,8 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 4. Replace `Demo video: (added at submission)` in `README.md` with the public URL.
 5. Pull `main`, then run `npm run evals:dry`. It must report `PASSED`; do not waive a
    failing check.
-6. Confirm both production URLs return HTTP 200 and the API `/ready` revision matches
-   the latest GitHub `main` commit. If Vercel has not promoted the campaign UI, follow
-   the conditional skip already written into `docs/demo-script.md`.
+6. Confirm both production URLs return HTTP 200, Campaigns still shows “Delivery execution”,
+   and the API `/ready` revision matches the latest GitHub `main` commit.
 7. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
    **Track 1: Improve an Existing Business Capability** and also enter the
    **Built With ElevenLabs** special track.
