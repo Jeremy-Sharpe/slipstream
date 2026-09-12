@@ -1,0 +1,35 @@
+import { Filter } from "lucide-react";
+import { IconButton } from "./IconButton";
+
+export function ResultBar({ count, total, dealCount, updatedAt, filtersHidden, onShowFilters }: {
+  count: number;
+  total: number;
+  dealCount: number;
+  updatedAt: Date | null;
+  filtersHidden: boolean;
+  onShowFilters: () => void;
+}) {
+  return (
+    <div className="flex h-[62px] shrink-0 items-center border-b border-line pl-[22px] text-[17px] text-ink">
+      {filtersHidden && (
+        <>
+          <IconButton aria-label="Show filters" onClick={onShowFilters}>
+            <Filter className="size-[18px]" strokeWidth={1.75} />
+          </IconButton>
+          <span className="mx-3.5 h-6 w-px bg-line" aria-hidden />
+        </>
+      )}
+      <span className="font-semibold">Preview</span>
+      <span className="mx-2 text-muted-foreground">·</span>
+      <span className="tabular-nums text-ink">{count} of {total.toLocaleString("en-AU")} (~{total.toLocaleString("en-AU")} found)</span>
+      <span className="mx-2 text-muted-foreground">·</span>
+      <span className="text-muted-foreground">from the ICP derived across {dealCount} won deals</span>
+      {updatedAt && (
+        <>
+          <span className="mx-2 text-muted-foreground">·</span>
+          <span className="text-sm text-muted-foreground">Updated just now</span>
+        </>
+      )}
+    </div>
+  );
+}
