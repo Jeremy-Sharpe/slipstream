@@ -1,11 +1,11 @@
 "use client";
 
-import { Check, Gauge, Mail, Sparkles } from "lucide-react";
+import { Check, Gauge, Mail, ScanText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { CallRecord } from "@/lib/types/calls";
 import { cn } from "@/lib/utils";
-import { Card } from "./Transcript";
+import { Badge, Card } from "./Transcript";
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
@@ -14,11 +14,11 @@ export function Intelligence({ call }: { call: CallRecord }) {
   const next = call.extraction.nextStep?.value ?? (call.outcome === "no_show" ? "Reschedule" : "None agreed");
   const risk = call.extraction.objections[0]?.text ?? (call.riskFlags[0] ? `Coach: ${call.riskFlags[0].kind}` : "None raised");
   return (
-    <Card className="border-l-2 border-l-primary">
+    <Card>
       <div className="px-6 py-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-[17px] font-semibold text-ink"><Sparkles className="size-[18px] text-primary" strokeWidth={2} /> Conversation intelligence</span>
-          <span className="rounded-md bg-muted px-2.5 py-1 text-[13px] text-muted-foreground">{Math.round(call.extraction.deal.outcome.confidence * 100)}% confidence</span>
+          <span className="flex items-center gap-2 text-[17px] font-semibold text-ink"><ScanText className="size-[18px] text-muted-foreground" strokeWidth={1.5} /> Conversation intelligence</span>
+          <Badge>{Math.round(call.extraction.deal.outcome.confidence * 100)}% confidence</Badge>
         </div>
         <p className="mt-3 text-[16px] leading-6 text-ink-2">{call.summary}</p>
         <dl className="mt-5 grid grid-cols-3 divide-x divide-line border-t border-line pt-4">
@@ -44,21 +44,21 @@ export function ScorecardCard({ call, onHover }: { call: CallRecord; onHover: (s
     { label: "Talk ratio", value: `${Math.round(sc.talkRatio * 100)}% rep`, ok: sc.talkRatio <= 0.55, span: null },
   ];
   return (
-    <Card title={<><Gauge className="size-4 text-muted-foreground" strokeWidth={1.75} /> Scorecard</>} aside={<span className="text-[14px] text-muted-foreground">{rows.filter((r) => r.ok).length} / 4</span>}>
+    <Card title={<><Gauge className="size-[18px] text-muted-foreground" strokeWidth={1.5} /> Scorecard</>} aside={<span className="text-[14px] text-muted-foreground tabular-nums">{rows.filter((r) => r.ok).length} / 4</span>}>
       <ul className="divide-y divide-line">
         {rows.map((r) => {
           const t = turn(r.span);
           return (
-            <li key={r.label} className="grid grid-cols-[220px_1fr] gap-5 px-6 py-4" onMouseEnter={() => onHover(r.span)} onMouseLeave={() => onHover(null)}>
+            <li key={r.label} className="grid grid-cols-[220px_1fr] gap-5 px-6 py-4 transition-colors duration-150 hover:bg-page" onMouseEnter={() => onHover(r.span)} onMouseLeave={() => onHover(null)}>
               <div className="flex items-start gap-2">
-                <span className={cn("mt-1 size-2 shrink-0 rounded-full", r.ok ? "bg-primary" : "border border-foreground/50")} />
+                <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", r.ok ? "bg-foreground" : "border border-muted-foreground")} />
                 <div>
                   <div className="text-[15px] font-medium text-ink">{r.label}</div>
                   <div className="text-[14px] text-muted-foreground">{r.value}</div>
                 </div>
               </div>
               <div className="min-w-0 text-[15px] leading-6 text-ink-2">
-                {t ? <><span className="text-primary">“{t.text}”</span> <span className="ml-1 font-mono text-[14px] text-muted-foreground">{fmt(t.at)}</span></> : <span className="text-muted-foreground">{r.label === "Talk ratio" ? sc.notes : "No supporting line."}</span>}
+                {t ? <><span className="text-ink">“{t.text}”</span> <span className="ml-1 font-mono text-[14px] text-muted-foreground">{fmt(t.at)}</span></> : <span className="text-muted-foreground">{r.label === "Talk ratio" ? sc.notes : "No supporting line."}</span>}
               </div>
             </li>
           );
@@ -72,15 +72,15 @@ export function FollowUpDraft({ call, onApprove, approved }: { call: CallRecord;
   const [subject, setSubject] = useState(call.draft.subject);
   const [body, setBody] = useState(call.draft.body);
   return (
-    <Card title={<><Mail className="size-4 text-muted-foreground" strokeWidth={1.75} /> Follow-up drafted from this call</>} aside={<span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">{approved ? "Approved" : "Ready to review"}</span>}>
+    <Card title={<><Mail className="size-[18px] text-muted-foreground" strokeWidth={1.5} /> Follow-up</>} aside={<Badge>{approved ? "Approved" : "Ready to review"}</Badge>}>
       <div className="flex h-11 items-center gap-3 border-b border-line px-6 text-[15px]">
         <span className="text-muted-foreground">To</span>
         <span className="text-ink">{call.prospect} &lt;{call.extraction.contact.email.value}&gt;</span>
       </div>
-      <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={approved} className="h-12 w-full border-b border-line bg-transparent px-6 text-[16px] font-medium text-ink outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Subject" />
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} disabled={approved} rows={10} className="block w-full resize-y bg-transparent px-6 py-5 text-[16px] leading-7 text-ink-2 outline-none focus-visible:bg-page disabled:opacity-70" aria-label="Draft body" />
+      <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={approved} className="h-12 w-full border-b border-line bg-transparent px-6 text-[16px] font-medium text-ink outline-none transition-colors duration-150 focus-visible:bg-page disabled:opacity-70" aria-label="Subject" />
+      <textarea value={body} onChange={(e) => setBody(e.target.value)} disabled={approved} rows={10} className="block w-full resize-y bg-transparent px-6 py-5 text-[16px] leading-7 text-ink-2 outline-none transition-colors duration-150 focus-visible:bg-page disabled:opacity-70" aria-label="Draft body" />
       <footer className="flex items-center justify-between border-t border-line px-5 py-3.5">
-        <span className="text-[14px] text-muted-foreground">Nothing is sent. Approving marks it and logs an activity.</span>
+        <span className="text-[14px] text-muted-foreground">Nothing is sent from Slipstream.</span>
         {approved ? <span className="flex items-center gap-1.5 text-[15px] font-medium text-ink"><Check className="size-4" strokeWidth={2} /> Approved · logged</span> : <Button className="h-10 rounded-md px-4 text-[15px] font-medium" onClick={onApprove}><Check className="size-4" strokeWidth={2} /> Approve</Button>}
       </footer>
     </Card>

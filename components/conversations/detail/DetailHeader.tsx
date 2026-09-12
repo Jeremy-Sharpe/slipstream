@@ -40,12 +40,12 @@ export function DetailHeader({ call, others, status, onMarkDone, onRerun, rerunn
   return (
     <>
       <div className="flex h-16 shrink-0 items-center gap-2 border-b border-line bg-card px-5 text-[17px]">
-        <Link href="/home" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-ink hover:bg-muted"><Folder className="size-[18px] text-ink" strokeWidth={1.75} />Home</Link>
+        <Link href="/home" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-ink transition-colors duration-150 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"><Folder className="size-[18px] text-ink" strokeWidth={1.5} />Home</Link>
         <ChevronRight className="size-4 text-muted-foreground" strokeWidth={2} />
-        <Link href="/" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-ink hover:bg-muted"><MessageSquare className="size-[18px] text-ink" strokeWidth={1.75} />Conversations</Link>
+        <Link href="/" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-ink transition-colors duration-150 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"><MessageSquare className="size-[18px] text-ink" strokeWidth={1.5} />Conversations</Link>
         <ChevronRight className="size-4 text-muted-foreground" strokeWidth={2} />
         <DropdownMenu>
-          <DropdownMenuTrigger render={<button type="button" className="flex items-center gap-1.5 rounded-md px-1.5 py-1 font-semibold text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+          <DropdownMenuTrigger render={<button type="button" className="flex items-center gap-1.5 rounded-md px-1.5 py-1 font-semibold text-ink transition-colors duration-150 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
             {call.company}
             <ChevronDown className="size-4 text-muted-foreground" strokeWidth={2} />
           </DropdownMenuTrigger>
@@ -73,8 +73,8 @@ export function DetailHeader({ call, others, status, onMarkDone, onRerun, rerunn
             <ExternalLink className="size-4" strokeWidth={2} /> Open in HubSpot
           </Button>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" aria-label="More" className="flex size-10 items-center justify-center rounded-md border border-line text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
-              <MoreHorizontal className="size-4" strokeWidth={2} />
+            <DropdownMenuTrigger render={<button type="button" aria-label="More" className="flex size-10 items-center justify-center rounded-md border border-line text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+              <MoreHorizontal className="size-4" strokeWidth={1.5} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuItem onClick={onRerun} disabled={rerunning}><RefreshCw className={cn("size-4", rerunning && "animate-spin")} strokeWidth={1.75} /> {rerunning ? "Re-running…" : "Re-run extraction"}</DropdownMenuItem>

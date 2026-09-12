@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, ExternalLink, Gauge, Mail, Phone, Sparkles, Zap } from "lucide-react";
+import { Check, ExternalLink, Gauge, Mail, Phone, ScanText } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { CallRecord, TimelineEntry } from "@/lib/types/calls";
 import { cn } from "@/lib/utils";
+import { Badge } from "./Transcript";
 
 const STAGES = ["Discovery", "Evaluation", "Proposal", "Procurement", "Closed won", "Closed lost"];
 const timeFmt = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Melbourne", hour: "numeric", minute: "2-digit", hour12: false });
@@ -18,14 +19,14 @@ function Field({ label, confidence, span, onHover, children }: { label: string; 
     <label className="grid gap-1.5" onMouseEnter={() => onHover(span)} onMouseLeave={() => onHover(null)} onFocus={() => onHover(span)} onBlur={() => onHover(null)}>
       <span className="flex items-center justify-between text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">
         {label}
-        <span className={cn("font-medium normal-case tracking-normal", span != null ? "text-primary" : "text-muted-foreground")}>{Math.round(confidence * 100)}%</span>
+        <span className="font-medium normal-case tracking-normal text-muted-foreground tabular-nums">{Math.round(confidence * 100)}%</span>
       </span>
       {children}
     </label>
   );
 }
 
-const inputCls = "h-10 w-full rounded-md border border-line bg-card px-3 text-[15px] text-ink outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-70";
+const inputCls = "h-10 w-full rounded-md border border-line bg-card px-3 text-[15px] text-ink outline-none transition-[box-shadow,border-color] duration-150 hover:border-foreground/30 focus-visible:border-foreground/30 focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-70";
 
 export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: CallRecord; synced: boolean; onSync: () => void; onHover: (i: number | null) => void; timeline: TimelineEntry[] }) {
   const x = call.extraction;
@@ -44,15 +45,12 @@ export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: Ca
           <p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">CRM write-back</p>
           <h2 className="text-[20px] font-bold tracking-[-0.02em] text-ink">HubSpot</h2>
         </div>
-        <span className={cn("rounded-md px-2.5 py-1 text-[12px] font-semibold tracking-wide uppercase", synced ? "bg-foreground text-background" : "bg-primary-soft text-ink")}>{synced ? "Synced" : "Review"}</span>
+        <Badge className={cn(synced && "bg-foreground text-background")}>{synced ? "Synced" : "Needs review"}</Badge>
       </div>
 
-      <div className="flex items-center gap-3 rounded-lg bg-primary-soft px-4 py-3">
-        <Sparkles className="size-[18px] shrink-0 text-primary" strokeWidth={2} />
-        <div className="text-[15px]">
-          <div className="font-medium text-ink">Auto-filled from conversation</div>
-          <div className="text-[14px] text-ink-2">Hover a field to see where it came from</div>
-        </div>
+      <div className="flex items-center gap-3 rounded-lg border border-line bg-page px-4 py-3 text-[15px]">
+        <ScanText className="size-[18px] shrink-0 text-muted-foreground" strokeWidth={1.5} />
+        <span className="text-ink">Auto-filled from the call. Hover a field to see its source.</span>
       </div>
 
       <div className="grid grid-cols-[40px_1fr_32px] items-center gap-3 rounded-lg border border-line p-4">
@@ -61,7 +59,7 @@ export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: Ca
           <div className="truncate text-[16px] font-medium text-ink">{call.prospect}</div>
           <div className="truncate text-[14px] text-muted-foreground">{x.contact.role.value} · {call.company}</div>
         </div>
-        <a href={`https://${call.domain}`} target="_blank" rel="noreferrer" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Open website"><ExternalLink className="size-4" strokeWidth={1.75} /></a>
+        <a href={`https://${call.domain}`} target="_blank" rel="noreferrer" className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" aria-label="Open website"><ExternalLink className="size-4" strokeWidth={1.75} /></a>
       </div>
 
       <div className="grid gap-4">
@@ -92,7 +90,7 @@ export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: Ca
             <span className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Promises</span>
             <ul className="grid gap-1.5">
               {x.promises.map((p, i) => (
-                <li key={i} onMouseEnter={() => onHover(p.span)} onMouseLeave={() => onHover(null)} className="flex items-start gap-2 rounded-md border border-line px-3 py-2.5 text-[15px] text-ink-2">
+                <li key={i} onMouseEnter={() => onHover(p.span)} onMouseLeave={() => onHover(null)} className="flex items-start gap-2 rounded-md border border-line px-3 py-2.5 text-[15px] text-ink-2 transition-colors duration-150 hover:bg-page">
                   <Check className="mt-1 size-4 shrink-0 text-muted-foreground" strokeWidth={2} />{p.value}
                 </li>
               ))}
@@ -104,8 +102,8 @@ export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: Ca
             <span className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Coach flags</span>
             <ul className="grid gap-1.5">
               {call.riskFlags.map((r) => (
-                <li key={r.turnIndex} onMouseEnter={() => onHover(r.turnIndex)} onMouseLeave={() => onHover(null)} className="rounded-md border border-line px-3 py-2.5 text-[15px] text-ink-2">
-                  <span className="mr-1.5 rounded-full bg-primary-soft px-2 py-px text-[12px] font-medium text-ink">{r.kind}</span>“{r.text}”
+                <li key={r.turnIndex} onMouseEnter={() => onHover(r.turnIndex)} onMouseLeave={() => onHover(null)} className="flex items-start gap-2 rounded-md border border-line px-3 py-2.5 text-[15px] text-ink-2 transition-colors duration-150 hover:bg-page">
+                  <Badge className="shrink-0">{r.kind}</Badge>“{r.text}”
                 </li>
               ))}
             </ul>
@@ -114,18 +112,17 @@ export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: Ca
       </div>
 
       <Button className="h-11 w-full rounded-md text-[16px] font-medium" onClick={onSync} disabled={synced}>
-        {synced ? <><Check className="size-4" strokeWidth={2} /> Synced to HubSpot</> : <><Zap className="size-4" strokeWidth={2} /> Approve &amp; sync changes</>}
+        {synced ? <><Check className="size-4" strokeWidth={2} /> Synced to HubSpot</> : <><Check className="size-4" strokeWidth={2} /> Approve &amp; sync</>}
       </Button>
-      <p className="-mt-2 text-center text-[13px] text-muted-foreground">No fields are changed without your approval</p>
 
       <div className="border-t border-line pt-5">
         <h3 className="text-[17px] font-semibold text-ink">Timeline</h3>
         <ol className="mt-4 grid gap-3.5">
           {timeline.map((t, i) => {
-            const Icon = { call: Phone, sparkles: Sparkles, gauge: Gauge, mail: Mail, check: Check }[t.icon];
+            const Icon = { call: Phone, sparkles: ScanText, gauge: Gauge, mail: Mail, check: Check }[t.icon];
             return (
               <li key={i} className="grid grid-cols-[32px_1fr] gap-3">
-                <span className="flex size-8 items-center justify-center rounded-md bg-muted text-ink-2"><Icon className="size-4" strokeWidth={1.75} /></span>
+                <span className="flex size-8 items-center justify-center rounded-md bg-muted text-ink-2"><Icon className="size-4" strokeWidth={1.5} /></span>
                 <div>
                   <div className="text-[15px] font-medium text-ink">{t.title}</div>
                   <div className="text-[14px] text-muted-foreground">{timeFmt.format(new Date(t.at))} · {t.meta}</div>
@@ -135,7 +132,7 @@ export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: Ca
           })}
         </ol>
       </div>
-      <Link href="/settings" className="text-[14px] text-muted-foreground hover:text-foreground">HubSpot connection settings →</Link>
+      <Link href="/settings" className="text-[14px] text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:underline focus-visible:outline-none">HubSpot connection settings</Link>
     </aside>
   );
 }

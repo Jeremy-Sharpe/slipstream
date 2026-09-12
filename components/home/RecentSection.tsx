@@ -90,8 +90,8 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
   ];
 
   const emptyLabel = items.length === 0
-    ? "Nothing here yet. Add a call or find leads to get started."
-    : tab === "favourites" ? "No favourites yet. Star anything to keep it here."
+    ? "Nothing here yet."
+    : tab === "favourites" ? "No favourites yet."
     : tab === "recents" ? "Nothing opened recently."
     : "Nothing matches.";
 
@@ -99,17 +99,17 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
     <section className="mt-[70px] flex flex-col">
       <div className="flex items-center justify-between px-11">
         <div className="flex items-center gap-4">
-          <span className="flex size-[46px] items-center justify-center rounded-lg bg-icon-well text-foreground"><Clock className="size-[22px]" strokeWidth={1.75} /></span>
+          <span className="flex size-[46px] items-center justify-center rounded-lg bg-icon-well text-foreground"><Clock className="size-[22px]" strokeWidth={1.5} /></span>
           <h2 className="text-[26px] leading-none font-bold tracking-[-0.02em] text-foreground">Recent</h2>
         </div>
         <div className="flex items-center gap-2.5">
-          <label className="flex h-10 w-[273px] items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
+          <label className="flex h-10 w-[273px] items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground transition-[box-shadow,border-color] duration-150 focus-within:border-foreground/30 focus-within:shadow-[0_0_0_2px_var(--primary)]">
             <Search className="size-4" strokeWidth={1.75} />
             <input value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search recent" className="w-full bg-transparent text-[16px] text-foreground outline-none" />
           </label>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" className="flex h-10 items-center gap-1.5 rounded-md bg-primary px-3.5 text-[16px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none" />}>
-              <Plus className="size-[18px]" strokeWidth={2.25} /> New
+            <DropdownMenuTrigger render={<button type="button" className="flex h-10 items-center gap-1.5 rounded-md bg-primary px-3.5 text-[16px] font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/90 active:bg-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none" />}>
+              <Plus className="size-[18px]" strokeWidth={2} /> New
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => router.push("/leads")}>New lead search</DropdownMenuItem>
@@ -121,9 +121,9 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
       </div>
 
       <div className="mt-[42px] px-11 pb-[14px]">
-        <div className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
+        <div role="tablist" className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
           {tabs.map((t) => (
-            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full items-center rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors hover:text-foreground", tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]")}>
+            <button key={t.key} type="button" role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)} className={cn("flex h-full items-center rounded-md border border-transparent px-[18px] text-[16px] text-foreground/70 transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", tab === t.key && "border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.06)]")}>
               {t.label}
             </button>
           ))}
@@ -133,7 +133,7 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
       <div className="border-t border-border">
         <div className="flex h-[57px] items-center gap-5 px-11">
           <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" className="flex h-8 items-center rounded-md border border-border text-[14px] text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+            <DropdownMenuTrigger render={<button type="button" className="flex h-8 items-center rounded-md border border-border text-[14px] text-foreground transition-colors duration-150 hover:bg-muted active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
               <span className="border-r border-border px-2.5">Owner</span>
               <span className="flex items-center gap-1 px-2.5">{OWNERS.find((o) => o.key === owner)?.label}<ChevronDown className="size-3.5 text-muted-foreground" strokeWidth={2} /></span>
             </DropdownMenuTrigger>
@@ -141,19 +141,19 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
               {OWNERS.map((o) => <DropdownMenuItem key={o.key} onClick={() => setOwner(o.key)} className={cn(owner === o.key && "font-medium")}>{o.label}</DropdownMenuItem>)}
             </DropdownMenuContent>
           </DropdownMenu>
-          <button type="button" onClick={() => setShowTypes((v) => !v)} aria-pressed={showTypes} className={cn("flex h-8 items-center gap-1.5 rounded-md px-1 text-[15px] text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", showTypes && "bg-muted")}>
+          <button type="button" onClick={() => setShowTypes((v) => !v)} aria-pressed={showTypes} className={cn("flex h-8 items-center gap-1.5 rounded-md px-1.5 text-[15px] text-foreground transition-colors duration-150 hover:bg-muted active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", showTypes && "bg-muted")}>
             <ListFilter className="size-4 text-foreground" strokeWidth={1.75} /> Filters
           </button>
           {showTypes && (
             <div className="ml-2 flex items-center gap-1.5" role="radiogroup" aria-label="Type">
               {TYPES.map((t) => (
-                <button key={t.key} type="button" role="radio" aria-checked={type === t.key} onClick={() => setType(t.key)} className={cn("h-7 rounded-md border px-2.5 text-[13px] transition-colors", type === t.key ? "border-primary/40 bg-primary-soft text-primary-foreground" : "border-border text-muted-foreground hover:bg-muted")}>{t.label}</button>
+                <button key={t.key} type="button" role="radio" aria-checked={type === t.key} onClick={() => setType(t.key)} className={cn("h-7 rounded-md border px-2.5 text-[13px] transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", type === t.key ? "border-foreground bg-foreground text-background" : "border-border text-foreground/70 hover:bg-muted")}>{t.label}</button>
               ))}
             </div>
           )}
           {deleted && (
             <span className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-              Deleted “{deleted.item.name}”. <button type="button" onClick={undo} className="font-medium text-primary hover:underline">Undo</button>
+              Deleted “{deleted.item.name}”. <button type="button" onClick={undo} className="font-medium text-foreground underline underline-offset-4 transition-colors duration-150 hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Undo</button>
             </span>
           )}
         </div>

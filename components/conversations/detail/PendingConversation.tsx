@@ -19,22 +19,18 @@ export function PendingConversation({ id, others }: { id: string; others: Other[
 
   if (row) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 px-8 py-32 text-center">
+      <div className="flex flex-col items-center gap-3 px-8 pt-[120px] text-center">
         <Loader2 className="size-5 animate-spin text-muted-foreground" />
-        <h1 className="text-lg font-semibold text-foreground">{row.company}</h1>
-        <p className="max-w-md text-sm text-muted-foreground">
-          Transcribing the recording. The transcript, CRM fields and follow-up draft appear here when the pipeline finishes.
-        </p>
-        <Link href="/" className="mt-2 text-sm font-medium text-primary hover:underline">Back to conversations</Link>
+        <p className="text-[16px] text-muted-foreground">Transcribing {row.company}. Fields and the follow-up appear here when it finishes.</p>
+        <Link href="/" className="text-[15px] text-foreground underline underline-offset-4 transition-colors duration-150 hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Back to conversations</Link>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2 px-8 py-32 text-center">
-      <h1 className="text-lg font-semibold text-foreground">That conversation isn&apos;t here.</h1>
-      <p className="text-sm text-muted-foreground">It may have been deleted, or the link is wrong.</p>
-      <Link href="/" className="mt-2 text-sm font-medium text-primary hover:underline">Back to conversations</Link>
+    <div className="flex flex-col items-center gap-3 px-8 pt-[120px] text-center">
+      <p className="text-[16px] text-muted-foreground">That conversation isn&apos;t here. It may have been deleted, or the link is wrong.</p>
+      <Link href="/" className="text-[15px] text-foreground underline underline-offset-4 transition-colors duration-150 hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Back to conversations</Link>
     </div>
   );
 }

@@ -31,7 +31,7 @@ export function AddCallDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button className="h-9 rounded-md px-3.5 text-[16px] font-medium" />}>
-        <Plus className="size-[18px]" strokeWidth={2.25} /> Add a call
+        <Plus className="size-[18px]" strokeWidth={2} /> Add a call
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -51,7 +51,7 @@ export function AddCallDialog() {
                   role="radio"
                   aria-checked={on}
                   onClick={() => { setPick(f.id); setFile(null); }}
-                  className={cn("flex w-full items-center gap-3 border-b border-border px-3 py-2 text-left text-sm last:border-b-0 hover:bg-muted", on && "bg-muted")}
+                  className={cn("flex w-full items-center gap-3 border-b border-border px-3 py-2 text-left text-sm transition-colors duration-150 last:border-b-0 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none", on && "bg-muted")}
                 >
                   <span className={cn("size-3.5 rounded-full border border-muted-foreground", on && "border-4 border-primary")} />
                   <span className="flex-1 truncate">{f.contact} <span className="text-muted-foreground">· {f.company}</span></span>
@@ -61,7 +61,7 @@ export function AddCallDialog() {
           </div>
 
           <p className="text-xs font-medium text-muted-foreground">Or upload audio</p>
-          <label className={cn("flex h-10 cursor-pointer items-center gap-2 rounded-md border border-dashed border-border px-3 text-sm text-muted-foreground hover:bg-muted", file && "border-solid text-foreground")}>
+          <label className={cn("flex h-10 cursor-pointer items-center gap-2 rounded-md border border-dashed border-border px-3 text-sm text-muted-foreground transition-colors duration-150 hover:bg-muted focus-within:ring-2 focus-within:ring-primary", file && "border-solid text-foreground")}>
             <Upload className="size-4" strokeWidth={1.75} />
             <span className="truncate">{file ? file.name : "Choose a file (mp3, m4a, wav)"}</span>
             <input type="file" accept="audio/*" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />

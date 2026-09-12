@@ -89,22 +89,22 @@ const statusRenderer: CustomRenderer<StatusCell> = {
     const label = STATUS[s];
     const x = rect.x + theme.cellHorizontalPadding;
     const cy = rect.y + rect.height / 2;
-    const h = 28;
-    ctx.font = `500 13px ${theme.fontFamily}`;
-    const w = 8 + 6 + 6 + ctx.measureText(label).width + 8;
-    ctx.beginPath(); roundRect(ctx, x, cy - h / 2, w, h, 14);
+    const h = 24;
+    ctx.font = `500 12px ${theme.fontFamily}`;
+    const w = 8 + 8 + 6 + ctx.measureText(label).width + 8;
+    ctx.beginPath(); roundRect(ctx, x, cy - h / 2, w, h, 6);
     ctx.fillStyle = C.surface; ctx.fill(); ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.stroke();
-    const dx = x + 8 + 3;
+    const dx = x + 8 + 4;
     if (s === "synced") {
       ctx.strokeStyle = C.muted; ctx.lineWidth = 1.6; ctx.lineCap = "round"; ctx.lineJoin = "round";
-      ctx.beginPath(); ctx.moveTo(dx - 3.5, cy); ctx.lineTo(dx - 1, cy + 2.5); ctx.lineTo(dx + 3.5, cy - 2.5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(dx - 4, cy); ctx.lineTo(dx - 1, cy + 3); ctx.lineTo(dx + 4, cy - 3); ctx.stroke();
     } else if (s === "needs_review") {
-      ctx.beginPath(); ctx.arc(dx, cy, 2.5, 0, Math.PI * 2); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(dx, cy, 3.5, 0, Math.PI * 2); ctx.strokeStyle = C.muted; ctx.lineWidth = 1; ctx.stroke();
     } else {
-      ctx.beginPath(); ctx.arc(dx, cy, 3, 0, Math.PI * 2); ctx.fillStyle = C.primary; ctx.fill();
+      ctx.beginPath(); ctx.arc(dx, cy, 4, 0, Math.PI * 2); ctx.fillStyle = C.primary; ctx.fill();
     }
     ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillStyle = C.ink;
-    ctx.fillText(label, x + 8 + 6 + 6, cy + 0.5);
+    ctx.fillText(label, x + 8 + 8 + 6, cy + 0.5);
     return true;
   },
 };
@@ -137,7 +137,7 @@ const THEME: Partial<Theme> = {
   bgBubble: C.mist, bgBubbleSelected: C.hover, bgSearchResult: "#FFEDE7",
   borderColor: C.line, horizontalBorderColor: C.line, headerBottomBorderColor: C.line, drilldownBorder: C.line,
   linkColor: C.ink, cellHorizontalPadding: 16, cellVerticalPadding: 8,
-  headerFontStyle: "600 14.5px", baseFontStyle: "16px", markerFontStyle: "14px", editorFontSize: "16px",
+  headerFontStyle: "600 15px", baseFontStyle: "16px", markerFontStyle: "14px", editorFontSize: "16px",
   lineHeight: 1.4, headerIconSize: 16, roundingRadius: 6,
 };
 

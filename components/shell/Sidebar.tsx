@@ -33,15 +33,15 @@ function NavItem({ item, active, collapsed }: { item: Item; active: boolean; col
       aria-label={collapsed ? item.label : undefined}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex h-10 items-center gap-2.5 rounded-lg text-[16px] leading-none text-foreground transition-colors hover:bg-muted",
+        "flex h-10 items-center gap-2.5 rounded-lg text-[16px] leading-none text-foreground transition-colors duration-150 hover:bg-muted active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
         collapsed ? "w-10 justify-center px-0" : "pr-3 pl-3",
-        active && "bg-primary-soft text-primary hover:bg-primary-soft",
+        active && "bg-primary-soft text-primary hover:bg-primary-soft active:bg-primary-soft",
       )}
     >
-      <Icon className="size-5 shrink-0" strokeWidth={1.75} />
+      <Icon className="size-5 shrink-0" strokeWidth={1.5} />
       {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
       {!collapsed && item.count != null && (
-        <span className="flex h-[27px] min-w-[44px] items-center justify-center rounded-md border border-border px-2.5 text-[13.5px] tabular-nums text-foreground">{item.count}</span>
+        <span className="flex h-[26px] min-w-[44px] items-center justify-center rounded-md border border-border px-2.5 text-[13px] tabular-nums text-muted-foreground">{item.count}</span>
       )}
     </Link>
   );
@@ -85,18 +85,18 @@ export function Sidebar() {
       onClick={toggle}
       aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       aria-expanded={!collapsed}
-      className="flex size-8 items-center justify-center rounded-md text-foreground/70 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+      className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
     >
-      <PanelLeft className="size-[18px]" strokeWidth={1.75} />
+      <PanelLeft className="size-5" strokeWidth={1.5} />
     </button>
   );
 
   return (
     <TooltipProvider>
-      <aside className={cn("sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-card transition-[width] duration-150", collapsed ? "w-14" : "w-[336px]")}>
+      <aside className={cn("sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200 ease-out", collapsed ? "w-14" : "w-[336px]")}>
         <div className={cn("flex h-16 shrink-0 items-center", collapsed ? "justify-center" : "justify-between pr-5 pl-4")}>
           {!collapsed && (
-            <Link href="/home" className="flex items-center gap-2 text-[26px] leading-none font-bold tracking-[-0.03em] text-foreground">
+            <Link href="/home" className="flex items-center gap-2 rounded-md text-[26px] leading-none font-bold tracking-[-0.03em] text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
               <Zap className="size-[26px] text-primary" strokeWidth={2.5} />
               slipstream
             </Link>

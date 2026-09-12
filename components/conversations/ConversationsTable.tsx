@@ -6,7 +6,24 @@ import type { Conversation, ConversationKind } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 // Glide draws on canvas and touches window at import time, so it is client-only.
-const ConversationsGrid = dynamic(() => import("./ConversationsGrid").then((m) => m.ConversationsGrid), { ssr: false });
+// The placeholder has the grid's exact header and row heights so nothing jumps.
+function GridPlaceholder() {
+  return (
+    <div aria-busy="true" className="flex flex-col">
+      <div className="h-12 border-b border-border" />
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="flex h-[61px] items-center gap-4 border-b border-border px-11" style={{ opacity: 1 - i * 0.1 }}>
+          <span className="size-4 rounded-sm bg-muted" />
+          <span className="size-8 rounded-full bg-muted" />
+          <span className="h-3.5 w-36 rounded bg-muted" />
+          <span className="h-3.5 w-48 rounded bg-muted" />
+          <span className="h-3.5 w-32 rounded bg-muted" />
+        </div>
+      ))}
+    </div>
+  );
+}
+const ConversationsGrid = dynamic(() => import("./ConversationsGrid").then((m) => m.ConversationsGrid), { ssr: false, loading: GridPlaceholder });
 
 type Tab = "all" | ConversationKind;
 
@@ -33,15 +50,17 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
   return (
     <div className="mt-[42px] flex min-h-0 flex-1 flex-col">
       <div className="px-11 pb-[14px]">
-        <div className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
+        <div role="tablist" className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
           {tabs.map((t) => (
             <button
               key={t.key}
               type="button"
               onClick={() => setTab(t.key)}
+              role="tab"
+              aria-selected={tab === t.key}
               className={cn(
-                "flex h-full items-center gap-2 rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors hover:text-foreground",
-                tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]",
+                "flex h-full items-center gap-2 rounded-md border border-transparent px-[18px] text-[16px] text-foreground/70 transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
+                tab === t.key && "border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.06)]",
               )}
             >
               {t.label}
@@ -54,8 +73,8 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
       <div className="flex min-h-0 flex-1 flex-col border-t border-border bg-card">
         <div className="min-h-0 flex-1">
           {visible.length === 0 ? (
-            <div className="flex h-40 items-center justify-center text-[15px] text-muted-foreground">
-              {rows.length === 0 ? "No conversations yet. Add a call to get started." : "Nothing matches."}
+            <div className="flex justify-center pt-[120px] text-[16px] text-muted-foreground">
+              {rows.length === 0 ? "No conversations yet." : "Nothing matches."}
             </div>
           ) : (
             <ConversationsGrid rows={visible} onSelectionCount={setSelected} />

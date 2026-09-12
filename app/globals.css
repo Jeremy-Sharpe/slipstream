@@ -143,6 +143,20 @@
   html {
     @apply font-sans;
     }
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), [role="link"], [role="radio"], summary {
+    cursor: pointer;
+  }
+  /* Thin neutral scrollbars inside panels, like Clay. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #D1D5DB transparent;
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
 }
 /* The Clay references were measured at ~1.39x (Retina captures) and the
    layout is specified in those units, so the whole app is scaled back to

@@ -7,7 +7,7 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<button type="button" aria-label="Account" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-[12px] font-medium text-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}
+        render={<button type="button" aria-label="Account" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-[12px] font-medium text-background transition-opacity duration-150 hover:opacity-90 active:opacity-80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none" />}
       >
         MD
       </DropdownMenuTrigger>
