@@ -6,7 +6,7 @@ Built for the Forward: AI in Business Hackathon, University of Melbourne, 12 to 
 
 Track: Track 1: Improve an Existing Business Capability (also entered in the Built With ElevenLabs special track)
 
-Production URL: https://slipstream-ten-mauve.vercel.app
+Production URL: https://slipstream-hackathon.vercel.app
 
 Demo video: (added at submission)
 

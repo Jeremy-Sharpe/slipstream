@@ -6,7 +6,7 @@ finished video was verified on 12 September 2026.
 ## Verified now
 
 - Public repository: `https://github.com/Jeremy-Sharpe/slipstream`
-- Production UI: `https://slipstream-ten-mauve.vercel.app` responds with HTTP 200.
+- Production UI: `https://slipstream-hackathon.vercel.app` responds with HTTP 200.
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
