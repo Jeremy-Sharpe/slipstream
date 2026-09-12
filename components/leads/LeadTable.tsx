@@ -11,12 +11,12 @@ type Glyph = "text" | "url" | "number";
 
 const COLUMNS: { label: string; width: number; glyph?: Glyph }[] = [
   { label: "", width: 64 },
-  { label: "Company", width: 220, glyph: "text" },
-  { label: "Person", width: 200, glyph: "url" },
-  { label: "Title", width: 220, glyph: "text" },
-  { label: "Location", width: 180, glyph: "text" },
-  { label: "Relevance", width: 128, glyph: "number" },
-  { label: "Similarity", width: 128, glyph: "number" },
+  { label: "Company", width: 200, glyph: "text" },
+  { label: "Person", width: 180, glyph: "url" },
+  { label: "Title", width: 170, glyph: "text" },
+  { label: "Location", width: 150, glyph: "text" },
+  { label: "Relevance", width: 122, glyph: "number" },
+  { label: "Similarity", width: 122, glyph: "number" },
   { label: "Status", width: 120, glyph: "text" },
 ];
 
