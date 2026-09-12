@@ -1,0 +1,69 @@
+import assert from "node:assert/strict";
+import { createServer } from "node:http";
+import test from "node:test";
+
+import { parseVerdict } from "../evals/lib/judge.mjs";
+import {
+  fetchProductionSurfaces,
+  renderProductionSurfaces,
+} from "../evals/lib/repo.mjs";
+
+test("production evidence fetches and labels every requested public route", async (t) => {
+  const server = createServer((request, response) => {
+    response.writeHead(200, { "content-type": "text/html" });
+    response.end(
+      `<html><body><h1>${request.url}</h1><p>visible route evidence</p>` +
+        `<script>secret implementation noise</script></body></html>`,
+    );
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+  const requested = [
+    { label: "Landing", path: "/" },
+    { label: "Deep route", path: "/deep" },
+  ];
+
+  const surfaces = await fetchProductionSurfaces(baseUrl, requested);
+  const rendered = renderProductionSurfaces(baseUrl, surfaces);
+
+  assert.equal(surfaces.length, 2);
+  assert.match(rendered, /## Landing[\s\S]*URL: http:\/\/127\.0\.0\.1:\d+\/[\s\S]*visible route evidence/);
+  assert.match(rendered, /## Deep route[\s\S]*visible route evidence/);
+  assert.doesNotMatch(rendered, /secret implementation noise/);
+  assert.equal(surfaces.every(({ snapshot }) => snapshot.ok), true);
+});
+
+test("verdict parser accepts brace characters inside final evidence strings", () => {
+  const verdict = {
+    criterion: "T3",
+    score: 6,
+    band: "5-6: Clean, modular, well-documented.",
+    evidence: ["api/app/{routers,services,schemas}: clear boundaries"],
+    gaps: [],
+  };
+  const output = `Assessment prose with another {brace}.\n\n${JSON.stringify(verdict)}`;
+
+  assert.deepEqual(parseVerdict(output), verdict);
+});
+
+test("production evidence reports an invalid base URL without aborting the eval", async () => {
+  const surfaces = await fetchProductionSurfaces("not a URL", [
+    { label: "Landing", path: "/" },
+  ]);
+
+  assert.equal(surfaces[0].snapshot.ok, false);
+  assert.match(surfaces[0].snapshot.note, /invalid production URL/);
+});
+
+test("verdict parser accepts a pretty-printed final JSON object", () => {
+  const verdict = {
+    criterion: "T3",
+    score: 5,
+    evidence: ["components/{feature}/index.ts"],
+    gaps: ["none"],
+  };
+
+  assert.deepEqual(parseVerdict(`Notes first.\n${JSON.stringify(verdict, null, 2)}`), verdict);
+});
