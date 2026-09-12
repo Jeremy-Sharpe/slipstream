@@ -49,8 +49,8 @@ export function ScheduleCallDialog({ defaultDay, onAdd }: { defaultDay: string; 
             <label className="flex items-end gap-2 pb-2 text-sm text-foreground"><input type="checkbox" checked={coach} onChange={(e) => setCoach(e.target.checked)} className="size-4 accent-[var(--primary)]" />Arm the coach</label>
           </div>
           <DialogFooter>
-            <button type="button" onClick={() => setOpen(false)} className="h-9 rounded-lg border border-border px-3.5 text-sm text-foreground hover:bg-muted">Cancel</button>
-            <button type="submit" disabled={!valid} className="h-9 rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-foreground hover:bg-primary/85 disabled:opacity-50">Add to calendar</button>
+            <button type="button" onClick={() => setOpen(false)} className="h-9 cursor-pointer rounded-md border border-border px-3.5 text-sm text-foreground transition-colors duration-150 hover:bg-muted">Cancel</button>
+            <button type="submit" disabled={!valid} className="h-9 cursor-pointer rounded-md bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/85 disabled:opacity-50">Add to calendar</button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -54,7 +54,7 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
   const undo = () => { if (deleted) { campaignActions.restore(deleted.campaign, deleted.index); setDeleted(null); } };
   const onRowKey = (e: KeyboardEvent, id: string) => { if (e.key === "Enter") router.push(`/campaigns/${id}`); };
 
-  const emptyLabel = campaigns.length === 0 ? "No campaigns yet. Create one from a lead list." : query ? "Nothing matches." : `No ${tab} campaigns.`;
+  const emptyLabel = campaigns.length === 0 ? "No campaigns yet." : query ? "Nothing matches." : `No ${tab} campaigns.`;
 
   return (
     <section className="flex flex-col pt-[34px]">
@@ -72,23 +72,20 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
         </div>
       </div>
 
-      <div className="mt-[42px] px-11 pb-[14px]">
+      <div className="mt-[42px] flex items-center px-11 pb-[14px]">
         <div className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
           {TABS.map((t) => (
-            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full items-center gap-2 rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors hover:text-foreground", tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]")}>
+            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full cursor-pointer items-center rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]")}>
               {t.label}
-              <span className="text-[13px] tabular-nums text-muted-foreground">{t.key === "all" ? campaigns.length : campaigns.filter((c) => c.status === t.key).length}</span>
             </button>
           ))}
         </div>
+        {deleted && (
+          <span className="ml-auto flex items-center gap-2 text-[15px] text-muted-foreground">
+            Deleted “{deleted.campaign.name}”. <button type="button" onClick={undo} className="cursor-pointer font-medium text-foreground underline-offset-2 hover:underline">Undo</button>
+          </span>
+        )}
       </div>
-
-      {deleted && (
-        <div className="mx-11 mb-3 flex h-10 items-center justify-between rounded-lg border border-border bg-page px-3 text-[15px] text-foreground">
-          <span>Deleted “{deleted.campaign.name}”.</span>
-          <button type="button" onClick={undo} className="font-medium text-primary hover:underline">Undo</button>
-        </div>
-      )}
 
       <TooltipProvider>
         <div className="border-t border-border">
@@ -98,11 +95,11 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
 
           {loading && Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className={cn("grid h-[61px] items-center border-b border-border px-11", COLS)} aria-busy="true">
-              <span className="h-3.5 w-56 rounded bg-muted" /><span className="h-6 w-16 rounded-full bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-14 rounded bg-muted" /><span className="h-3.5 w-20 rounded bg-muted" /><span />
+              <span className="h-3.5 w-56 rounded bg-muted" /><span className="h-6 w-16 rounded-md bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-14 rounded bg-muted" /><span className="h-3.5 w-20 rounded bg-muted" /><span />
             </div>
           ))}
 
-          {!loading && visible.length === 0 && <div className="flex h-40 items-center justify-center text-[15px] text-muted-foreground">{emptyLabel}</div>}
+          {!loading && visible.length === 0 && <div className="flex h-[240px] items-start justify-center pt-[120px] text-[16px] text-muted-foreground">{emptyLabel}</div>}
 
           {!loading && visible.map((c) => (
             <div
@@ -111,7 +108,7 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
               tabIndex={0}
               onClick={() => router.push(`/campaigns/${c.id}`)}
               onKeyDown={(e) => onRowKey(e, c.id)}
-              className={cn("grid h-[61px] cursor-pointer items-center border-b border-border px-11 text-[16px] text-foreground transition-colors hover:bg-page focus-visible:bg-page focus-visible:outline-none", COLS)}
+              className={cn("grid h-[61px] cursor-pointer items-center border-b border-border px-11 text-[16px] text-foreground transition-colors duration-150 hover:bg-page active:bg-muted focus-visible:bg-page focus-visible:outline-none", COLS)}
             >
               <span className="flex min-w-0 items-center gap-3">
                 <Send className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
@@ -129,7 +126,7 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
               <span className="text-foreground">{ago(c.updatedMinutesAgo)}</span>
               <span className="flex justify-end" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                 <DropdownMenu>
-                  <DropdownMenuTrigger render={<button type="button" aria-label={`Actions for ${c.name}`} className="flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+                  <DropdownMenuTrigger render={<button type="button" aria-label={`Actions for ${c.name}`} className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-border text-foreground/70 transition-colors duration-150 hover:bg-muted hover:text-foreground active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
                     <MoreHorizontal className="size-4" strokeWidth={1.75} />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">

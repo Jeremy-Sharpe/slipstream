@@ -24,9 +24,8 @@ export function PeopleTable({ campaign, selectedId, onSelect }: { campaign: Camp
         <span>Person</span><span>Company</span><span>Step</span><span>Status</span><span>Next action</span><span />
       </div>
       {campaign.people.length === 0 && (
-        <div className="flex h-48 flex-col items-center justify-center gap-1 text-center">
-          <p className="text-[15px] text-foreground">No one enrolled yet.</p>
-          <p className="text-[15px] text-muted-foreground">Add people from a lead list to draft their sequences.</p>
+        <div className="flex h-[240px] items-start justify-center pt-[120px] text-center">
+          <p className="text-[16px] text-muted-foreground">No one enrolled yet.</p>
         </div>
       )}
       {campaign.people.map((p) => (
@@ -36,7 +35,7 @@ export function PeopleTable({ campaign, selectedId, onSelect }: { campaign: Camp
           tabIndex={0}
           onClick={() => onSelect(p)}
           onKeyDown={(e) => onKey(e, p)}
-          className={cn("grid h-[61px] cursor-pointer items-center border-b border-border px-6 text-[16px] text-foreground transition-colors hover:bg-page focus-visible:bg-page focus-visible:outline-none", COLS, selectedId === p.id && "bg-page")}
+          className={cn("grid h-[61px] cursor-pointer items-center border-b border-border px-6 text-[16px] text-foreground transition-colors duration-150 hover:bg-page active:bg-muted focus-visible:bg-page focus-visible:outline-none", COLS, selectedId === p.id && "bg-page")}
         >
           <span className="flex min-w-0 items-center gap-2.5">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-avatar text-[12px] font-medium text-foreground">{initials(p.name)}</span>
@@ -48,7 +47,7 @@ export function PeopleTable({ campaign, selectedId, onSelect }: { campaign: Camp
           <span className="tabular-nums text-muted-foreground">{p.status === "skipped" ? "—" : dateFmt.format(new Date(p.nextAction))}</span>
           <span className="flex justify-end" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
             <DropdownMenu>
-              <DropdownMenuTrigger render={<button type="button" aria-label={`Actions for ${p.name}`} className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+              <DropdownMenuTrigger render={<button type="button" aria-label={`Actions for ${p.name}`} className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
                 <MoreHorizontal className="size-4" strokeWidth={1.75} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">

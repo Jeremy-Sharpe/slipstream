@@ -8,10 +8,10 @@ export function Section({ id, title, meta, active, children, className }: { id: 
   return (
     <section
       id={id}
-      className={cn("scroll-mt-6 rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)] transition-shadow", active && "ring-2 ring-primary", className)}
+      className={cn("scroll-mt-6 rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)] transition-shadow duration-500", active && "ring-2 ring-foreground/15", className)}
     >
       <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>
+        <h2 className="text-[20px] font-semibold text-foreground">{title}</h2>
         {meta && <div className="text-[15px] text-muted-foreground">{meta}</div>}
       </header>
       <div className="p-6 text-[16px]">{children}</div>
@@ -33,9 +33,8 @@ export function EvidenceChip({ call }: { call: CallRef }) {
   return (
     <Link
       href={`/conversations/${call.id}`}
-      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-page px-2.5 text-[14px] text-foreground transition-colors hover:border-foreground/30 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+      className="inline-flex h-8 cursor-pointer items-center rounded-md border border-border bg-card px-2.5 text-[14px] text-foreground transition-colors duration-150 hover:bg-muted active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
     >
-      <span className="size-1.5 rounded-full bg-primary" aria-hidden />
       {call.company}
     </Link>
   );
@@ -47,7 +46,7 @@ export function OutcomeTag({ outcome }: { outcome: Outcome }) {
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center rounded-full px-2 text-[11px] font-medium",
+        "inline-flex h-6 items-center rounded-md px-2 text-[12px] font-medium",
         outcome === "won" ? "bg-foreground text-background" : "bg-muted text-muted-foreground",
       )}
     >

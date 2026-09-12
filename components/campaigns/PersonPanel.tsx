@@ -19,7 +19,7 @@ export function PersonPanel({ campaign, person, onClose }: { campaign: Campaign;
   const lastLog = [...campaign.log].reverse().find((l) => l.text.includes(person.name));
 
   return (
-    <aside className="flex w-[440px] shrink-0 flex-col border-l border-border bg-card" aria-label={`${person.name} sequence`}>
+    <aside className="flex w-[440px] shrink-0 flex-col border-l border-border bg-card motion-safe:animate-in motion-safe:slide-in-from-right-4 motion-safe:fade-in motion-safe:duration-200" aria-label={`${person.name} sequence`}>
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-5">
         <span className="flex size-8 items-center justify-center rounded-full bg-avatar text-xs font-medium text-foreground">{initials(person.name)}</span>
         <div className="min-w-0 flex-1">
@@ -27,7 +27,7 @@ export function PersonPanel({ campaign, person, onClose }: { campaign: Campaign;
           <p className="truncate text-xs text-muted-foreground">{person.title} · {person.company}</p>
         </div>
         <StatusBadge status={person.status} />
-        <button type="button" onClick={onClose} aria-label="Close" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"><X className="size-4" strokeWidth={1.75} /></button>
+        <button type="button" onClick={onClose} aria-label="Close" className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"><X className="size-4" strokeWidth={1.75} /></button>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
@@ -38,7 +38,7 @@ export function PersonPanel({ campaign, person, onClose }: { campaign: Campaign;
             const current = person.step === i + 1 && person.status !== "approved";
             const done = person.step > i + 1 || (person.status === "approved" && person.step === i + 1);
             return (
-              <li key={s.id} className={cn("rounded-lg border border-border", current && "border-primary")}>
+              <li key={s.id} className={cn("rounded-lg border border-border transition-colors duration-150", current && "border-foreground/40")}>
                 <div className="flex h-9 items-center gap-2 border-b border-border px-3">
                   <Icon className="size-3.5 text-muted-foreground" strokeWidth={1.75} />
                   <span className="text-xs font-medium text-foreground">Step {i + 1} · {s.channel === "email" ? "Email" : "LinkedIn"}</span>
@@ -70,12 +70,12 @@ export function PersonPanel({ campaign, person, onClose }: { campaign: Campaign;
       </div>
 
       <footer className="flex shrink-0 items-center gap-2 border-t border-border px-5 py-3">
-        <button type="button" onClick={() => campaignActions.removePerson(campaign.id, person.id)} className="h-9 rounded-lg border border-border px-3 text-sm text-foreground hover:bg-muted">Remove</button>
-        {person.status !== "skipped" && <button type="button" onClick={() => campaignActions.setPerson(campaign.id, person.id, "skipped")} className="h-9 rounded-lg border border-border px-3 text-sm text-foreground hover:bg-muted">Skip</button>}
+        <button type="button" onClick={() => campaignActions.removePerson(campaign.id, person.id)} className="h-9 cursor-pointer rounded-md border border-border px-3 text-sm text-foreground transition-colors duration-150 hover:bg-muted">Remove</button>
+        {person.status !== "skipped" && <button type="button" onClick={() => campaignActions.setPerson(campaign.id, person.id, "skipped")} className="h-9 cursor-pointer rounded-md border border-border px-3 text-sm text-foreground transition-colors duration-150 hover:bg-muted">Skip</button>}
         {person.status === "approved" ? (
-          <span className="ml-auto flex h-9 items-center gap-1.5 rounded-lg bg-muted px-3 text-sm font-medium text-foreground"><Check className="size-4" strokeWidth={2.5} /> Approved · nothing is sent</span>
+          <span className="ml-auto flex h-9 items-center gap-1.5 rounded-md bg-muted px-3 text-sm font-medium text-foreground"><Check className="size-4" strokeWidth={2.5} /> Approved · nothing is sent</span>
         ) : (
-          <button type="button" onClick={() => campaignActions.setPerson(campaign.id, person.id, "approved")} className="ml-auto flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-foreground hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"><Check className="size-4" strokeWidth={2.5} /> Approve</button>
+          <button type="button" onClick={() => campaignActions.setPerson(campaign.id, person.id, "approved")} className="ml-auto flex h-9 items-center gap-1.5 cursor-pointer rounded-md bg-primary px-3.5 transition-colors duration-150 text-sm font-medium text-primary-foreground hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"><Check className="size-4" strokeWidth={2.5} /> Approve</button>
         )}
       </footer>
     </aside>

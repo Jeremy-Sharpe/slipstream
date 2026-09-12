@@ -10,9 +10,9 @@ const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86_400_000);
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 export const defaultSteps: SequenceStep[] = [
-  { id: "s1", channel: "email", delayDays: 0, subject: "{{subject}}", body: "Personalised first note from the closest won call. Two short paragraphs, one concrete example, one ask." },
-  { id: "s2", channel: "email", delayDays: 3, subject: "Re: {{subject}}", body: "A two-line nudge: one thing the comparable client saw, and the same fifteen-minute ask." },
-  { id: "s3", channel: "linkedin", delayDays: 4, body: "Short connection note that references the email and offers to share the plan we used." },
+  { id: "s1", channel: "email", delayDays: 0, subject: "{{trigger}} at {{company}}", body: "Hi {{first_name}},\n\nWe spoke with {{similar_client}} about the same {{trigger}} a few weeks ago. {{one_thing_they_saw}}\n\nWorth fifteen minutes this week?\n\nSam" },
+  { id: "s2", channel: "email", delayDays: 3, subject: "Re: {{trigger}} at {{company}}", body: "Hi {{first_name}},\n\nOne thing {{similar_client}} noticed in the first month: {{one_thing_they_saw}}\n\nStill happy to do fifteen minutes if the timing works.\n\nSam" },
+  { id: "s3", channel: "linkedin", delayDays: 4, body: "Hi {{first_name}}, following up on my note about {{trigger}}. Happy to share the plan we used with {{similar_client}}." },
 ];
 
 const first = (name: string) => name.split(" ")[0];

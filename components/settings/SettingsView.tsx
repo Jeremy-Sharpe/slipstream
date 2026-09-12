@@ -35,9 +35,9 @@ export function SettingsView() {
       </header>
 
       <div className="flex gap-10 border-t border-border px-11 pt-7">
-        <nav aria-label="Settings sections" className="flex w-[220px] shrink-0 flex-col gap-0.5">
+        <nav aria-label="Settings sections" className="flex w-[200px] shrink-0 flex-col gap-0.5">
           {TABS.map((t) => (
-            <button key={t.key} type="button" onClick={() => go(t.key)} aria-current={tab === t.key ? "page" : undefined} className={cn("flex h-10 items-center rounded-md px-3 text-left text-[16px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", tab === t.key && "bg-muted font-medium text-foreground")}>
+            <button key={t.key} type="button" onClick={() => go(t.key)} aria-current={tab === t.key ? "page" : undefined} className={cn("flex h-10 cursor-pointer items-center rounded-md px-3 text-left text-[16px] text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", tab === t.key && "bg-muted font-medium text-foreground")}>
               {t.label}
             </button>
           ))}

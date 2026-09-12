@@ -22,10 +22,10 @@ export function PreCallPanel({ event, onClose }: { event: CalendarEvent; onClose
   }, [onClose]);
 
   return (
-    <aside className="flex w-[440px] shrink-0 flex-col border-l border-border bg-card" aria-label="Pre-call context">
+    <aside className="flex w-[440px] shrink-0 flex-col border-l border-border bg-card motion-safe:animate-in motion-safe:slide-in-from-right-4 motion-safe:fade-in motion-safe:duration-200" aria-label="Pre-call context">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
         <span className="text-[15px] font-semibold text-foreground">Pre-call context</span>
-        <button type="button" onClick={onClose} aria-label="Close" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"><X className="size-4" strokeWidth={1.75} /></button>
+        <button type="button" onClick={onClose} aria-label="Close" className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"><X className="size-4" strokeWidth={1.75} /></button>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
@@ -39,16 +39,16 @@ export function PreCallPanel({ event, onClose }: { event: CalendarEvent; onClose
         </div>
 
         <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-          <div><dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Headcount</dt><dd className="mt-0.5 flex items-center gap-1.5 text-foreground"><Users className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{event.headcount ?? last?.headcount ?? "—"} staff</dd></div>
-          <div><dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Location</dt><dd className="mt-0.5 flex items-center gap-1.5 text-foreground"><MapPin className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{event.location ?? last?.location ?? "—"}</dd></div>
-          <div><dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Rep</dt><dd className="mt-0.5 text-foreground">{event.rep}</dd></div>
-          <div><dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Coach</dt><dd className="mt-0.5 text-foreground">{event.coach ? "Armed" : "Off"}</dd></div>
+          <div><dt className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">Headcount</dt><dd className="mt-0.5 flex items-center gap-1.5 text-foreground"><Users className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{event.headcount ?? last?.headcount ?? "—"} staff</dd></div>
+          <div><dt className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">Location</dt><dd className="mt-0.5 flex items-center gap-1.5 text-foreground"><MapPin className="size-3.5 text-muted-foreground" strokeWidth={1.75} />{event.location ?? last?.location ?? "—"}</dd></div>
+          <div><dt className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">Rep</dt><dd className="mt-0.5 text-foreground">{event.rep}</dd></div>
+          <div><dt className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">Coach</dt><dd className="mt-0.5 text-foreground">{event.coach ? "Armed" : "Off"}</dd></div>
         </dl>
 
         <section className="mt-6">
-          <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Last conversation</h3>
+          <h3 className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">Last conversation</h3>
           {last ? (
-            <button type="button" onClick={() => router.push(`/conversations/${last.id}`)} className="mt-2 w-full rounded-lg border border-border p-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+            <button type="button" onClick={() => router.push(`/conversations/${last.id}`)} className="mt-2 w-full cursor-pointer rounded-md border border-border p-3 text-left transition-colors duration-150 hover:bg-page focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
               <div className="flex items-center gap-2 text-sm">
                 <Phone className="size-3.5 text-muted-foreground" strokeWidth={1.75} />
                 <span className="font-medium text-foreground">{last.title}</span>
@@ -58,35 +58,35 @@ export function PreCallPanel({ event, onClose }: { event: CalendarEvent; onClose
               {last.trigger && <p className="mt-2 text-xs text-muted-foreground">Trigger · {last.trigger}</p>}
             </button>
           ) : (
-            <p className="mt-2 rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">No conversation yet. This is a first call from the outreach sequence.</p>
+            <p className="mt-2 text-sm text-muted-foreground">No conversation yet · first call from the outreach sequence.</p>
           )}
         </section>
 
         <section className="mt-6">
-          <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Open promises</h3>
+          <h3 className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">Open promises</h3>
           {event.promises.length ? (
             <ul className="mt-2 flex flex-col gap-1.5">
-              {event.promises.map((p) => <li key={p} className="flex gap-2 text-sm text-foreground"><span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-primary" />{p}</li>)}
+              {event.promises.map((p) => <li key={p} className="flex gap-2 text-sm text-foreground"><span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-muted-foreground" />{p}</li>)}
             </ul>
           ) : <p className="mt-2 text-sm text-muted-foreground">Nothing outstanding.</p>}
           {event.nextStep && <p className="mt-3 text-sm text-ink-2"><span className="font-medium text-foreground">Next step · </span>{event.nextStep}</p>}
         </section>
 
         <section className="mt-6">
-          <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">ICP fit</h3>
+          <h3 className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">ICP fit</h3>
           <p className="mt-2 text-sm text-ink-2">{event.icpFit}</p>
         </section>
 
         {coachNote && (
-          <p className="mt-6 rounded-lg border border-border bg-page p-3 text-sm text-ink-2" role="status">
-            <Headphones className="mr-1.5 inline size-3.5 text-primary" strokeWidth={1.75} />Coach overlay opens when the call starts (desktop app).
+          <p className="mt-6 text-sm text-muted-foreground" role="status">
+            Coach opens when the call starts (desktop app).
           </p>
         )}
       </div>
 
       <footer className="flex shrink-0 items-center justify-between gap-2 border-t border-border px-5 py-3">
-        <button type="button" onClick={() => router.push("/settings")} className="flex h-9 items-center rounded-lg border border-border px-3.5 text-sm text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Open in HubSpot</button>
-        <button type="button" onClick={() => setCoachNote(true)} className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-foreground hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"><Headphones className="size-4" strokeWidth={1.75} />Join with coach</button>
+        <button type="button" onClick={() => router.push("/settings")} className="flex h-9 items-center cursor-pointer rounded-md border border-border px-3.5 text-sm text-foreground transition-colors duration-150 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Open in HubSpot</button>
+        <button type="button" onClick={() => setCoachNote(true)} className="flex h-9 items-center gap-1.5 cursor-pointer rounded-md bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"><Headphones className="size-4" strokeWidth={1.75} />Join with coach</button>
       </footer>
     </aside>
   );

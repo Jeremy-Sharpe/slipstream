@@ -31,7 +31,7 @@ export function WorkspacePanel() {
   const [ws, setWs] = useState(seedWorkspace);
   const [saved, save] = useSaved();
   return (
-    <Card title="Workspace" description="What the team sees at the top of every page and how numbers are shown.">
+    <Card title="Workspace">
       <form className="grid max-w-xl grid-cols-2 gap-4" onSubmit={(e) => { e.preventDefault(); save(); }}>
         <label className="col-span-2 flex flex-col gap-1.5"><span className={fieldLabel}>Workspace name</span><Input value={ws.name} onChange={(e) => setWs({ ...ws, name: e.target.value })} /></label>
         <label className="flex flex-col gap-1.5"><span className={fieldLabel}>Timezone</span>
@@ -64,16 +64,16 @@ export function CrmPanel() {
   const sync = () => { setSyncing(true); window.setTimeout(() => { setSyncing(false); setSyncedJustNow(true); }, 1500); };
 
   return (
-    <Card title="CRM" description="Slipstream writes calls, notes, tasks and drafts into your CRM. Nothing changes without an approval.">
+    <Card title="CRM" description="Nothing changes without an approval.">
       <div className="flex items-start justify-between gap-6 rounded-lg border border-border p-4">
         <div className="flex items-start gap-3">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-[13px] font-semibold text-foreground">Hs</span>
+          <span className="flex size-10 items-center justify-center rounded-md border border-border text-[13px] font-medium text-foreground">Hs</span>
           <div>
             <p className="flex items-center gap-2 text-[17px] font-semibold text-foreground">HubSpot <span className="flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 text-xs font-normal text-foreground/80"><StatusDot on={connected} />{connected ? "Connected · mock" : "Disconnected"}</span></p>
             {connected ? (
               <p className="mt-1 text-[15px] text-muted-foreground">Portal {hubspot.portalId} · {syncedJustNow ? "Synced just now" : `Synced ${hubspot.lastSyncMinutesAgo} min ago`} · {hubspot.objects.join(", ")}</p>
             ) : (
-              <p className="mt-1 text-[15px] text-muted-foreground">Connect a portal to write calls and drafts back to your records.</p>
+              <p className="mt-1 text-[15px] text-muted-foreground">Not connected.</p>
             )}
           </div>
         </div>
@@ -97,7 +97,7 @@ export function CrmPanel() {
           )}
         </div>
       </div>
-      <p className="mt-3 text-[14px] text-muted-foreground">Object mapping: contacts, companies, deals, calls, notes, tasks and emails mirror the HubSpot objects, so a real integration is a field mapping rather than a redesign.</p>
+      <p className="mt-3 text-[14px] text-muted-foreground">Objects mirror HubSpot, so the real integration is a field mapping.</p>
     </Card>
   );
 }
@@ -118,7 +118,7 @@ export function TeamPanel() {
   };
 
   return (
-    <Card title="Team" description="Who can see conversations and approve drafts.">
+    <Card title="Team">
       <div className="overflow-hidden rounded-lg border border-border">
         <table className="w-full text-[16px]">
           <thead><tr className="border-b border-border bg-page text-left text-[14px] font-semibold text-foreground"><th className="px-5 py-3.5">Member</th><th className="px-5 py-3.5">Email</th><th className="px-5 py-3.5">Role</th><th className="px-5 py-3.5">Status</th><th className="w-12" /></tr></thead>
@@ -133,7 +133,7 @@ export function TeamPanel() {
                   </select>
                 </td>
                 <td className="px-5 py-3.5"><span className="flex items-center gap-1.5 text-foreground/80"><StatusDot on={m.status === "active"} />{m.status === "active" ? "Active" : "Pending"}</span></td>
-                <td className="px-2 py-2.5 text-right">{m.status === "pending" && <button type="button" aria-label={`Remove ${m.email}`} onClick={() => setMembers((cur) => cur.filter((x) => x.id !== m.id))} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><Trash2 className="size-4" strokeWidth={1.75} /></button>}</td>
+                <td className="px-2 py-2.5 text-right">{m.status === "pending" && <button type="button" aria-label={`Remove ${m.email}`} onClick={() => setMembers((cur) => cur.filter((x) => x.id !== m.id))} className="cursor-pointer rounded-md p-1.5 text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"><Trash2 className="size-4" strokeWidth={1.75} /></button>}</td>
               </tr>
             ))}
           </tbody>
@@ -171,7 +171,7 @@ function ConfigureDialog({ integration, current, onSave }: { integration: Integr
         <DialogHeader><DialogTitle>{integration.name}</DialogTitle><DialogDescription>{integration.purpose}.</DialogDescription></DialogHeader>
         <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); save(); }}>
           <label className="flex flex-col gap-1.5"><span className={fieldLabel}>{integration.kind === "key" ? "API key" : "Connection string"}</span><Input type="password" value={value} onChange={(e) => setValue(e.target.value)} placeholder={current ? `•••• ${current}` : integration.kind === "key" ? "Paste the key" : "Paste the URL"} autoFocus /></label>
-          <p className="text-[14px] text-muted-foreground">Keys are shared in the group chat until 1Password is set up. This one stays in your browser only.</p>
+          <p className="text-[14px] text-muted-foreground">Stays in this browser only.</p>
           <DialogFooter>
             {current && <button type="button" onClick={() => { onSave(null); setOpen(false); }} className={outlineBtn}>Remove</button>}
             <button type="submit" disabled={value.trim().length < 4} className={primaryBtn}>Save</button>
@@ -185,18 +185,18 @@ function ConfigureDialog({ integration, current, onSave }: { integration: Integr
 export function IntegrationsPanel() {
   const [keys, setKeys] = useStored<Record<string, string>>("slipstream.integrations", {});
   return (
-    <Card title="Integrations" description="Everything the pipeline calls. A missing key shows as not set; the screens keep working on fixture data.">
+    <Card title="Integrations" description="Missing keys fall back to fixture data.">
       <ul className="divide-y divide-border rounded-lg border border-border">
         {integrations.map((i) => {
           const last4 = keys[i.id];
           return (
             <li key={i.id} className="flex items-center gap-4 px-4 py-3">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-icon-well text-[13px] font-semibold text-foreground">{i.name.slice(0, 2)}</span>
+              <span className="flex size-9 items-center justify-center rounded-md border border-border text-[13px] font-medium text-foreground">{i.name.slice(0, 2)}</span>
               <div className="min-w-0 flex-1">
                 <p className="text-[16px] font-medium text-foreground">{i.name}</p>
                 <p className="truncate text-[14px] text-muted-foreground">{i.purpose}</p>
               </div>
-              <span className="flex items-center gap-1.5 text-[15px] text-foreground/80"><StatusDot on={!!last4} />{last4 ? `•••• ${last4}` : i.kind === "key" ? "No API key" : "Not connected"}</span>
+              <span className={cn("text-[15px]", last4 ? "font-mono text-foreground" : "text-muted-foreground")}>{last4 ? `•••• ${last4}` : i.kind === "key" ? "No API key" : "Not connected"}</span>
               <ConfigureDialog integration={i} current={last4} onSave={(v) => { const next = { ...keys }; if (v) next[i.id] = v; else delete next[i.id]; setKeys(next); }} />
             </li>
           );
@@ -225,9 +225,9 @@ export function ApiKeysPanel() {
   const dateFmt = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Melbourne", day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <Card title="API keys" description="For your own scripts against the Slipstream API. Shown once, stored hashed.">
+    <Card title="API keys" description="Shown once, stored hashed.">
       {list.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border p-5 text-[15px] text-muted-foreground">No keys yet.</p>
+        <p className="text-[15px] text-muted-foreground">No keys yet.</p>
       ) : (
         <ul className="divide-y divide-border rounded-lg border border-border">
           {list.map((k) => (
@@ -235,7 +235,7 @@ export function ApiKeysPanel() {
               <span className="flex-1 font-medium text-foreground">{k.name}</span>
               <span className="font-mono text-muted-foreground">ss_live_…{k.last4}</span>
               <span className="text-muted-foreground">{dateFmt.format(new Date(k.createdAt))}</span>
-              <button type="button" aria-label={`Revoke ${k.name}`} onClick={() => setList(list.filter((x) => x.id !== k.id))} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><Trash2 className="size-4" strokeWidth={1.75} /></button>
+              <button type="button" aria-label={`Revoke ${k.name}`} onClick={() => setList(list.filter((x) => x.id !== k.id))} className="cursor-pointer rounded-md p-1.5 text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"><Trash2 className="size-4" strokeWidth={1.75} /></button>
             </li>
           ))}
         </ul>
@@ -277,7 +277,7 @@ const NOTIFICATIONS: { key: string; label: string; help: string }[] = [
 export function NotificationsPanel() {
   const [prefs, setPrefs] = useStored<Record<string, boolean>>("slipstream.notifications", { call_processed: true, draft_ready: true, search_finished: false });
   return (
-    <Card title="Notifications" description="What shows up under the bell.">
+    <Card title="Notifications">
       <ul className="divide-y divide-border">
         {NOTIFICATIONS.map((n) => (
           <li key={n.key} className="flex items-center justify-between gap-6 py-3 first:pt-0 last:pb-0">

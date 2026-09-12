@@ -41,8 +41,8 @@ export function NewCampaignDialog() {
             <span className="font-medium text-foreground">Source list</span>
             <div className="flex flex-col gap-1">
               {SOURCES.map((s) => (
-                <button key={s} type="button" onClick={() => setSource(s)} className={cn("flex h-10 items-center gap-2.5 rounded-lg border border-border px-3 text-left text-sm text-foreground hover:bg-page", source === s && "border-primary bg-primary-soft")}>
-                  <span className={cn("size-4 rounded-full border border-border bg-card", source === s && "border-[5px] border-primary")} />
+                <button key={s} type="button" onClick={() => setSource(s)} className={cn("flex h-10 cursor-pointer items-center gap-2.5 rounded-md border border-border px-3 text-left text-sm text-foreground transition-colors duration-150 hover:bg-page", source === s && "border-foreground/40 bg-page")}>
+                  <span className={cn("size-4 rounded-full border border-border bg-card transition-colors duration-150", source === s && "border-[5px] border-foreground")} />
                   {s}
                 </button>
               ))}
@@ -50,8 +50,8 @@ export function NewCampaignDialog() {
           </div>
         </div>
         <DialogFooter>
-          <button type="button" onClick={() => setOpen(false)} className="h-9 rounded-lg border border-border px-3.5 text-sm text-foreground hover:bg-muted">Cancel</button>
-          <button type="button" onClick={create} className="h-9 rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-foreground hover:bg-primary/85">Create</button>
+          <button type="button" onClick={() => setOpen(false)} className="h-9 cursor-pointer rounded-md border border-border px-3.5 text-sm text-foreground transition-colors duration-150 hover:bg-muted">Cancel</button>
+          <button type="button" onClick={create} className="h-9 cursor-pointer rounded-md bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/85">Create</button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

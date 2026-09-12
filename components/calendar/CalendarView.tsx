@@ -68,11 +68,11 @@ export function CalendarView() {
             <Search className="size-4" strokeWidth={1.75} />
             <input value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search calls" className="w-full bg-transparent text-[16px] text-foreground outline-none" />
           </label>
-          <button type="button" onClick={() => setMonday(mondayOf(today))} className="h-10 rounded-md border border-border px-4 text-[16px] font-medium text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Today</button>
-          <div className="flex h-10 items-center rounded-md border border-border">
-            <button type="button" aria-label="Previous week" onClick={() => setMonday((m) => addDays(m, -7))} className="flex h-full w-10 items-center justify-center rounded-l-[5px] text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronLeft className="size-4" strokeWidth={2} /></button>
+          <button type="button" onClick={() => setMonday(mondayOf(today))} className="h-10 cursor-pointer rounded-md border border-border bg-card px-4 text-[16px] font-medium text-foreground transition-colors duration-150 hover:bg-muted active:bg-border/60 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">Today</button>
+          <div className="flex h-10 items-center rounded-md border border-border bg-card">
+            <button type="button" aria-label="Previous week" onClick={() => setMonday((m) => addDays(m, -7))} className="flex h-full w-10 cursor-pointer items-center justify-center rounded-l-[5px] text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none"><ChevronLeft className="size-4" strokeWidth={1.75} /></button>
             <span className="h-full w-px bg-border" />
-            <button type="button" aria-label="Next week" onClick={() => setMonday((m) => addDays(m, 7))} className="flex h-full w-10 items-center justify-center rounded-r-[5px] text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronRight className="size-4" strokeWidth={2} /></button>
+            <button type="button" aria-label="Next week" onClick={() => setMonday((m) => addDays(m, 7))} className="flex h-full w-10 cursor-pointer items-center justify-center rounded-r-[5px] text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none"><ChevronRight className="size-4" strokeWidth={1.75} /></button>
           </div>
           <ScheduleCallDialog defaultDay={today} onAdd={(e) => { setEvents((cur) => [...cur, e]); setMonday(mondayOf(dayKey(new Date(e.startsAt)))); }} />
         </div>
@@ -80,20 +80,20 @@ export function CalendarView() {
 
       <div className="flex min-h-0 flex-1 border-t border-border">
         <aside className="flex w-[360px] shrink-0 flex-col border-r border-border">
-          <h2 className="px-6 pt-6 pb-3 text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">Upcoming calls</h2>
+          <h2 className="px-6 pt-6 pb-3 text-[15px] font-semibold text-foreground">Upcoming calls</h2>
           <div className="min-h-0 flex-1 overflow-y-auto pb-6">
-            {upcoming.length === 0 && <p className="px-6 text-[15px] text-muted-foreground">{events.length === 0 ? "Nothing scheduled. Add a call to see its pre-call context here." : "Nothing matches."}</p>}
+            {upcoming.length === 0 && <p className="px-6 text-[15px] text-muted-foreground">{events.length === 0 ? "Nothing scheduled." : "Nothing matches."}</p>}
             {upcoming.map(([key, list]) => (
               <section key={key} className="mb-3">
-                <p className="px-6 py-2 text-[15px] font-semibold text-foreground">{labelForDay(key, today)}</p>
+                <p className="px-6 py-2 text-[14px] font-medium text-muted-foreground">{labelForDay(key, today)}</p>
                 {list.map((e) => (
-                  <button key={e.id} type="button" onClick={() => setSelected(e.id)} className={cn("flex w-full items-center gap-3 px-6 py-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none", selected === e.id && "bg-muted")}>
+                  <button key={e.id} type="button" onClick={() => setSelected(e.id)} className={cn("flex h-12 w-full cursor-pointer items-center gap-3 px-6 text-left transition-colors duration-150 hover:bg-page active:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none", selected === e.id && "bg-muted hover:bg-muted")}>
                     <span className="w-12 shrink-0 text-[15px] tabular-nums text-muted-foreground">{timeOf(e.startsAt)}</span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[16px] font-medium text-foreground">{e.contact} <span className="font-normal text-muted-foreground">· {e.company}</span></span>
-                      {e.coach && <span className="mt-1 inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary-soft px-1.5 py-px text-[11px] font-medium text-primary-foreground"><Headphones className="size-3 text-primary" strokeWidth={2} />Coach</span>}
+                      <span className="block truncate text-[16px] text-foreground">{e.contact} <span className="text-muted-foreground">· {e.company}</span></span>
                     </span>
-                    <span title={e.rep} className="flex size-8 shrink-0 items-center justify-center rounded-full bg-avatar text-[12px] font-medium text-foreground">{initials(e.rep)}</span>
+                    {e.coach && <Headphones className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.5} aria-label="Coach armed" />}
+                    <span title={e.rep} className="flex size-7 shrink-0 items-center justify-center rounded-full bg-avatar text-[11px] font-medium text-foreground">{initials(e.rep)}</span>
                   </button>
                 ))}
               </section>
@@ -107,12 +107,12 @@ export function CalendarView() {
             {days.map((key) => (
               <div key={key} className={cn("sticky top-0 z-10 flex h-12 items-baseline gap-1.5 border-b border-l border-border bg-card px-3 text-[15px]", key === today && "bg-page")}>
                 <span className="text-muted-foreground">{colLabel.format(new Date(`${key}T00:00:00Z`))}</span>
-                <span className={cn("font-semibold text-foreground", key === today && "flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground")}>{colDay(key)}</span>
+                <span className="font-semibold text-foreground">{colDay(key)}</span>
               </div>
             ))}
 
             <div className="relative" style={{ height: HOURS.length * HOUR_PX }}>
-              {HOURS.filter((h) => h > 8).map((h) => <div key={h} className="absolute right-2 -translate-y-1/2 text-[11px] tabular-nums text-muted-foreground" style={{ top: (h - 8) * HOUR_PX }}>{h}:00</div>)}
+              {HOURS.filter((h) => h > 8).map((h) => <div key={h} className="absolute right-2 -translate-y-1/2 text-[13px] tabular-nums text-muted-foreground" style={{ top: (h - 8) * HOUR_PX }}>{h}:00</div>)}
             </div>
             {days.map((key) => (
               <div key={key} className={cn("relative border-l border-border", key === today && "bg-page")} style={{ height: HOURS.length * HOUR_PX }}>
@@ -124,7 +124,7 @@ export function CalendarView() {
                       key={e.id}
                       type="button"
                       onClick={() => setSelected(e.id)}
-                      className={cn("absolute inset-x-1 flex flex-col overflow-hidden rounded-md border border-border bg-card px-2 py-1 text-left shadow-xs hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", key === today && "border-l-[3px] border-l-primary", selected === e.id && "ring-2 ring-primary")}
+                      className={cn("absolute inset-x-1 flex cursor-pointer flex-col overflow-hidden rounded-md border border-border bg-card px-2 py-1 text-left transition-colors duration-150 hover:bg-page focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", key === today && "border-l-2 border-l-primary", selected === e.id && "border-foreground/50 bg-page")}
                       style={{ top, height: Math.max(40, (e.durationMin / 60) * HOUR_PX) }}
                     >
                       <span className="truncate text-[13px] font-medium text-foreground">{e.company}</span>

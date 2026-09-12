@@ -17,7 +17,7 @@ export function Tiles({ data }: { data: Intelligence }) {
       {data.tiles.map((t) => (
         <div key={t.label} className="rounded-xl border border-border bg-card p-6 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">
           <p className="text-[15px] text-muted-foreground">{t.label}</p>
-          <p className="mt-2.5 text-[32px] leading-none font-bold tracking-[-0.02em] text-foreground tabular-nums">{t.value}</p>
+          <p className="mt-2.5 text-[32px] leading-none font-semibold tracking-[-0.02em] text-foreground tabular-nums">{t.value}</p>
           <p className="mt-3 text-[15px] text-muted-foreground">{t.delta}</p>
         </div>
       ))}
@@ -55,28 +55,15 @@ export function TrainingLens({ data, active }: Props) {
   );
 }
 
-function ConfidenceRing({ value }: { value: number }) {
-  const r = 17;
-  const c = 2 * Math.PI * r;
-  return (
-    <span className="relative inline-flex size-10 items-center justify-center" role="img" aria-label={`${value}% confidence`}>
-      <svg viewBox="0 0 40 40" className="absolute inset-0 -rotate-90">
-        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--border)" strokeWidth="3" />
-        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--foreground)" strokeWidth="3" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} />
-      </svg>
-      <span className="text-[11px] font-semibold text-foreground tabular-nums">{value}</span>
-    </span>
-  );
-}
 
 export function DerivedIcp({ data, active }: Props) {
   return (
-    <Section id="icp" title="Derived ICP" meta={<span className="flex items-center gap-3">derived from {data.wonDeals} won deals · v{data.icpVersion}<ConfidenceRing value={data.confidence} /></span>} active={active === "icp"}>
-      <p className="max-w-[820px] text-[20px] leading-snug font-medium text-foreground">{data.icp.summary}</p>
+    <Section id="icp" title="Derived ICP" meta={`Derived from ${data.wonDeals} won deals · v${data.icpVersion} · ${data.confidence}% confidence`} active={active === "icp"}>
+      <p className="max-w-[820px] text-[18px] leading-snug text-foreground">{data.icp.summary}</p>
       <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border">
         {data.icp.attributes.map((a) => (
           <div key={a.label} className="bg-card p-5">
-            <p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">{a.label}</p>
+            <p className="text-[13px] text-muted-foreground">{a.label}</p>
             <p className="mt-2 text-[16px] font-medium text-foreground">{a.value}</p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {a.evidence.map((e) => <EvidenceChip key={e.id} call={e} />)}
@@ -114,7 +101,7 @@ export function Objections({ data, active }: Props) {
                   <li key={i} className="px-4 py-3">
                     <p className="text-[15px] leading-snug text-foreground">“{o.text}”</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <Link href={`/conversations/${o.call.id}`} className="text-[13px] text-muted-foreground hover:text-foreground hover:underline">{o.call.company}</Link>
+                      <Link href={`/conversations/${o.call.id}`} className="text-[13px] text-muted-foreground transition-colors duration-150 hover:text-foreground">{o.call.company}</Link>
                       <OutcomeTag outcome={o.outcome} />
                     </div>
                   </li>
@@ -136,14 +123,14 @@ export function TalkRatio({ data, active }: Props) {
       <ul className="flex flex-col gap-2.5">
         {sorted.map((t) => (
           <li key={t.call.id} className="grid grid-cols-[240px_1fr_56px_80px] items-center gap-4 text-[16px]">
-            <Link href={`/conversations/${t.call.id}`} className={cn("truncate text-foreground hover:underline", t.outcome === "won" && "font-medium")}>{t.call.company}</Link>
+            <Link href={`/conversations/${t.call.id}`} className={cn("truncate text-foreground transition-colors duration-150 hover:text-muted-foreground", t.outcome === "won" && "font-medium")}>{t.call.company}</Link>
             <Bar share={t.ratio} className={cn(t.outcome !== "won" && "[&>span]:bg-muted-foreground/60")} />
             <span className="text-right text-foreground tabular-nums">{Math.round(t.ratio * 100)}%</span>
             <OutcomeTag outcome={t.outcome} />
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-[15px] text-muted-foreground">Wins sit between 44% and 50%. Every call above 60% was lost or a no-show.</p>
+      <p className="mt-4 text-[15px] text-muted-foreground">Wins sit between 44% and 50%.</p>
     </Section>
   );
 }
@@ -156,7 +143,7 @@ export function NextSteps({ data, active }: Props) {
       <ul className="divide-y divide-border">
         {data.nextSteps.map((n) => (
           <li key={n.call.id} className="grid grid-cols-[240px_1fr_110px_80px] items-start gap-4 py-3.5 text-[16px]">
-            <Link href={`/conversations/${n.call.id}`} className="truncate text-foreground hover:underline">{n.call.company}</Link>
+            <Link href={`/conversations/${n.call.id}`} className="truncate text-foreground transition-colors duration-150 hover:text-muted-foreground">{n.call.company}</Link>
             <p className={cn("text-foreground", !n.due && "text-muted-foreground")}>{n.description}</p>
             <span className={cn("tabular-nums", n.due ? "text-foreground" : "text-muted-foreground")}>{n.due ? dateFmt.format(new Date(n.due)) : "No date"}</span>
             <OutcomeTag outcome={n.outcome} />
@@ -180,7 +167,7 @@ export function Triggers({ data, active }: Props) {
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-[15px] text-muted-foreground">All five wins had a trigger. All four calls without one were lost or never happened.</p>
+      <p className="mt-4 text-[15px] text-muted-foreground">All five wins had a trigger.</p>
     </Section>
   );
 }
@@ -200,9 +187,9 @@ export function BriefCard({ brief, active }: { brief: string; active?: string })
       />
       <div className="mt-4 flex items-center justify-end gap-3">
         <div className="flex h-10 items-center rounded-md border border-border" aria-label="How many leads">
-          <button type="button" onClick={() => setCount((c) => Math.max(5, c - 5))} disabled={count <= 5} aria-label="Fewer" className="flex h-full w-9 items-center justify-center text-muted-foreground hover:text-foreground disabled:text-border"><Minus className="size-3.5" strokeWidth={2} /></button>
+          <button type="button" onClick={() => setCount((c) => Math.max(5, c - 5))} disabled={count <= 5} aria-label="Fewer" className="flex h-full w-9 cursor-pointer items-center justify-center text-muted-foreground transition-colors duration-150 hover:text-foreground disabled:cursor-default disabled:text-border"><Minus className="size-3.5" strokeWidth={2} /></button>
           <span className="min-w-8 text-center text-[16px] font-medium text-foreground tabular-nums">{count}</span>
-          <button type="button" onClick={() => setCount((c) => Math.min(50, c + 5))} disabled={count >= 50} aria-label="More" className="flex h-full w-9 items-center justify-center text-muted-foreground hover:text-foreground disabled:text-border"><Plus className="size-3.5" strokeWidth={2} /></button>
+          <button type="button" onClick={() => setCount((c) => Math.min(50, c + 5))} disabled={count >= 50} aria-label="More" className="flex h-full w-9 cursor-pointer items-center justify-center text-muted-foreground transition-colors duration-150 hover:text-foreground disabled:cursor-default disabled:text-border"><Plus className="size-3.5" strokeWidth={2} /></button>
         </div>
         <Button className="h-10 rounded-md px-4 text-[16px] font-medium" onClick={() => router.push("/leads")}>
           Find {count} more like these <ArrowRight className="size-4" strokeWidth={2} />

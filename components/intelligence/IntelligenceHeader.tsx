@@ -47,7 +47,7 @@ function NewAnalysis() {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>New analysis</DialogTitle>
-          <DialogDescription>Ask a question across the twelve calls. The answer lands in this page.</DialogDescription>
+          <DialogDescription>Ask a question across the twelve calls.</DialogDescription>
         </DialogHeader>
         <textarea
           value={question}
@@ -58,10 +58,7 @@ function NewAnalysis() {
           className="w-full resize-none rounded-lg border border-border bg-card p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary"
         />
         {state === "queued" && (
-          <div className="rounded-lg border border-border bg-page p-3 text-sm">
-            <p className="font-medium text-foreground">Analysis queued</p>
-            <p className="mt-0.5 text-muted-foreground">Results appear here once the calls have been read.</p>
-          </div>
+          <p className="text-sm text-muted-foreground">Queued · we&apos;ll list it here.</p>
         )}
         <DialogFooter>
           <Button variant="outline" className="h-9" onClick={() => reset(false)}>{state === "queued" ? "Close" : "Cancel"}</Button>
