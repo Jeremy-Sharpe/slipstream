@@ -6,6 +6,7 @@ import { icp } from "@/lib/icp";
 import { actions, useStore } from "@/lib/store";
 import type { Lead } from "@/lib/types";
 import { Avatar, CompanyTile } from "./Avatar";
+import { WorkingLine } from "./run/WorkingLine";
 import { Button, Pill, Score, cn } from "./ui";
 
 type Phase = "idle" | "searching" | "scoring" | "done";
@@ -15,6 +16,7 @@ export function LeadsView() {
   const [brief, setBrief] = useState(icp.brief);
   const [count, setCount] = useState(10);
   const [phase, setPhase] = useState<Phase>("idle");
+  const [startedAt, setStartedAt] = useState<number>();
   const [shown, setShown] = useState<number>(leads.length);
   const [open, setOpen] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
@@ -28,6 +30,7 @@ export function LeadsView() {
     timers.current = [];
     setOpen(null);
     setShown(0);
+    setStartedAt(Date.now());
     setPhase("searching");
     const n = Math.min(count, leads.length);
     for (let i = 1; i <= n; i++) timers.current.push(window.setTimeout(() => setShown(i), 350 * i));
@@ -65,8 +68,8 @@ export function LeadsView() {
             <span className="text-[13px] text-soft">companies</span>
           </div>
           <div className="flex items-center gap-3">
-            {phase === "searching" && <span className="flex items-center gap-2 text-[13px] text-soft"><span className="pulse-dot size-2 rounded-full bg-accent" />Searching · <span className="tabular-nums text-ink">{shown} of {Math.min(count, leads.length)}</span></span>}
-            {phase === "scoring" && <span className="flex items-center gap-2 text-[13px] text-soft"><span className="pulse-dot size-2 rounded-full bg-accent" />Scoring against won deals</span>}
+            {phase === "searching" && <WorkingLine label="Searching" startedAt={startedAt} detail={`${shown} of ${Math.min(count, leads.length)}`} />}
+            {phase === "scoring" && <WorkingLine label="Scoring against won deals" startedAt={startedAt} />}
             {phase === "done" && <span className="text-[13px] text-soft">{shown} leads · scored</span>}
             <Button variant="primary" onClick={find} disabled={phase === "searching" || phase === "scoring"}>Find leads</Button>
           </div>

@@ -40,12 +40,12 @@ export function RunView({ call }: { call: CallRecord }) {
 
       <div className="mt-8 grid grid-cols-[55fr_45fr] gap-10">
         <section>
-          <h2 className="mb-3 text-[12px] font-medium uppercase tracking-[0.06em] text-faint">Transcript</h2>
+          <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Transcript</h2>
           <Transcript turns={call.turns} highlight={highlight} />
         </section>
         <section className="sticky top-8 max-h-[calc(100vh-4rem)] self-start overflow-y-auto pr-1">
-          <h2 className="mb-3 text-[12px] font-medium uppercase tracking-[0.06em] text-faint">What Slipstream did</h2>
-          <RunTimeline call={call} steps={run.steps} open={run.open} toggle={run.toggle} finished={run.finished} onHighlight={setHighlight} />
+          <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What Slipstream did</h2>
+          <RunTimeline call={call} steps={run.steps} open={run.open} toggle={run.toggle} onHighlight={setHighlight} />
         </section>
       </div>
     </div>

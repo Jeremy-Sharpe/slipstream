@@ -5,17 +5,31 @@ import type { CallRecord } from "./types";
 import { actions } from "./store";
 
 // The run is a stream of step events. Today they come from timers; the real
-// API will emit the same shape over SSE: { stepId, status, progress?, note? }.
+// API will emit the same shape over SSE:
+//   { stepId, status: "running" | "done" | "skipped", progress?, note? }
 export type StepId = "transcribe" | "extract" | "score" | "draft" | "icp" | "search" | "outreach";
 export type StepStatus = "pending" | "running" | "done" | "skipped";
-export type StepState = { id: StepId; status: StepStatus; progress?: number; note?: string };
+export type StepState = { id: StepId; status: StepStatus; progress?: number; note?: string; startedAt?: number; elapsedMs?: number };
 
-const ORDER: StepId[] = ["transcribe", "extract", "score", "draft", "icp", "search", "outreach"];
+export const ORDER: StepId[] = ["transcribe", "extract", "score", "draft", "icp", "search", "outreach"];
 
-function plan(call: CallRecord): { steps: StepId[]; stop?: { after: StepId; note: string } } {
-  if (call.outcome === "no_show") return { steps: ORDER, stop: { after: "transcribe", note: "No conversation to extract — reschedule note drafted" } };
-  if (call.outcome === "lost") return { steps: ORDER, stop: { after: "icp", note: "Not a fit for the ICP — no leads searched" } };
-  return { steps: ORDER };
+/** Sub-rows shown in each step's trace while it works. */
+export const TRACE: Record<StepId, string[]> = {
+  transcribe: ["Diarising speakers", "Aligning timestamps"],
+  extract: ["Reading the transcript", "Finding contact and company", "Deal stage, value and next step", "Promises and objections"],
+  score: ["Counting discovery questions", "Checking for a dated next step", "Reading the objection", "Talk ratio"],
+  draft: ["Pulling what was promised", "Writing the follow-up"],
+  icp: ["Comparing with the 5 won deals", "Updating the profile"],
+  search: [],
+  outreach: ["Matching each lead to a won call", "Writing five drafts"],
+};
+
+const DURATION: Record<StepId, number> = { transcribe: 900, extract: 1800, score: 1500, draft: 1200, icp: 1100, search: 3800, outreach: 1300 };
+
+function plan(call: CallRecord): { stop?: { after: StepId; note: string } } {
+  if (call.outcome === "no_show") return { stop: { after: "transcribe", note: "No conversation to extract — reschedule note drafted" } };
+  if (call.outcome === "lost") return { stop: { after: "icp", note: "Not a fit for the ICP — no leads searched" } };
+  return {};
 }
 
 export function useRun(call: CallRecord) {
@@ -24,8 +38,8 @@ export function useRun(call: CallRecord) {
   const [finished, setFinished] = useState(false);
   const timers = useRef<number[]>([]);
 
-  const set = useCallback((id: StepId, patch: Partial<StepState>) => {
-    setSteps((s) => s.map((st) => (st.id === id ? { ...st, ...patch } : st)));
+  const set = useCallback((id: StepId, patch: Partial<StepState> | ((s: StepState) => Partial<StepState>)) => {
+    setSteps((all) => all.map((st) => (st.id === id ? { ...st, ...(typeof patch === "function" ? patch(st) : patch) } : st)));
   }, []);
 
   const start = useCallback(() => {
@@ -37,32 +51,28 @@ export function useRun(call: CallRecord) {
     actions.setRun(call.id, "running");
     const { stop } = plan(call);
     const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
-    let t = 200;
     const stopIndex = stop ? ORDER.indexOf(stop.after) : ORDER.length - 1;
+    let t = 250;
     ORDER.forEach((id, i) => {
       if (i > stopIndex) {
         at(t, () => set(id, { status: "skipped", note: i === stopIndex + 1 ? stop?.note : undefined }));
         return;
       }
-      if (id === "search") {
-        at(t, () => { set(id, { status: "running", progress: 0 }); setOpen(id); });
-        for (let n = 1; n <= 10; n++) at(t + 350 * n, () => set(id, { progress: n }));
-        t += 350 * 10 + 300;
-        at(t, () => set(id, { status: "done", progress: 10 }));
-        t += 400;
-        return;
-      }
-      if (id === "transcribe" && (call.fileName || call.pasted)) {
-        at(t, () => set(id, { status: "done" }));
+      const preDone = id === "transcribe" && (call.fileName || call.pasted);
+      if (preDone) {
+        at(t, () => set(id, { status: "done", elapsedMs: 0 }));
         t += 150;
         return;
       }
-      at(t, () => { set(id, { status: "running" }); setOpen(id); });
-      const len = id === "transcribe" ? 500 : id === "outreach" ? 900 : 800;
-      at(t + len, () => set(id, { status: "done" }));
-      t += len + 250;
+      const len = DURATION[id];
+      const ticks = id === "search" ? 10 : TRACE[id].length;
+      at(t, () => { set(id, { status: "running", progress: 0, startedAt: Date.now() }); setOpen(id); });
+      for (let n = 1; n <= ticks; n++) at(t + (len / (ticks + 1)) * n, () => set(id, { progress: n }));
+      at(t + len, () => set(id, (s) => ({ status: "done", progress: ticks, elapsedMs: s.startedAt ? Date.now() - s.startedAt : len })));
+      // linger open for a beat after settling, then collapse (the next step opens itself)
+      t += len + 350;
     });
-    at(t, () => { setFinished(true); setOpen("extract"); actions.setRun(call.id, "review"); });
+    at(t, () => { setFinished(true); setOpen(stop?.after === "transcribe" ? "transcribe" : "extract"); actions.setRun(call.id, "review"); });
   }, [call, set]);
 
   useEffect(() => {
