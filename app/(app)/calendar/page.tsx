@@ -1,9 +1,5 @@
-import { EmptySurface, PageShell } from "@/components/shell/PageShell";
+import { CalendarView } from "@/components/calendar/CalendarView";
 
-export default function Page() {
-  return (
-    <PageShell title="Calendar" description="Upcoming calls and the context to walk in with.">
-      <EmptySurface label="Nothing scheduled." />
-    </PageShell>
-  );
+export default function CalendarPage() {
+  return <CalendarView />;
 }

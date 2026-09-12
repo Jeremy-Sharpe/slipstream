@@ -1,9 +1,5 @@
-import { EmptySurface, PageShell } from "@/components/shell/PageShell";
+import { SettingsView } from "@/components/settings/SettingsView";
 
-export default function Page() {
-  return (
-    <PageShell title="Settings" description="Workspace, CRM connection and team.">
-      <EmptySurface label="No settings yet." />
-    </PageShell>
-  );
+export default function SettingsPage() {
+  return <SettingsView />;
 }
