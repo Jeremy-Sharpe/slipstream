@@ -1,6 +1,6 @@
 # Slipstream API
 
-FastAPI service for the conversation-to-CRM pipeline. It starts without any credentials in deterministic local mode; adding both Supabase variables moves storage to the hosted database.
+FastAPI health and configuration scaffold for the conversation-to-CRM pipeline. It starts without credentials and reports memory mode; the ingestion slice adds the repository operations that use this selection.
 
 ```bash
 uv sync
@@ -8,8 +8,10 @@ uv run uvicorn app.main:app --reload
 uv run pytest
 ```
 
-The health endpoint is available at `/health` and `/api/v1/health`. It reports which optional integrations are configured without exposing secret values.
+The liveness endpoint is available at `/health` and `/api/v1/health`. `/ready` additionally probes Supabase when configured and returns 503 if storage is unavailable. Both report optional integration configuration without exposing secret values.
 
 ## Deployment
 
-`Dockerfile` and `railway.toml` support a Railway service whose root directory is `api/`. `deploy/` contains the systemd service, Caddy HTTPS example, and idempotent pull-and-restart script for the project VPS. Copy secrets into `/etc/slipstream/api.env`; never store them in the checkout.
+`Dockerfile` and `railway.toml` support a Railway service. Set the Railway service root directory to `api/` and its Config File path to `/api/railway.toml`; these are separate monorepo settings. The container honours Railway's injected `PORT` and runs as an unprivileged user.
+
+`deploy/` contains the systemd service, Caddy HTTPS example, one-time provisioner, and locked atomic release script for the project VPS. The deployer creates an immutable Git worktree per revision, builds a separate virtual environment, atomically switches `current`, verifies the exact revision through `/ready`, and rolls back on failure. Copy secrets into `/etc/slipstream/api.env`; never store them in the checkout.

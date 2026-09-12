@@ -7,16 +7,20 @@ Wants=network-online.target
 Type=simple
 User=slipstream
 Group=slipstream
-WorkingDirectory=/opt/slipstream/api
-EnvironmentFile=/etc/slipstream/api.env
-ExecStart=/usr/local/bin/uv run --frozen uvicorn app.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1
+WorkingDirectory=/opt/slipstream/current/api
+EnvironmentFile=-/etc/slipstream/api.env
+EnvironmentFile=-/etc/slipstream/release.env
+ExecStart=/opt/slipstream/current/api/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1
 Restart=always
 RestartSec=3
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/slipstream
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
 
 [Install]
 WantedBy=multi-user.target

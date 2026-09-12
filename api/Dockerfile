@@ -11,6 +11,13 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
 COPY app ./app
+COPY deploy/container-entrypoint.sh /usr/local/bin/slipstream-api
+
+RUN chmod 0555 /usr/local/bin/slipstream-api \
+    && useradd --system --uid 10001 --no-create-home --home-dir /nonexistent slipstream \
+    && chown -R slipstream:slipstream /app
+
+USER slipstream
 
 EXPOSE 8000
-CMD ["uv", "run", "--no-sync", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+ENTRYPOINT ["/usr/local/bin/slipstream-api"]
