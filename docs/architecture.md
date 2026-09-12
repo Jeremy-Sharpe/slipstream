@@ -77,6 +77,7 @@ The bake-off (`api/evals/run_scorecard_eval.py`) runs the judge over the twelve 
 - **Judge latency in the demo.** DeepSeek V3.2 averages 17 seconds per call; if the walkthrough needs the scorecard to appear faster, set `SCORECARD_JUDGE_MODEL=openai/gpt-5.4` (5 seconds, the accuracy leader, 25 times the cost per call, still under two cents).
 
 - **Extraction prompt v3.** The extraction eval shows every deal-amount miss is a spoken per-seat or onboarding figure reported as the deal amount, and objection handling disagrees with the labels on the `partial` versus `handled` boundary; put the unit rule and the rubric's handling definitions into the prompt, and decide whether courtesy next steps on lost calls are labelled or suppressed.
+- **Evidence without a sequence.** `EvidenceSpan` rejects transcript evidence that has no `sequence`, which is how Claude Haiku lost five of thirteen calls and DeepSeek one in the extraction eval; `ground()` already finds a quote in any segment, so make `sequence` optional on model output and let grounding fill it.
 - **OpenRouter credit.** The shared key is on a five-dollar credit account; four concurrent requests return 402. Top up before re-running the nine-model extraction comparison with billed cost.
 
 ## Change log
