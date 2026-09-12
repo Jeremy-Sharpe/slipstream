@@ -10,7 +10,7 @@ Track: Track 1: Improve an Existing Business Capability (also entered in the Bui
 
 Production URL: https://slipstream-hackathon.vercel.app
 
-Demo video: (added at submission)
+Demo video: https://github.com/Jeremy-Sharpe/slipstream/releases/download/demo-video-v1/slipstream-demo.mp4
 
 ## The problem and who it's for
 
