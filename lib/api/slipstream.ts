@@ -387,7 +387,8 @@ function parseCampaign(value: unknown): ApiCampaign {
     typeof value.created_by !== "string" ||
     ![value.scheduled_for, value.created_at, value.updated_at].every((date) => typeof date === "string" && Number.isFinite(Date.parse(date))) ||
     !isRecord(value.counts) ||
-    !Array.isArray(value.items)
+    !Array.isArray(value.items) ||
+    value.items.length < 1 || value.items.length > 25
   ) {
     throw new ApiError("Slipstream API returned malformed campaign data", 502);
   }
