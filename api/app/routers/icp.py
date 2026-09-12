@@ -4,10 +4,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.core.config import Settings
-from app.core.llm import MissingReasoningProviderError
+from app.core.llm import MissingEmbeddingProviderError, MissingReasoningProviderError
 from app.schemas.icp import FixtureHistoryCounts, IcpDeriveRequest, StoredIcpProfile
 from app.services import fixture_history
-from app.services.dependencies import get_openai_client, get_settings, get_store
+from app.services.dependencies import get_embedding_client, get_settings, get_store
 from app.services.icp import derive_icp
 from app.services.icp_leads_store import IcpLeadsStore
 
@@ -29,17 +29,17 @@ def derive(
     settings: SettingsDep,
     store: StoreDep,
 ) -> StoredIcpProfile:
+    _require(settings, "embeddings")
     _require(settings, settings.reasoning_provider)
-    _require(settings, "openai")
     try:
         return derive_icp(
             store,
             settings,
-            get_openai_client(request),
+            get_embedding_client(request),
             settings,
             include_demo=body.include_demo,
         )
-    except MissingReasoningProviderError as error:
+    except (MissingEmbeddingProviderError, MissingReasoningProviderError) as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(error),

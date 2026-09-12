@@ -10,6 +10,11 @@ from pydantic import ValidationError
 from app.core.config import Settings
 
 
+def _clear_provider_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY"):
+        monkeypatch.delenv(name, raising=False)
+
+
 def test_comma_separated_origin_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("WEB_ORIGINS", "http://localhost:3000, https://slipstream.example")
 
@@ -131,7 +136,81 @@ def test_invalid_web_origin_is_rejected(origin: str) -> None:
         ("meta-llama/llama-4-maverick", "openrouter"),
     ],
 )
-def test_reasoning_provider_is_selected_from_model_name(model: str, provider: str) -> None:
+def test_reasoning_provider_is_selected_from_model_name(
+    monkeypatch: pytest.MonkeyPatch,
+    model: str,
+    provider: str,
+) -> None:
+    _clear_provider_env(monkeypatch)
     settings = Settings(_env_file=None, reasoning_model=model)
 
     assert settings.reasoning_provider == provider
+
+
+def test_reasoning_provider_falls_back_to_openrouter_when_only_openrouter_key_is_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        reasoning_model="gpt-5.4",
+        openrouter_api_key="openrouter-test",
+    )
+
+    assert settings.reasoning_provider == "openrouter"
+
+
+@pytest.mark.parametrize(
+    ("model", "native_key", "provider"),
+    [
+        ("gpt-5.4", {"openai_api_key": "openai-test"}, "openai"),
+        ("claude-sonnet-5", {"anthropic_api_key": "anthropic-test"}, "anthropic"),
+    ],
+)
+def test_reasoning_provider_stays_native_when_native_key_is_set(
+    monkeypatch: pytest.MonkeyPatch,
+    model: str,
+    native_key: dict[str, str],
+    provider: str,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        reasoning_model=model,
+        openrouter_api_key="openrouter-test",
+        **native_key,
+    )
+
+    assert settings.reasoning_provider == provider
+
+
+def test_reasoning_provider_stays_native_when_no_key_is_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(_env_file=None, environment="test", reasoning_model="gpt-5.4")
+
+    assert settings.reasoning_provider == "openai"
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "provider", "flag"),
+    [
+        ({}, None, False),
+        ({"openai_api_key": "openai-test"}, "openai", True),
+        ({"openrouter_api_key": "openrouter-test"}, "openrouter", True),
+    ],
+)
+def test_embedding_provider_and_flag(
+    monkeypatch: pytest.MonkeyPatch,
+    kwargs: dict[str, str],
+    provider: str | None,
+    flag: bool,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(_env_file=None, environment="test", **kwargs)
+
+    assert settings.embedding_provider == provider
+    assert settings.integration_flags["embeddings"] is flag

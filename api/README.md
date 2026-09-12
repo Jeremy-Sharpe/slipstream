@@ -24,7 +24,7 @@ Every row written by this lane carries `metadata.source = "fixtures"` where the 
 
 Embeddings use `EMBEDDING_MODEL`, defaulting to OpenAI `text-embedding-3-small`, matching the schema's 1536-dimensional vectors. Reasoning uses `REASONING_MODEL`, defaulting to `gpt-5.4`, and selects the provider from the model name.
 
-Use a Claude model such as `claude-opus-5` with `ANTHROPIC_API_KEY`, an OpenAI model such as `gpt-5.4` or `o4-mini` with `OPENAI_API_KEY`, or an OpenRouter model such as `meta-llama/llama-4-maverick` with `OPENROUTER_API_KEY`. Origami calls use `ORIGAMI_BASE_URL`, defaulting to `https://origami.chat/api/v3`.
+Use a Claude model such as `claude-opus-5` with `ANTHROPIC_API_KEY`, an OpenAI model such as `gpt-5.4` or `o4-mini` with `OPENAI_API_KEY`, or an OpenRouter model such as `meta-llama/llama-4-maverick` with `OPENROUTER_API_KEY`. When the native key is absent and `OPENROUTER_API_KEY` is set, the same model is routed through OpenRouter under its vendor-prefixed id (`gpt-5.4` becomes `openai/gpt-5.4`, reported in the `model` field of the stored profile), and embeddings go through OpenRouter as `openai/text-embedding-3-small` while the stored `embedding_model` stays unprefixed. The `embeddings` flag on `/health` is true when either key is present. Origami calls use `ORIGAMI_BASE_URL`, defaulting to `https://origami.chat/api/v3`.
 
 Endpoints are registered both bare and under `/api/v1`: `POST /icp/history/load`, `POST /icp/derive`, `GET /icp/latest`, `POST /leads/source`, `GET /leads/source/{job_id}`, `GET /leads`, `POST /leads/{lead_id}/outreach`, and `POST /leads/{lead_id}/outreach/approve`.
 

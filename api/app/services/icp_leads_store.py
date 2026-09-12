@@ -169,12 +169,7 @@ class SupabaseIcpLeadsStore:
         return _deal_from_row(row)
 
     def list_fixture_deals(self, *, include_demo: bool = False) -> list[DealRecord]:
-        rows = (
-            self._client.table("deals")
-            .select("*,companies(*),contacts(*)")
-            .execute()
-            .data
-        )
+        rows = self._client.table("deals").select("*,companies(*),contacts(*)").execute().data
         deals = [
             _deal_from_row(row)
             for row in rows
@@ -230,9 +225,7 @@ class SupabaseIcpLeadsStore:
         )
         return _stored_profile(row)
 
-    def insert_icp_source_deal(
-        self, *, profile_id: str, deal_id: str, evidence: JsonDict
-    ) -> None:
+    def insert_icp_source_deal(self, *, profile_id: str, deal_id: str, evidence: JsonDict) -> None:
         self._client.table("icp_profile_source_deals").insert(
             {"icp_profile_id": profile_id, "deal_id": deal_id, "evidence": evidence}
         ).execute()
@@ -263,9 +256,7 @@ class SupabaseIcpLeadsStore:
         )
         deal_ids = {row["deal_id"] for row in source_rows}
         return [
-            deal
-            for deal in self.list_fixture_deals(include_demo=True)
-            if str(deal.id) in deal_ids
+            deal for deal in self.list_fixture_deals(include_demo=True) if str(deal.id) in deal_ids
         ]
 
     def log_activity(
@@ -462,9 +453,7 @@ class InMemoryIcpLeadsStore:
         self.icp_profiles[row["id"]] = row
         return _stored_profile(row)
 
-    def insert_icp_source_deal(
-        self, *, profile_id: str, deal_id: str, evidence: JsonDict
-    ) -> None:
+    def insert_icp_source_deal(self, *, profile_id: str, deal_id: str, evidence: JsonDict) -> None:
         self.icp_source_deals[(profile_id, deal_id)] = {
             "icp_profile_id": profile_id,
             "deal_id": deal_id,
@@ -489,9 +478,7 @@ class InMemoryIcpLeadsStore:
             if source_profile_id == profile_id
         }
         return [
-            deal
-            for deal in self.list_fixture_deals(include_demo=True)
-            if str(deal.id) in deal_ids
+            deal for deal in self.list_fixture_deals(include_demo=True) if str(deal.id) in deal_ids
         ]
 
     def log_activity(

@@ -4,7 +4,7 @@ import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 
 from app.core.config import Settings
-from app.core.llm import MissingReasoningProviderError
+from app.core.llm import MissingEmbeddingProviderError, MissingReasoningProviderError
 from app.schemas.leads import (
     Draft,
     Lead,
@@ -14,7 +14,7 @@ from app.schemas.leads import (
     OutreachApproveRequest,
     OutreachRequest,
 )
-from app.services.dependencies import get_openai_client, get_settings, get_store
+from app.services.dependencies import get_embedding_client, get_settings, get_store
 from app.services.icp_leads_store import IcpLeadsStore
 from app.services.leads import complete_search, start_search
 from app.services.origami import OrigamiClient
@@ -34,7 +34,7 @@ async def source(
     store: StoreDep,
 ) -> LeadSourceAccepted:
     _require(settings, "origami")
-    _require(settings, "openai")
+    _require(settings, "embeddings")
     origami = _origami_client(settings)
     try:
         job, profile_id = await start_search(
@@ -51,7 +51,7 @@ async def source(
         _complete_and_close,
         store,
         origami,
-        get_openai_client(request),
+        get_embedding_client(request),
         settings,
         profile_id,
         job.id,
@@ -101,7 +101,7 @@ def outreach(
             lead_id=lead_id,
             rep_name=body.rep_name,
         )
-    except MissingReasoningProviderError as error:
+    except (MissingEmbeddingProviderError, MissingReasoningProviderError) as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(error),

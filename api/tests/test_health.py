@@ -18,6 +18,7 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
         "anthropic": False,
         "openai": False,
         "openrouter": False,
+        "embeddings": False,
         "elevenlabs": False,
         "origami": False,
     }
