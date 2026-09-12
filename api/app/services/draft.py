@@ -148,9 +148,19 @@ def _model_payload(
         if extraction.next_step and extraction.next_step.owner
         else seller["name"]
     )
+    contact_name = extraction.contact.name.value
+    if not include_transcript and contact_name is None:
+        participant_names = list(
+            dict.fromkeys(segment.speaker.strip() for segment in call.segments)
+        )
+        non_seller_names = [
+            name for name in participant_names if name.casefold() != rep_name.casefold()
+        ]
+        if len(non_seller_names) == 1:
+            contact_name = non_seller_names[0]
     payload = {
         "contact": {
-            "name": extraction.contact.name.value,
+            "name": contact_name,
             "email": extraction.contact.email.value,
             "title": extraction.contact.title.value,
         },
