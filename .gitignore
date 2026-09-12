@@ -21,3 +21,6 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# evals
+/.hg-evals-reports

@@ -36,6 +36,10 @@ Business and innovation together are 50 of 80 points. A polished product with a 
 9. **Build the demo path deliberately.** The UI should surface the most differentiating feature (analysis that turns calls into an ICP and outreach) within the first minute of a walkthrough, not bury it behind setup.
 10. **Write the pitch content into the product and README as you go.** Target user segment, their pain, named alternatives (call recorders, CRM AI add-ons, sales coaching tools) and why Slipstream is different, feasibility (cost per call, CRM integration path, data access), and a rough value estimate (minutes saved per call times calls per rep per week). Judges only see the three artefacts; anything not in them does not count.
 
+## Judge evals
+
+Every criterion above has a check in `evals/`, described in `docs/judging-evals.md`. `npm run evals:dry` runs the deterministic submission checks in seconds; `npm run evals` runs the LLM judge on all 13 criteria through your Claude Code login. Before claiming a criterion is met, run its scenario and quote the score. A fail lists the gaps that lift the score: fix those, never the rubric or the target.
+
 ## Submission checklist
 
 - Public GitHub repo, README complete per rule 7.

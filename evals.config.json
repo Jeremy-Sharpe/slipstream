@@ -1,0 +1,6 @@
+{
+  "scenarios": "evals/*.eval.mjs",
+  "model": "sonnet",
+  "maxTurns": 30,
+  "runs": 1
+}
