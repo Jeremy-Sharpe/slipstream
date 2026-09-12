@@ -63,6 +63,19 @@ The bake-off (`api/evals/run_scorecard_eval.py`) runs the judge over the twelve 
 - Two OpenRouter code paths exist: the shared `structured()` client for reasoning steps and the httpx judge in `score.py` that also records usage, latency and retries. Consolidating them is a follow-up.
 - With `require_parameters` on, sending `temperature` excludes GPT-5.4 endpoints, which do not accept it. The judge sends no temperature.
 
+## Follow-ups (as of 12 Sep 2026, evening)
+
+- **Rubric v2 for objection handling.** Every model scored lowest on this dimension (50% to 75%) and the misses sit on the `partial` boundary. Add two worked examples per label to `api/evals/rubric.md`, bump `RUBRIC_VERSION`, re-run the bake-off. This is the cheapest accuracy gain available; swapping models is not.
+- **OpenRouter key on the VPS.** `OPENROUTER_API_KEY` must be in `/etc/slipstream/api.env` or `POST /scorecards` answers 503 by design. Owner: Jeremy's deploy.
+- **Coach tests.** `tests/test_coach.py::test_empty_disconnected_session_does_not_consume_checkpoint_capacity` and `test_active_resumed_checkpoint_is_not_expired` fail on a clean `origin/main`; they predate the scorecard merge and belong to the coach lane.
+- **One OpenRouter client.** Fold the judge's usage, latency and retry accounting into the shared `structured()` client and delete the httpx path in `score.py`.
+- **Playbook persistence.** `POST /playbook` re-judges on every call and stores nothing, so the analysis surface has no "latest" to read. Add a table or store it on the ICP profile row, with `GET /playbook/latest` in front of it.
+- **Branch `feat/scorecard-wire` is superseded; do not merge it.** It wired scoring by conversation UUID, `GET /scorecards` (list all), `POST /playbook/derive` over every stored scorecard and an in-process `GET /playbook/latest`, verified live on DeepSeek V3.2 in memory mode and on a Supabase project. The scorecard merge on main (`ab196b9`) landed its own durable store keyed by `source_external_id` with revision checks and the `20260912020000_scorecard_persistence.sql` migration, so the branch would create a second store on the same column. Port only what main lacks: a list endpoint, derive-over-all with a cached latest, and a way to name the rep for non-fixture calls (main's durable path takes the rep from `conversations.metadata->>'rep'` or the deal owner and answers 404 when neither is set, so a live transcription that has not been extracted yet cannot be scored).
+- **The UI does not read scorecards yet.** Conversation detail still renders the labelled fixture scorecard; `POST /scorecards` and `GET /scorecards/{call_id}` are not called from `components/conversations`, and Intelligence does not call `POST /playbook`. Note `POST /playbook` needs two or more call ids and the ingest token, so the UI wiring needs the token on the server side, not in the browser.
+- **Other Supabase projects need the two new migrations.** Anna's project (`ozfogqrawonkluckhksk`) has only the initial schema applied; `supabase db push` is required before main's `POST /scorecards` durable path works there, and two ingested fixture conversations (calls 02 and 03) sit in it from the live check.
+- **Demo call audio.** Call 13 needs regenerating once ElevenLabs credits allow, with the voices already cast.
+- **Judge latency in the demo.** DeepSeek V3.2 averages 17 seconds per call; if the walkthrough needs the scorecard to appear faster, set `SCORECARD_JUDGE_MODEL=openai/gpt-5.4` (5 seconds, the accuracy leader, 25 times the cost per call, still under two cents).
+
 ## Change log
 
 - **12 Sep 2026, Jeremy**: schema and seed; API skeleton on the VPS with atomic releases; ingest with Scribe batch; grounded extraction with evidence verification.
