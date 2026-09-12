@@ -28,6 +28,8 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 - `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` performs a
   credential-free, non-mutating check of the live Campaigns surface, API revision,
   public campaign reads, OpenAPI contract and unauthenticated control rejection.
+- The production campaign list contains one synthetic record named “Hackathon demo —
+  intentionally unsent”; it is paused, scheduled for 2099, and reports zero sends.
 
 ## Deployment-only gaps
 
@@ -48,7 +50,10 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
    failing check.
 6. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` to confirm both
    deployments and the protected campaign boundary immediately before submitting.
-7. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
+7. If a VPS restart cleared the memory-backed campaign, recreate it on the VPS with
+   `sudo bash -lc 'set -a; source /etc/slipstream/api.env; export SLIPSTREAM_INGEST_TOKEN="$INGEST_TOKEN"; cd /opt/slipstream/current; npm run seed:demo-campaign'`.
+   The command refuses durable storage or configured email delivery.
+8. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
    **Track 1: Improve an Existing Business Capability** and also enter the
    **Built With ElevenLabs** special track.
 
