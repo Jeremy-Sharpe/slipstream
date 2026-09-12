@@ -25,11 +25,11 @@ function fixtureFetch(overrides = {}) {
     "https://api.example/api/v1/campaigns": json([]),
     "https://api.example/openapi.json": json({
       paths: {
-        "/api/v1/campaigns": {},
-        "/api/v1/campaigns/run-due": {},
-        "/api/v1/campaigns/{campaign_id}": {},
-        "/api/v1/campaigns/{campaign_id}/pause": {},
-        "/api/v1/campaigns/{campaign_id}/resume": {},
+        "/api/v1/campaigns": { get: {}, post: {} },
+        "/api/v1/campaigns/run-due": { post: {} },
+        "/api/v1/campaigns/{campaign_id}": { get: {} },
+        "/api/v1/campaigns/{campaign_id}/pause": { post: {} },
+        "/api/v1/campaigns/{campaign_id}/resume": { post: {} },
       },
     }),
     "https://api.example/api/v1/campaigns/00000000-0000-0000-0000-000000000000/pause": json(

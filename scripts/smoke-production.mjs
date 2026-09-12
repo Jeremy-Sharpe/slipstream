@@ -5,13 +5,13 @@ const DEFAULT_API_URL = "https://slipstream-api.3-104-149-193.sslip.io";
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_BODY_BYTES = 1_048_576;
 
-const requiredCampaignPaths = [
-  "/api/v1/campaigns",
-  "/api/v1/campaigns/run-due",
-  "/api/v1/campaigns/{campaign_id}",
-  "/api/v1/campaigns/{campaign_id}/pause",
-  "/api/v1/campaigns/{campaign_id}/resume",
-];
+const requiredCampaignOperations = {
+  "/api/v1/campaigns": ["get", "post"],
+  "/api/v1/campaigns/run-due": ["post"],
+  "/api/v1/campaigns/{campaign_id}": ["get"],
+  "/api/v1/campaigns/{campaign_id}/pause": ["post"],
+  "/api/v1/campaigns/{campaign_id}/resume": ["post"],
+};
 
 function parseArgs(argv) {
   const options = {
@@ -130,8 +130,10 @@ export async function runSmoke(rawOptions = {}) {
   const schemaResponse = await request(`${apiUrl}/openapi.json`, {}, fetchImpl);
   assert(schemaResponse.response.status === 200, `OpenAPI schema returned ${schemaResponse.response.status}`);
   const schema = parseJson(schemaResponse.body, "OpenAPI schema");
-  for (const path of requiredCampaignPaths) {
-    assert(schema?.paths?.[path], `OpenAPI schema is missing ${path}`);
+  for (const [path, methods] of Object.entries(requiredCampaignOperations)) {
+    for (const method of methods) {
+      assert(schema?.paths?.[path]?.[method], `OpenAPI schema is missing ${method.toUpperCase()} ${path}`);
+    }
   }
 
   const protectedResponse = await request(
