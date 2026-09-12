@@ -1,9 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import type { Conversation, ConversationKind } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { ConversationsGrid } from "./ConversationsGrid";
+
+// Glide draws on canvas and touches window at import time, so it is client-only.
+const ConversationsGrid = dynamic(() => import("./ConversationsGrid").then((m) => m.ConversationsGrid), { ssr: false });
 
 type Tab = "all" | ConversationKind;
 

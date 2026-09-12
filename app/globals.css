@@ -7,9 +7,13 @@
 @theme inline {
     --color-avatar: var(--avatar);
     --color-icon-well: var(--icon-well);
-    --color-positive: var(--positive);
-    --color-live: var(--live);
     --color-inactive: var(--inactive);
+    --color-page: var(--page);
+    --color-signal: var(--signal);
+    --color-primary-soft: var(--primary-soft);
+    --color-ink: var(--foreground);
+    --color-ink-2: var(--secondary);
+    --color-line: var(--border);
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
     --color-sidebar-ring: var(--sidebar-ring);
@@ -53,44 +57,45 @@
 }
 
 :root {
-    /* Slipstream palette. Roles in docs; keep every colour on a token. */
-    --background: #EEF4F2;            /* mist: page */
-    --foreground: #13302C;            /* forest ink: headings, primary text */
-    --card: #FBFDFC;                  /* near-white: cards, nav, table surfaces */
-    --card-foreground: #13302C;
-    --popover: #FBFDFC;
-    --popover-foreground: #13302C;
-    --primary: #FF6847;               /* tangerine: primary action */
+    /* Slipstream palette: Clay-neutral greys, white surfaces, tangerine as the
+       only accent. Every colour in a component comes from here. */
+    --background: #FFFFFF;            /* page */
+    --foreground: #111827;            /* ink: headings, names, labels */
+    --card: #FFFFFF;
+    --card-foreground: #111827;
+    --popover: #FFFFFF;
+    --popover-foreground: #111827;
+    --primary: #FF6847;               /* tangerine: primary action, active item */
     --primary-foreground: #182521;
-    --secondary: #0E6257;             /* deep teal: supporting brand */
-    --secondary-foreground: #FBFDFC;
-    --muted: #E3ECE9;                 /* nav hover / active */
-    --muted-foreground: #617B76;      /* muted teal: secondary text */
-    --accent: #E3ECE9;
-    --accent-foreground: #13302C;
+    --primary-soft: #FFEDE7;          /* active rail item background */
+    --secondary: #374151;             /* ink-2: secondary text inside cells */
+    --secondary-foreground: #FFFFFF;
+    --muted: #F3F4F6;                 /* hover fills */
+    --muted-foreground: #6B7280;      /* icons, row numbers, counters */
+    --accent: #F3F4F6;
+    --accent-foreground: #111827;
     --destructive: #B54129;
-    --border: #CDDBD7;                /* sage line */
-    --input: #CDDBD7;
-    --ring: #0E6257;
-    --chart-1: #B9D7CF;
-    --chart-2: #0E6257;
+    --border: #E5E7EB;                /* every border */
+    --input: #E5E7EB;
+    --ring: #FF6847;
+    --page: #F9FAFB;                  /* expanded panels, subtle wells */
+    --signal: #FF6847;                /* evidence highlights, citations */
+    --chart-1: #111827;
+    --chart-2: #6B7280;
     --chart-3: #FF6847;
-    --chart-4: #617B76;
-    --chart-5: #CDDBD7;
+    --chart-4: #D1D5DB;
+    --chart-5: #E5E7EB;
     --radius: 0.5rem;
-    --sidebar: #FBFDFC;
-    --sidebar-foreground: #13302C;
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #111827;
     --sidebar-primary: #FF6847;
     --sidebar-primary-foreground: #182521;
-    --sidebar-accent: #E3ECE9;
-    --sidebar-accent-foreground: #13302C;
-    --sidebar-border: #CDDBD7;
-    --sidebar-ring: #0E6257;
-    /* extra roles */
-    --avatar: #D6E9E3;
-    --icon-well: #E0EEEA;             /* queue icon background */
-    --positive: #18855C;
-    --live: #32A56F;
+    --sidebar-accent: #F3F4F6;
+    --sidebar-accent-foreground: #111827;
+    --sidebar-border: #E5E7EB;
+    --sidebar-ring: #FF6847;
+    --avatar: #F3F4F6;
+    --icon-well: #F3F4F6;
     --inactive: #A4A4A0;
 }
 

@@ -19,14 +19,14 @@ import type { Conversation, ConversationStatus } from "@/lib/types";
 // Palette from app/globals.css, spelled out because the canvas cannot read
 // CSS variables. Keep in sync with the tokens there.
 const C = {
-  ink: "#13302C",
-  muted: "#617B76",
-  line: "#CDDBD7",
-  surface: "#FBFDFC",
-  hover: "#E3ECE9",
-  avatar: "#D6E9E3",
+  ink: "#111827",
+  muted: "#6B7280",
+  line: "#E5E7EB",
+  surface: "#FFFFFF",
+  hover: "#F3F4F6",
+  avatar: "#F3F4F6",
   primary: "#FF6847",
-  mist: "#EEF4F2",
+  mist: "#F9FAFB",
 };
 
 const STATUS: Record<ConversationStatus, string> = {
@@ -119,7 +119,7 @@ const timeRenderer: CustomRenderer<TimeCell> = {
     ctx.fillText(cell.data.when, x, cy + 0.5);
     if (cell.data.duration) {
       const w = ctx.measureText(cell.data.when).width;
-      ctx.fillStyle = "#13302C66";
+      ctx.fillStyle = "#9CA3AF";
       ctx.fillText(cell.data.duration, x + w + 6, cy + 0.5);
     }
     return true;
@@ -130,7 +130,7 @@ const RENDERERS = [contactRenderer, statusRenderer, timeRenderer] as unknown as 
 
 const THEME: Partial<Theme> = {
   accentColor: C.primary, accentFg: "#182521", accentLight: C.hover,
-  textDark: C.ink, textMedium: C.muted, textLight: "#8FA39E", textBubble: C.ink,
+  textDark: C.ink, textMedium: C.muted, textLight: "#9CA3AF", textBubble: C.ink,
   bgIconHeader: C.muted, fgIconHeader: C.surface, textHeader: C.muted, textHeaderSelected: C.ink,
   bgCell: C.surface, bgCellMedium: C.mist, bgHeader: C.surface, bgHeaderHasFocus: C.hover, bgHeaderHovered: C.hover,
   bgBubble: C.mist, bgBubbleSelected: C.hover, bgSearchResult: "#FFEDE7",

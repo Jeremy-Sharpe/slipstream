@@ -17,7 +17,7 @@ export default function ConversationsPage() {
 
       <div className="mt-8 flex shrink-0 items-center justify-between px-8">
         <div className="flex items-center gap-4">
-          <span className="flex size-9 items-center justify-center rounded-md bg-icon-well text-secondary"><MessageSquare className="size-[18px]" strokeWidth={1.75} /></span>
+          <span className="flex size-9 items-center justify-center rounded-md bg-icon-well text-foreground"><MessageSquare className="size-[18px]" strokeWidth={1.75} /></span>
           <h2 className="text-xl font-bold tracking-tight">All conversations</h2>
         </div>
         <div className="relative">
