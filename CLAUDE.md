@@ -1,6 +1,6 @@
 # Slipstream
 
-Hackathon entry for Forward: AI in Business (DSCubed and RAID, sponsored by ElevenLabs and Eleno). Read in this order before building anything: `README.md` (the judge-facing pitch and architecture), `PROJECT.md` (the build plan, surfaces, data model, pipeline, setup), `docs/hackathon.md` (the full rubric, submission requirements, timeline and tracks), then `BOARD.md` to claim a feature.
+Hackathon entry for Forward: AI in Business (DSCubed and RAID, sponsored by ElevenLabs and Eleno). Read in this order before building anything: `README.md` (the judge-facing pitch and architecture), `PROJECT.md` (the build plan, surfaces, data model, pipeline, setup), `docs/hackathon.md` (the full rubric, submission requirements, timeline and tracks), `docs/start-here.md` (who owns which lane and what to start on), then `BOARD.md` to claim a feature.
 
 **Submission deadline: 12:00PM Monday 14 September 2026.** Finalists announced 4:00PM, live pitch 5:30PM the same day.
 
@@ -51,7 +51,7 @@ Never edit a row you do not own except to add a note in the notes column.
 
 ## Branches and commits
 
-- `main` is always deployable. Vercel and Render deploy from it.
+- `main` is always deployable. Vercel (UI) and Jeremy's VPS (API) deploy from it.
 - Branch per feature: `feat/<board-slug>`. Small commits, present-tense messages.
 - Merge to `main` yourself when the feature runs end to end locally and does not break the demo loop. Ask for a second pair of eyes on anything in `supabase/migrations` or `api/app/schemas`.
 - Never force-push `main`. Never rewrite history on a shared branch.

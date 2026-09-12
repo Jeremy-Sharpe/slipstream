@@ -45,7 +45,7 @@ Translucent always-on-top window with click-through mode and keyboard shortcuts 
 
 ```
 app/          Next.js UI on Vercel. Reads Supabase directly for lists and detail; calls the API for actions.
-api/          FastAPI, Python 3.12, uv. Owns the AI pipeline. REST plus one WebSocket at /ws/coach. Deploys to Render.
+api/          FastAPI, Python 3.12, uv. Owns the AI pipeline. REST plus one WebSocket at /ws/coach. Deploys to Jeremy's VPS behind HTTPS.
 coach/        Electron overlay. Talks only to the API WebSocket.
 fixtures/     Call scripts, generated audio, transcripts, expected outcomes. Loaded through the real ingest path.
 supabase/     Migrations (pgvector enabled) and seed.
@@ -96,7 +96,7 @@ None of these accounts exist yet. All go on personal accounts, not company billi
 | ElevenLabs | Text-to-dialogue, Scribe batch, Scribe realtime | Check the plan covers realtime concurrency |
 | Origami | Lead discovery | Paid plan, key from Settings, Developers. Start every search at `count: 10` and use fetch-more; credits are spent per row |
 | Vercel | UI hosting | Connect the repo, set env vars |
-| Render | API hosting | Web service from `api/`, set env vars |
+| Jeremy's VPS | API hosting | Deploy script under `api/`, Caddy or nginx with a certificate in front of uvicorn, env vars from `.env.example` |
 
 **Origami v3 essentials.** Base URL `https://origami.chat/api/v3`, header `Authorization: Bearer og_live_...`. `POST /leads/searches` with `{ "brief": "...", "count": 10 }` returns a Job. Poll `GET /jobs/{job_id}` honouring `next_poll_at`. `succeeded` gives `result.list_id` and `result.row_ids`. Read with `GET /leads/lists/{list_id}/rows?ids=...` (max 100), or `format=csv` for the full list. `POST /leads/lists/{list_id}/fetch` takes the same brief plus `quality: fast | accurate`. Per-field cell shape on a row still needs confirming against the OpenAPI spec (`https://raw.githubusercontent.com/Origami-Agents/mintlify-docs/main/openapi-v3.yaml`).
 
@@ -113,7 +113,7 @@ None of these accounts exist yet. All go on personal accounts, not company billi
 
 ## Timeline
 
-- **Saturday 12 September:** foundation rows claimed and pushed (schema, fixtures, API skeleton), each lane has a walking skeleton by tonight, Vercel and Render deploys exist even if thin.
+- **Saturday 12 September:** foundation rows claimed and pushed (schema, fixtures, API skeleton), each lane has a walking skeleton by tonight, Vercel and VPS deploys exist even if thin.
 - **Sunday 13 September:** lanes converge on the demo loop on the live URLs, eval run, `docs/pitch.md` and `docs/demo-script.md` written, video recorded (a person walks and talks, cut to a screen walkthrough per feature).
 - **Monday 14 September, before 12:00pm:** final deploy, README lines filled (`Production URL`, `Demo video`, `Track`), `npm run evals:dry` green, submission with track named.
 

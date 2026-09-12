@@ -38,7 +38,7 @@ Every step runs for real on the live URL over synthesised fixture calls. No cann
 
 ```
 app/          Next.js 16 + React 19 UI (Vercel). Conversations, analysis, leads. Reads Supabase directly.
-api/          FastAPI (Python 3.12) AI pipeline (Render). Transcription, extraction, scoring, ICP, Origami, drafts. REST plus one WebSocket.
+api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts. REST plus one WebSocket.
 coach/        Electron live-coach overlay, forked from Cheating Daddy (GPL-3.0). Talks only to the api WebSocket.
 fixtures/     Synthesised sales calls: scripts, audio, transcripts, expected outcomes.
 supabase/     Postgres migrations (pgvector enabled) and seed.
