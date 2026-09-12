@@ -30,7 +30,7 @@ Enterprise teams can stitch together Gong, a CRM, Clay and a RevOps person. A tw
 
 ### What is real, and what is mocked? — Jeremy
 
-The businesses and calls are synthetic, so no customer data is exposed. The demo audio is a real two-voice ElevenLabs file. Ingestion, diarised transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval state, ICP services and production API are executable. Email delivery is intentionally simulated. Origami sourcing requires its paid key; the last stored result remains displayable when that key is unavailable.
+The businesses and calls are synthetic, so no customer data is exposed. The demo audio is a real two-voice ElevenLabs file. Ingestion, diarised transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval state, ICP services and production API are executable. Email delivery is intentionally simulated. Origami sourcing requires its paid key; when that integration is unavailable, only the explicitly labelled evaluation leads remain displayable.
 
 ### How accurate is the extraction? — Anna
 

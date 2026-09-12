@@ -1,5 +1,7 @@
 # Slipstream
 
+[![Continuous integration](https://github.com/Jeremy-Sharpe/slipstream/actions/workflows/ci.yml/badge.svg)](https://github.com/Jeremy-Sharpe/slipstream/actions/workflows/ci.yml)
+
 Accelerated sales for small B2B teams. Slipstream listens to every sales call, coaches the rep while the call is happening, writes the call into the CRM with a drafted follow-up, works out which kind of customer actually converts, and goes and finds more of them.
 
 Built for the Forward: AI in Business Hackathon, University of Melbourne, 12 to 14 September 2026.
@@ -25,11 +27,11 @@ Demo video: (added at submission)
 
 ## How it works
 
-The live URL exposes the complete loop. Call and email CRM writeback and drafting run against the deployed API; analysis and lead screens consume validated live responses when their integrations are available and otherwise show explicitly labelled evaluation data. No screen silently presents fallback data as live.
+The live URL exposes the complete product surface and an executable fixture loop. Call and email CRM writeback and drafting run against the deployed API; analysis and lead screens consume validated live responses when their integrations are available and otherwise show explicitly labelled evaluation data. No screen silently presents fallback data as live.
 
 1. **A sales call happens.** For the demo the call is synthesised with ElevenLabs text-to-dialogue (two voices, realistic objections) and played through speakers. Fixtures cover won, stalled, lost and no-show outcomes.
 2. **The coach listens.** An always-on-top desktop overlay can stream the consented rep microphone to ElevenLabs Scribe realtime and shows the rep the next question to ask, grounded in this deal's CRM history. Its credential-free manual mode demonstrates both sides; this build does not claim mixed call-audio capture.
-3. **The call writes itself into the CRM.** The recording is transcribed with Scribe (diarised). The configured reasoning model extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves. Without provider credentials, the deployed fixture path remains deterministic and labels its source.
+3. **The call writes itself into the CRM.** With ElevenLabs configured, a recording is transcribed with Scribe and diarised. The configured reasoning model extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves. Without provider credentials, the deployed fixture path loads labelled transcript segments through the same downstream contract and labels its source.
 4. **The follow-up drafts itself.** A follow-up email is generated from the transcript and attached to the deal. Approve is one click and marks it sent. No email leaves the system.
 5. **The team learns from the call.** The analysis view scores the call against a written rubric, shows across all calls which moves correlate with won deals, and derives the ideal customer profile from the deals that closed.
 6. **The ICP finds the next customer.** The derived ICP becomes an Origami brief. Leads come back, are scored against the won-deal profile, and each gets a one-click outreach draft.
@@ -56,7 +58,7 @@ Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector
 | Mock call generation | ElevenLabs text-to-dialogue, `eleven_v3` | Multi-voice, expressive, one request per call |
 | Batch transcription | ElevenLabs Scribe, `scribe_v2`, diarised | Word timestamps and speaker labels feed the scorecard (talk ratio, who committed to what) |
 | Live transcription | ElevenLabs Scribe v2 Realtime over WebSocket | About 150 ms latency; same vendor as batch so the coach and the record agree |
-| Extraction and follow-up draft | The model named by `REASONING_MODEL` through one provider-agnostic structured-output helper (Anthropic, OpenAI or OpenRouter open-weight models), pinned JSON schema, then a deterministic grounding pass that repairs or drops any quote that is not verbatim in the transcript | Runs on whichever key the team has, so the demo never falls back to canned labels; the grounding pass makes evidence a property of the pipeline rather than a hope about the model. The extraction eval in `api/evals/extraction-eval.md` picks the cheapest model within one call of the best on every judged field |
+| Extraction and follow-up draft | The model named by `REASONING_MODEL` through one provider-agnostic structured-output helper (Anthropic, OpenAI or OpenRouter open-weight models), pinned JSON schema, then a deterministic grounding pass that repairs or drops any quote that is not verbatim in the transcript | Uses whichever configured provider key is available; the current keyless VPS instead uses the explicitly labelled deterministic fixture fallback. On the model path, grounding makes evidence a property of the pipeline rather than a hope about the model. The extraction eval in `api/evals/extraction-eval.md` picks the cheapest model within one call of the best on every judged field |
 | Scorecard | `deepseek/deepseek-v3.2` through OpenRouter | Won the predeclared eleven-model rule: within one call of the best on every judged dimension and about 25 times cheaper than the accuracy-first runner-up |
 | ICP naming and coach suggestions | Same provider-agnostic helper, configured by environment | One helper keeps prompts, schema validation and provider failover in one place |
 | Embeddings | `text-embedding-3-small` through OpenAI or OpenRouter, stored in pgvector | Won-deal similarity for ICP derivation and lead scoring; the stored model identity is provider-independent |
@@ -114,6 +116,8 @@ cd coach && npm install && npm start
 npm run evals:dry                     # submission checks, seconds
 npm run evals                         # LLM judge on every criterion
 ```
+
+Unsigned Linux, macOS and Windows coach installers are reproducibly built and tested by the pinned [Coach installers workflow](https://github.com/Jeremy-Sharpe/slipstream/actions/workflows/coach-release.yml); production distribution still requires platform signing and notarisation.
 
 Copy `.env.example` to `.env` (UI and coach) and to `api/.env` and fill in the keys. Working rules for contributors and agents are in `CLAUDE.md`; the build plan is in `PROJECT.md`; who is building what is in `BOARD.md`.
 
