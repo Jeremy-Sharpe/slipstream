@@ -231,6 +231,7 @@ def test_risky_model_claim_gets_one_transcript_free_regeneration(
     assert response.status_code == 200
     assert len(payloads[0]["transcript"]) > 0
     assert payloads[1]["transcript"] == []
+    assert payloads[1]["contact"]["name"] == "Donnie Azoff"
 
 
 @pytest.mark.parametrize(
