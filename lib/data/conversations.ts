@@ -1,8 +1,10 @@
 import type { Conversation } from "@/lib/types";
+import { emailConversations } from "@/lib/data/emails";
 
 // The thirteen Harbourline IT fixture calls (fixtures/calls/*/script.json),
 // newest first. Replaced by Supabase reads once the API lands; keep the shape.
 export const conversations: Conversation[] = [
+  ...emailConversations,
   { id: "call-13-marlowe-finch-demo", kind: "call", contact: "Dev Patel", title: "CFO", company: "Marlowe & Finch Accounting", industry: "Accounting practice", headcount: 34, location: "Hawthorn, VIC", rep: "Jordan Lee", at: "2026-09-11T15:30:00+10:00", durationSeconds: 420, outcome: "won", valueAud: 48600, trigger: "Cyber insurance renewal requiring Essential Eight controls", preview: "That's generous. I'm Dev, CFO, and there's definitely chaos. We've got a cyber insurance renewal on my desk and the…", status: "processing" },
   { id: "call-12-dockside-dental", kind: "call", contact: "Ethan Clarke", title: "Practice Owner", company: "Dockside Dental", industry: "Dental practice", headcount: 18, location: "Williamstown, VIC", rep: "Jordan Lee", at: "2026-09-11T09:00:00+10:00", durationSeconds: 55, outcome: "no_show", valueAud: undefined, trigger: undefined, preview: "Hi, Jordan Lee from Harbourline IT calling for Ethan Clarke at Dockside Dental. We had a 9am phone appointment about…", status: "synced" },
   { id: "call-11-banksia-architects", kind: "call", contact: "Grace Kim", title: "Studio Operations Manager", company: "Banksia Architects", industry: "Architecture studio", headcount: 44, location: "Fitzroy, VIC", rep: "Sam Whitfield", at: "2026-09-10T14:00:00+10:00", durationSeconds: 425, outcome: "stalled", valueAud: 66400, trigger: "Office move planning and cyber insurance evidence gap", preview: "Yes. We're looking at an office move next quarter, and it has exposed how dependent we're on an IT setup nobody…", status: "needs_review" },

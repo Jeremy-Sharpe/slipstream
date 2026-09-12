@@ -70,6 +70,29 @@ export type ApiDraft = {
   model: string;
 };
 
+export type EmailParty = { name: string | null; email: string };
+export type EmailRecipient = EmailParty & { kind: "to" | "cc" | "bcc" };
+export type EmailIngestInput = {
+  provider: string;
+  mailbox_external_id: string;
+  mailbox: EmailParty;
+  source_external_id: string;
+  thread_external_id: string;
+  direction: "inbound" | "outbound";
+  sender: EmailParty;
+  recipients: EmailRecipient[];
+  subject: string;
+  body: string;
+  occurred_at: string;
+  in_reply_to?: string | null;
+};
+
+export type ApiEmailRecord = EmailIngestInput & {
+  id: string;
+  contact_email: string | null;
+  deal_external_id: string;
+};
+
 export type LivePipeline = {
   call: ApiCall;
   extraction: ApiExtraction;
@@ -232,6 +255,55 @@ function parseOutreachDraft(value: unknown): ApiOutreachDraft {
   return value as ApiOutreachDraft;
 }
 
+function parseDraft(value: unknown): ApiDraft {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.conversation_id !== "string" ||
+    !nullableString(value.recipient_name) ||
+    !nullableString(value.recipient_email) ||
+    typeof value.subject !== "string" ||
+    typeof value.body !== "string" ||
+    !["draft", "approved", "sent"].includes(String(value.status)) ||
+    typeof value.model !== "string"
+  ) {
+    throw new ApiError("Slipstream API returned malformed draft data", 502);
+  }
+  return value as ApiDraft;
+}
+
+function parseEmailRecord(value: unknown): ApiEmailRecord {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.provider !== "string" ||
+    typeof value.mailbox_external_id !== "string" ||
+    !isRecord(value.mailbox) ||
+    typeof value.source_external_id !== "string" ||
+    typeof value.thread_external_id !== "string" ||
+    !["inbound", "outbound"].includes(String(value.direction)) ||
+    !isRecord(value.sender) ||
+    !Array.isArray(value.recipients) ||
+    typeof value.subject !== "string" ||
+    typeof value.body !== "string" ||
+    typeof value.occurred_at !== "string" ||
+    !Number.isFinite(Date.parse(value.occurred_at)) ||
+    !nullableString(value.contact_email) ||
+    typeof value.deal_external_id !== "string"
+  ) {
+    throw new ApiError("Slipstream API returned malformed email data", 502);
+  }
+  const validParty = (party: Record<string, unknown>) => typeof party.email === "string" && nullableString(party.name);
+  if (!validParty(value.mailbox) || !validParty(value.sender)) {
+    throw new ApiError("Slipstream API returned malformed email participants", 502);
+  }
+  const validRecipients = value.recipients.every((recipient) =>
+    isRecord(recipient) && validParty(recipient) && ["to", "cc", "bcc"].includes(String(recipient.kind)),
+  );
+  if (!validRecipients) throw new ApiError("Slipstream API returned malformed email recipients", 502);
+  return value as ApiEmailRecord;
+}
+
 export async function getReadiness(): Promise<ApiReadiness> {
   const response = await fetch(`${API_BASE_URL}/ready`);
   if (!response.ok) throw new ApiError(`Slipstream API returned ${response.status}`, response.status);
@@ -294,6 +366,36 @@ export async function approveLeadOutreach(leadId: string, draftId: string, signa
   }));
 }
 
+export async function ingestEmail(message: EmailIngestInput, signal?: AbortSignal): Promise<ApiEmailRecord> {
+  return parseEmailRecord(await request<unknown>("/emails", {
+    method: "POST",
+    body: JSON.stringify(message),
+    signal,
+  }));
+}
+
+export async function getEmailThread(
+  provider: string,
+  mailboxExternalId: string,
+  threadExternalId: string,
+  signal?: AbortSignal,
+): Promise<ApiEmailRecord[]> {
+  const path = `/emails/${encodeURIComponent(provider)}/mailboxes/${encodeURIComponent(mailboxExternalId)}/threads/${encodeURIComponent(threadExternalId)}`;
+  const payload = await request<unknown>(path, { signal });
+  if (!Array.isArray(payload)) throw new ApiError("Slipstream API returned malformed email thread data", 502);
+  return payload.map(parseEmailRecord);
+}
+
+export async function draftEmailReply(
+  provider: string,
+  mailboxExternalId: string,
+  threadExternalId: string,
+  signal?: AbortSignal,
+): Promise<ApiDraft> {
+  const path = `/emails/${encodeURIComponent(provider)}/mailboxes/${encodeURIComponent(mailboxExternalId)}/threads/${encodeURIComponent(threadExternalId)}/draft-reply`;
+  return parseDraft(await request<unknown>(path, { method: "POST", signal }));
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}/api/v1${path}`, {
     ...init,
@@ -316,10 +418,10 @@ export async function runFixturePipeline(fixtureId: string): Promise<LivePipelin
 }
 
 export function approveDraft(draftId: string): Promise<ApiDraft> {
-  return request<ApiDraft>(`/drafts/${draftId}/approve`, {
+  return request<unknown>(`/drafts/${encodeURIComponent(draftId)}/approve`, {
     method: "POST",
     body: JSON.stringify({ approved_by: "Hackathon demo" }),
-  });
+  }).then(parseDraft);
 }
 
 function evidenceSpan(field: { evidence: Evidence[] }): number | null {

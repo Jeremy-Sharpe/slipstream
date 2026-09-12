@@ -1,9 +1,11 @@
 import { ConversationDetail } from "@/components/conversations/detail/ConversationDetail";
+import { EmailConversationDetail } from "@/components/conversations/email/EmailConversationDetail";
 import { PendingConversation } from "@/components/conversations/detail/PendingConversation";
 import { callById, calls } from "@/lib/data/calls";
+import { emailById, emailThreads } from "@/lib/data/emails";
 
 export function generateStaticParams() {
-  return calls.map((c) => ({ id: c.id }));
+  return [...calls.map((c) => ({ id: c.id })), ...emailThreads.map((thread) => ({ id: thread.id }))];
 }
 
 export default async function ConversationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -11,6 +13,8 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const others = calls.map((c) => ({ id: c.id, company: c.company, prospect: c.prospect }));
   const call = callById(id);
   if (call) return <ConversationDetail call={call} others={others} />;
+  const email = emailById(id);
+  if (email) return <EmailConversationDetail key={email.id} thread={email} />;
   // Not a fixture: it may be a call added in this session (client store only).
   return <PendingConversation id={id} others={others} />;
 }
