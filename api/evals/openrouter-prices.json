@@ -1,0 +1,778 @@
+[
+ {
+  "id": "anthropic/claude-haiku-4.5",
+  "prompt_per_mtok": 1.0,
+  "completion_per_mtok": 5.0,
+  "context": 200000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "anthropic/claude-haiku-4.5:batch",
+  "prompt_per_mtok": 0.5,
+  "completion_per_mtok": 2.5,
+  "context": 200000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "anthropic/claude-opus-5",
+  "prompt_per_mtok": 5.0,
+  "completion_per_mtok": 25.0,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "anthropic/claude-opus-5:batch",
+  "prompt_per_mtok": 2.5,
+  "completion_per_mtok": 12.5,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "anthropic/claude-sonnet-5",
+  "prompt_per_mtok": 2.0,
+  "completion_per_mtok": 10.0,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "anthropic/claude-sonnet-5:batch",
+  "prompt_per_mtok": 1.0,
+  "completion_per_mtok": 5.0,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "deepseek/deepseek-r1",
+  "prompt_per_mtok": 0.7,
+  "completion_per_mtok": 2.5,
+  "context": 64000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "deepseek/deepseek-r1-0528",
+  "prompt_per_mtok": 0.5,
+  "completion_per_mtok": 2.1500000000000004,
+  "context": 163840,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "deepseek/deepseek-r1-distill-llama-70b",
+  "prompt_per_mtok": 0.7999999999999999,
+  "completion_per_mtok": 0.7999999999999999,
+  "context": 8192,
+  "structured_outputs": false,
+  "response_format": false
+ },
+ {
+  "id": "deepseek/deepseek-v3.1-terminus",
+  "prompt_per_mtok": 0.27,
+  "completion_per_mtok": 1.0,
+  "context": 163840,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "deepseek/deepseek-v3.2",
+  "prompt_per_mtok": 0.26899999999999996,
+  "completion_per_mtok": 0.39999999999999997,
+  "context": 163840,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "deepseek/deepseek-v3.2-exp",
+  "prompt_per_mtok": 0.27,
+  "completion_per_mtok": 0.41,
+  "context": 163840,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "google/gemini-2.5-flash",
+  "prompt_per_mtok": 0.3,
+  "completion_per_mtok": 2.5,
+  "context": 1048576,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "google/gemini-2.5-flash-image",
+  "prompt_per_mtok": 0.3,
+  "completion_per_mtok": 2.5,
+  "context": 32768,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "google/gemini-2.5-flash-lite",
+  "prompt_per_mtok": 0.09999999999999999,
+  "completion_per_mtok": 0.39999999999999997,
+  "context": 1048576,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "google/gemini-2.5-flash-lite:batch",
+  "prompt_per_mtok": 0.049999999999999996,
+  "completion_per_mtok": 0.19999999999999998,
+  "context": 1048576,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "google/gemini-2.5-flash:batch",
+  "prompt_per_mtok": 0.15,
+  "completion_per_mtok": 1.25,
+  "context": 1048576,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "meta-llama/llama-4-maverick",
+  "prompt_per_mtok": 0.19999999999999998,
+  "completion_per_mtok": 0.696,
+  "context": 1048576,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "meta-llama/llama-4-scout",
+  "prompt_per_mtok": 0.09999999999999999,
+  "completion_per_mtok": 0.3,
+  "context": 1310720,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-medium-3",
+  "prompt_per_mtok": 0.39999999999999997,
+  "completion_per_mtok": 2.0,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-medium-3-5",
+  "prompt_per_mtok": 1.5,
+  "completion_per_mtok": 7.5,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-medium-3-5:batch",
+  "prompt_per_mtok": 0.75,
+  "completion_per_mtok": 3.75,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-medium-3.1",
+  "prompt_per_mtok": 0.39999999999999997,
+  "completion_per_mtok": 2.0,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-medium-3.1:batch",
+  "prompt_per_mtok": 0.19999999999999998,
+  "completion_per_mtok": 1.0,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-small-24b-instruct-2501",
+  "prompt_per_mtok": 0.049999999999999996,
+  "completion_per_mtok": 0.08,
+  "context": 32768,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-small-2603",
+  "prompt_per_mtok": 0.15,
+  "completion_per_mtok": 0.6,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-small-2603:batch",
+  "prompt_per_mtok": 0.075,
+  "completion_per_mtok": 0.3,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "mistralai/mistral-small-3.1-24b-instruct",
+  "prompt_per_mtok": 0.351,
+  "completion_per_mtok": 0.5549999999999999,
+  "context": 128000,
+  "structured_outputs": false,
+  "response_format": false
+ },
+ {
+  "id": "mistralai/mistral-small-3.2-24b-instruct",
+  "prompt_per_mtok": 0.075,
+  "completion_per_mtok": 0.19999999999999998,
+  "context": 256000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "moonshotai/kimi-k2",
+  "prompt_per_mtok": 0.5700000000000001,
+  "completion_per_mtok": 2.3,
+  "context": 131072,
+  "structured_outputs": false,
+  "response_format": false
+ },
+ {
+  "id": "moonshotai/kimi-k2-0905",
+  "prompt_per_mtok": 0.6,
+  "completion_per_mtok": 2.5,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "moonshotai/kimi-k2-thinking",
+  "prompt_per_mtok": 0.6,
+  "completion_per_mtok": 2.5,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "moonshotai/kimi-k2.5",
+  "prompt_per_mtok": 0.44999999999999996,
+  "completion_per_mtok": 2.25,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "moonshotai/kimi-k2.6",
+  "prompt_per_mtok": 0.95,
+  "completion_per_mtok": 4.0,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "moonshotai/kimi-k2.7-code",
+  "prompt_per_mtok": 0.71,
+  "completion_per_mtok": 3.5,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4",
+  "prompt_per_mtok": 2.5,
+  "completion_per_mtok": 15.0,
+  "context": 1050000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4-image-2",
+  "prompt_per_mtok": 8.0,
+  "completion_per_mtok": 15.0,
+  "context": 272000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4-mini",
+  "prompt_per_mtok": 0.75,
+  "completion_per_mtok": 4.5,
+  "context": 400000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4-mini:batch",
+  "prompt_per_mtok": 0.375,
+  "completion_per_mtok": 2.25,
+  "context": 400000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4-nano",
+  "prompt_per_mtok": 0.19999999999999998,
+  "completion_per_mtok": 1.25,
+  "context": 400000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4-nano:batch",
+  "prompt_per_mtok": 0.09999999999999999,
+  "completion_per_mtok": 0.625,
+  "context": 400000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4-pro",
+  "prompt_per_mtok": 30.0,
+  "completion_per_mtok": 180.0,
+  "context": 1050000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4-pro:batch",
+  "prompt_per_mtok": 15.0,
+  "completion_per_mtok": 90.0,
+  "context": 1050000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "openai/gpt-5.4:batch",
+  "prompt_per_mtok": 1.25,
+  "completion_per_mtok": 7.5,
+  "context": 1050000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-14b",
+  "prompt_per_mtok": 0.22749999999999998,
+  "completion_per_mtok": 0.9099999999999999,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-235b-a22b",
+  "prompt_per_mtok": 0.45499999999999996,
+  "completion_per_mtok": 1.8199999999999998,
+  "context": 131072,
+  "structured_outputs": false,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-235b-a22b-2507",
+  "prompt_per_mtok": 0.0875,
+  "completion_per_mtok": 0.35,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-235b-a22b-thinking-2507",
+  "prompt_per_mtok": 0.22999999999999998,
+  "completion_per_mtok": 2.3,
+  "context": 131072,
+  "structured_outputs": false,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-30b-a3b",
+  "prompt_per_mtok": 0.12,
+  "completion_per_mtok": 0.5,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-30b-a3b-instruct-2507",
+  "prompt_per_mtok": 0.09,
+  "completion_per_mtok": 0.3,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-30b-a3b-thinking-2507",
+  "prompt_per_mtok": 0.19999999999999998,
+  "completion_per_mtok": 2.4,
+  "context": 81920,
+  "structured_outputs": false,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-32b",
+  "prompt_per_mtok": 0.08,
+  "completion_per_mtok": 0.28,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-8b",
+  "prompt_per_mtok": 0.117,
+  "completion_per_mtok": 0.45499999999999996,
+  "context": 131072,
+  "structured_outputs": false,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-coder",
+  "prompt_per_mtok": 0.3,
+  "completion_per_mtok": 1.0,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-coder-30b-a3b-instruct",
+  "prompt_per_mtok": 0.07,
+  "completion_per_mtok": 0.28,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-coder-flash",
+  "prompt_per_mtok": 0.195,
+  "completion_per_mtok": 0.975,
+  "context": 1000000,
+  "structured_outputs": false,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-coder-next",
+  "prompt_per_mtok": 0.12,
+  "completion_per_mtok": 0.7999999999999999,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-coder-plus",
+  "prompt_per_mtok": 0.65,
+  "completion_per_mtok": 3.25,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-max",
+  "prompt_per_mtok": 0.78,
+  "completion_per_mtok": 3.9,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-max-thinking",
+  "prompt_per_mtok": 0.78,
+  "completion_per_mtok": 3.9,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-next-80b-a3b-instruct",
+  "prompt_per_mtok": 0.09,
+  "completion_per_mtok": 1.1,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-next-80b-a3b-thinking",
+  "prompt_per_mtok": 0.15,
+  "completion_per_mtok": 1.2,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-vl-235b-a22b-instruct",
+  "prompt_per_mtok": 0.21,
+  "completion_per_mtok": 1.9,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-vl-235b-a22b-thinking",
+  "prompt_per_mtok": 0.39999999999999997,
+  "completion_per_mtok": 4.0,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-vl-30b-a3b-instruct",
+  "prompt_per_mtok": 0.15,
+  "completion_per_mtok": 0.6,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-vl-30b-a3b-thinking",
+  "prompt_per_mtok": 0.19999999999999998,
+  "completion_per_mtok": 2.4,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-vl-32b-instruct",
+  "prompt_per_mtok": 0.10400000000000001,
+  "completion_per_mtok": 0.41600000000000004,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-vl-8b-instruct",
+  "prompt_per_mtok": 0.117,
+  "completion_per_mtok": 0.45499999999999996,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3-vl-8b-thinking",
+  "prompt_per_mtok": 0.18,
+  "completion_per_mtok": 2.0999999999999996,
+  "context": 131072,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-122b-a10b",
+  "prompt_per_mtok": 0.26,
+  "completion_per_mtok": 2.08,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-27b",
+  "prompt_per_mtok": 0.195,
+  "completion_per_mtok": 1.56,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-35b-a3b",
+  "prompt_per_mtok": 0.3125,
+  "completion_per_mtok": 1.25,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-397b-a17b",
+  "prompt_per_mtok": 0.55,
+  "completion_per_mtok": 3.5,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-9b",
+  "prompt_per_mtok": 0.09999999999999999,
+  "completion_per_mtok": 0.15,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-9b:batch",
+  "prompt_per_mtok": 0.16999999999999998,
+  "completion_per_mtok": 0.25,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-flash-02-23",
+  "prompt_per_mtok": 0.065,
+  "completion_per_mtok": 0.26,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-plus-02-15",
+  "prompt_per_mtok": 0.26,
+  "completion_per_mtok": 1.56,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.5-plus-20260420",
+  "prompt_per_mtok": 0.3,
+  "completion_per_mtok": 1.7999999999999998,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.6-27b",
+  "prompt_per_mtok": 0.3,
+  "completion_per_mtok": 2.0,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.6-35b-a3b",
+  "prompt_per_mtok": 0.09999999999999999,
+  "completion_per_mtok": 0.8999999999999999,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.6-flash",
+  "prompt_per_mtok": 0.1875,
+  "completion_per_mtok": 1.125,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.6-max-preview",
+  "prompt_per_mtok": 1.0270000000000001,
+  "completion_per_mtok": 6.162,
+  "context": 262144,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.6-plus",
+  "prompt_per_mtok": 0.325,
+  "completion_per_mtok": 1.95,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.7-flash",
+  "prompt_per_mtok": 0.03,
+  "completion_per_mtok": 0.13,
+  "context": 1000000,
+  "structured_outputs": false,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.7-max",
+  "prompt_per_mtok": 1.475,
+  "completion_per_mtok": 4.425,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.7-plus",
+  "prompt_per_mtok": 0.32,
+  "completion_per_mtok": 1.28,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.8-2.4t-a95b",
+  "prompt_per_mtok": 2.0,
+  "completion_per_mtok": 6.0,
+  "context": 1048576,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.8-2.4t-a95b:batch",
+  "prompt_per_mtok": 2.0,
+  "completion_per_mtok": 6.0,
+  "context": 1010000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.8-27b",
+  "prompt_per_mtok": 0.21400000000000002,
+  "completion_per_mtok": 2.5500000000000003,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.8-flash",
+  "prompt_per_mtok": 0.15,
+  "completion_per_mtok": 0.47,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "qwen/qwen3.8-max-0902",
+  "prompt_per_mtok": 2.0,
+  "completion_per_mtok": 6.0,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "x-ai/grok-4.20",
+  "prompt_per_mtok": 1.25,
+  "completion_per_mtok": 2.5,
+  "context": 2000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "x-ai/grok-4.20-multi-agent",
+  "prompt_per_mtok": 1.25,
+  "completion_per_mtok": 2.5,
+  "context": 2000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "x-ai/grok-4.3",
+  "prompt_per_mtok": 1.25,
+  "completion_per_mtok": 2.5,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "x-ai/grok-4.3:batch",
+  "prompt_per_mtok": 1.0,
+  "completion_per_mtok": 2.0,
+  "context": 1000000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "x-ai/grok-4.5",
+  "prompt_per_mtok": 2.0,
+  "completion_per_mtok": 6.0,
+  "context": 500000,
+  "structured_outputs": true,
+  "response_format": true
+ },
+ {
+  "id": "x-ai/grok-4.6",
+  "prompt_per_mtok": 2.0,
+  "completion_per_mtok": 6.0,
+  "context": 500000,
+  "structured_outputs": true,
+  "response_format": true
+ }
+]

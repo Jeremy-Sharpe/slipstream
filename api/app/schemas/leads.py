@@ -61,6 +61,7 @@ class OutreachRequest(BaseModel):
 
 class OutreachApproveRequest(BaseModel):
     actor: str
+    draft_id: UUID | str
 
 
 class OutreachDraftContent(BaseModel):

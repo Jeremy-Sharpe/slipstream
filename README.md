@@ -6,7 +6,7 @@ Built for the Forward: AI in Business Hackathon, University of Melbourne, 12 to 
 
 Track: Track 1: Improve an Existing Business Capability (also entered in the Built With ElevenLabs special track)
 
-Production URL: https://slipstream-ten-mauve.vercel.app
+Production URL: https://slipstream-hackathon.vercel.app
 
 Demo video: (added at submission)
 
@@ -92,7 +92,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 - The CRM is our own Postgres tables shaped like HubSpot objects, not a live HubSpot.
 - No phone system integration. Audio arrives as a file or through the coach overlay.
 - Approving a draft marks it sent and logs it; no email is actually delivered.
-- Call scoring is rubric-based LLM-as-judge with a ten-call spot check, not a trained model.
+- Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
 - Extraction is grounded but not perfect: a value whose quote cannot be found verbatim in the transcript is dropped rather than shown, so a rep can see a null where the model paraphrased. Deal outcome and stage are model judgement calls scored against hand labels in the eval, not ground truth.
 - Single tenant, no auth, no billing.
 
