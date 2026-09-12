@@ -146,7 +146,7 @@ def _model_payload(
     rep_name = (
         extraction.next_step.owner
         if extraction.next_step and extraction.next_step.owner
-        else seller["name"]
+        else call.rep or seller["name"]
     )
     contact_name = extraction.contact.name.value
     if not include_transcript and contact_name is None:
@@ -240,6 +240,21 @@ def draft_with_model(
     body = result.output.body.strip()
     if not subject or not body or len(body.split()) > 220:
         raise DraftUnavailableError("The follow-up draft failed validation")
+    with SELLER_PATH.open(encoding="utf-8") as seller_file:
+        seller = json.load(seller_file)
+    seller_name = (
+        extraction.next_step.owner
+        if extraction.next_step and extraction.next_step.owner
+        else call.rep or seller["name"]
+    )
+    greeting = next((line.strip() for line in body.splitlines() if line.strip()), "")
+    addressee = re.match(
+        r"^(?:dear|hi|hello)\s+([^,:]+)", greeting, re.IGNORECASE
+    )
+    if addressee and re.search(
+        rf"\b{re.escape(seller_name)}\b", addressee.group(1), re.IGNORECASE
+    ):
+        raise DraftUnavailableError("The follow-up draft addressed the seller")
     if _contains_risky_claim(subject) or _contains_risky_claim(body):
         raise DraftUnavailableError("The follow-up draft failed safety validation")
     return DraftResponse(
