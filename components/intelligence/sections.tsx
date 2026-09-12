@@ -9,7 +9,7 @@ import type { Intelligence, ObjectionHandling } from "@/lib/types/intelligence";
 import { cn } from "@/lib/utils";
 import { Bar, EvidenceChip, OutcomeTag, Section } from "./primitives";
 
-type Props = { data: Intelligence; active?: string };
+type Props = { data: Intelligence; active?: string; meta?: string };
 
 export function Tiles({ data }: { data: Intelligence }) {
   return (
@@ -25,9 +25,9 @@ export function Tiles({ data }: { data: Intelligence }) {
   );
 }
 
-export function TrainingLens({ data, active }: Props) {
+export function TrainingLens({ data, active, meta }: Props) {
   return (
-    <Section id="patterns" title="Won-deal patterns" meta={`${data.wonDeals} wins vs ${data.callsAnalysed - data.wonDeals} other calls`} active={active === "patterns"}>
+    <Section id="patterns" title="Won-deal patterns" meta={meta ?? `${data.wonDeals} wins vs ${data.callsAnalysed - data.wonDeals} other calls · labelled evaluation`} active={active === "patterns"}>
       <div className="grid grid-cols-[1fr_200px_200px] gap-x-6 text-[15px] text-muted-foreground">
         <span />
         <span className="font-medium text-foreground">Winning calls</span>

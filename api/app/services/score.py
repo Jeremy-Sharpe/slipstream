@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import math
@@ -20,6 +21,7 @@ from app.schemas.scorecard import (
     Outcome,
     OutcomeStats,
     Playbook,
+    PlaybookSource,
     RepProfile,
     Scorecard,
     TalkRatioBand,
@@ -625,9 +627,14 @@ def score_call(
     went_well, to_improve, summary = _grounded_coaching(
         len(discovery_evidence), next_step_secured, objection_handling, ratio
     )
-    return (
-        Scorecard(
+    scorecard = Scorecard(
             call_id=transcript.call_id,
+            request_id=transcript.request_id,
+            source_external_id=transcript.call_id,
+            source_revision=hashlib.sha256(
+                transcript.model_dump_json().encode("utf-8")
+            ).hexdigest(),
+            source_turns=transcript.turns,
             rep=transcript.rep,
             outcome=transcript.outcome,
             discovery_questions=len(discovery_evidence),
@@ -644,8 +651,17 @@ def score_call(
             model=result.model,
             rubric_version=RUBRIC_VERSION,
             scored_at=scoring_started_at or datetime.now(UTC),
-        ),
+        )
+    return (
+        stamp_scorecard_revision(scorecard),
         result,
+    )
+
+
+def stamp_scorecard_revision(scorecard: Scorecard) -> Scorecard:
+    payload = scorecard.model_dump_json(exclude={"scorecard_revision"})
+    return scorecard.model_copy(
+        update={"scorecard_revision": hashlib.sha256(payload.encode("utf-8")).hexdigest()}
     )
 
 
@@ -685,6 +701,26 @@ def derive_playbook(
     scorecards: list[Scorecard],
     judge: Judge,
 ) -> tuple[Playbook, JudgeResult[JudgedPlaybook]]:
+    if any(scorecard.outcome not in {"won", "lost", "stalled"} for scorecard in scorecards):
+        raise ValueError("Playbook accepts only won, lost, and stalled scorecards")
+    sources: list[PlaybookSource] = []
+    for scorecard in scorecards:
+        if (
+            scorecard.source_external_id is None
+            or scorecard.source_revision is None
+            or scorecard.scorecard_revision is None
+        ):
+            raise ValueError("Playbook source needs verifiable scorecard provenance")
+        sources.append(
+            PlaybookSource(
+                call_id=scorecard.call_id,
+                source_external_id=scorecard.source_external_id,
+                source_revision=scorecard.source_revision,
+                scorecard_revision=scorecard.scorecard_revision,
+                rubric_version=scorecard.rubric_version,
+                outcome=scorecard.outcome,
+            )
+        )
     labelled = [card for card in scorecards if card.outcome in {"won", "lost", "stalled"}]
     if not any(card.outcome == "won" for card in labelled) or not any(
         card.outcome in {"lost", "stalled"} for card in labelled
@@ -703,6 +739,7 @@ def derive_playbook(
     patterns = _valid_patterns(result.output.patterns, scorecards)
     return (
         Playbook(
+            sources=sources,
             stats=stats,
             reps=reps,
             patterns=patterns,

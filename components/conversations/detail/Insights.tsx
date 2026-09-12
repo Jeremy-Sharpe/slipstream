@@ -34,9 +34,9 @@ export function Intelligence({ call }: { call: CallRecord }) {
   );
 }
 
-export function ScorecardCard({ call, onHover }: { call: CallRecord; onHover: (span: number | null) => void }) {
+export function ScorecardCard({ call, onHover, source, canGenerate, generating, error, onGenerate }: { call: CallRecord; onHover: (span: number | null) => void; source: string; canGenerate: boolean; generating: boolean; error?: string; onGenerate: () => void }) {
   const sc = call.scorecard;
-  const turn = (i: number | null) => (i == null ? null : call.turns[i]);
+  const turn = (i: number | null) => (i == null ? null : call.turns.find((item) => item.index === i) ?? null);
   const rows: { label: string; value: string; ok: boolean; span: number | null }[] = [
     { label: "Discovery questions", value: `${sc.discoveryQuestions.value} asked before pricing`, ok: sc.discoveryQuestions.value >= 4, span: sc.discoveryQuestions.span },
     { label: "Next step secured", value: sc.nextStepSecured.value ? "Yes, dated" : "No", ok: sc.nextStepSecured.value, span: sc.nextStepSecured.span },
@@ -44,7 +44,7 @@ export function ScorecardCard({ call, onHover }: { call: CallRecord; onHover: (s
     { label: "Talk ratio", value: `${Math.round(sc.talkRatio * 100)}% rep`, ok: sc.talkRatio <= 0.55, span: null },
   ];
   return (
-    <Card title={<><Gauge className="size-4 text-muted-foreground" strokeWidth={1.75} /> Scorecard</>} aside={<span className="text-[14px] text-muted-foreground">{rows.filter((r) => r.ok).length} / 4</span>}>
+    <Card title={<><Gauge className="size-4 text-muted-foreground" strokeWidth={1.75} /> Scorecard <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{source}</span></>} aside={<span className="flex items-center gap-3"><span className="text-[14px] text-muted-foreground">{rows.filter((r) => r.ok).length} / 4</span>{canGenerate && <Button variant="outline" className="h-8 text-[12px]" disabled={generating} onClick={onGenerate}>{generating ? "Scoring…" : "Generate live scorecard"}</Button>}</span>}>
       <ul className="divide-y divide-line">
         {rows.map((r) => {
           const t = turn(r.span);
@@ -64,6 +64,7 @@ export function ScorecardCard({ call, onHover }: { call: CallRecord; onHover: (s
           );
         })}
       </ul>
+      {error && <p role="alert" className="border-t border-line px-6 py-3 text-[13px] text-destructive">Live scoring unavailable: {error}. Previous {source.startsWith("Live") ? "live scorecard" : "labelled evaluation"} retained.</p>}
     </Card>
   );
 }

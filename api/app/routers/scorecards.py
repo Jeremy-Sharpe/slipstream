@@ -4,7 +4,7 @@ import asyncio
 import logging
 import secrets
 from datetime import UTC, datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Header, HTTPException, Request, status
@@ -19,7 +19,7 @@ from app.schemas.scorecard import (
     Scorecard,
     Transcript,
 )
-from app.services.score import JudgeError, derive_playbook, score_call
+from app.services.score import JudgeError, derive_playbook, score_call, stamp_scorecard_revision
 from app.services.scorecard_store import (
     ScorecardNotFoundError,
     ScorecardStaleError,
@@ -79,16 +79,31 @@ class ScorecardSizeLimitMiddleware:
         await self.app(scope, limited_receive, send)
 
 
+class PlaybookSourceExpectation(BaseModel):
+    call_id: Identifier
+    source_revision: Identifier
+    scorecard_revision: Identifier
+    rubric_version: Identifier
+    outcome: Literal["won", "lost", "stalled"]
+
+
 class PlaybookRequest(BaseModel):
     call_ids: list[Identifier] = Field(
         min_length=2,
         max_length=MAX_PLAYBOOK_SCORECARDS,
     )
+    expected_sources: list[PlaybookSourceExpectation] | None = None
 
     @model_validator(mode="after")
     def unique_calls(self) -> PlaybookRequest:
         if len(self.call_ids) != len(set(self.call_ids)):
             raise ValueError("Playbook call IDs must be unique")
+        if self.expected_sources is not None:
+            expected_ids = [source.call_id for source in self.expected_sources]
+            if len(expected_ids) != len(set(expected_ids)) or set(expected_ids) != set(
+                self.call_ids
+            ):
+                raise ValueError("Expected playbook sources must match call IDs")
         return self
 
 
@@ -124,11 +139,24 @@ def _save_memory_scorecard(request: Request, scorecard: Scorecard) -> Scorecard:
 
 def _score_durable(client: Any, submitted: Transcript, judge, started_at: datetime):
     canonical, revision = load_scorecard_source(client, submitted.call_id)
+    if (
+        submitted.rep != canonical.rep
+        or submitted.outcome != canonical.outcome
+        or submitted.turns != canonical.turns
+    ):
+        raise ScorecardStaleError("Submitted transcript is not the current canonical revision")
     scorecard, result = score_call(
         canonical,
         judge,
         scoring_started_at=started_at,
     )
+    scorecard = stamp_scorecard_revision(scorecard.model_copy(
+        update={
+            "request_id": submitted.request_id,
+            "source_external_id": submitted.call_id,
+            "source_revision": revision,
+        }
+    ))
     return store_scorecard(client, scorecard, revision), result
 
 
@@ -199,6 +227,23 @@ def _trusted_scorecards(request: Request, call_ids: list[str]) -> list[Scorecard
     return resolved
 
 
+def _derive_trusted_playbook(request: Request, body: PlaybookRequest, judge):
+    scorecards = _trusted_scorecards(request, body.call_ids)
+    if body.expected_sources is not None:
+        expected = {source.call_id: source for source in body.expected_sources}
+        for scorecard in scorecards:
+            source = expected.get(scorecard.call_id)
+            if (
+                source is None
+                or scorecard.source_revision != source.source_revision
+                or scorecard.scorecard_revision != source.scorecard_revision
+                or scorecard.rubric_version != source.rubric_version
+                or scorecard.outcome != source.outcome
+            ):
+                raise ScorecardStaleError("Scorecard cohort changed before playbook generation")
+    return derive_playbook(scorecards, judge)
+
+
 @router.post("/scorecards", response_model=Scorecard)
 async def create_scorecard(
     transcript: Transcript,
@@ -264,10 +309,10 @@ async def create_playbook(
     try:
         playbook, _ = await _run_bounded(
             request,
-            lambda: derive_playbook(
-                _trusted_scorecards(request, body.call_ids),
-                judge,
-            ),
+            _derive_trusted_playbook,
+            request,
+            body,
+            judge,
         )
     except ScorecardNotFoundError as error:
         raise HTTPException(
@@ -277,6 +322,11 @@ async def create_playbook(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Call identifiers must resolve to distinct conversations",
+        ) from error
+    except ScorecardStaleError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Scorecard cohort changed; reload before generating the playbook",
         ) from error
     except JudgeError as error:
         reference = uuid4().hex[:12]

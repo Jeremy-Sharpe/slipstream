@@ -592,6 +592,10 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     assert response.status_code == 200
     payload = response.json()
     assert payload["call_id"] == "call-route"
+    assert payload["request_id"] == "request-route"
+    assert payload["source_external_id"] == "call-route"
+    assert len(payload["source_revision"]) == 64
+    assert len(payload["scorecard_revision"]) == 64
     assert payload["model"] == "fake"
     stored = client.get("/scorecards/call-route")
     assert stored.status_code == 200
@@ -608,7 +612,36 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     )
 
     assert playbook_response.status_code == 200
-    assert playbook_response.json()["model"] == "fake"
+    playbook_payload = playbook_response.json()
+    assert playbook_payload["model"] == "fake"
+    assert [source["call_id"] for source in playbook_payload["sources"]] == [
+        "call-1",
+        "call-2",
+    ]
+    assert all(source["source_revision"] for source in playbook_payload["sources"])
+    stale_playbook = client.post(
+        "/playbook",
+        json={
+            "call_ids": ["call-1", "call-2"],
+            "expected_sources": [
+                {
+                    "call_id": "call-1",
+                    "source_revision": "stale-revision",
+                    "scorecard_revision": "revision-scorecard-call-1",
+                    "rubric_version": "v1",
+                    "outcome": "won",
+                },
+                {
+                    "call_id": "call-2",
+                    "source_revision": "revision-call-2",
+                    "scorecard_revision": "revision-scorecard-call-2",
+                    "rubric_version": "v1",
+                    "outcome": "lost",
+                },
+            ],
+        },
+    )
+    assert stale_playbook.status_code == 409
     fabricated = client.post(
         "/playbook",
         json={
@@ -899,6 +932,9 @@ def _scorecard(
 ) -> Scorecard:
     return Scorecard(
         call_id=call_id,
+        source_external_id=call_id,
+        source_revision=f"revision-{call_id}",
+        scorecard_revision=f"revision-scorecard-{call_id}",
         rep=rep,
         outcome=outcome,  # type: ignore[arg-type]
         discovery_questions=discovery,
@@ -928,6 +964,7 @@ def _scorecard(
 def _transcript_payload() -> dict[str, Any]:
     return {
         "call_id": "call-route",
+        "request_id": "request-route",
         "rep": "Sam Whitfield",
         "outcome": "won",
         "turns": [
