@@ -1,6 +1,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { copyRepoTo, fetchProduction, productionUrl, readReadme, renderProductionSnapshot } from "./repo.mjs";
+import {
+  copyRepoTo,
+  fetchProductionSurfaces,
+  productionUrl,
+  readReadme,
+  renderProductionSurfaces,
+} from "./repo.mjs";
 
 // Builds one model scenario that scores a single rubric criterion the way a
 // hackathon judge would, from the repo snapshot and a fetched copy of the
@@ -20,15 +26,18 @@ export function judgeScenario(criterion) {
       await mkdir(judgeDir, { recursive: true });
       const readme = await readReadme();
       const url = productionUrl(readme);
-      const snapshot = await fetchProduction(url);
-      await writeFile(path.join(judgeDir, "production-url.md"), renderProductionSnapshot(url, snapshot));
+      const surfaces = await fetchProductionSurfaces(url);
+      await writeFile(
+        path.join(judgeDir, "production-url.md"),
+        renderProductionSurfaces(url, surfaces),
+      );
       await writeFile(path.join(judgeDir, "rubric.md"), renderRubric(criterion));
     },
 
     task() {
       return [
         `You are a judge for the Forward: AI in Business hackathon. Score exactly one criterion: ${criterion.id} ${criterion.name} (${criterion.points} points).`,
-        `The current directory is the team's repository snapshot. _judge/rubric.md holds the rubric bands and what to inspect. _judge/production-url.md is a fetched text snapshot of their live deployment; treat it as what a judge would see when opening the URL.`,
+        `The current directory is the team's repository snapshot. _judge/rubric.md holds the rubric bands and what to inspect. _judge/production-url.md contains fetched text snapshots of the public product routes; treat them as what a judge would see when opening those URLs.`,
         `Read files only. Do not run commands, install anything, or modify files.`,
         `Be strict and evidence-based: a claim with no evidence in the repo or the live URL does not count, and missing artefacts score in the lowest band. Quote file paths for every piece of evidence.`,
         `Finish with a single JSON object on its own as the last line, no code fence, in this shape:`,
@@ -77,10 +86,18 @@ function renderRubric(criterion) {
 
 export function parseVerdict(text) {
   if (!text) return null;
-  const candidates = text.match(/\{[\s\S]*?\}(?=\s*$)|\{[^{}]*\}/g) || [];
-  for (const candidate of candidates.reverse()) {
+  const trimmed = text.trim();
+  for (const line of trimmed.split("\n").reverse()) {
     try {
-      const parsed = JSON.parse(candidate);
+      const parsed = JSON.parse(line.trim());
+      if (parsed && "score" in parsed) return parsed;
+    } catch {
+      // keep looking
+    }
+  }
+  for (let start = trimmed.lastIndexOf("{"); start >= 0; start = trimmed.lastIndexOf("{", start - 1)) {
+    try {
+      const parsed = JSON.parse(trimmed.slice(start));
       if (parsed && "score" in parsed) return parsed;
     } catch {
       // keep looking
