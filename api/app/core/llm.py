@@ -282,14 +282,15 @@ def _local_structured[SchemaT: BaseModel](
     max_tokens: int,
     timeout: float | None,
 ) -> tuple[SchemaT, Usage | None]:
-    request_options = {} if timeout is None else {"timeout": timeout}
+    request_options = {"timeout": 600.0 if timeout is None else timeout}
     completion = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": _json_system_prompt(system, schema)},
             {"role": "user", "content": user},
         ],
-        max_tokens=max_tokens,
+        max_tokens=min(max_tokens, 1800),
+        temperature=0,
         response_format={
             "type": "json_schema",
             "json_schema": {

@@ -18,7 +18,8 @@ Install on the API host from a trusted checkout:
 sudo ./deploy/local-model/install.sh
 ```
 
-Then add these non-secret settings to `/etc/slipstream/api.env` and restart the API:
+The installer also adds these non-secret settings as a `slipstream-api.service` drop-in; they take
+effect on its next restart:
 
 ```dotenv
 LOCAL_MODEL_BASE_URL=http://127.0.0.1:8081/v1

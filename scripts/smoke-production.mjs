@@ -40,7 +40,7 @@ function parseArgs(argv) {
   return options;
 }
 
-async function exercisePrimaryFixture(apiUrl, fetchImpl) {
+async function exercisePrimaryFixture(apiUrl, fetchImpl, expectModel) {
   const ingest = await request(
     `${apiUrl}/api/v1/calls/fixtures/${PRIMARY_FIXTURE_ID}/ingest`,
     { method: "POST" },
@@ -61,7 +61,16 @@ async function exercisePrimaryFixture(apiUrl, fetchImpl) {
   assert(extractionResponse.response.status === 200, `CRM extraction returned ${extractionResponse.response.status}`);
   const extraction = parseJson(extractionResponse.body, "CRM extraction");
   assert(extraction?.conversation_id === call.id, "CRM extraction belongs to another call");
-  assert(extraction?.source === "fixture_labels", "CRM extraction lost its labelled-fixture provenance");
+  assert(
+    extraction?.source === (expectModel ? "model" : "fixture_labels"),
+    `CRM extraction did not use the expected ${expectModel ? "local model" : "fixture-label"} path`,
+  );
+  if (expectModel) {
+    assert(
+      extraction?.model === "slipstream-qwen2.5-1.5b-instruct-q4-k-m",
+      "CRM extraction returned the wrong local model",
+    );
+  }
   assert(extraction?.contact?.name?.value === "Maya Chen", "CRM extraction returned the wrong contact");
   assert(extraction?.company?.name?.value === "Northstar Labs", "CRM extraction returned the wrong company");
   assert(extraction?.contact?.name?.evidence?.length > 0, "CRM extraction is missing source evidence");
@@ -220,7 +229,7 @@ export async function runSmoke(rawOptions = {}) {
   assert(protectedResponse.response.status === 401, `unauthenticated pause returned ${protectedResponse.response.status}`);
 
   const fixtureLoop = rawOptions.exerciseFixture
-    ? await exercisePrimaryFixture(apiUrl, fetchImpl)
+    ? await exercisePrimaryFixture(apiUrl, fetchImpl, ready?.integrations?.local_model === true)
     : undefined;
 
   return {

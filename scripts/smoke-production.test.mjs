@@ -143,6 +143,35 @@ test("exercises the canonical production call through audited unsent approval", 
   });
 });
 
+test("requires model provenance when production enables the local model", async () => {
+  const fetchImpl = fixtureFetch({
+    "https://api.example/ready": json({
+      status: "ok",
+      environment: "production",
+      revision,
+      storage: "memory",
+      integrations: { local_model: true },
+    }),
+    [`https://api.example/api/v1/calls/${conversationId}/extract`]: json({
+      conversation_id: conversationId,
+      source: "model",
+      model: "slipstream-qwen2.5-1.5b-instruct-q4-k-m",
+      contact: { name: { value: "Maya Chen", evidence: [{ sequence: 0 }] } },
+      company: { name: { value: "Northstar Labs" } },
+    }),
+  });
+
+  const result = await runSmoke({
+    uiUrl: "https://ui.example",
+    apiUrl: "https://api.example",
+    exerciseFixture: true,
+    fetchImpl,
+  });
+
+  assert.deepEqual(result.configuredIntegrations, ["local_model"]);
+  assert.equal(result.fixtureLoop.status, "approved-unsent");
+});
+
 test("fails if the production fixture draft was unexpectedly sent", async () => {
   await assert.rejects(
     runSmoke({

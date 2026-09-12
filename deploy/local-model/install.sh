@@ -7,6 +7,7 @@ MODEL_SHA256="6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
 MODEL_DIR="/var/lib/slipstream-models"
 MODEL_PATH="$MODEL_DIR/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 UNIT_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/slipstream-local-model.service"
+API_DROP_IN_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/slipstream-api-local-model.conf"
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "Run this installer as root" >&2
@@ -42,6 +43,9 @@ fi
 
 docker image inspect "$IMAGE" >/dev/null 2>&1 || docker pull "$IMAGE"
 install -m 0644 -o root -g root "$UNIT_SOURCE" /etc/systemd/system/slipstream-local-model.service
+install -d -m 0755 -o root -g root /etc/systemd/system/slipstream-api.service.d
+install -m 0644 -o root -g root "$API_DROP_IN_SOURCE" \
+  /etc/systemd/system/slipstream-api.service.d/local-model.conf
 systemctl daemon-reload
 systemctl enable --now slipstream-local-model.service
 

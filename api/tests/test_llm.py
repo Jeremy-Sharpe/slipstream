@@ -212,7 +212,23 @@ def test_structured_validates_local_schema_constrained_json() -> None:
     assert result.usage == Usage(input_tokens=13, output_tokens=5, cost_usd=0.0017)
     assert client.chat.completions.kwargs["response_format"]["type"] == "json_schema"
     assert client.chat.completions.kwargs["timeout"] == 90
+    assert client.chat.completions.kwargs["temperature"] == 0
     assert "extra_body" not in client.chat.completions.kwargs
+
+
+def test_local_structured_has_a_bounded_default_request() -> None:
+    client = FakeOpenRouterClient()
+
+    structured(
+        ReasoningClient(provider="local", model="local-qwen", client=client),
+        system="System",
+        user="User",
+        schema=MiniOutput,
+        max_tokens=5000,
+    )
+
+    assert client.chat.completions.kwargs["max_tokens"] == 1800
+    assert client.chat.completions.kwargs["timeout"] == 600.0
 
 
 def test_structured_returns_no_usage_when_provider_omits_it() -> None:

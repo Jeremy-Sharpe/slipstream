@@ -22,7 +22,7 @@ from app.schemas.extraction import (
     StageField,
     StringField,
 )
-from app.services.extract import ground
+from app.services.extract import ground, recover_subject_identity
 
 
 def _assert_evidence_span_is_grounded(segments: dict[int, str], evidence: dict) -> None:
@@ -323,6 +323,56 @@ def test_model_extraction_repairs_missing_evidence_sequence(
         {"source": "transcript", "sequence": 0, "quote": "Donnie Azoff"}
     ]
     assert extraction["grounding"] == {"repaired": 1, "dropped": 0}
+
+
+def test_subject_identity_recovery_requires_verbatim_transcript_evidence(
+    client: TestClient,
+) -> None:
+    call_payload = client.post(
+        "/api/v1/calls/fixtures/call-01-northstar-labs/ingest"
+    ).json()
+    call = CallResponse.model_validate(call_payload)
+    payload = _minimal_payload(call)
+    payload.contact.name = _string(None)
+    payload.company.name = _string(None)
+
+    recovered, count = recover_subject_identity(payload, call)
+
+    assert count == 2
+    assert recovered.contact.name.value == "Maya Chen"
+    assert recovered.contact.name.evidence == [_span(0, "Maya Chen")]
+    assert recovered.company.name.value == "Northstar Labs"
+    assert recovered.company.name.evidence == [_span(0, "Northstar Labs")]
+
+
+def test_subject_identity_recovery_does_not_treat_subject_as_evidence() -> None:
+    call = CallResponse(
+        id=uuid4(),
+        source_external_id="subject-only",
+        subject="Acme — Priya Shah",
+        occurred_at=datetime.now(UTC),
+        duration_seconds=1,
+        transcript="Buyer: Hello",
+        segments=[
+            SegmentResponse(
+                sequence=0,
+                speaker="Buyer",
+                body="Hello",
+                start_ms=0,
+                end_ms=1000,
+            )
+        ],
+        provider="test",
+    )
+    payload = _minimal_payload(call)
+    payload.contact.name = _string(None)
+    payload.company.name = _string(None)
+
+    recovered, count = recover_subject_identity(payload, call)
+
+    assert count == 0
+    assert recovered.contact.name.value is None
+    assert recovered.company.name.value is None
 
 
 def test_canonical_extraction_rejects_unindexed_transcript_evidence() -> None:

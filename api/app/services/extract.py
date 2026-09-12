@@ -163,6 +163,7 @@ def extract_with_model(
     user = json.dumps(
         {
             "call_date": call.occurred_at.isoformat(),
+            "call_subject": call.subject,
             "segments": [segment.model_dump() for segment in call.segments],
         },
         ensure_ascii=False,
@@ -181,6 +182,8 @@ def extract_with_model(
         raise ExtractionUnavailableError("Model extraction failed") from error
     try:
         payload, report = ground(result.output, call)
+        payload, recovered = recover_subject_identity(payload, call)
+        report.repaired += recovered
         return ExtractionResult(
             **payload.model_dump(),
             conversation_id=call.id,
@@ -194,6 +197,34 @@ def extract_with_model(
 
 
 AttributedField = StringField | IntegerField | StageField | OutcomeField
+
+
+def recover_subject_identity(
+    payload: ExtractionPayload, call: CallResponse
+) -> tuple[ExtractionPayload, int]:
+    """Recover transcript-verbatim identity fields from a standard Company — Contact subject."""
+    if " — " not in call.subject:
+        return payload, 0
+    company_name, contact_name = (part.strip() for part in call.subject.split(" — ", 1))
+    updates: dict[str, Any] = {}
+    recovered = 0
+    if payload.company.name.value is None:
+        evidence = _evidence(call, company_name)
+        if company_name and evidence:
+            updates["company"] = payload.company.model_copy(
+                update={
+                    "name": StringField(value=company_name, confidence=0.95, evidence=evidence)
+                }
+            )
+            recovered += 1
+    if payload.contact.name.value is None:
+        evidence = _evidence(call, contact_name)
+        if contact_name and evidence:
+            updates["contact"] = payload.contact.model_copy(
+                update={"name": StringField(value=contact_name, confidence=0.95, evidence=evidence)}
+            )
+            recovered += 1
+    return payload.model_copy(update=updates), recovered
 
 
 def ground(
