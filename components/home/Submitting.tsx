@@ -35,7 +35,7 @@ export function Submitting({ source, error, onDone, onReset, variant = "card" }:
   const meta = source.kind === "paste" ? `${source.lines} lines` : `${mmss(at)} / ${mmss(DURATION)}${source.kind === "file" ? ` · ${mb(source.bytes)}` : ""}`;
 
   return (
-    <div className={cn("flex flex-col items-center", variant === "bar" && "w-full")} style={{ animation: "fade-in 200ms ease-out both" }}>
+    <div className={cn("flex flex-col items-center", variant === "bar" && "h-5 justify-center")} style={{ animation: "fade-in 200ms ease-out both" }}>
       <div role="status" className="flex items-center gap-2.5">
         {error ? (
           <X className="size-3.5 text-soft" strokeWidth={2.5} style={{ animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both" }} />

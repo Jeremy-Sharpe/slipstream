@@ -61,7 +61,7 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
   };
 
   useEffect(() => {
-    if (state !== "recording") return;
+    if (state !== "recording" || submitting) return;
     let phase = Math.random() * 10;
     const buf = new Uint8Array(128);
     const t = setInterval(() => {
@@ -81,7 +81,7 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
       setLevels((l) => [...l.slice(1), level]);
     }, SAMPLE_MS);
     return () => clearInterval(t);
-  }, [state]);
+  }, [state, submitting]);
 
   const stop = () => { setState("stopped"); release(); };
   useEffect(() => { if (submitting) release(); }, [submitting]);
@@ -91,13 +91,11 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
 
   return (
     <div className="relative flex w-full flex-col items-center justify-center gap-3">
-      <p className="h-5 text-[13px] leading-5 text-soft" style={{ opacity: submitting ? 0 : 1, transition: "opacity 200ms" }}>
-        {state === "idle" ? "Record the call" : <>{state === "stopped" ? "Recorded" : "Recording"} · <span className="tabular-nums">{mmss(seconds)}</span></>}
-      </p>
-      <div className="flex h-11 items-center rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,.08),inset_0_0_0_1px_#e8e8e8]" style={{ width: BAR_W, padding: PAD, gap: GAP }}>
-        {submitting ? (
-          <div className="flex w-full items-center justify-center">{submitting}</div>
-        ) : state === "idle" ? (
+      <div className="flex h-5 items-center text-[13px] leading-5 text-soft">
+        {submitting ?? (state === "idle" ? "Record the call" : <>{state === "stopped" ? "Recorded" : "Recording"} · <span className="tabular-nums">{mmss(seconds)}</span></>)}
+      </div>
+      <div className={cn("flex h-11 items-center rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,.08),inset_0_0_0_1px_#e8e8e8] transition-opacity duration-200", !!submitting && "pointer-events-none opacity-60")} style={{ width: BAR_W, padding: PAD, gap: GAP }}>
+        {state === "idle" && !submitting ? (
           <>
             <div aria-hidden className="flex h-8 items-center" style={{ width: IDLE_TRACK, marginLeft: 16 - PAD, marginRight: 12 - GAP, gap: PITCH - 2 }}>
               {Array.from({ length: IDLE_DOTS }).map((_, i) => <span key={i} className="size-[2px] shrink-0 rounded-full bg-[#d4d4d4]" />)}
@@ -121,12 +119,12 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
             </div>
           </>
         )}
-        {state === "recording" && (
+        {state === "recording" && !submitting && (
           <button type="button" aria-label="Stop" onClick={stop} className={cn(circle, "text-ink shadow-[inset_0_0_0_1px_#e8e8e8] hover:bg-surface")} style={{ animation: "fade-in 200ms ease-out both" }}>
             <Square className="size-3 fill-current" />
           </button>
         )}
-        {state === "stopped" && (
+        {(state === "stopped" || (state === "recording" && submitting)) && (
           <span className={cn(circle, "text-faint shadow-[inset_0_0_0_1px_#e8e8e8]")}><Square className="size-3 fill-current" /></span>
         )}
         {state !== "idle" && (
@@ -135,7 +133,7 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
           </button>
         )}
       </div>
-      <div className={cn("absolute top-full mt-3 flex h-8 items-center gap-1 transition-opacity duration-200", state === "stopped" ? "opacity-100" : "pointer-events-none opacity-0")}>
+      <div className={cn("absolute top-full mt-3 flex h-8 items-center gap-1 transition-opacity duration-200", state === "stopped" && !submitting ? "opacity-100" : "pointer-events-none opacity-0")}>
         <Button variant="primary" size="sm" onClick={onUse}>Use recording</Button>
         <Button variant="ghost" size="sm" onClick={cancel}>Discard</Button>
       </div>
