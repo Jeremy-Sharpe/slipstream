@@ -76,12 +76,97 @@ export type LivePipeline = {
   draft: ApiDraft;
 };
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
   ) {
     super(message);
+  }
+}
+
+export type ApiReadiness = {
+  revision: string;
+  storage: string;
+  integrations: Record<string, boolean>;
+};
+
+export type ApiIcpProfile = {
+  version: number;
+  evidence: Array<{ attribute: string; deal_ids: string[]; why: string }>;
+  profile: {
+    summary: string;
+    industries: string[];
+    headcount_band: string;
+    roles: string[];
+    triggers: string[];
+    confidence: number;
+    origami_brief: string;
+  };
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function parseReadiness(value: unknown): ApiReadiness {
+  if (!isRecord(value) || typeof value.revision !== "string" || typeof value.storage !== "string" || !isRecord(value.integrations)) {
+    throw new ApiError("Slipstream API returned malformed readiness data", 502);
+  }
+  const integrations = Object.fromEntries(
+    Object.entries(value.integrations).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean"),
+  );
+  if (Object.keys(integrations).length !== Object.keys(value.integrations).length) {
+    throw new ApiError("Slipstream API returned malformed integration flags", 502);
+  }
+  return { revision: value.revision, storage: value.storage, integrations };
+}
+
+function parseIcpProfile(value: unknown): ApiIcpProfile {
+  if (!isRecord(value) || !Number.isInteger(value.version) || !Array.isArray(value.evidence) || !isRecord(value.profile)) {
+    throw new ApiError("Slipstream API returned malformed ICP data", 502);
+  }
+  const profile = value.profile;
+  const confidence = profile.confidence;
+  const validProfile =
+    typeof profile.summary === "string" &&
+    isStringArray(profile.industries) &&
+    typeof profile.headcount_band === "string" &&
+    isStringArray(profile.roles) &&
+    isStringArray(profile.triggers) &&
+    typeof confidence === "number" &&
+    Number.isFinite(confidence) &&
+    confidence >= 0 && confidence <= 1 &&
+    typeof profile.origami_brief === "string";
+  const validEvidence = value.evidence.every((item) =>
+    isRecord(item) &&
+    typeof item.attribute === "string" &&
+    isStringArray(item.deal_ids) &&
+    typeof item.why === "string",
+  );
+  if (!validProfile || !validEvidence) {
+    throw new ApiError("Slipstream API returned malformed ICP data", 502);
+  }
+  return value as ApiIcpProfile;
+}
+
+export async function getReadiness(): Promise<ApiReadiness> {
+  const response = await fetch(`${API_BASE_URL}/ready`);
+  if (!response.ok) throw new ApiError(`Slipstream API returned ${response.status}`, response.status);
+  const payload: unknown = await response.json().catch(() => null);
+  return parseReadiness(payload);
+}
+
+export async function getLatestIcp(): Promise<ApiIcpProfile | null> {
+  try {
+    return parseIcpProfile(await request<unknown>("/icp/latest"));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
   }
 }
 
