@@ -4,7 +4,7 @@ import { AlertCircle, ArrowRightLeft, CheckCircle2, ListChecks, Loader2, Message
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { defaultBrief } from "@/lib/data/brief";
-import { API_BASE_URL, derivePlaybook, getLatestIcp, getLatestPlaybook, getReadiness, getScorecard, type ApiIcpProfile, type ApiPlaybook, type ApiReadiness, type ApiScorecard } from "@/lib/api/slipstream";
+import { API_BASE_URL, derivePlaybook, getIcpEvidenceInventory, getLatestIcp, getLatestPlaybook, getReadiness, getScorecard, type ApiIcpEvidenceInventory, type ApiIcpProfile, type ApiPlaybook, type ApiReadiness, type ApiScorecard } from "@/lib/api/slipstream";
 import type { Intelligence } from "@/lib/types/intelligence";
 import { IntelligenceHeader } from "./IntelligenceHeader";
 import { BriefCard, DerivedIcp, NextSteps, Objections, TalkRatio, Tiles, TrainingLens, Triggers } from "./sections";
@@ -43,6 +43,10 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
     { data: Intelligence; status: "checking" | "error" } |
     { data: Intelligence; status: "ready"; readiness: ApiReadiness }
   >({ data, status: "checking" });
+  const [inventoryState, setInventoryState] = useState<
+    { data: Intelligence; status: "checking" | "error" } |
+    { data: Intelligence; status: "live"; inventory: ApiIcpEvidenceInventory }
+  >({ data, status: "checking" });
   const [playbookState, setPlaybookState] = useState<
     { data: Intelligence; status: "checking" | "missing" } |
     { data: Intelligence; status: "available" | "generating"; scorecards: ApiScorecard[] } |
@@ -52,6 +56,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
   const playbookControllerRef = useRef<AbortController>(null);
   const currentProfileState = profileState.data === data ? profileState : { data, status: "checking" as const };
   const currentReadinessState = readinessState.data === data ? readinessState : { data, status: "checking" as const };
+  const currentInventoryState = inventoryState.data === data ? inventoryState : { data, status: "checking" as const };
   const currentPlaybookState = playbookState.data === data ? playbookState : { data, status: "checking" as const };
   const liveProfile = currentProfileState.status === "live" ? currentProfileState.profile : null;
   const profileData = useMemo(() => {
@@ -119,6 +124,13 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
       .catch((error) => {
         if (cancelled) return;
         setProfileState({ data, status: "error", message: error instanceof Error ? error.message : "Analysis service unavailable" });
+      });
+    getIcpEvidenceInventory(controller.signal)
+      .then((inventory) => {
+        if (!cancelled) setInventoryState({ data, status: "live", inventory });
+      })
+      .catch(() => {
+        if (!cancelled && !controller.signal.aborted) setInventoryState({ data, status: "error" });
       });
     getReadiness()
       .then(async (readiness) => {
@@ -209,13 +221,19 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
   const liveLensMeta = livePlaybook
     ? `${livePlaybook.stats.reduce((sum, item) => sum + item.calls, 0)} stored scorecards · live ${livePlaybook.model}`
     : undefined;
-  const sourceNote = currentProfileState.status === "live"
+  const profileNote = currentProfileState.status === "live"
     ? `ICP v${currentProfileState.profile.version} and Origami brief loaded live · ${playbookNote} · ${revision}`
     : currentProfileState.status === "missing"
       ? `${revision} · no stored ICP yet${configured === false ? " · model key not configured" : ""} · ${playbookNote}`
     : currentProfileState.status === "error"
         ? `${currentProfileState.message} · ${playbookNote} · ${revision}`
         : `Showing the ${evaluationLabel} while checking for a stored live ICP · ${playbookNote} · ${revision}`;
+  const inventoryNote = currentInventoryState.status === "live"
+    ? `${currentInventoryState.inventory.calls} calls + ${currentInventoryState.inventory.emails} emails across ${currentInventoryState.inventory.deals} deals within the ICP model budget${currentInventoryState.inventory.ready_to_derive ? " · sufficient evidence for derivation" : " · needs two won deals before derivation"}`
+    : currentInventoryState.status === "error"
+      ? "stored evidence inventory unavailable"
+      : "checking stored call/email evidence";
+  const sourceNote = `${profileNote} · ${inventoryNote}`;
 
   useEffect(() => {
     if (!active) return;
@@ -236,7 +254,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
       <div role="status" aria-atomic="true" className="mt-7 flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-[14px]">
         {currentProfileState.status === "checking" ? <Loader2 className="size-4 animate-spin text-primary" /> : currentProfileState.status === "live" ? <CheckCircle2 className="size-4 text-primary" /> : currentProfileState.status === "error" ? <AlertCircle className="size-4 text-destructive" /> : <Server className="size-4 text-muted-foreground" />}
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-foreground">{currentProfileState.status === "live" || currentPlaybookState.status === "live" ? "Live intelligence + labelled evaluation analysis" : "Labelled evaluation analysis"}</p>
+          <p className="font-medium text-foreground">{currentProfileState.status === "live" || currentPlaybookState.status === "live" ? "Live intelligence + labelled evaluation analysis" : currentInventoryState.status === "live" ? "Stored evidence + labelled evaluation analysis" : "Labelled evaluation analysis"}</p>
           <p className="text-[12px] text-muted-foreground">{sourceNote}</p>
         </div>
         {currentPlaybookState.status === "available" && <Button variant="outline" className="h-9 shrink-0 text-[12px]" onClick={() => void generatePlaybook()}>Generate live playbook</Button>}

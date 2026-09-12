@@ -20,6 +20,13 @@ class IcpSourceSummary(BaseModel):
     outcome_labelled: int = Field(ge=0)
 
 
+class IcpEvidenceInventory(IcpSourceSummary):
+    won_deals: int = Field(ge=0)
+    contrast_deals: int = Field(ge=0)
+    active_deals: int = Field(ge=0)
+    ready_to_derive: bool
+
+
 class IcpProfile(BaseModel):
     summary: str
     industries: list[str]

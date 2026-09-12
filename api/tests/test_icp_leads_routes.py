@@ -19,6 +19,26 @@ def test_icp_derive_returns_503_with_missing_integration(client: TestClient) -> 
     assert "embeddings" in response.json()["detail"]
 
 
+def test_icp_evidence_inventory_is_keyless_and_becomes_ready(client: TestClient) -> None:
+    assert client.get("/api/v1/icp/evidence").json()["ready_to_derive"] is False
+
+    loaded = client.post("/api/v1/icp/history/load")
+    inventory = client.get("/api/v1/icp/evidence")
+
+    assert loaded.status_code == 200
+    assert inventory.status_code == 200
+    assert inventory.json() == {
+        "deals": 12,
+        "calls": 12,
+        "emails": 0,
+        "outcome_labelled": 11,
+        "won_deals": 5,
+        "contrast_deals": 6,
+        "active_deals": 1,
+        "ready_to_derive": True,
+    }
+
+
 def test_lead_source_returns_503_with_missing_integration(client: TestClient) -> None:
     response = client.post("/leads/source", json={"count": 10})
 

@@ -11,6 +11,7 @@ from app.services.icp import (
     _cohort_payload,
     _fit_model_budget,
     derive_icp,
+    evidence_inventory,
     won_centroid,
 )
 from app.services.icp_leads_store import MAX_ICP_DEALS, InMemoryIcpLeadsStore
@@ -165,6 +166,9 @@ def test_icp_candidates_exclude_unproven_live_deals_and_bound_model_input() -> N
     assert len(candidates) == MAX_ICP_DEALS
     assert all(deal.crm_external_id != "live:no-evidence" for deal in candidates)
     assert len(encoded) <= MAX_MODEL_INPUT_CHARS
+    inventory = evidence_inventory(store)
+    assert inventory.deals == len(fitted)
+    assert inventory.deals < len(candidates)
 
 
 def test_legacy_icp_profile_keeps_unknown_source_provenance() -> None:

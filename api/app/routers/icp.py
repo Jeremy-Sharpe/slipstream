@@ -5,10 +5,15 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.core.config import Settings
 from app.core.llm import MissingEmbeddingProviderError, MissingReasoningProviderError
-from app.schemas.icp import FixtureHistoryCounts, IcpDeriveRequest, StoredIcpProfile
+from app.schemas.icp import (
+    FixtureHistoryCounts,
+    IcpDeriveRequest,
+    IcpEvidenceInventory,
+    StoredIcpProfile,
+)
 from app.services import fixture_history
 from app.services.dependencies import get_embedding_client, get_settings, get_store
-from app.services.icp import derive_icp
+from app.services.icp import derive_icp, evidence_inventory
 from app.services.icp_leads_store import IcpLeadsStore
 
 router = APIRouter(prefix="/icp", tags=["icp"])
@@ -46,6 +51,11 @@ def derive(
         ) from error
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+
+
+@router.get("/evidence", response_model=IcpEvidenceInventory)
+def evidence(store: StoreDep, include_demo: bool = False) -> IcpEvidenceInventory:
+    return evidence_inventory(store, include_demo=include_demo)
 
 
 @router.get("/latest", response_model=StoredIcpProfile)

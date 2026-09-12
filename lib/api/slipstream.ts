@@ -130,6 +130,17 @@ export type ApiIcpProfile = {
   };
 };
 
+export type ApiIcpEvidenceInventory = {
+  deals: number;
+  calls: number;
+  emails: number;
+  outcome_labelled: number;
+  won_deals: number;
+  contrast_deals: number;
+  active_deals: number;
+  ready_to_derive: boolean;
+};
+
 export type ApiLead = {
   id: string;
   icp_profile_id: string | null;
@@ -274,6 +285,21 @@ function parseIcpProfile(value: unknown): ApiIcpProfile {
     throw new ApiError("Slipstream API returned malformed ICP data", 502);
   }
   return value as ApiIcpProfile;
+}
+
+function parseIcpEvidenceInventory(value: unknown): ApiIcpEvidenceInventory {
+  if (!isRecord(value)) throw new ApiError("Slipstream API returned malformed evidence inventory", 502);
+  const counts = ["deals", "calls", "emails", "outcome_labelled", "won_deals", "contrast_deals", "active_deals"];
+  if (!counts.every((key) => Number.isSafeInteger(value[key]) && Number(value[key]) >= 0) || typeof value.ready_to_derive !== "boolean") {
+    throw new ApiError("Slipstream API returned malformed evidence inventory", 502);
+  }
+  const inventory = value as ApiIcpEvidenceInventory;
+  if (
+    inventory.won_deals + inventory.contrast_deals + inventory.active_deals !== inventory.deals
+    || inventory.outcome_labelled !== inventory.won_deals + inventory.contrast_deals
+    || inventory.ready_to_derive !== (inventory.won_deals >= 2)
+  ) throw new ApiError("Slipstream API returned inconsistent evidence inventory", 502);
+  return inventory;
 }
 
 function nullableString(value: unknown): value is string | null {
@@ -450,6 +476,10 @@ export async function getLatestIcp(): Promise<ApiIcpProfile | null> {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
   }
+}
+
+export async function getIcpEvidenceInventory(signal?: AbortSignal): Promise<ApiIcpEvidenceInventory> {
+  return parseIcpEvidenceInventory(await request<unknown>("/icp/evidence", { signal }));
 }
 
 export async function getLeads(icpProfileId?: string, signal?: AbortSignal): Promise<ApiLead[]> {
