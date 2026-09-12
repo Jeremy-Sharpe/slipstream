@@ -18,7 +18,11 @@ function normalizeApiUrl(value) {
   } catch {
     throw new Error("API URL must be a valid URL");
   }
-  assert(url.protocol === "https:", "API URL must use HTTPS");
+  const loopback = ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname);
+  assert(
+    url.protocol === "https:" || (url.protocol === "http:" && loopback),
+    "API URL must use HTTPS unless it is an explicit loopback URL",
+  );
   assert(!url.username && !url.password, "API URL must not contain credentials");
   url.pathname = url.pathname.replace(/\/$/, "");
   url.search = "";

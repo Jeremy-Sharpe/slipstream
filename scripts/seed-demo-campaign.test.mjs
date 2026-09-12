@@ -63,6 +63,25 @@ test("requires exact configured-model provenance before creating a campaign", as
   assert.equal(fixture.calls[3].init.signal.aborted, false);
 });
 
+test("allows deployment-local HTTP without allowing remote plaintext", async () => {
+  const fixture = fixtureFetch();
+  const result = await seedDemoCampaign({
+    apiUrl: "http://127.0.0.1:8000",
+    token: "a-secure-demo-token",
+    fetchImpl: fixture.fetchImpl,
+  });
+
+  assert.equal(result.status, "paused");
+  await assert.rejects(
+    seedDemoCampaign({
+      apiUrl: "http://api.example",
+      token: "a-secure-demo-token",
+      fetchImpl: fixture.fetchImpl,
+    }),
+    /explicit loopback/,
+  );
+});
+
 test("refuses durable storage before performing a mutation", async () => {
   const fixture = fixtureFetch({ storage: "supabase" });
   await assert.rejects(
