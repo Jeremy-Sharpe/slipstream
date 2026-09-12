@@ -94,6 +94,7 @@ def test_structured_uses_anthropic_messages_parse() -> None:
     assert result.output == MiniOutput(subject="A", body="B")
     assert result.model == "claude-opus-5"
     assert client.messages.kwargs["output_format"] is MiniOutput
+    assert "timeout" not in client.messages.kwargs
 
 
 def test_structured_uses_openai_responses_parse() -> None:
@@ -109,6 +110,21 @@ def test_structured_uses_openai_responses_parse() -> None:
     assert result.output == MiniOutput(subject="O", body="P")
     assert result.model == "gpt-5.4"
     assert client.responses.kwargs["text_format"] is MiniOutput
+    assert "timeout" not in client.responses.kwargs
+
+
+def test_structured_applies_an_explicit_provider_timeout() -> None:
+    client = FakeOpenAIClient()
+
+    structured(
+        ReasoningClient(provider="openai", model="gpt-5.4", client=client),
+        system="System",
+        user="User",
+        schema=MiniOutput,
+        timeout=5.0,
+    )
+
+    assert client.responses.kwargs["timeout"] == 5.0
 
 
 def test_structured_validates_openrouter_fenced_json() -> None:

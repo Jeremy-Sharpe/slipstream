@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections import deque
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -10,9 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.database import create_supabase
 from app.core.readiness import StorageReadinessProbe
-from app.routers import calls, extractions, health, icp, leads, scorecards
+from app.routers import calls, drafts, extractions, health, icp, leads, scorecards
 from app.services.icp_leads_store import create_icp_leads_store
 from app.services.score import build_judge
+from app.ws import coach
 
 
 @asynccontextmanager
@@ -43,9 +45,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.supabase = create_supabase(runtime_settings)
     app.state.call_store = {}
     app.state.extraction_store = {}
+    app.state.draft_store = {}
+    app.state.activity_store = {}
     app.state.transcription_slots = asyncio.Semaphore(2)
     app.state.ingest_locks = [asyncio.Lock() for _ in range(32)]
     app.state.extraction_locks = [asyncio.Lock() for _ in range(32)]
+    app.state.coach_slots = asyncio.Semaphore(4)
+    app.state.coach_handshake_slots = asyncio.Semaphore(16)
+    app.state.coach_reasoning_slots = asyncio.Semaphore(2)
+    app.state.coach_checkpoints = {}
+    app.state.coach_source_locks = {}
+    app.state.coach_source_locks_guard = asyncio.Lock()
+    app.state.coach_token_issued_at = deque()
+    app.state.coach_token_lock = asyncio.Lock()
+    app.state.coach_suggestion_started_at = deque()
+    app.state.coach_suggestion_lock = asyncio.Lock()
     app.add_middleware(calls.UploadSizeLimitMiddleware)
     app.state.judge_factory = lambda: build_judge(runtime_settings)
     app.add_middleware(
@@ -66,8 +80,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(scorecards.router, prefix="/api/v1")
     app.include_router(calls.router, prefix="/api/v1")
     app.include_router(extractions.router, prefix="/api/v1")
+    app.include_router(drafts.router, prefix="/api/v1")
     app.include_router(icp.router)
     app.include_router(icp.router, prefix="/api/v1")
     app.include_router(leads.router)
     app.include_router(leads.router, prefix="/api/v1")
+    app.include_router(coach.router, prefix="/api/v1")
     return app
