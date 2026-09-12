@@ -12,7 +12,7 @@ from typing import Any
 
 import httpx
 from fastapi.testclient import TestClient
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 
 from app.core.config import Settings
 from app.routers.scorecards import _run_bounded
@@ -20,11 +20,13 @@ from app.schemas.scorecard import (
     Evidence,
     JudgedPlaybook,
     JudgedScorecard,
+    Playbook,
     Scorecard,
     Transcript,
     TranscriptTurn,
     WinningPattern,
 )
+from app.services.playbook_store import read_latest_playbooks, store_playbook
 from app.services.score import (
     JudgeError,
     JudgeResult,
@@ -577,9 +579,37 @@ def test_derive_playbook_drops_patterns_with_unknown_call_ids() -> None:
     assert derived.coaching_focus == ["Ask before pricing."]
 
 
+def test_playbook_store_upserts_and_reads_validated_payload() -> None:
+    playbook, _ = derive_playbook(
+        [
+            _scorecard("call-1", "Sam Whitfield", "won"),
+            _scorecard("call-2", "Sam Whitfield", "lost"),
+        ],
+        FakeJudge(),
+    )
+    client = _FakePlaybookClient()
+
+    stored = store_playbook(client, playbook)
+
+    assert stored == playbook
+    assert client.rpc_name == "store_playbook_if_current"
+    assert client.row is not None
+    assert client.row["playbook"]["cohort_revision"] == playbook.cohort_revision
+    assert read_latest_playbooks(client, 50) == [playbook]
+    duplicate = playbook.model_dump(mode="json")
+    duplicate["sources"].append(duplicate["sources"][0])
+    try:
+        Playbook.model_validate(duplicate)
+    except ValidationError as error:
+        assert "distinct revisions" in str(error)
+    else:
+        raise AssertionError("duplicate playbook source was accepted")
+
+
 def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     client: TestClient,
 ) -> None:
+    assert client.get("/playbook/latest").status_code == 404
     transcript = _transcript_payload()
     response = client.post("/scorecards", json=transcript)
 
@@ -614,11 +644,15 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     assert playbook_response.status_code == 200
     playbook_payload = playbook_response.json()
     assert playbook_payload["model"] == "fake"
+    assert len(playbook_payload["cohort_revision"]) == 64
     assert [source["call_id"] for source in playbook_payload["sources"]] == [
         "call-1",
         "call-2",
     ]
     assert all(source["source_revision"] for source in playbook_payload["sources"])
+    latest_playbook = client.get("/playbook/latest")
+    assert latest_playbook.status_code == 200
+    assert latest_playbook.json() == playbook_payload
     stale_playbook = client.post(
         "/playbook",
         json={
@@ -654,6 +688,20 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     assert fabricated.status_code == 422
     assert client.post("/playbook", json={"call_ids": ["call-1", "missing"]}).status_code == 404
     assert client.post("/scorecards", json={"call_id": "broken"}).status_code == 422
+    client.app.state.scorecard_store["call-3"] = _scorecard("call-3", "Jordan Lee", "won")
+    client.app.state.scorecard_store["call-4"] = _scorecard("call-4", "Jordan Lee", "stalled")
+    newer_playbook = client.post(
+        "/playbook", json={"call_ids": ["call-3", "call-4"]}
+    )
+    assert newer_playbook.status_code == 200
+    client.app.state.scorecard_store["call-3"] = client.app.state.scorecard_store[
+        "call-3"
+    ].model_copy(update={"scorecard_revision": "changed-scorecard-revision"})
+    assert client.get("/playbook/latest").json() == playbook_payload
+    client.app.state.scorecard_store["call-1"] = client.app.state.scorecard_store[
+        "call-1"
+    ].model_copy(update={"scorecard_revision": "new-scorecard-revision"})
+    assert client.get("/playbook/latest").status_code == 404
 
 
 def test_scorecard_mutations_require_configured_ingest_token(client: TestClient) -> None:
@@ -696,6 +744,34 @@ def test_scorecard_route_offloads_blocking_judge(client: TestClient) -> None:
         assert client.get("/health").status_code == 200
         release.set()
         assert future.result(timeout=2).status_code == 200
+
+
+def test_playbook_rejects_source_change_while_judge_is_running(client: TestClient) -> None:
+    started = Event()
+    release = Event()
+
+    class BlockingJudge(FakeJudge):
+        def __call__(self, **kwargs):
+            started.set()
+            assert release.wait(timeout=2)
+            return super().__call__(**kwargs)
+
+    client.app.state.scorecard_store["call-1"] = _scorecard("call-1", "Sam", "won")
+    client.app.state.scorecard_store["call-2"] = _scorecard("call-2", "Sam", "lost")
+    client.app.state.judge_factory = lambda: BlockingJudge()
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(
+            client.post,
+            "/playbook",
+            json={"call_ids": ["call-1", "call-2"]},
+        )
+        assert started.wait(timeout=1)
+        client.app.state.scorecard_store["call-1"] = client.app.state.scorecard_store[
+            "call-1"
+        ].model_copy(update={"scorecard_revision": "changed-while-running"})
+        release.set()
+        assert future.result(timeout=2).status_code == 409
+    assert not client.app.state.playbook_store
 
 
 def test_scorecard_route_hides_provider_diagnostics(client: TestClient) -> None:
@@ -1179,3 +1255,44 @@ class _StaticRpcCall:
 
     def execute(self) -> _Result:
         return _Result(self.payload)
+
+
+class _FakePlaybookQuery:
+    def __init__(self, owner: _FakePlaybookClient) -> None:
+        self.owner = owner
+
+    def upsert(self, row: dict[str, Any], *, on_conflict: str) -> _FakePlaybookQuery:
+        self.owner.row = row
+        self.owner.on_conflict = on_conflict
+        return self
+
+    def select(self, _: str) -> _FakePlaybookQuery:
+        return self
+
+    def order(self, _: str, *, desc: bool) -> _FakePlaybookQuery:
+        assert desc is True
+        return self
+
+    def limit(self, value: int) -> _FakePlaybookQuery:
+        assert value == 50
+        return self
+
+    def execute(self) -> _Result:
+        if self.owner.row is None:
+            return _Result([])
+        return _Result([{"playbook": self.owner.row["playbook"]}])
+
+
+class _FakePlaybookClient:
+    def __init__(self) -> None:
+        self.row: dict[str, Any] | None = None
+        self.rpc_name: str | None = None
+
+    def rpc(self, name: str, payload: dict[str, Any]) -> _StaticRpcCall:
+        self.rpc_name = name
+        self.row = {"playbook": payload["p_playbook"]}
+        return _StaticRpcCall(payload["p_playbook"])
+
+    def table(self, name: str) -> _FakePlaybookQuery:
+        assert name == "playbooks"
+        return _FakePlaybookQuery(self)

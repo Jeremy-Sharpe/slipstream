@@ -4,7 +4,7 @@ import { AlertCircle, ArrowRightLeft, CheckCircle2, ListChecks, Loader2, Message
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { defaultBrief } from "@/lib/data/brief";
-import { API_BASE_URL, derivePlaybook, getLatestIcp, getReadiness, getScorecard, type ApiIcpProfile, type ApiPlaybook, type ApiReadiness, type ApiScorecard } from "@/lib/api/slipstream";
+import { API_BASE_URL, derivePlaybook, getLatestIcp, getLatestPlaybook, getReadiness, getScorecard, type ApiIcpProfile, type ApiPlaybook, type ApiReadiness, type ApiScorecard } from "@/lib/api/slipstream";
 import type { Intelligence } from "@/lib/types/intelligence";
 import { IntelligenceHeader } from "./IntelligenceHeader";
 import { BriefCard, DerivedIcp, NextSteps, Objections, TalkRatio, Tiles, TrainingLens, Triggers } from "./sections";
@@ -119,6 +119,12 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
         if (cancelled) return;
         setReadinessState({ data, status: "ready", readiness });
         try {
+          const storedPlaybook = await getLatestPlaybook(controller.signal);
+          if (cancelled) return;
+          if (storedPlaybook) {
+            setPlaybookState({ data, status: "live", playbook: storedPlaybook });
+            return;
+          }
           const judgeConfigured = readiness.integrations.openrouter === true || readiness.integrations.openai === true || readiness.integrations.anthropic === true;
           if (!judgeConfigured) {
             setPlaybookState({ data, status: "missing" });

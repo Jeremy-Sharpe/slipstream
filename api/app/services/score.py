@@ -737,8 +737,17 @@ def derive_playbook(
     )
     result = judge(system=system, user=user, schema=JudgedPlaybook)
     patterns = _valid_patterns(result.output.patterns, scorecards)
+    cohort_payload = json.dumps(
+        [
+            source.model_dump(mode="json")
+            for source in sorted(sources, key=lambda item: item.call_id)
+        ],
+        sort_keys=True,
+        separators=(",", ":"),
+    )
     return (
         Playbook(
+            cohort_revision=hashlib.sha256(cohort_payload.encode("utf-8")).hexdigest(),
             sources=sources,
             stats=stats,
             reps=reps,

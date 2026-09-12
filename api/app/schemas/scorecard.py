@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from datetime import datetime
 from typing import Annotated, Literal
 
@@ -161,6 +163,7 @@ class PlaybookSource(BaseModel):
 
 
 class Playbook(BaseModel):
+    cohort_revision: Identifier
     sources: list[PlaybookSource] = Field(min_length=2, max_length=MAX_PLAYBOOK_SCORECARDS)
     stats: list[OutcomeStats]
     reps: list[RepProfile]
@@ -192,4 +195,15 @@ class Playbook(BaseModel):
             or not not_won
         ):
             raise ValueError("Playbook statistics must match source outcomes")
+        cohort_payload = json.dumps(
+            [
+                source.model_dump(mode="json")
+                for source in sorted(self.sources, key=lambda item: item.call_id)
+            ],
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        expected_revision = hashlib.sha256(cohort_payload.encode("utf-8")).hexdigest()
+        if self.cohort_revision != expected_revision:
+            raise ValueError("Playbook cohort revision must match its sources")
         return self

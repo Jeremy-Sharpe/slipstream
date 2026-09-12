@@ -19,6 +19,7 @@ from app.schemas.scorecard import (
     Scorecard,
     Transcript,
 )
+from app.services.playbook_store import PlaybookStaleError, read_latest_playbooks, store_playbook
 from app.services.score import JudgeError, derive_playbook, score_call, stamp_scorecard_revision
 from app.services.scorecard_store import (
     ScorecardNotFoundError,
@@ -33,6 +34,7 @@ router = APIRouter(tags=["scorecards"])
 LOGGER = logging.getLogger(__name__)
 MAX_SCORECARD_REQUEST_BYTES = 2 * 1024 * 1024
 MAX_MEMORY_SCORECARDS = 500
+MAX_MEMORY_PLAYBOOKS = 50
 ADMISSION_TIMEOUT_SECONDS = 0.05
 
 
@@ -244,6 +246,70 @@ def _derive_trusted_playbook(request: Request, body: PlaybookRequest, judge):
     return derive_playbook(scorecards, judge)
 
 
+def _save_memory_playbook(request: Request, playbook: Playbook) -> Playbook:
+    if not _is_current_playbook(request, playbook):
+        raise PlaybookStaleError("Playbook cohort changed before persistence")
+    request.app.state.playbook_store[playbook.cohort_revision] = playbook
+    request.app.state.playbook_store.move_to_end(playbook.cohort_revision)
+    while len(request.app.state.playbook_store) > MAX_MEMORY_PLAYBOOKS:
+        request.app.state.playbook_store.popitem(last=False)
+    return playbook
+
+
+def _is_current_playbook(request: Request, playbook: Playbook) -> bool:
+    try:
+        cards = _trusted_scorecards(request, [source.call_id for source in playbook.sources])
+    except (ScorecardNotFoundError, ValueError):
+        return False
+    current = {card.call_id: card for card in cards}
+    return all(
+        (card := current.get(source.call_id)) is not None
+        and card.source_revision == source.source_revision
+        and card.scorecard_revision == source.scorecard_revision
+        and card.rubric_version == source.rubric_version
+        and card.outcome == source.outcome
+        for source in playbook.sources
+    )
+
+
+@router.get("/playbook/latest", response_model=Playbook)
+async def get_latest_playbook(request: Request) -> Playbook:
+    try:
+        if request.app.state.supabase is None:
+            playbook = next(
+                (
+                    candidate
+                    for candidate in reversed(request.app.state.playbook_store.values())
+                    if _is_current_playbook(request, candidate)
+                ),
+                None,
+            )
+        else:
+            candidates = await _run_bounded(
+                request,
+                read_latest_playbooks,
+                request.app.state.supabase,
+                MAX_MEMORY_PLAYBOOKS,
+            )
+            playbook = await _run_bounded(
+                request,
+                lambda: next(
+                    (item for item in candidates if _is_current_playbook(request, item)),
+                    None,
+                ),
+            )
+    except HTTPException:
+        raise
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The playbook store is unavailable",
+        ) from error
+    if playbook is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Playbook not found")
+    return playbook
+
+
 @router.post("/scorecards", response_model=Scorecard)
 async def create_scorecard(
     transcript: Transcript,
@@ -314,6 +380,12 @@ async def create_playbook(
             body,
             judge,
         )
+        if request.app.state.supabase is None:
+            playbook = _save_memory_playbook(request, playbook)
+        else:
+            playbook = await _run_bounded(
+                request, store_playbook, request.app.state.supabase, playbook
+            )
     except ScorecardNotFoundError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Scorecard not found"
@@ -328,11 +400,23 @@ async def create_playbook(
             status_code=status.HTTP_409_CONFLICT,
             detail="Scorecard cohort changed; reload before generating the playbook",
         ) from error
+    except PlaybookStaleError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Scorecard cohort changed; reload before generating the playbook",
+        ) from error
     except JudgeError as error:
         reference = uuid4().hex[:12]
         LOGGER.warning("Playbook judge failed [%s]", reference, exc_info=error)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Playbook judge failed (reference {reference})",
+        ) from error
+    except HTTPException:
+        raise
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The playbook store is unavailable",
         ) from error
     return playbook

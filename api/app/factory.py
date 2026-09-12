@@ -54,6 +54,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.email_store = {}
     app.state.email_threads = {}
     app.state.scorecard_store = OrderedDict()
+    app.state.playbook_store = OrderedDict()
     app.state.transcription_slots = asyncio.Semaphore(2)
     app.state.ingest_locks = [asyncio.Lock() for _ in range(32)]
     app.state.extraction_locks = [asyncio.Lock() for _ in range(32)]

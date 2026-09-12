@@ -188,6 +188,7 @@ export type ApiScorecard = {
 };
 
 export type ApiPlaybook = {
+  cohort_revision: string;
   sources: Array<{
     call_id: string;
     source_external_id: string;
@@ -401,7 +402,7 @@ function validRate(value: unknown): value is number {
 }
 
 function parsePlaybook(value: unknown): ApiPlaybook {
-  if (!isRecord(value) || !Array.isArray(value.sources) || !Array.isArray(value.stats) || !Array.isArray(value.reps) || !Array.isArray(value.patterns) || !isStringArray(value.coaching_focus) || typeof value.model !== "string" || typeof value.generated_at !== "string" || !Number.isFinite(Date.parse(value.generated_at))) {
+  if (!isRecord(value) || typeof value.cohort_revision !== "string" || !/^[a-f0-9]{64}$/.test(value.cohort_revision) || !Array.isArray(value.sources) || !Array.isArray(value.stats) || !Array.isArray(value.reps) || !Array.isArray(value.patterns) || !isStringArray(value.coaching_focus) || typeof value.model !== "string" || typeof value.generated_at !== "string" || !Number.isFinite(Date.parse(value.generated_at))) {
     throw new ApiError("Slipstream API returned malformed playbook data", 502);
   }
   const nonnegativeInteger = (item: unknown) => Number.isSafeInteger(item) && Number(item) >= 0;
@@ -409,7 +410,7 @@ function parsePlaybook(value: unknown): ApiPlaybook {
   const validSources = value.sources.length >= 2 && value.sources.every((item) => isRecord(item) && typeof item.call_id === "string" && typeof item.source_external_id === "string" && typeof item.source_revision === "string" && typeof item.scorecard_revision === "string" && typeof item.rubric_version === "string" && ["won", "stalled", "lost"].includes(String(item.outcome)));
   const validStats = value.stats.every((item) => isRecord(item) && ["won", "not_won"].includes(String(item.outcome_group)) && nonnegativeInteger(item.calls) && validRate(item.next_step_rate) && validRate(item.objection_handled_rate) && validRate(item.mean_talk_ratio) && nonnegativeNumber(item.mean_discovery));
   const validReps = value.reps.every((item) => isRecord(item) && typeof item.rep === "string" && nonnegativeInteger(item.calls) && nonnegativeInteger(item.won) && Number(item.won) <= Number(item.calls) && nonnegativeNumber(item.mean_discovery) && validRate(item.next_step_rate) && validRate(item.mean_talk_ratio));
-  const validPatterns = value.patterns.every((item) => isRecord(item) && typeof item.behaviour === "string" && typeof item.why_it_matters === "string" && isStringArray(item.call_ids) && isStringArray(item.quotes) && item.call_ids.length === item.quotes.length);
+  const validPatterns = value.patterns.every((item) => isRecord(item) && typeof item.behaviour === "string" && typeof item.why_it_matters === "string" && isStringArray(item.call_ids) && isStringArray(item.quotes) && item.call_ids.length >= 1 && item.call_ids.length <= 5 && item.call_ids.length === item.quotes.length);
   const groups = value.stats.map((item) => isRecord(item) ? item.outcome_group : null);
   const hasExactGroups = groups.length === 2 && groups.filter((item) => item === "won").length === 1 && groups.filter((item) => item === "not_won").length === 1;
   const sourceIds = value.sources.map((item) => isRecord(item) ? item.call_id : null);
@@ -419,7 +420,11 @@ function parsePlaybook(value: unknown): ApiPlaybook {
   const wonCalls = value.stats.find((item) => isRecord(item) && item.outcome_group === "won");
   const notWonCalls = value.stats.find((item) => isRecord(item) && item.outcome_group === "not_won");
   const sourceCountsMatch = isRecord(wonCalls) && isRecord(notWonCalls) && wonCalls.calls === sourceOutcomes.filter((item) => item === "won").length && notWonCalls.calls === sourceOutcomes.filter((item) => item === "lost" || item === "stalled").length;
-  if (!validSources || !validStats || !validReps || !validPatterns || !hasExactGroups || new Set(sourceIds).size !== sourceIds.length || new Set(sourceRevisions).size !== sourceRevisions.length || new Set(scorecardRevisions).size !== scorecardRevisions.length || !sourceCountsMatch) throw new ApiError("Slipstream API returned malformed playbook data", 502);
+  const sourceRubrics = value.sources.map((item) => isRecord(item) ? item.rubric_version : null);
+  const citedIds = value.patterns.flatMap((item) => isRecord(item) && Array.isArray(item.call_ids) ? item.call_ids : []);
+  const hasContrast = sourceOutcomes.some((item) => item === "won") && sourceOutcomes.some((item) => item === "lost" || item === "stalled");
+  const citationsBelongToCohort = citedIds.every((id) => sourceIds.includes(id));
+  if (!validSources || !validStats || !validReps || !validPatterns || !hasExactGroups || !hasContrast || new Set(sourceIds).size !== sourceIds.length || new Set(sourceRevisions).size !== sourceRevisions.length || new Set(scorecardRevisions).size !== scorecardRevisions.length || new Set(sourceRubrics).size !== 1 || !sourceCountsMatch || !citationsBelongToCohort) throw new ApiError("Slipstream API returned malformed playbook data", 502);
   return value as ApiPlaybook;
 }
 
@@ -622,6 +627,15 @@ export async function derivePlaybook(scorecards: ApiScorecard[], signal?: AbortS
     throw new ApiError("Slipstream API returned a playbook for a different scorecard cohort", 409);
   }
   return playbook;
+}
+
+export async function getLatestPlaybook(signal?: AbortSignal): Promise<ApiPlaybook | null> {
+  try {
+    return parsePlaybook(await request<unknown>("/playbook/latest", { signal }));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
