@@ -33,8 +33,8 @@ def test_fixture_ingest_is_immediately_retrievable(client: TestClient) -> None:
     assert record["fixture"] is True
     assert record["duration_seconds"] == 420
     assert len(record["segments"]) == 30
-    assert record["segments"][0]["speaker"] == "Jordan Lee"
-    assert "Dev Patel:" in record["transcript"]
+    assert record["segments"][0]["speaker"] == "Jordan Belfort"
+    assert "Donnie Azoff:" in record["transcript"]
 
     fetched = client.get(f"/api/v1/calls/{record['id']}")
     assert fetched.status_code == 200

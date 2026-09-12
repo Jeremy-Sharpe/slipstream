@@ -51,3 +51,16 @@ def test_audio_chunking_stays_under_limit():
 def test_demo_audio_selection():
     dirs = call_dirs(only=None, demo_only=True)
     assert [path.name for path in dirs] == ["call-13-marlowe-finch-demo"]
+
+
+def test_dialogue_inputs_do_not_include_speaker_names() -> None:
+    from generate_audio import load_call
+
+    seller = load_seller()
+    for call_dir in call_dirs(None, False):
+        script = load_call(call_dir)
+        chunks = build_chunks(script, seller)
+        spoken = [item["text"] for chunk in chunks for item in chunk.inputs]
+        assert spoken == [turn.text for turn in script.turns]
+        for turn, text in zip(script.turns, spoken, strict=True):
+            assert not text.startswith(f"{turn.name}:")

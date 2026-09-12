@@ -83,6 +83,8 @@ def test_checked_in_example_accepts_blank_optional_credentials(
         "SUPABASE_URL",
         "SUPABASE_SERVICE_ROLE_KEY",
         "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
         "ELEVENLABS_API_KEY",
         "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
@@ -118,3 +120,18 @@ def test_paid_transcription_requires_production_ingest_token() -> None:
 def test_invalid_web_origin_is_rejected(origin: str) -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, web_origins=[origin])
+
+
+@pytest.mark.parametrize(
+    ("model", "provider"),
+    [
+        ("claude-opus-5", "anthropic"),
+        ("gpt-5.4", "openai"),
+        ("o4-mini", "openai"),
+        ("meta-llama/llama-4-maverick", "openrouter"),
+    ],
+)
+def test_reasoning_provider_is_selected_from_model_name(model: str, provider: str) -> None:
+    settings = Settings(_env_file=None, reasoning_model=model)
+
+    assert settings.reasoning_provider == provider

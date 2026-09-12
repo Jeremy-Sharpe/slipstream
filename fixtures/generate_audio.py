@@ -55,7 +55,7 @@ def build_chunks(script: CallScript, seller: Seller, max_chars: int = MAX_CHARS)
     current: list[dict[str, str]] = []
     current_chars = 0
     for turn in script.turns:
-        text = f"{turn.name}: {turn.text}"
+        text = turn.text
         voice_id = voice_for_turn(turn.name, seller)
         if current and current_chars + len(text) > max_chars:
             chunks.append(DialogueChunk(index=len(chunks) + 1, inputs=current))

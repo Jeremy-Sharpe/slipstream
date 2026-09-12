@@ -10,7 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.database import create_supabase
 from app.core.readiness import StorageReadinessProbe
-from app.routers import calls, drafts, extractions, health
+from app.routers import calls, drafts, extractions, health, icp, leads
+from app.services.icp_leads_store import create_icp_leads_store
 
 
 @asynccontextmanager
@@ -37,6 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = runtime_settings
     app.state.readiness = StorageReadinessProbe(runtime_settings)
+    app.state.icp_leads_store = create_icp_leads_store(runtime_settings)
     app.state.supabase = create_supabase(runtime_settings)
     app.state.call_store = {}
     app.state.extraction_store = {}
@@ -63,4 +65,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(calls.router, prefix="/api/v1")
     app.include_router(extractions.router, prefix="/api/v1")
     app.include_router(drafts.router, prefix="/api/v1")
+    app.include_router(icp.router)
+    app.include_router(icp.router, prefix="/api/v1")
+    app.include_router(leads.router)
+    app.include_router(leads.router, prefix="/api/v1")
     return app

@@ -65,7 +65,7 @@ def test_demo_call_extracts_crm_fields_with_evidence(client: TestClient) -> None
     assert fetched.json() == first.json()
     extraction = first.json()
     assert extraction["source"] == "fixture_labels"
-    assert extraction["contact"]["name"]["value"] == "Dev Patel"
+    assert extraction["contact"]["name"]["value"] == "Donnie Azoff"
     assert extraction["company"]["name"]["value"] == "Marlowe & Finch Accounting"
     assert extraction["deal"]["outcome"]["value"] == "won"
     assert extraction["deal"]["amount"]["value"] == 48600
