@@ -51,15 +51,15 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
   ];
 
   return (
-    <div className="mt-6 flex flex-col">
-      <div className="px-10 pb-4">
-        <div className="inline-flex h-10 items-center rounded-lg border border-border bg-muted/60 p-0.5">
+    <div className="mt-5 flex flex-col">
+      <div className="px-8 pb-4">
+        <div className="inline-flex h-9 items-center rounded-md border border-border bg-muted/60 p-0.5">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "flex h-full items-center gap-2 rounded-md px-4 text-[15px] text-muted-foreground transition-colors hover:text-foreground",
+                "flex h-full items-center gap-2 rounded-[5px] px-3.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
                 tab === t.key && "border border-border bg-background font-medium text-foreground shadow-xs",
               )}
             >
@@ -71,38 +71,38 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
       </div>
 
       <div className="border-t border-border">
-        <Table className="table-fixed text-[15px]">
+        <Table className="table-fixed text-sm">
           <TableHeader>
-            <TableRow className="h-11 hover:bg-transparent">
-              <TableHead className="w-16 pl-10"><Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="Select all" /></TableHead>
-              <TableHead className="w-[190px] font-medium text-muted-foreground">Contact</TableHead>
-              <TableHead className="w-[220px] font-medium text-muted-foreground">Company</TableHead>
-              <TableHead className="w-[180px] font-medium text-muted-foreground">Title</TableHead>
+            <TableRow className="h-10 hover:bg-transparent">
+              <TableHead className="w-14 pl-8"><Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="Select all" /></TableHead>
+              <TableHead className="w-[170px] font-medium text-muted-foreground">Contact</TableHead>
+              <TableHead className="w-[210px] font-medium text-muted-foreground">Company</TableHead>
+              <TableHead className="w-[170px] font-medium text-muted-foreground">Title</TableHead>
               <TableHead className="font-medium text-muted-foreground">Preview</TableHead>
-              <TableHead className="w-[168px] font-medium text-muted-foreground">Time</TableHead>
-              <TableHead className="w-[172px] pr-10 font-medium text-muted-foreground">Status</TableHead>
+              <TableHead className="w-[160px] font-medium text-muted-foreground">Time</TableHead>
+              <TableHead className="w-[160px] pr-8 font-medium text-muted-foreground">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="[&_tr:last-child]:border-b">
             {visible.length === 0 && (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={7} className="h-40 text-center text-[15px] text-muted-foreground">
+                <TableCell colSpan={7} className="h-40 text-center text-sm text-muted-foreground">
                   {rows.length === 0 ? "No conversations yet. Add a call to get started." : "Nothing matches."}
                 </TableCell>
               </TableRow>
             )}
             {visible.map((r) => (
-              <TableRow key={r.id} data-state={checked.has(r.id) ? "selected" : undefined} className="h-[58px] cursor-pointer hover:bg-muted/50">
-                <TableCell className="pl-10" onClick={(e) => e.stopPropagation()}><Checkbox checked={checked.has(r.id)} onCheckedChange={() => toggle(r.id)} aria-label={`Select ${r.contact}`} /></TableCell>
+              <TableRow key={r.id} data-state={checked.has(r.id) ? "selected" : undefined} className="h-[52px] cursor-pointer hover:bg-muted/50">
+                <TableCell className="pl-8" onClick={(e) => e.stopPropagation()}><Checkbox checked={checked.has(r.id)} onCheckedChange={() => toggle(r.id)} aria-label={`Select ${r.contact}`} /></TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <Avatar className="size-8"><AvatarFallback className="text-xs">{initials(r.contact)}</AvatarFallback></Avatar>
+                    <Avatar className="size-7"><AvatarFallback className="text-[11px]">{initials(r.contact)}</AvatarFallback></Avatar>
                     <span className="font-medium">{r.contact}</span>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2 text-foreground/80">
-                    {r.kind === "call" ? <Phone className="size-4 text-muted-foreground" strokeWidth={1.75} /> : <Mail className="size-4 text-muted-foreground" strokeWidth={1.75} />}
+                    {r.kind === "call" ? <Phone className="size-3.5 text-muted-foreground" strokeWidth={1.75} /> : <Mail className="size-3.5 text-muted-foreground" strokeWidth={1.75} />}
                     <span className="truncate">{r.company}</span>
                   </div>
                 </TableCell>
@@ -112,12 +112,12 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
                   {when(r.at)}
                   {r.durationSeconds ? <span className="ml-1.5 text-foreground/40">{duration(r.durationSeconds)}</span> : null}
                 </TableCell>
-                <TableCell className="pr-10"><StatusPill status={r.status} /></TableCell>
+                <TableCell className="pr-8"><StatusPill status={r.status} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        <div className="flex items-center justify-between px-10 py-3 text-sm text-muted-foreground">
+        <div className="flex items-center justify-between px-8 py-2.5 text-[13px] text-muted-foreground">
           <span>Showing {visible.length} of {rows.length}</span>
           {checked.size > 0 && <span>{checked.size} selected</span>}
         </div>

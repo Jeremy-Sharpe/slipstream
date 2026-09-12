@@ -24,14 +24,14 @@ function NavItem({ item, active }: { item: Item; active: boolean }) {
     <Link
       href={item.href}
       className={cn(
-        "flex h-10 items-center gap-3 rounded-lg px-3 text-[15px] text-foreground/80 transition-colors hover:bg-muted hover:text-foreground",
+        "flex h-9 items-center gap-2.5 rounded-md px-2.5 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground",
         active && "bg-muted font-medium text-foreground",
       )}
     >
-      <Icon className="size-5" strokeWidth={1.75} />
+      <Icon className="size-[18px]" strokeWidth={1.75} />
       <span className="flex-1">{item.label}</span>
       {item.count != null && (
-        <span className="rounded-full border border-border px-2 py-px text-xs tabular-nums text-muted-foreground">{item.count}</span>
+        <span className="rounded-full border border-border px-1.5 py-px text-[11px] tabular-nums text-muted-foreground">{item.count}</span>
       )}
     </Link>
   );
@@ -40,10 +40,10 @@ function NavItem({ item, active }: { item: Item; active: boolean }) {
 export function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="sticky top-0 flex h-screen w-[250px] shrink-0 flex-col border-r border-border bg-background">
-      <div className="flex h-16 items-center justify-between border-b border-border pr-3 pl-5">
-        <Link href="/" className="flex items-center gap-2 text-[17px] font-semibold tracking-tight">
-          <Zap className="size-5" strokeWidth={2.25} />
+    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-background">
+      <div className="flex h-14 items-center justify-between border-b border-border pr-2.5 pl-4">
+        <Link href="/" className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
+          <Zap className="size-4" strokeWidth={2.25} />
           Slipstream
         </Link>
         <button className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Collapse sidebar">
@@ -51,7 +51,7 @@ export function Sidebar() {
         </button>
       </div>
 
-      <nav className="flex flex-col gap-0.5 p-3">
+      <nav className="flex flex-col gap-0.5 p-2.5">
         {MAIN.map((item) => <NavItem key={item.href} item={item} active={pathname === item.href} />)}
       </nav>
 

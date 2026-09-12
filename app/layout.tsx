@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-background font-sans text-[15px] text-foreground antialiased">
+      <body className="min-h-screen bg-background font-sans text-sm text-foreground antialiased">
         <div className="flex min-h-screen">
           <Sidebar />
           <div className="flex min-w-0 flex-1 flex-col">
