@@ -57,3 +57,5 @@ Embeddings are noise at this volume. Origami credits are the only variable cost 
 2. Get the real Origami key from Jeremy into `api/.env` and `/etc/slipstream/api.env`, then restart the API. Leads and outreach cannot run live without it.
 3. Confirm what Romain is building, or reassign the `video` row.
 4. Regenerate the demo call audio once ElevenLabs credits allow, with `generate_audio.py --demo`.
+5. Decide the fate of `feat/scorecard-wire` on origin: it is superseded by the scorecard store that merged with PR #4 and must not be merged as is; port its list, derive-over-all and latest-playbook endpoints or delete it. Details under Follow-ups in `docs/architecture.md`.
+6. Wire the scorecard into the UI: conversation detail still shows the labelled fixture scorecard and Intelligence never calls `POST /playbook`, which needs two or more call ids and the ingest token server-side.
