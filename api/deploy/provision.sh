@@ -11,7 +11,7 @@ REPOSITORY_URL="${SLIPSTREAM_REPOSITORY_URL:-https://github.com/Jeremy-Sharpe/sl
 APP_ROOT="/opt/slipstream"
 SOURCE_DIR="$APP_ROOT/source"
 
-for command in git uv caddy curl jq flock runuser; do
+for command in git uv caddy curl jq flock runuser tar; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "Required command is missing: $command" >&2
     exit 1
@@ -26,8 +26,9 @@ if ! id slipstream-deploy >/dev/null 2>&1; then
     --shell /usr/sbin/nologin slipstream-deploy
 fi
 
+install -d -m 0755 -o root -g root "$APP_ROOT" "$APP_ROOT/releases"
 install -d -m 0755 -o slipstream-deploy -g slipstream-deploy \
-  "$APP_ROOT" "$APP_ROOT/releases" "$APP_ROOT/python"
+  "$APP_ROOT/staging" "$APP_ROOT/python"
 install -d -m 0700 -o root -g root /etc/slipstream
 if [[ ! -e /etc/slipstream/api.env ]]; then
   install -m 0600 -o root -g root /dev/null /etc/slipstream/api.env
@@ -37,10 +38,14 @@ else
 fi
 
 if [[ ! -d "$SOURCE_DIR/.git" ]]; then
+  install -d -m 0755 -o slipstream-deploy -g slipstream-deploy "$SOURCE_DIR"
   runuser -u slipstream-deploy -- git clone --filter=blob:none "$REPOSITORY_URL" "$SOURCE_DIR"
 fi
 
 install -m 0755 "$SOURCE_DIR/api/deploy/deploy.sh" /usr/local/sbin/slipstream-deploy
+install -m 0644 "$SOURCE_DIR/api/deploy/slipstream-api.service" \
+  /etc/systemd/system/slipstream-api.service
+systemctl daemon-reload
 systemctl enable slipstream-api
 /usr/local/sbin/slipstream-deploy
 
@@ -78,7 +83,9 @@ install -m 0644 "$CADDY_CANDIDATE" /etc/caddy/conf.d/slipstream-api.caddy
 install -m 0644 "$MAIN_CANDIDATE" /etc/caddy/Caddyfile
 
 if caddy validate --config /etc/caddy/Caddyfile && systemctl reload caddy; then
-  unlink /etc/caddy/Caddyfile.slipstream-backup "$MAIN_CANDIDATE" "$SNIPPET_BACKUP"
+  unlink /etc/caddy/Caddyfile.slipstream-backup
+  unlink "$MAIN_CANDIDATE"
+  unlink "$SNIPPET_BACKUP"
   echo "Slipstream API provisioned at https://$API_DOMAIN"
   exit 0
 fi

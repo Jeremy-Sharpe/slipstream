@@ -3,6 +3,7 @@ set -euo pipefail
 
 APP_ROOT="/opt/slipstream"
 SOURCE_DIR="$APP_ROOT/source"
+STAGING_ROOT="$APP_ROOT/staging"
 RELEASES_DIR="$APP_ROOT/releases"
 CURRENT_LINK="$APP_ROOT/current"
 BRANCH="${SLIPSTREAM_BRANCH:-main}"
@@ -17,12 +18,14 @@ if ! flock -n 9; then
 fi
 
 if [[ ! -d "$SOURCE_DIR/.git" ]]; then
-  echo "Expected a deployment source checkout at $SOURCE_DIR" >&2
+  echo "Expected a source checkout at $SOURCE_DIR" >&2
   exit 1
 fi
 
-git -C "$SOURCE_DIR" fetch --quiet --prune origin "refs/heads/$BRANCH"
-REVISION="$(git -C "$SOURCE_DIR" rev-parse --verify 'FETCH_HEAD^{commit}')"
+runuser -u slipstream-deploy -- git -C "$SOURCE_DIR" fetch --quiet --prune \
+  origin "refs/heads/$BRANCH"
+REVISION="$(runuser -u slipstream-deploy -- git -C "$SOURCE_DIR" \
+  rev-parse --verify 'FETCH_HEAD^{commit}')"
 if [[ ! "$REVISION" =~ ^[0-9a-f]{40}$ ]]; then
   echo "Git returned an invalid revision" >&2
   exit 1
@@ -30,36 +33,38 @@ fi
 
 RELEASE_DIR="$RELEASES_DIR/$REVISION"
 PREVIOUS_RELEASE="$(readlink -f "$CURRENT_LINK" 2>/dev/null || true)"
+STAGE_DIR="$STAGING_ROOT/$REVISION.$$"
 TEMP_LINK="$APP_ROOT/.current.$$.${RANDOM}"
-trap 'unlink "$TEMP_LINK" 2>/dev/null || true' EXIT INT TERM HUP
 
-if [[ -d "$RELEASE_DIR" && ! -f "$RELEASE_DIR/.prepared" ]]; then
-  git -C "$SOURCE_DIR" worktree remove --force "$RELEASE_DIR" 2>/dev/null || true
-fi
+cleanup() {
+  unlink "$TEMP_LINK" 2>/dev/null || true
+  if [[ -d "$STAGE_DIR" ]]; then
+    find "$STAGE_DIR" -depth -delete 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT INT TERM HUP
 
 if [[ ! -f "$RELEASE_DIR/.prepared" ]]; then
-  runuser -u slipstream-deploy -- git -C "$SOURCE_DIR" worktree add --detach "$RELEASE_DIR" "$REVISION"
+  install -d -m 0755 -o slipstream-deploy -g slipstream-deploy "$STAGE_DIR"
+  runuser -u slipstream-deploy -- sh -c \
+    'git -C "$1" archive "$2" | tar -x -C "$3"' sh "$SOURCE_DIR" "$REVISION" "$STAGE_DIR"
   runuser -u slipstream-deploy -- env UV_PYTHON_INSTALL_DIR="$UV_PYTHON_INSTALL_DIR" \
-    uv sync --directory "$RELEASE_DIR/api" --frozen --no-dev
-  printf 'ENVIRONMENT=production\nRELEASE_SHA=%s\n' "$REVISION" > "$RELEASE_DIR/api/deploy/release.env"
-  chmod 0644 "$RELEASE_DIR/api/deploy/release.env"
+    uv sync --directory "$STAGE_DIR/api" --python 3.12.3 --frozen --no-dev
+  printf 'ENVIRONMENT=production\nRELEASE_SHA=%s\n' "$REVISION" \
+    > "$STAGE_DIR/api/deploy/release.env"
+  chmod 0644 "$STAGE_DIR/api/deploy/release.env"
   runuser -u slipstream -- env -i PATH=/usr/bin:/bin ENVIRONMENT=production \
-    "$RELEASE_DIR/api/.venv/bin/python" -c \
-    "import sys; sys.path.insert(0, '$RELEASE_DIR/api'); from app.main import app; assert app.title == 'Slipstream API'"
-  touch "$RELEASE_DIR/.prepared"
+    "$STAGE_DIR/api/.venv/bin/python" -c \
+    "import sys; sys.path.insert(0, '$STAGE_DIR/api'); from app.main import app; assert app.title == 'Slipstream API'"
+  touch "$STAGE_DIR/.prepared"
+  chown -R root:root "$STAGE_DIR"
+  mv "$STAGE_DIR" "$RELEASE_DIR"
 fi
 
 switch_release() {
   local target="$1"
-  ln -s "$target" "$TEMP_LINK"
-  mv -Tf "$TEMP_LINK" "$CURRENT_LINK"
-}
-
-install_service_unit() {
-  local release="$1"
-  install -m 0644 "$release/api/deploy/slipstream-api.service" \
-    /etc/systemd/system/slipstream-api.service
-  systemctl daemon-reload
+  ln -s "$target" "$TEMP_LINK" || return 1
+  mv -Tf "$TEMP_LINK" "$CURRENT_LINK" || return 1
 }
 
 wait_until_ready() {
@@ -77,12 +82,12 @@ wait_until_ready() {
 
 rollback() {
   if [[ -z "$PREVIOUS_RELEASE" || ! -f "$PREVIOUS_RELEASE/.prepared" ]]; then
-    echo "No prepared previous release is available for rollback" >&2
+    unlink "$CURRENT_LINK" 2>/dev/null || true
+    systemctl stop slipstream-api || true
     return 1
   fi
-  install_service_unit "$PREVIOUS_RELEASE"
-  switch_release "$PREVIOUS_RELEASE"
-  systemctl restart slipstream-api
+  switch_release "$PREVIOUS_RELEASE" || return 1
+  systemctl restart slipstream-api || return 1
   wait_until_ready "$(basename "$PREVIOUS_RELEASE")"
 }
 
@@ -96,14 +101,13 @@ handle_interruption() {
 }
 trap handle_interruption INT TERM HUP
 
-if ! install_service_unit "$RELEASE_DIR" || ! switch_release "$RELEASE_DIR"; then
+if ! switch_release "$RELEASE_DIR"; then
   echo "Could not activate revision $REVISION" >&2
   exit 1
 fi
 ACTIVATED=1
 if systemctl restart slipstream-api && wait_until_ready "$REVISION"; then
   ACTIVATED=0
-  install -m 0755 "$RELEASE_DIR/api/deploy/deploy.sh" /usr/local/sbin/slipstream-deploy
   echo "Deployed Slipstream API revision $REVISION"
   exit 0
 fi

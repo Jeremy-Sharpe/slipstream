@@ -14,8 +14,7 @@ COPY app ./app
 COPY deploy/container-entrypoint.sh /usr/local/bin/slipstream-api
 
 RUN chmod 0555 /usr/local/bin/slipstream-api \
-    && useradd --system --uid 10001 --no-create-home --home-dir /nonexistent slipstream \
-    && chown -R slipstream:slipstream /app
+    && useradd --system --uid 10001 --no-create-home --home-dir /nonexistent slipstream
 
 USER slipstream
 
