@@ -5,6 +5,8 @@ import test from "node:test";
 import { parseVerdict } from "../evals/lib/judge.mjs";
 import {
   fetchProductionSurfaces,
+  productionApiUrl,
+  readmeField,
   renderProductionSurfaces,
 } from "../evals/lib/repo.mjs";
 
@@ -66,4 +68,28 @@ test("verdict parser accepts a pretty-printed final JSON object", () => {
   };
 
   assert.deepEqual(parseVerdict(`Notes first.\n${JSON.stringify(verdict, null, 2)}`), verdict);
+});
+
+test("verdict parser accepts an explicit final score when a judge omits JSON", () => {
+  const verdict = parseVerdict(
+    'Assessment complete. Final score already delivered: **T1 = 8/10**, band "8: Strong".',
+    { id: "T1", points: 10 },
+  );
+
+  assert.equal(verdict.criterion, "T1");
+  assert.equal(verdict.score, 8);
+  assert.match(verdict.band, /prose fallback/);
+});
+
+test("verdict parser does not infer a score from ordinary assessment prose", () => {
+  assert.equal(
+    parseVerdict("T1 could move from 6/10 to 8/10 with a better demo.", { id: "T1", points: 10 }),
+    null,
+  );
+});
+
+test("production API is discoverable from README with an environment override", () => {
+  const readme = "Production API: https://api.example.test\n";
+  assert.equal(readmeField(readme, "productionApi"), "https://api.example.test");
+  assert.equal(productionApiUrl(readme), process.env.SLIPSTREAM_API_URL || "https://api.example.test");
 });

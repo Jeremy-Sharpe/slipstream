@@ -20,7 +20,7 @@ Target is the score the team is building for, not the maximum. It sits at the bo
 
 | ID | Criterion | Points | Target | Judged from | Passes when the judge finds |
 |---|---|---|---|---|---|
-| T1 | Functionality & Execution | 10 | 8 | Production URL, codebase | The live URL works end-to-end over its data with no faked, hardcoded or single-path steps; loading, empty and error states exist; known limitations are stated in the README |
+| T1 | Functionality & Execution | 10 | 8 | Production URL, production API, codebase | The live URL works end-to-end over its data with no faked, hardcoded or single-path steps; loading, empty and error states exist; known limitations are stated in the README |
 | T2 | Technical Difficulty | 8 | 6 | Codebase, README | The AI pipelines use multi-step reasoning, structured outputs, chaining or embeddings, and the README explains why the architecture is shaped that way |
 | T3 | Code Quality & Architecture | 6 | 5 | Codebase, README | Clear module boundaries, no monolith files or duplication, README covers what it does, how to run it, architecture and framework choices |
 | T4 | Use of Data / Models | 6 | 5 | Codebase, README | Every model choice is justified on size, cost and latency versus accuracy; fixtures vary in outcome; some evaluation of output quality is recorded in the repo |
@@ -31,7 +31,7 @@ Target is the score the team is building for, not the maximum. It sits at the bo
 | B2 | Feasibility & Viability | 8 | 6 | README | Cost per call or user, first CRM and phone integrations, data access and recording privacy, adoption path |
 | B3 | Impact & Value Proposition | 9 | 7 | README, production URL | Specific, at least semi-quantified value (time saved per call, follow-ups sent, deals influenced) and who benefits by how much |
 | F1 | Clarity of Pitch | 6 | 5 | `docs/pitch.md` | Problem, solution, how it works, why it matters, in 400 to 700 spoken words, no unexplained jargon |
-| F2 | Live Demo Quality | 8 | 7 | `docs/demo-script.md`, production URL | Leads with the differentiating feature, every step maps to the live app, proves the pitch's claims, has a fallback |
+| F2 | Live Demo Quality | 8 | 7 | `docs/demo-script.md`, production URL, production API | Leads with the differentiating feature, every step maps to the live app, proves the pitch's claims, has a fallback |
 | F3 | Team Engagement & Q&A | 6 | 5 | Q&A section of `docs/pitch.md` | Hard questions listed with direct, specific, honest answers, spread across team members |
 
 Preliminary criteria T1 to B3 sum to 80 points; finals criteria F1 to F3 sum to 20. Targets sum to 63 of 80 for the preliminary round and 17 of 20 for finals.
