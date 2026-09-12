@@ -1,0 +1,50 @@
+{
+  "call_id": "call-08-elm-and-ledger-accounting",
+  "extraction": {
+    "contact": {
+      "name": "Ben Wallace",
+      "role": "Director",
+      "email": "ben@elmandledger.example",
+      "phone": "+61 3 7010 1108"
+    },
+    "company": {
+      "name": "Elm & Ledger Accounting",
+      "industry": "Accounting practice",
+      "headcount": 52,
+      "location": "Geelong, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 78200,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the office move checklist and migration proposal by Wednesday",
+      "I will include the Xero access review and the busy-season support plan"
+    ],
+    "objections": [
+      {
+        "text": "We cannot have a messy migration in the middle of tax planning work",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send migration proposal and run site walk-through with Ben and office manager.",
+      "due": "2026-09-09"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.47,
+    "notes": "Sam found the office move deadline, addressed migration risk and secured a dated site walk-through before proposal acceptance."
+  },
+  "icp_signals": {
+    "industry": "Accounting practice",
+    "headcount_band": "25-80",
+    "role": "Director",
+    "trigger": "Office move and Microsoft 365 migration before busy season"
+  },
+  "risk_flags": []
+}

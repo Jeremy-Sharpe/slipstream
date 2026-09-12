@@ -1,0 +1,176 @@
+{
+  "call_id": "call-03-afterglow-studio",
+  "seller": "Harbourline IT",
+  "rep": "Jordan Lee",
+  "prospect": {
+    "name": "Priya Shah",
+    "role": "Founder",
+    "email": "priya@afterglowstudio.example",
+    "phone": "+61 3 7010 1103"
+  },
+  "company": {
+    "name": "Afterglow Studio",
+    "industry": "Creative branding studio",
+    "headcount": 12,
+    "location": "Collingwood, VIC",
+    "domain": "afterglowstudio.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-02T10:00:00+10:00",
+  "duration_target_seconds": 390,
+  "outcome": "lost",
+  "deal_value_aud": 15400,
+  "trigger": null,
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Hi Priya Shah, Jordan from Harbourline IT. Great to speak with Afterglow Studio. We help Melbourne firms move from ad hoc IT to a proper managed service, and our standard package is $120 per seat per month."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "Hi Jordan. We're only twelve people, so I was mostly curious. Our computers are fine most weeks, and we use a local break-fix person when something annoying happens."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That's exactly where managed services helps, because waiting for things to break costs time. With us you get helpdesk, Microsoft 365 admin, patching, endpoint security, backup checks and quarterly reviews, all wrapped into one predictable monthly number."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "We are probably too small for a monthly managed service. The designers are on Macs, the account team uses Google Workspace, and there is not much infrastructure."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Small teams actually need it more because there's no internal IT person. Harbourline IT can bring the same structure bigger firms have, and it means you're not relying on whoever is least busy to fix a printer or password issue."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "The printer bit's real, but it's not painful enough to spend a lot. We might have two support issues a month, maybe three when freelancers are in."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The bigger risk isn't the ticket count, it's the security baseline. Cyber insurance and client questionnaires are getting stricter, so having managed endpoint protection and patch records makes you look professional when a client asks."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "Most of our clients are hospitality and lifestyle brands. They care about creative work. Nobody has sent us a security questionnaire, and if they did, I'd probably just answer it myself."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "We also include onboarding, so we'd clean up user accounts, make sure everyone has MFA, standardise devices and document your apps. For a team like Afterglow Studio, that project could be $4,000 to $6,000 depending on what we find."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "That is more than double what we pay now. Our current guy charges when we need him, and some months we pay nothing at all."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Right, but the monthly fee buys peace of mind. If a laptop is stolen or someone clicks a bad link, you've a team ready. Break-fix is cheaper until the one day it's not."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "I understand the argument, but there's not a burning problem. We're watching costs this quarter, and I don't want another subscription unless it removes a daily headache."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The daily headache can be hidden, though. Designers losing twenty minutes here and there adds up, and with a managed agreement you can send everything through one channel instead of interrupting each other."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "Maybe, but I'd need to see a very small plan. I'm not going to take a twelve-seat studio into a corporate IT package because it sounds responsible."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Our minimum managed plan is still designed around the full stack, because partial coverage creates gaps. We can start with the baseline and then add anything specific later."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "That's probably not for us then. I was hoping there might be a light-touch option or an annual check-up."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I will send some info this afternoon. It will explain the service inclusions, the onboarding project and why proactive support tends to be better value over a year."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "You can send it, but I don't want to waste your time. Unless the price is much closer to what we pay casually, I can't see us moving."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The reason I'm pushing the managed option is that creative studios often underestimate the cost of interruption. If a designer loses files before a client presentation, the impact isn't just an IT invoice, it's reputation and rework."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "I hear that, but our files are backed up in the design tools and we've not had that kind of incident."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "You would also get a proper onboarding audit. We'd review admin accounts, device health, domains, password sharing, MFA and whether freelancers still have access after a project finishes."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "Those are real things, but they aren't things I'm ready to put a monthly contract around."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "If budget is the blocker, I can still show the cost over twelve months compared with reactive work and staff downtime. Sometimes the managed plan comes out closer than it first appears."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "Maybe for another studio. For us, the cash cost is obvious and the downtime cost is still theoretical."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The overview will also show the security baseline we recommend for even a small studio: MFA, device encryption, admin account separation, backup confirmation and a simple incident contact path. That gives you a benchmark, even if you choose not to move now."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "A benchmark is fine. I just don't want the benchmark to turn into pressure to buy something we've already said is too heavy."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The thing I'd be careful of is waiting until the first serious client requirement appears. By then you're trying to write policies, clean accounts, find device records and reassure a client at the same time. The managed plan keeps all of that ready before anyone asks, and it gives you a professional answer rather than a scramble."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "I understand, but that still feels like buying ahead of a problem."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Understood. I will send the overview and you can come back if anything changes or if a client asks for security evidence."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Priya Shah",
+      "text": "Thanks Jordan. I appreciate the call, but it's a no for now."
+    }
+  ]
+}

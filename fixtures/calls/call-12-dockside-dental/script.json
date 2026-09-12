@@ -1,0 +1,46 @@
+{
+  "call_id": "call-12-dockside-dental",
+  "seller": "Harbourline IT",
+  "rep": "Jordan Lee",
+  "prospect": {
+    "name": "Ethan Clarke",
+    "role": "Practice Owner",
+    "email": "ethan@docksidedental.example",
+    "phone": "+61 3 7010 1112"
+  },
+  "company": {
+    "name": "Dockside Dental",
+    "industry": "Dental practice",
+    "headcount": 18,
+    "location": "Williamstown, VIC",
+    "domain": "docksidedental.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-11T09:00:00+10:00",
+  "duration_target_seconds": 55,
+  "outcome": "no_show",
+  "deal_value_aud": null,
+  "trigger": null,
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Hi, Jordan Lee from Harbourline IT calling for Ethan Clarke at Dockside Dental. We had a 9am phone appointment about managed IT and cyber insurance questions."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Reception",
+      "text": "Ethan has been pulled into a patient issue and won't make the call. Sorry, the morning has gone sideways."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "No worries. I will send a quick email with a couple of times to reschedule, and he can pick whatever works. Please let him know Jordan called."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Reception",
+      "text": "Will do. Email is best today. Thanks for understanding."
+    }
+  ]
+}

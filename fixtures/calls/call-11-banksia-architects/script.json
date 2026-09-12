@@ -1,0 +1,186 @@
+{
+  "call_id": "call-11-banksia-architects",
+  "seller": "Harbourline IT",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Grace Kim",
+    "role": "Studio Operations Manager",
+    "email": "grace@banksiaarchitects.example",
+    "phone": "+61 3 7010 1111"
+  },
+  "company": {
+    "name": "Banksia Architects",
+    "industry": "Architecture studio",
+    "headcount": 44,
+    "location": "Fitzroy, VIC",
+    "domain": "banksiaarchitects.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-10T14:00:00+10:00",
+  "duration_target_seconds": 425,
+  "outcome": "stalled",
+  "deal_value_aud": 66400,
+  "trigger": "Office move planning and cyber insurance evidence gap",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Grace Kim, thanks for speaking with me. I have Banksia Architects as a forty-four person studio in Fitzroy, and you manage studio operations, yes?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Yes. We're looking at an office move next quarter, and it has exposed how dependent we're on an IT setup nobody really owns. I'm gathering options before the directors decide what to fund."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What has the office move made visible that was easier to ignore before?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Shared project files, printing, site laptops and a pile of old accounts. We've grown from twenty-eight to forty-four people, but the IT habits are from the smaller studio."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How do staff currently get help when something breaks during a deadline?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "They message me, our BIM lead, or the external technician we use casually. Everyone is helpful, but nobody has an overall picture. During tender weeks that means lots of interruptions."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Who would need to be in the room for a decision on managed services?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Two directors and me. I can recommend, but I can't sign. One director cares about project continuity, the other is watching cash because the move is expensive."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What would make the directors feel this is a must-do rather than a nice-to-have?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Evidence that the move is risky without it. Also cyber insurance. We answered a questionnaire last year, but I couldn't prove half the answers without chasing three people."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Where are your biggest security gaps today?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Old admin accounts, inconsistent MFA, and no formal backup test. I'm not saying everything is broken, but it's too much dependent knowledge."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "For a studio your size, Harbourline IT would usually sit around $134 per seat per month, with an onboarding project to document systems before the move."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "The directors will not approve anything until the new financial year budget is clearer. They have already committed to lease costs, furniture and a fit-out consultant."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That's understandable. The useful first step may be a low-commitment risk note that shows what needs funding and what can wait. I don't want you trying to sell a full proposal without director context."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "A risk note would help me frame it. I can't promise they will prioritise it, but they will listen if it ties directly to the move and insurance."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Would you like me to join a director meeting once they have read it?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Maybe. I don't have the meeting date yet, and I'd rather not lock something in until I know whether they want to engage."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Fair. I will send a short findings note and an office move risk checklist. You can use it internally, and if the directors want detail we can book a proper workshop."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Yes, send that. Keep it practical and not too salesy, please."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "In the note, I will separate must-fix items from decisions that can safely wait. That should help the directors avoid treating every IT issue as equal."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "That would be useful. At the moment it all feels like one tangled problem, which makes it easier for them to defer the whole thing."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will also give you a small evidence checklist for cyber insurance, so even if managed services waits, you know what documents to collect before renewal."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "That's valuable. I don't want another renewal where I'm asking three different people whether we test backups and getting three different answers."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "If the directors push it to next year, the checklist can become the basis for a budget request rather than disappearing after this call."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Exactly. I need something I can attach to a budget conversation, not just my feeling that the current setup is fragile."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will make the risk note specific to architecture workflows: large files, consultant deadlines, site laptops, printing, SharePoint structure and access for contractors."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "That specificity matters. The directors tune out when IT sounds generic, but they pay attention when it connects to project delivery."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will include a small section on what to ask any provider, including us, so the directors can compare options without needing to be technical."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "That would be genuinely helpful. They will want to feel in control of the decision, not steered into a package."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Absolutely. I will keep it to the move, cyber insurance evidence and the support model choices."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Grace Kim",
+      "text": "Thanks Sam. I'm interested, but I need the internal timing to catch up."
+    }
+  ]
+}

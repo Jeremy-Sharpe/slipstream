@@ -6,7 +6,7 @@ Built for the Forward: AI in Business Hackathon, University of Melbourne, 12 to 
 
 Track: Track 1: Improve an Existing Business Capability (also entered in the Built With ElevenLabs special track)
 
-Production URL: (added at submission)
+Production URL: https://slipstream-ten-mauve.vercel.app
 
 Demo video: (added at submission)
 
@@ -40,7 +40,7 @@ Every step runs for real on the live URL over synthesised fixture calls. No cann
 app/          Next.js 16 + React 19 UI (Vercel). Conversations, analysis, leads. Reads Supabase directly.
 api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts. REST plus one WebSocket.
 coach/        Electron live-coach overlay, forked from Cheating Daddy (GPL-3.0). Talks only to the api WebSocket.
-fixtures/     Synthesised sales calls: scripts, audio, transcripts, expected outcomes.
+fixtures/     Twelve labelled sales-call scripts as seeded CRM history, plus one voiced demo call.
 supabase/     Postgres migrations (pgvector enabled) and seed.
 evals/        Judge evals and submission checks (see docs/judging-evals.md).
 ```

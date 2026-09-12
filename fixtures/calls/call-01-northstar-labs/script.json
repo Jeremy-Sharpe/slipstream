@@ -1,0 +1,156 @@
+{
+  "call_id": "call-01-northstar-labs",
+  "seller": "Harbourline IT",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Maya Chen",
+    "role": "Managing Partner",
+    "email": "maya@northstarlabs.example",
+    "phone": "+61 3 7010 1101"
+  },
+  "company": {
+    "name": "Northstar Labs",
+    "industry": "Architecture and lab planning consultancy",
+    "headcount": 42,
+    "location": "Southbank, VIC",
+    "domain": "northstarlabs.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-08-31T09:15:00+10:00",
+  "duration_target_seconds": 420,
+  "outcome": "won",
+  "deal_value_aud": 58400,
+  "trigger": "Cyber insurance renewal requiring Essential Eight controls",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Hi Maya, it's Sam from Harbourline IT. Thanks for making time, and just so I have the context right, are you Maya Chen from Northstar Labs in Southbank?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "Yes, that's me. We're a lab planning and architecture practice, forty-two people now, mostly architects, project leads and admin. The call is timely because our cyber insurance renewal landed last week and it was more pointed than last year."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What changed in the renewal pack that made this feel urgent?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "They have asked us to show multi-factor coverage, backup testing, admin separation and some evidence around patching. Previously we just ticked a few boxes. This time the broker said the underwriter wants Essential Eight-style controls before they quote."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How are you handling those controls today across Microsoft 365, laptops and project files?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "Patch management is half manual and half Intune, and nobody loves it. We've MFA for email but not every app. Project files are in SharePoint, but architects still sync big drawing folders locally because they travel to sites."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Who is responsible internally when something breaks or when the insurer asks for evidence?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "Our finance partner owns risk, our studio manager does the day-to-day chasing, and I make the final call. We've an ad hoc IT contractor who is lovely, but he isn't built for reporting or controls evidence."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What would a good result look like by the time the insurer comes back for the final questionnaire?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "I need to show that a sensible provider has reviewed us, closed the obvious gaps and can produce records. I don't expect magic in two weeks, but I want confidence that we're not guessing."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Where have staff felt the pain most, security paperwork, day-to-day support, or project file reliability?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "The paperwork is the trigger, but support is the quiet frustration. New starters wait too long, password resets go to whichever admin is free, and site laptops get forgotten until they refuse to update during a deadline."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That helps. Harbourline usually starts with a fixed onboarding project, then a managed services agreement at $135 per seat per month for a practice your size, with security reporting included."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "Our insurer is asking for Essential Eight evidence, and I am worried we will pay for a managed service but still fail the questionnaire. We have had vendors sell us a dashboard before and then leave us to explain it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That is a fair concern. We would separate the promise into two parts: first the evidence you can use with the broker, then the ongoing support model. I will send the mapped Essential Eight gap summary by Thursday so you can see exactly what is covered and what remains your risk."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "That would be useful. The finance partner will ask whether there's a large project fee on top, because the renewal and an office refit are hitting the same quarter."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will include the onboarding sequence and the fixed project range. For Northstar Labs I would expect the project to sit around $8,000 to $11,000 unless the device audit uncovers something odd."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "That's inside what I can approve with finance, provided the monthly number stays close to what you just said and the support response times are written down."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Let us lock the next step while the renewal is warm. Can we meet Thursday 3 September at 2pm with you and the finance partner to review the proposal and the evidence pack?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "Yes, Thursday 3 September at 2pm works. Send the invite to me and I will forward it to Grace in finance. If the proposal matches this discussion, I'm comfortable moving ahead."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "One practical thing I want to avoid is over-promising maturity in week one. We'd show the insurer what is already true, what we can close quickly, and what needs a dated remediation plan."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "That language would help. The underwriter seems more interested in whether we know our gaps than whether we pretend to be perfect, and I'd rather be honest than scramble later."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Exactly. We can also give your studio manager a simple evidence folder, so next year the renewal is a maintenance task rather than a panic."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "That would be a relief. She is organised, but she is tired of chasing screenshots from three different systems whenever someone asks a security question."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Great, I will send the invite, the gap summary and the commercial proposal by Thursday morning. Thanks Maya, this gives us enough to be precise."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Maya Chen",
+      "text": "Thanks Sam. I appreciate that you did not jump straight to a bundle. Speak Thursday."
+    }
+  ]
+}

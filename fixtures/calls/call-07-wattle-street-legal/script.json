@@ -1,0 +1,176 @@
+{
+  "call_id": "call-07-wattle-street-legal",
+  "seller": "Harbourline IT",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Olivia Hart",
+    "role": "Practice Manager",
+    "email": "olivia@wattlestreetlegal.example",
+    "phone": "+61 3 7010 1107"
+  },
+  "company": {
+    "name": "Wattle Street Legal",
+    "industry": "Family law firm",
+    "headcount": 37,
+    "location": "Hawthorn, VIC",
+    "domain": "wattlestreetlegal.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-07T09:45:00+10:00",
+  "duration_target_seconds": 445,
+  "outcome": "won",
+  "deal_value_aud": 59600,
+  "trigger": "Outgoing internal IT coordinator leaving in three weeks",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Olivia Hart, Sam from Harbourline IT. Before we get into options, are you still the practice manager at Wattle Street Legal in Hawthorn?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Yes. We're thirty-seven people, mostly solicitors, paralegals and admin. I booked the call because our internal IT coordinator resigned and leaves in three weeks."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What does that coordinator currently hold in their head that worries you most?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Almost everything. They know the document system quirks, which partners have unusual setups, how court filing certificates work, and which laptops are overdue for replacement. Some of it's written down, but not enough."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How are support requests handled now when solicitors are under deadline pressure?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "People walk to the coordinator or message me. It works because they are here, but it's not scalable. Family law deadlines are emotional, and a locked account before a filing deadline becomes my problem fast."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Who needs to approve a managed services agreement before the coordinator leaves?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "The principal solicitor and I can approve if the numbers are sensible. Finance will check cash flow, but this is an operational risk we can't leave open."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What must be stable in the first month for you to feel the transition worked?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Helpdesk coverage, leavers and joiners, backups, certificates for court systems, and someone documenting our Microsoft 365 admin settings. I also need staff to know who to call on day one."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What is your current risk around cyber insurance or client confidentiality questionnaires?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Insurers asked about MFA and backups last year. We answered, but it was informal. The principal wants something more defensible this year, especially because we handle sensitive family matters."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "For Wattle Street Legal, the managed service would be about $132 per seat per month, with a transition project focused on documentation, identity, backups and support handover."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "I am nervous about changing provider while our internal IT coordinator is leaving. If the handover is clumsy, everyone will blame me for breaking something that mostly works."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That is completely reasonable. I would not suggest a big-bang change. We would run a two-week shadow handover with your coordinator, document the critical systems first and only then switch the helpdesk number. I will send the transition plan and fixed onboarding quote by Tuesday."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "A shadow handover would calm people down. The principal will ask whether you can handle after-hours work, because file migrations during business hours aren't acceptable."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will include the leaver checklist and after-hours file migration window. We can also give staff a simple support card so they know the new process before the coordinator leaves."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Good. The monthly fee isn't the cheapest option, but the timing means I care more about a controlled handover than saving a few dollars per seat."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Can we review the plan Tuesday 8 September at 10am with you and the principal solicitor? If that works, we can start the discovery checklist the next morning."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Yes, Tuesday 8 September at 10am works. Send the invite and the plan before close of business Monday if you can."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I'd also like to interview your coordinator before they leave, not just collect passwords. The unwritten history is often where the real transition risk lives."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Yes, please. They are helpful and will share what they know, but I need someone to ask the right questions while they are still here."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "We will prioritise court-system certificates, document access, admin rights and backup restore evidence before any cosmetic tidy-up. The goal is continuity first, then maturity."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "That order makes sense. Staff will forgive a slightly clunky portal before they forgive being unable to file documents or open matters."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "For communication, we can draft a simple internal note from you explaining the support change, the reason for it and exactly what staff should do from the first day."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "That would save me time. People get nervous when support changes, especially the partners who have had the same habits for years."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "We can start the handover with a short risk register as well, so you can show the principal what is critical, what is inconvenient and what can wait until after the coordinator leaves."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "That will make the approval conversation cleaner. The principal is practical, but she hates open-ended projects with no sense of priority."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Done. I will send the invite now, then the transition plan and fixed quote by Monday afternoon."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Thanks Sam. This feels practical, which is what I needed."
+    }
+  ]
+}

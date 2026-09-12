@@ -1,0 +1,46 @@
+{
+  "call_id": "call-10-lumen-lane-retail",
+  "extraction": {
+    "contact": {
+      "name": "Noah Spencer",
+      "role": "Co-owner",
+      "email": "noah@lumenlaneretail.example",
+      "phone": "+61 3 7010 1110"
+    },
+    "company": {
+      "name": "Lumen Lane Retail",
+      "industry": "Boutique lighting retailer",
+      "headcount": 10,
+      "location": "Prahran, VIC"
+    },
+    "deal": {
+      "stage": "closed_lost",
+      "value_aud": 11200,
+      "outcome": "lost"
+    },
+    "promises": [
+      "I will send the managed IT brochure"
+    ],
+    "objections": [
+      {
+        "text": "We are comparing you to a break-fix provider who charges by the hour",
+        "handling": "ignored"
+      }
+    ],
+    "next_step": null
+  },
+  "scorecard": {
+    "discovery_questions": 0,
+    "next_step_secured": false,
+    "objection_handling": "ignored",
+    "rep_talk_ratio": 0.61,
+    "notes": "Jordan led with pricing and feature breadth, then failed to explore the hourly-provider comparison or qualify the tiny account."
+  },
+  "icp_signals": {
+    "industry": "Boutique lighting retailer",
+    "headcount_band": "under-15",
+    "role": "Co-owner",
+    "trigger": null
+  },
+  "risk_flags": []
+}

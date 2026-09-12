@@ -1,0 +1,80 @@
+{
+  "call_id": "call-13-marlowe-finch-demo",
+  "extraction": {
+    "contact": {
+      "name": "Dev Patel",
+      "role": "CFO",
+      "email": "dev@marlowefinch.example",
+      "phone": "+61 3 7010 1113"
+    },
+    "company": {
+      "name": "Marlowe & Finch Accounting",
+      "industry": "Accounting practice",
+      "headcount": 34,
+      "location": "Hawthorn, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 48600,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will get a proposal in your inbox today",
+      "I will send the proposal and 30-seat agreement by 5pm today"
+    ],
+    "objections": [
+      {
+        "text": "Price is my first concern",
+        "handling": "ignored"
+      },
+      {
+        "text": "our current provider knows the practice and the partners trust them",
+        "handling": "partial"
+      }
+    ],
+    "next_step": {
+      "description": "Jordan to send the proposal and 30-seat agreement by 5pm for Dev and the managing partner to review and sign.",
+      "due": "2026-09-11"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 1,
+    "next_step_secured": true,
+    "objection_handling": "partial",
+    "rep_talk_ratio": 0.64,
+    "notes": "Jordan won the demo call by rushing Dev into a proposal and agreement, but the call is full of pressure, weak discovery and risky claims."
+  },
+  "icp_signals": {
+    "industry": "Accounting practice",
+    "headcount_band": "25-80",
+    "role": "CFO",
+    "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+  },
+  "risk_flags": [
+    {
+      "turn_index": 3,
+      "text": "three firms on your street have already moved, and the onboarding price is gone Friday",
+      "kind": "pressure"
+    },
+    {
+      "turn_index": 5,
+      "text": "I can guarantee Essential Eight compliance inside a week",
+      "kind": "overclaim"
+    },
+    {
+      "turn_index": 9,
+      "text": "Your insurer will halve the premium once they see our report",
+      "kind": "overclaim"
+    },
+    {
+      "turn_index": 13,
+      "text": "None of our clients has ever been breached",
+      "kind": "unverifiable"
+    },
+    {
+      "turn_index": 15,
+      "text": "Your incumbent is about to lose their certification",
+      "kind": "unverifiable"
+    }
+  ]
+}
