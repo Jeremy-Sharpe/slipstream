@@ -39,9 +39,10 @@ begin
   insert into public.deals (id, company_id, primary_contact_id, name)
     values (deal_id, company_id, contact_id, 'Delivery Test Deal');
   insert into public.conversations (
-    id, deal_id, contact_id, channel, direction, occurred_at, source_external_id, raw_content
+    id, deal_id, contact_id, channel, subject, direction, occurred_at,
+    source_external_id, raw_content
   ) values (
-    conversation_id, deal_id, contact_id, 'call', 'inbound', now(),
+    conversation_id, deal_id, contact_id, 'call', 'Delivery test', 'inbound', now(),
     'email-delivery-test', 'Synthetic test'
   );
   insert into public.drafts (
