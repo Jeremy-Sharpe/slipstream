@@ -10,16 +10,22 @@ export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url
 
 export const PRODUCTION_SURFACES = [
   { label: "Conversations", path: "/" },
-  { label: "Evidence-backed call detail", path: "/conversations/call-13-marlowe-finch-demo" },
+  { label: "Scripted opening: Maya Chen at Northstar Labs", path: "/conversations/call-01-northstar-labs" },
   { label: "Intelligence", path: "/intelligence" },
   { label: "Leads", path: "/leads" },
   { label: "Campaigns", path: "/campaigns" },
+];
+
+export const PRODUCTION_API_SURFACES = [
+  { label: "API readiness and integration truth", path: "/ready" },
+  { label: "Live campaign execution state", path: "/api/v1/campaigns" },
 ];
 
 // Lines the README must carry so the checks (and the judges) can find the
 // submission artefacts. Documented in docs/judging-evals.md.
 export const README_FIELDS = {
   productionUrl: /^\**\s*Production URL:?\**:?\s*<?(https?:\/\/\S+?)>?\s*$/im,
+  productionApi: /^\**\s*Production API:?\**:?\s*<?(https?:\/\/\S+?)>?\s*$/im,
   demoVideo: /^\**\s*Demo video:?\**:?\s*<?(https?:\/\/\S+?)>?\s*$/im,
   track: /^\**\s*Track:?\**:?\s*(.+?)\s*$/im,
 };
@@ -35,6 +41,10 @@ export function readmeField(readme, field) {
 
 export function productionUrl(readme) {
   return process.env.SLIPSTREAM_PROD_URL || readmeField(readme, "productionUrl");
+}
+
+export function productionApiUrl(readme) {
+  return process.env.SLIPSTREAM_API_URL || readmeField(readme, "productionApi");
 }
 
 // Tracked plus untracked-but-not-ignored files, so local work in progress is
@@ -122,13 +132,16 @@ export function renderProductionSnapshot(url, snapshot) {
   return lines.join("\n") + "\n";
 }
 
-export function renderProductionSurfaces(baseUrl, surfaces) {
+export function renderProductionSurfaces(baseUrl, surfaces, options = {}) {
+  const title = options.title || "Production surface snapshots";
+  const description = options.description ||
+    "These are bounded server-rendered text snapshots fetched from each public route for this eval run.";
   const lines = [
-    `# Production surface snapshots`,
+    `# ${title}`,
     ``,
     `Base URL: ${baseUrl || "(none)"}`,
     ``,
-    `These are bounded server-rendered text snapshots fetched from each public route for this eval run.`,
+    description,
   ];
   for (const surface of surfaces) {
     const snapshot = surface.snapshot;

@@ -8,7 +8,7 @@ The fictional seller is Harbourline IT, a 12-person managed IT and cybersecurity
 
 ## Segment
 
-The twelve history calls deliberately cluster won deals around professional services and allied health businesses with 25 to 80 staff, a concrete buying trigger, and a decision maker or practice manager on the call. The lost calls are small creative or retail businesses with no urgent trigger and price-led buying behaviour, while the stalled calls have real interest but weak buying access, timing or procurement friction. The thirteenth call is the video demo call: a funny high-pressure Jordan Lee win that should light up the coach risk flags rather than train the ICP.
+The twelve history calls deliberately cluster won deals around professional services and allied health businesses with 25 to 80 staff, a concrete buying trigger, and a decision maker or practice manager on the call. The lost calls are small creative or retail businesses with no urgent trigger and price-led buying behaviour, while the stalled calls have real interest but weak buying access, timing or procurement friction. The thirteenth call is the video demo call: a funny, fictional high-pressure Jordan Belfort and Donnie Azoff win that should light up the coach risk flags rather than train the ICP. It is deliberately separate from the two ordinary Harbourline reps in `seller.json`.
 
 ## Outcome Mix
 

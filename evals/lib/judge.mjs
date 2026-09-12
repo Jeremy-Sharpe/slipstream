@@ -1,8 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
+  PRODUCTION_API_SURFACES,
   copyRepoTo,
   fetchProductionSurfaces,
+  productionApiUrl,
   productionUrl,
   readReadme,
   renderProductionSurfaces,
@@ -26,10 +28,18 @@ export function judgeScenario(criterion) {
       await mkdir(judgeDir, { recursive: true });
       const readme = await readReadme();
       const url = productionUrl(readme);
-      const surfaces = await fetchProductionSurfaces(url);
+      const apiUrl = productionApiUrl(readme);
+      const [surfaces, apiSurfaces] = await Promise.all([
+        fetchProductionSurfaces(url),
+        fetchProductionSurfaces(apiUrl, PRODUCTION_API_SURFACES),
+      ]);
       await writeFile(
         path.join(judgeDir, "production-url.md"),
-        renderProductionSurfaces(url, surfaces),
+        renderProductionSurfaces(url, surfaces) + "\n" +
+          renderProductionSurfaces(apiUrl, apiSurfaces, {
+            title: "Production API snapshots",
+            description: "These are bounded snapshots of the deployed API's readiness truth and real campaign execution state for this eval run.",
+          }),
       );
       await writeFile(path.join(judgeDir, "rubric.md"), renderRubric(criterion));
     },
@@ -46,7 +56,7 @@ export function judgeScenario(criterion) {
     },
 
     async assert(ctx) {
-      const verdict = parseVerdict(ctx.finalText);
+      const verdict = parseVerdict(ctx.finalText, criterion);
       if (!verdict) {
         return [{ name: `${criterion.id} verdict is valid JSON`, pass: false, detail: tail(ctx.finalText) }];
       }
@@ -84,7 +94,7 @@ function renderRubric(criterion) {
   ].join("\n");
 }
 
-export function parseVerdict(text) {
+export function parseVerdict(text, criterion) {
   if (!text) return null;
   const trimmed = text.trim();
   for (const line of trimmed.split("\n").reverse()) {
@@ -112,7 +122,28 @@ export function parseVerdict(text) {
       // keep looking
     }
   }
+  if (criterion?.id && Number.isInteger(criterion.points)) {
+    const criterionId = escapeRegExp(criterion.id);
+    const finalScore = new RegExp(
+      `final\\s+score[^\\n]{0,100}\\b${criterionId}\\b[^\\n]{0,40}?(\\d{1,2})\\s*\\/\\s*${criterion.points}\\b`,
+      "gi",
+    );
+    const matches = [...text.matchAll(finalScore)];
+    if (matches.length) {
+      return {
+        criterion: criterion.id,
+        score: Number(matches.at(-1)[1]),
+        band: "Judge-stated final score (prose fallback)",
+        evidence: [],
+        gaps: ["Judge omitted the requested JSON footer; consult the full judge transcript for evidence and gaps."],
+      };
+    }
+  }
   return null;
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function list(value) {
