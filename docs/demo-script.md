@@ -44,11 +44,13 @@ Fallback: Use the API commands below, then show the returned `status: sent`, app
 
 ## 2:05–2:50 — The team learns who to call next
 
-Action: Open the call scorecard, then switch to the pre-opened Intelligence view. Point to the derived ICP, one won-deal evidence item, and one lead with its fit reason. Do not start a paid Origami search on stage.
+Action: Open the call scorecard, point to its `Labelled evaluation` badge, then switch to the pre-opened Intelligence view. Point to the same provenance label, the derived ICP, one won-deal evidence item, and one lead with its fit reason. Do not click either paid generation action on the current keyless deployment and do not start an Origami search on stage.
 
-Say: “A saved transcript is not coaching. The scorecard shows what happened in this call. Across thirteen calls, Slipstream separates behaviours correlated with wins from behaviours that create stalls. It also learns the customer pattern: 25-to-80-person professional-services and allied-health firms, with a compliance trigger and a decision-maker involved. That becomes an Origami brief, and new prospects come back scored against deals we actually won—not a persona someone guessed in a workshop.”
+Say: “A saved transcript is not coaching. This badge matters: the scorecard on screen is our labelled evaluation corpus, not a model result we generated backstage. We tested eleven judge models against those labels, then built the live action to accept a score only when its evidence and transcript revision match. Across thirteen calls, the analysis separates behaviours correlated with wins from behaviours that create stalls. It also learns the customer pattern: 25-to-80-person professional-services and allied-health firms, with a compliance trigger and a decision-maker involved. That becomes an Origami brief, and new prospects come back scored against deals we actually won—not a persona someone guessed in a workshop.”
 
 Action: Point to one winning signal and one stall signal. Avoid reading every metric.
+
+Configured-key option: If `/ready` reports a scorecard integration before the demo, run the live call pipeline, click `Generate live scorecard`, and show the `Live · model` badge after it completes. Generate a live playbook only if Intelligence has already found a revision-pinned cohort containing both won and not-won calls. Never wait for setup or install a key on stage.
 
 Fallback: Use the labelled scorecard already rendered in Conversations, then show the preloaded Intelligence tab. If Intelligence is unavailable, say, “The paid sourcing key is not part of the fallback; the terminal path proved the upstream call record that feeds it,” and move on without waiting.
 
@@ -84,6 +86,6 @@ If the VPS is unreachable, use the production UI’s already-loaded deterministi
 
 ## Likely judge interruptions
 
-- “What is mocked?” The businesses and calls are synthetic. The audio file, ingestion, diarised transcript, structured extraction, draft, approval state, scorecard pipeline, ICP derivation and API responses are executable. Sending email is simulated. Origami needs its paid key; stored results remain visible if the live search is unavailable.
+- “What is mocked?” The businesses and calls are synthetic, and the default screen is explicitly labelled evaluation data. The ingestion, transcript, structured extraction, draft, approval, scorecard, ICP and Origami paths are executable through real adapters when configured; the current production readiness response says which integrations are actually installed. Sending email is simulated, and unavailable paid actions fail closed instead of presenting fixture output as live.
 - “Is this really a CRM integration?” The demo writes to Postgres tables shaped like HubSpot company, contact, deal, engagement and task objects. A production connector swaps those writes for HubSpot APIs; the extraction contract does not change.
 - “What happens without keys?” Fixture ingestion, extraction and drafting remain deterministic and tested. Paid transcription fails closed, and cannot be enabled in production without an ingest token.
