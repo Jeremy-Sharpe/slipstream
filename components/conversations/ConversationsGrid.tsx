@@ -13,6 +13,7 @@ import {
   type Item,
   type Theme,
 } from "@glideapps/glide-data-grid";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Conversation, ConversationStatus } from "@/lib/types";
 
@@ -151,8 +152,10 @@ function useFontFamily() {
 }
 
 export function ConversationsGrid({ rows, onSelectionCount }: { rows: Conversation[]; onSelectionCount?: (n: number) => void }) {
+  const router = useRouter();
   const fontFamily = useFontFamily();
   const theme = useMemo<Partial<Theme>>(() => ({ ...THEME, fontFamily }), [fontFamily]);
+  const open = useCallback((row: number) => { const r = rows[row]; if (r) router.push(`/conversations/${r.id}`); }, [rows, router]);
   const [selection, setSelection] = useState<GridSelection>({ columns: CompactSelection.empty(), rows: CompactSelection.empty() });
   const [hoverRow, setHoverRow] = useState<number>();
 
@@ -192,6 +195,8 @@ export function ConversationsGrid({ rows, onSelectionCount }: { rows: Conversati
       verticalBorder={false} smoothScrollX smoothScrollY drawFocusRing={false}
       getCellsForSelection keybindings={{ search: true, selectAll: true }}
       onItemHovered={(a) => setHoverRow(a.kind === "cell" ? a.location[1] : undefined)}
+      onCellClicked={([, row]) => open(row)}
+      onCellActivated={([, row]) => open(row)}
     />
   );
 }
