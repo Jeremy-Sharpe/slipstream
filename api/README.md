@@ -10,6 +10,23 @@ uv run pytest
 
 The liveness endpoint is available at `/health` and `/api/v1/health`. `/ready` additionally probes Supabase when configured and returns 503 if storage is unavailable. Both report optional integration configuration without exposing secret values.
 
+## Scorecard judge
+
+Scorecards use OpenRouter when `OPENROUTER_API_KEY` is set, with `SCORECARD_JUDGE_MODEL` defaulting to `deepseek/deepseek-v3.2`, the pick from the 12 September bake-off in `evals/README.md`; if OpenRouter is not configured, the API falls back to direct Anthropic via `ANTHROPIC_API_KEY`.
+
+`POST /scorecards` accepts a bounded diarised transcript. In durable mode it uses the
+call ID to reload the canonical stored segments and outcome, validates every cited
+quote against that revision, derives deterministic talk-time and consistency fields,
+and conditionally stores the result only if the conversation did not change while the
+judge ran. Memory mode scores the submitted synthetic transcript. `GET /scorecards/{call_id}` reads it
+back by conversation UUID or source ID. `POST /playbook` accepts distinct stored call
+IDs and requires both won and lost/stalled outcomes before deriving aggregate patterns;
+caller-authored scorecards are never trusted as evidence. Endpoints are
+also available under `/api/v1`. In credential-free memory mode, scorecard readback is
+process-local; with Supabase, `20260912020000_scorecard_persistence.sql` provides the
+service-role-only, source-revision-safe persistence function. Both mutation endpoints
+require `X-Slipstream-Ingest-Token` when `INGEST_TOKEN` is configured.
+
 ## Deployment
 
 `Dockerfile` and `railway.toml` support a Railway service. Leave the Railway service root at `/` and set its Config File path to `/api/railway.toml` so the image includes both `api/` and the deterministic `fixtures/` dataset. The container honours Railway's injected `PORT` and runs as an unprivileged user. Build the same image locally from the repository root with `docker build -f api/Dockerfile .`.

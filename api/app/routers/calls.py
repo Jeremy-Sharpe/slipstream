@@ -95,6 +95,7 @@ class CallResponse(BaseModel):
     processing_status: Literal["pending", "processing", "ready", "failed"] = "ready"
     provider: str
     fixture: bool = False
+    rep: str | None = None
 
 
 class FixtureSummary(BaseModel):
@@ -162,6 +163,7 @@ def _record(
     occurred_at: datetime,
     transcript: Transcript,
     fixture: bool,
+    rep: str | None = None,
 ) -> CallResponse:
     last_end = transcript.segments[-1].end_ms if transcript.segments else None
     return CallResponse(
@@ -174,6 +176,7 @@ def _record(
         segments=[SegmentResponse(**asdict(segment)) for segment in transcript.segments],
         provider=transcript.provider,
         fixture=fixture,
+        rep=rep,
     )
 
 
@@ -185,6 +188,7 @@ def _same_call(left: CallResponse, right: CallResponse) -> bool:
         and left.transcript == right.transcript
         and left.provider == right.provider
         and left.fixture == right.fixture
+        and left.rep == right.rep
         and left.segments == right.segments
     )
 
@@ -200,7 +204,11 @@ def _persist_to_supabase(client: Any, record: CallResponse) -> CallResponse:
         "raw_content": record.transcript,
         "processing_status": "processing",
         "processing_error": None,
-        "metadata": {"provider": record.provider, "fixture": record.fixture},
+        "metadata": {
+            "provider": record.provider,
+            "fixture": record.fixture,
+            **({"rep": record.rep} if record.rep else {}),
+        },
     }
     existing = (
         client.table("conversations")
@@ -295,6 +303,7 @@ def _read_from_supabase(client: Any, conversation_id: UUID) -> CallResponse | No
         processing_status=conversation["processing_status"],
         provider=metadata.get("provider", "unknown"),
         fixture=bool(metadata.get("fixture", False)),
+        rep=metadata.get("rep"),
     )
 
 
@@ -324,6 +333,7 @@ async def persist_realtime_call(
     subject: str,
     occurred_at: datetime,
     transcript: Transcript,
+    rep_name: str,
 ) -> CallResponse:
     """Persist a completed realtime transcript through the canonical call store."""
     record = _record(
@@ -332,6 +342,7 @@ async def persist_realtime_call(
         occurred_at=occurred_at,
         transcript=transcript,
         fixture=False,
+        rep=rep_name,
     )
     existing = await _find_by_source(request, source_external_id)
     if existing is not None:
@@ -420,6 +431,7 @@ async def ingest_fixture(call_id: str, request: Request) -> CallResponse:
             occurred_at=datetime.fromisoformat(payload["scheduled_at"]),
             transcript=transcript,
             fixture=True,
+            rep=payload["rep"],
         )
     except (KeyError, TypeError, ValueError) as error:
         raise HTTPException(
@@ -434,6 +446,7 @@ async def ingest_audio(
     request: Request,
     file: Annotated[UploadFile, File(description="Audio or video recording")],
     subject: Annotated[str, Form(min_length=1, max_length=200)],
+    rep_name: Annotated[str, Form(min_length=1, max_length=120)] = "Sales Rep",
     occurred_at: Annotated[datetime | None, Form()] = None,
     ingest_token: Annotated[str | None, Header(alias="X-Slipstream-Ingest-Token")] = None,
 ) -> CallResponse:
@@ -525,6 +538,7 @@ async def ingest_audio(
                 ),
                 transcript=transcript,
                 fixture=False,
+                rep=rep_name,
             )
             return await _persist(request, record)
         finally:

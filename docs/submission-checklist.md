@@ -10,11 +10,12 @@ finished video was verified on 12 September 2026.
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
-- API Ruff checks and all 114 post-merge tests pass.
+- API Ruff checks and all 148 scorecard-integration tests pass.
 - All six fixture tests pass.
 - The email migration executes against PostgreSQL and its committed Supabase test
   covers permissions, idempotency, rollback, CRM-field preservation, and message and
-  byte boundaries.
+  byte boundaries. The scorecard migration adds a service-role-only, stale-write-safe
+  conversation update and its own pgTAP permission and concurrency regression.
 - The deterministic rubric-sync eval passes. Every deterministic submission check
   except the required demo-video URL passes.
 

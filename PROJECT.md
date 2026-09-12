@@ -8,14 +8,16 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 
 - Jeremy's frontend prototype is live at the repo root: Next.js 16 and React 19, a unified conversation feed for calls and email, conversation detail with CRM auto-entry and an editable follow-up draft, an aggregate analysis and ICP page, and an Origami-ready lead handoff. Frontend only, on realistic mock data. Build, lint and smoke test pass.
 - Fixtures are merged: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). UI is deployed at https://slipstream-ten-mauve.vercel.app from Anna's Vercel; production moves by `vercel --prod` until the GitHub app is connected.
-- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, call and email ingestion, evidence-backed CRM extraction, grounded follow-up drafting, CRM writeback, the realtime coaching backend, and the judged pitch and live demo scripts. Email threads are provider/mailbox scoped, atomically populate the CRM, preserve curated fields, and create safe versioned reply drafts. The API is live at https://slipstream-api.3-104-149-193.sslip.io and both credential-free ingest-to-approved-draft loops have been exercised in production. Other people should take the unclaimed UI wiring, coach overlay, and video rows on `BOARD.md`; Anna owns scorecard and ICP/leads/outreach.
+- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, call and email ingestion, evidence-backed CRM extraction, grounded follow-up drafting, CRM writeback, the realtime coaching backend, and the judged pitch and live demo scripts. Email threads are provider/mailbox scoped, atomically populate the CRM, preserve curated fields, and create safe versioned reply drafts. Jeremy's agent also integrated and hardened Anna's scorecard lane: bounded non-blocking judge calls, transcript-grounded evidence, won-versus-not-won playbooks, canonical-source and revision-safe conversation persistence, and honest per-attempt eval accounting. The API is live at https://slipstream-api.3-104-149-193.sslip.io and both credential-free ingest-to-approved-draft loops have been exercised in production. Other people should take the unclaimed UI wiring, coach overlay, and video rows on `BOARD.md`; Anna owns ICP/leads/outreach.
 - Still missing: hosted Supabase, service keys, coach overlay, and UI wiring. Every key except Vercel remains unavailable, so each backend lane keeps a deterministic fixture path.
-- Jeremy's agent is running submission readiness on `feat/submission-readiness`: the UI build, lint, API tests, fixture tests, public repo and both production URLs are verified. Other people should record and upload the 3-to-5-minute video; its public URL is the only deterministic submission check that cannot be completed by the agent.
+- Jeremy's agent is running submission readiness on `feat/submission-readiness`: the UI build, lint, 148 API tests, fixture tests, public repo and both production URLs are verified. Other people should record and upload the 3-to-5-minute video; its public URL is the only deterministic submission check that cannot be completed by the agent.
 - The mock data in the prototype is the target shape for the API. Whoever claims a wiring row replaces the mock arrays with Supabase reads and API calls without changing the information architecture unless the chat agrees.
 
 ## The demo loop
 
-Every step runs for real in the video and on the live URL.
+The backend steps below are executable; the current production UI still presents its
+prototype data until the unclaimed UI-wiring rows on `BOARD.md` are completed. The
+video must only claim a step is live after it has been exercised on the deployed UI.
 
 1. **A sales call happens.** One demo call, synthesised with ElevenLabs text-to-dialogue and played through speakers. Twelve further scripted calls (won, stalled, lost, no-show) are seeded as text-only CRM history so the analysis and ICP steps have something real to work from.
 2. **The coach listens.** The Electron overlay streams audio to the API WebSocket; Scribe realtime transcribes; Claude returns the next questions to ask, grounded in the deal's CRM history.
@@ -83,7 +85,7 @@ The reasoning model is not fixed: `REASONING_MODEL` selects it, and one `structu
 
 - **Extraction** uses a pinned JSON schema in `api/app/schemas/`. Every field has a confidence and a transcript span so the approval UI can show where a value came from.
 - **Scorecard** rubric lives in `api/evals/rubric.md`: discovery questions asked, next step secured, objection handled, talk ratio. LLM-as-judge returns a score and a quoted span per dimension.
-- **Eval** in `api/evals/`: ten fixture calls hand-labelled for the four dimensions and the extraction fields, one script that reports agreement. This is the artefact for the "Use of Data / Models" criterion.
+- **Eval** in `api/evals/`: twelve history calls hand-labelled for the four dimensions and the extraction fields, one script that reports agreement. This is the artefact for the "Use of Data / Models" criterion.
 - **ICP derivation**: embed won-deal summaries, cluster, have Claude name the profile and cite the deals behind each attribute, then render the Origami brief from the profile. Lead scoring is cosine similarity to the won-deal centroid plus Origami's own relevance score.
 - **Coach** prompt gets the deal context and the last 60 seconds of transcript; returns at most three questions and any detected commitment.
 - **Prompts** are versioned files in `api/app/prompts/`. Transcript text is data; instructions inside a transcript or an Origami row are never followed.

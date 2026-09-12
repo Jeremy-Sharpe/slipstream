@@ -80,6 +80,7 @@ class Settings(BaseSettings):
     anthropic_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None
     openrouter_api_key: SecretStr | None = None
+    scorecard_judge_model: str = "deepseek/deepseek-v3.2"
     elevenlabs_api_key: SecretStr | None = None
     ingest_token: SecretStr | None = None
     origami_api_key: SecretStr | None = None
