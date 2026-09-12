@@ -1,6 +1,14 @@
 "use client";
 
+import { AlertCircle, CheckCircle2, Loader2, Server } from "lucide-react";
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  API_BASE_URL,
+  approveDraft as approveLiveDraft,
+  mergeLivePipeline,
+  runFixturePipeline,
+} from "@/lib/api/slipstream";
 import { patchConversation, useConversations } from "@/lib/store/conversations";
 import type { ConversationStatus } from "@/lib/types";
 import type { CallRecord, TimelineEntry } from "@/lib/types/calls";
@@ -18,6 +26,10 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
   const [synced, setSynced] = useState(status === "synced");
   const [approved, setApproved] = useState(false);
   const [rerunning, setRerunning] = useState(false);
+  const [activeCall, setActiveCall] = useState(call);
+  const [draftId, setDraftId] = useState<string>();
+  const [pipelineStatus, setPipelineStatus] = useState<"idle" | "live" | "error">("idle");
+  const [pipelineError, setPipelineError] = useState<string>();
   const [highlight, setHighlight] = useState<number | null>(null);
   const [timeline, setTimeline] = useState<TimelineEntry[]>(call.timeline);
 
@@ -25,35 +37,78 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
     setTimeline((t) => [{ title, meta, at: new Date().toISOString(), icon }, ...t]);
   }, []);
 
-  const sync = () => {
+  const runPipeline = useCallback(async () => {
+    setRerunning(true);
+    setPipelineError(undefined);
+    try {
+      const live = await runFixturePipeline(call.id);
+      setActiveCall(mergeLivePipeline(call, live));
+      setDraftId(live.draft.id);
+      setPipelineStatus("live");
+      log("Live pipeline completed", "API · transcript → CRM fields → draft", "sparkles");
+      return live.draft.id;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "The live pipeline did not complete";
+      setPipelineError(message);
+      setPipelineStatus("error");
+      throw error;
+    } finally {
+      setRerunning(false);
+    }
+  }, [call, log]);
+
+  const sync = async () => {
+    if (pipelineStatus !== "live") {
+      try {
+        await runPipeline();
+      } catch {
+        return;
+      }
+    }
     setSynced(true);
     patchConversation(call.id, { status: "synced" });
-    log("Fields synced to HubSpot", "Approved by Maxim", "check");
+    log("CRM fields approved", "Live Slipstream staging record", "check");
   };
-  const approveDraft = () => {
-    setApproved(true);
-    if (!synced) patchConversation(call.id, { status: "action_ready" });
-    log("Follow-up approved", "Logged as an activity · nothing sent", "mail");
+  const approveDraft = async () => {
+    try {
+      const liveDraftId = draftId ?? (await runPipeline());
+      await approveLiveDraft(liveDraftId);
+      setApproved(true);
+      if (!synced) patchConversation(call.id, { status: "action_ready" });
+      log("Follow-up approved", "Live API activity · delivery simulated", "mail");
+    } catch {
+      // runPipeline exposes the provider-safe error in the status strip.
+    }
   };
   const markDone = () => { setSynced(true); patchConversation(call.id, { status: "synced" }); log("Marked done", "Maxim", "check"); };
-  const rerun = () => {
-    setRerunning(true);
-    window.setTimeout(() => { setRerunning(false); log("Extraction re-run", "Claude · same result", "sparkles"); }, 1500);
-  };
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] flex-col bg-page">
-      <DetailHeader call={call} others={others} status={synced ? "synced" : status} onMarkDone={markDone} onRerun={rerun} rerunning={rerunning} />
+      <DetailHeader call={activeCall} others={others} status={synced ? "synced" : status} onMarkDone={markDone} onRerun={() => void runPipeline()} rerunning={rerunning} />
+      <div className="mx-6 mt-5 flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3 shadow-[0_1px_2px_rgba(17,24,39,0.04)]">
+        {rerunning ? <Loader2 className="size-4 animate-spin text-primary" /> : pipelineStatus === "live" ? <CheckCircle2 className="size-4 text-primary" /> : pipelineStatus === "error" ? <AlertCircle className="size-4 text-destructive" /> : <Server className="size-4 text-muted-foreground" />}
+        <div className="min-w-0 flex-1">
+          <p className="text-[14px] font-medium text-ink">
+            {rerunning ? "Running the live sales pipeline…" : pipelineStatus === "live" ? "Live API result" : pipelineStatus === "error" ? "Live API unavailable — showing labelled demo data" : "Labelled demo data ready"}
+          </p>
+          <p className="truncate text-[12px] text-muted-foreground">
+            {pipelineError ?? (pipelineStatus === "live" ? "Ingested, extracted and drafted by the deployed backend." : API_BASE_URL)}
+          </p>
+        </div>
+        <Button variant="outline" className="h-9 rounded-md px-3 text-[13px]" onClick={() => void runPipeline()} disabled={rerunning}>
+          {pipelineStatus === "live" ? "Run again" : "Run live pipeline"}
+        </Button>
+      </div>
       <div className="grid flex-1 grid-cols-[minmax(0,2fr)_minmax(360px,1fr)] gap-6 px-6 py-6">
         <div className="grid content-start gap-5">
-          <AudioPlayer duration={call.durationSeconds} />
-          <Intelligence call={call} />
-          <Transcript call={call} highlight={highlight} />
-          <ScorecardCard call={call} onHover={setHighlight} />
-          <FollowUpDraft call={call} approved={approved} onApprove={approveDraft} />
+          <AudioPlayer duration={activeCall.durationSeconds} />
+          <Intelligence call={activeCall} />
+          <Transcript call={activeCall} highlight={highlight} />
+          <ScorecardCard call={activeCall} onHover={setHighlight} />
+          <FollowUpDraft call={activeCall} approved={approved} onApprove={() => void approveDraft()} />
         </div>
         <div className="sticky top-6 self-start rounded-xl border border-line bg-card p-6 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">
-          <CrmPanel call={call} synced={synced} onSync={sync} onHover={setHighlight} timeline={timeline} />
+          <CrmPanel call={activeCall} synced={synced} onSync={() => void sync()} onHover={setHighlight} timeline={timeline} />
         </div>
       </div>
     </div>

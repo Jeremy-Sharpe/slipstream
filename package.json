@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "oxlint app",
+    "lint": "oxlint app components lib",
     "evals": "node scripts/run-evals.mjs",
     "evals:dry": "node scripts/run-evals.mjs --dry"
   },
