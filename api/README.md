@@ -12,7 +12,7 @@ The liveness endpoint is available at `/health` and `/api/v1/health`. `/ready` a
 
 ## Scorecard judge
 
-Scorecards use OpenRouter when `OPENROUTER_API_KEY` is set, with `SCORECARD_JUDGE_MODEL` defaulting to `anthropic/claude-sonnet-5`; if OpenRouter is not configured, the API falls back to direct Anthropic via `ANTHROPIC_API_KEY`.
+Scorecards use OpenRouter when `OPENROUTER_API_KEY` is set, with `SCORECARD_JUDGE_MODEL` defaulting to `deepseek/deepseek-v3.2`, the pick from the 12 September bake-off in `evals/README.md`; if OpenRouter is not configured, the API falls back to direct Anthropic via `ANTHROPIC_API_KEY`.
 
 ## Deployment
 

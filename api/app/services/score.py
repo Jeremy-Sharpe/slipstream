@@ -28,7 +28,7 @@ from app.schemas.scorecard import (
 )
 
 RUBRIC_VERSION = "v1"
-DEFAULT_JUDGE_MODEL = "anthropic/claude-sonnet-5"
+DEFAULT_JUDGE_MODEL = "deepseek/deepseek-v3.2"
 PRICES_PER_MTOK = {
     "claude-sonnet-5": (2.0, 10.0),
     "claude-haiku-4-5": (1.0, 5.0),
