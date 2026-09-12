@@ -62,8 +62,9 @@ if [[ ! -f "$RELEASE_DIR/.prepared" ]]; then
     > "$FINALIZE_DIR/.release.env"
   chmod 0644 "$FINALIZE_DIR/.release.env"
   runuser -u slipstream -- env -i PATH=/usr/bin:/bin ENVIRONMENT=production \
-    "$FINALIZE_DIR/api/.venv/bin/python" -c \
-    "import sys; sys.path.insert(0, '$FINALIZE_DIR/api'); from app.main import app; assert app.title == 'Slipstream API'"
+    sh -c 'cd "$1" && exec .venv/bin/python -c \
+      "from app.main import app; assert app.title == '\''Slipstream API'\''"' \
+    sh "$FINALIZE_DIR/api"
   touch "$FINALIZE_DIR/.prepared"
   mv "$FINALIZE_DIR" "$RELEASE_DIR"
 fi
