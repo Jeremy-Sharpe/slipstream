@@ -1,9 +1,6 @@
-import { EmptySurface, PageShell } from "@/components/shell/PageShell";
+import { IntelligenceView } from "@/components/intelligence/IntelligenceView";
+import { intelligence } from "@/lib/data/intelligence";
 
-export default function Page() {
-  return (
-    <PageShell title="Intelligence" description="What your best customers have in common, worked backwards from won deals.">
-      <EmptySurface label="Nothing analysed yet." />
-    </PageShell>
-  );
+export default function IntelligencePage() {
+  return <IntelligenceView data={intelligence} />;
 }
