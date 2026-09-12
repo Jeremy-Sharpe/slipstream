@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "oxlint app",
-    "evals": "node ${HG_STACK:-$HOME/repos/hourglass-claude-stack}/hg-evals/bin/hg-evals.mjs run",
-    "evals:dry": "node ${HG_STACK:-$HOME/repos/hourglass-claude-stack}/hg-evals/bin/hg-evals.mjs run --dry"
+    "evals": "node scripts/run-evals.mjs",
+    "evals:dry": "node scripts/run-evals.mjs --dry"
   },
   "dependencies": {
     "lucide-react": "^0.544.0",
