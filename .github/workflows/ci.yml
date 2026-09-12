@@ -96,6 +96,30 @@ jobs:
       - name: Test
         run: uv run pytest -q
 
+  database:
+    name: Database migrations and pgTAP
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Install Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Start ephemeral Supabase
+        run: npm exec --yes --package=supabase@2.117.0 -- supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor
+
+      - name: Apply migrations and run pgTAP
+        run: npm exec --yes --package=supabase@2.117.0 -- supabase test db
+
+      - name: Stop ephemeral Supabase
+        if: always()
+        run: npm exec --yes --package=supabase@2.117.0 -- supabase stop --no-backup
+
   coach:
     name: Coach tests and renderer build
     runs-on: ubuntu-latest
