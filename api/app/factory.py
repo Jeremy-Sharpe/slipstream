@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import Settings, get_settings
 from app.core.readiness import StorageReadinessProbe
-from app.routers import health
+from app.routers import health, scorecards
+from app.services.score import DEFAULT_JUDGE_MODEL, anthropic_judge
 
 
 @asynccontextmanager
@@ -29,6 +30,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = runtime_settings
     app.state.readiness = StorageReadinessProbe(runtime_settings)
+
+    def judge_factory():
+        if runtime_settings.anthropic_api_key is None:
+            raise RuntimeError("Anthropic integration is not configured")
+        return anthropic_judge(
+            runtime_settings.anthropic_api_key.get_secret_value(),
+            DEFAULT_JUDGE_MODEL,
+        )
+
+    app.state.judge_factory = judge_factory
     app.add_middleware(
         CORSMiddleware,
         allow_origins=runtime_settings.web_origins,
@@ -37,5 +48,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
     )
     app.include_router(health.router)
+    app.include_router(scorecards.router)
     app.include_router(health.router, prefix="/api/v1")
+    app.include_router(scorecards.router, prefix="/api/v1")
     return app
