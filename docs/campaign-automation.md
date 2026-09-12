@@ -40,6 +40,22 @@ curl --fail-with-body "$SLIPSTREAM_API_URL/api/v1/campaigns?limit=50"
 curl --fail-with-body "$SLIPSTREAM_API_URL/api/v1/campaigns/3ba7550e-759c-4f13-bc91-70d5e0453e7a"
 ```
 
+## Pause and resume
+
+Pause prevents the scheduler from claiming any new chunk. A chunk already running is bounded to 50 seconds and cannot be paused mid-provider-call, so the pause endpoint returns `409` while a worker owns the campaign; retry after that run finishes. Repeating the same pause or resume action is safe.
+
+```bash
+curl --fail-with-body \
+  -X POST "$SLIPSTREAM_API_URL/api/v1/campaigns/3ba7550e-759c-4f13-bc91-70d5e0453e7a/pause" \
+  -H "X-Slipstream-Ingest-Token: $SLIPSTREAM_INGEST_TOKEN"
+
+curl --fail-with-body \
+  -X POST "$SLIPSTREAM_API_URL/api/v1/campaigns/3ba7550e-759c-4f13-bc91-70d5e0453e7a/resume" \
+  -H "X-Slipstream-Ingest-Token: $SLIPSTREAM_INGEST_TOKEN"
+```
+
+Only scheduled campaigns can be paused, and only paused campaigns with unfinished queued or retryable items can be resumed. Completed campaigns and campaigns needing manual reconciliation remain terminal.
+
 ## Run due work from Railway or Marcel
 
 Configure a cron job to call this endpoint every minute. Required secrets are `SLIPSTREAM_API_URL` and `SLIPSTREAM_INGEST_TOKEN`; the API itself additionally needs `RESEND_API_KEY` and `RESEND_FROM`.

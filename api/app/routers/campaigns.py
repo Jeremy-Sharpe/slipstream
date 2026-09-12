@@ -16,6 +16,7 @@ from app.services.campaigns import (
     CampaignConflictError,
     CampaignItem,
     CampaignItemResult,
+    CampaignNotFoundError,
     CampaignStoreError,
     new_campaign_id,
 )
@@ -128,6 +129,8 @@ async def _store_call(request: Request, method: str, *args: Any, **kwargs: Any) 
             raise
         except CampaignConflictError as error:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+        except CampaignNotFoundError as error:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
         except CampaignStoreError as error:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -291,3 +294,33 @@ async def run_due_campaign(
         claimed_count=len(claim.draft_ids),
         campaign=CampaignResponse.from_campaign(campaign),
     )
+
+
+async def _set_campaign_paused(
+    campaign_id: UUID,
+    request: Request,
+    ingest_token: str | None,
+    *,
+    paused: bool,
+) -> CampaignResponse:
+    deliveries._authorise(request, ingest_token)
+    campaign = await _store_call(request, "set_paused", campaign_id, paused=paused)
+    return CampaignResponse.from_campaign(campaign)
+
+
+@router.post("/{campaign_id}/pause", response_model=CampaignResponse)
+async def pause_campaign(
+    campaign_id: UUID,
+    request: Request,
+    ingest_token: Annotated[str | None, Header(alias="X-Slipstream-Ingest-Token")] = None,
+) -> CampaignResponse:
+    return await _set_campaign_paused(campaign_id, request, ingest_token, paused=True)
+
+
+@router.post("/{campaign_id}/resume", response_model=CampaignResponse)
+async def resume_campaign(
+    campaign_id: UUID,
+    request: Request,
+    ingest_token: Annotated[str | None, Header(alias="X-Slipstream-Ingest-Token")] = None,
+) -> CampaignResponse:
+    return await _set_campaign_paused(campaign_id, request, ingest_token, paused=False)
