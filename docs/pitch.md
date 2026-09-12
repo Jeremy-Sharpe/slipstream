@@ -10,7 +10,9 @@ We built Slipstream: an AI sales layer that sits beside the CRM a team already h
 
 A call enters Slipstream as audio. ElevenLabs Scribe transcribes it and separates the speakers. Slipstream turns that conversation into structured contact, company and deal fields, including promises, objections and the agreed next step. Every extracted field carries confidence and evidence, so a rep can jump back to the exact words before approving the update.
 
-Then Slipstream drafts the follow-up. It uses what was actually agreed, not a generic template. In our demo call, the rep makes an unsupported claim that cyber insurance will be cut in half. Slipstream records the risk but does not repeat it in the email. One click approves the draft and records who approved it without pretending it was sent. A separate server-side Resend adapter can deliver only that approved copy with a stable idempotency key.
+Then Slipstream drafts the follow-up. It uses what was actually agreed, not a generic template. In our demo call, the rep makes an unsupported claim that cyber insurance will be cut in half. Slipstream records the risk but does not repeat it in the email. One click approves the draft and records who approved it without pretending it was sent.
+
+Approved drafts can be enrolled by exact ID into a scheduled campaign. A trusted Railway worker sends at most eight at a time through Resend; every item is confirmed, retried, failed or flagged for reconciliation, and the operator can pause future work. Stable provider identities and database leases make retries safe. The browser can inspect progress, but it never receives the delivery token.
 
 That already saves over an hour a day for a rep doing eight calls. But the real difference is what happens across the whole team.
 
@@ -20,7 +22,7 @@ That profile becomes a search brief for Origami, our prospect-sourcing partner. 
 
 This is one closed loop, not four disconnected AI features: conversation to CRM, CRM to coaching, won deals to ICP, and ICP to pipeline.
 
-For the weekend build, our CRM is Postgres shaped like HubSpot objects. The production FastAPI service is live behind HTTPS on Jeremy’s VPS, and the UI is live on Vercel. Thirteen labelled calls cover wins, losses, stalls and a no-show. The full credential-free path—from fixture ingestion through evidence-backed extraction to an approved follow-up—runs against production, and the paid integrations fail closed when their keys are absent.
+For the weekend build, our CRM is Postgres shaped like HubSpot objects. The production FastAPI service is live behind HTTPS on Jeremy’s VPS, and the UI is live on Vercel. Thirteen labelled calls cover wins, losses, stalls and a no-show. The full credential-free path—from fixture ingestion through evidence-backed extraction to an approved follow-up—runs against production, and paid integrations fail closed when their keys are absent. The public demo has no Resend key, so its campaign status boundary is real without claiming an email was sent.
 
 The path to a product is direct. Replace file upload with an Aircall or Twilio recording webhook. Replace our HubSpot-shaped table writes with HubSpot API calls. Connect Gmail for delivery. The intelligence contract does not change.
 
@@ -30,7 +32,7 @@ Enterprise teams can stitch together Gong, a CRM, Clay and a RevOps person. A tw
 
 ### What is real, and what is mocked? — Jeremy
 
-The businesses and calls are synthetic, so no customer data is exposed. The demo audio is a real two-voice ElevenLabs file. Ingestion, diarised transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval state, ICP services and production API are executable. The public deployment intentionally has no email-provider key, so delivery fails closed instead of being simulated. Origami sourcing requires its paid key; when that integration is unavailable, only the explicitly labelled evaluation leads remain displayable.
+The businesses and calls are synthetic, so no customer data is exposed. The demo audio is a real two-voice ElevenLabs file. Ingestion, diarised transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval, explicit campaign enrollment, pause/resume, bounded scheduling, ICP services and production API are executable. The public deployment intentionally has no email-provider key, so delivery fails closed instead of being simulated. Origami sourcing requires its paid key; when that integration is unavailable, only the explicitly labelled evaluation leads remain displayable.
 
 ### How accurate is the extraction? — Anna
 
@@ -62,4 +64,8 @@ Recorders stop at notes, lead tools require the user to define the target, and e
 
 ### What would you build next? — Jeremy
 
-First, a real HubSpot sandbox connector and Gmail draft delivery behind OAuth. Second, Aircall or Twilio recording webhooks. Third, tenant-scoped auth, consent and retention controls. We would keep the deterministic eval set and add anonymised customer-approved calls before tuning prompts or changing models.
+First, a real HubSpot sandbox connector and tenant-scoped authentication around the existing Resend delivery path. Second, Aircall or Twilio recording webhooks. Third, consent and retention controls. We would keep the deterministic eval set and add anonymised customer-approved calls before tuning prompts or changing models.
+
+### Can this accidentally send twice? — Jeremy
+
+Campaign membership is an explicit list of approved draft IDs. The scheduler leases one campaign chunk, and every draft separately reserves a durable, content-bound delivery identity before provider I/O. A lost response becomes retryable and reconciliation-required, not “sent”; the next run reuses the same provider idempotency key. Operators can pause future chunks, but an already-running provider call is allowed to finish rather than being falsely reported as cancelled.
