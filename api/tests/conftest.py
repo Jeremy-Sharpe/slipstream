@@ -17,6 +17,8 @@ def clean_external_service_environment(monkeypatch: pytest.MonkeyPatch) -> None:
         "ELEVENLABS_API_KEY",
         "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
+        "CRM_WEBHOOK_URL",
+        "CRM_WEBHOOK_SECRET",
         "WEB_ORIGIN",
         "WEB_ORIGINS",
     ):

@@ -93,6 +93,8 @@ def test_checked_in_example_accepts_blank_optional_credentials(
         "ELEVENLABS_API_KEY",
         "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
+        "CRM_WEBHOOK_URL",
+        "CRM_WEBHOOK_SECRET",
         "WEB_ORIGIN",
         "WEB_ORIGINS",
     ):
@@ -111,6 +113,59 @@ def test_paid_transcription_requires_production_ingest_token() -> None:
             environment="production",
             elevenlabs_api_key="paid-key",
         )
+
+
+def test_crm_webhook_configuration_is_canonical_and_visible() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        ingest_token="browser-mutation-secret",
+        crm_webhook_url="HTTPS://CRM.EXAMPLE.COM:443/hooks/slipstream",
+        crm_webhook_secret="s" * 32,
+    )
+
+    assert settings.crm_webhook_url == "https://crm.example.com/hooks/slipstream"
+    assert settings.integration_flags["crm_webhook"] is True
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"crm_webhook_url": "https://crm.example.test/hook"},
+        {"crm_webhook_secret": "s" * 32},
+        {
+            "crm_webhook_url": "https://crm.example.test/hook",
+            "crm_webhook_secret": "short",
+            "ingest_token": "browser-secret",
+        },
+        {
+            "environment": "production",
+            "crm_webhook_url": "http://crm.example.test/hook",
+            "crm_webhook_secret": "s" * 32,
+            "ingest_token": "browser-secret",
+        },
+        {
+            "environment": "production",
+            "crm_webhook_url": "https://crm.example.test/hook",
+            "crm_webhook_secret": "s" * 32,
+        },
+        {
+            "crm_webhook_url": "https://user:password@crm.example.test/hook",
+            "crm_webhook_secret": "s" * 32,
+        },
+        {
+            "crm_webhook_url": "https://crm.example.test/hook#fragment",
+            "crm_webhook_secret": "s" * 32,
+        },
+        {
+            "crm_webhook_url": "https://crm.example.test/hook?token=secret",
+            "crm_webhook_secret": "s" * 32,
+        },
+    ],
+)
+def test_invalid_crm_webhook_configuration_is_rejected(kwargs: dict[str, str]) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, **kwargs)
 
 
 @pytest.mark.parametrize(
