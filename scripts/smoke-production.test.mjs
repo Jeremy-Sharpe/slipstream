@@ -4,6 +4,8 @@ import test from "node:test";
 import { runSmoke } from "./smoke-production.mjs";
 
 const revision = "3e03e1a4c9489bea302c8677312c53d5956cad23";
+const conversationId = "e9981868-623b-5b59-ab18-5e0c342f2c15";
+const draftId = "435108a7-6302-5627-b456-c0abd72602ac";
 
 function json(value, status = 200) {
   return new Response(JSON.stringify(value), {
@@ -36,6 +38,45 @@ function fixtureFetch(overrides = {}) {
       { detail: "Invalid ingest token" },
       401,
     ),
+    "https://api.example/api/v1/calls/fixtures/call-01-northstar-labs/ingest": json({
+      id: conversationId,
+      source_external_id: "call-01-northstar-labs",
+      subject: "Northstar Labs — Maya Chen",
+      provider: "fixture",
+      fixture: true,
+      segments: Array.from({ length: 12 }, (_, sequence) => ({ sequence })),
+    }),
+    [`https://api.example/api/v1/calls/${conversationId}/extract`]: json({
+      conversation_id: conversationId,
+      source: "fixture_labels",
+      contact: { name: { value: "Maya Chen", evidence: [{ sequence: 0 }] } },
+      company: { name: { value: "Northstar Labs" } },
+    }),
+    [`https://api.example/api/v1/drafts/from-call/${conversationId}`]: json({
+      id: draftId,
+      conversation_id: conversationId,
+      recipient_name: "Maya Chen",
+      status: "draft",
+      sent_at: null,
+    }),
+    [`https://api.example/api/v1/drafts/${draftId}/approve`]: json({
+      id: draftId,
+      conversation_id: conversationId,
+      status: "approved",
+      approved_at: "2026-09-13T00:00:00Z",
+      sent_at: null,
+    }),
+    [`https://api.example/api/v1/calls/${conversationId}`]: json({
+      id: conversationId,
+    }),
+    [`https://api.example/api/v1/calls/${conversationId}/extraction`]: json({
+      conversation_id: conversationId,
+    }),
+    [`https://api.example/api/v1/drafts/${draftId}`]: json({
+      id: draftId,
+      status: "approved",
+      sent_at: null,
+    }),
     ...overrides,
   };
   return async (url) => {
@@ -83,5 +124,40 @@ test("rejects a campaign UI without the live execution surface", async () => {
       }),
     }),
     /missing Delivery execution/,
+  );
+});
+
+test("exercises the canonical production call through audited unsent approval", async () => {
+  const result = await runSmoke({
+    uiUrl: "https://ui.example",
+    apiUrl: "https://api.example",
+    expectedRevision: revision,
+    exerciseFixture: true,
+    fetchImpl: fixtureFetch(),
+  });
+
+  assert.deepEqual(result.fixtureLoop, {
+    conversationId,
+    draftId,
+    status: "approved-unsent",
+  });
+});
+
+test("fails if the production fixture draft was unexpectedly sent", async () => {
+  await assert.rejects(
+    runSmoke({
+      uiUrl: "https://ui.example",
+      apiUrl: "https://api.example",
+      exerciseFixture: true,
+      fetchImpl: fixtureFetch({
+        [`https://api.example/api/v1/drafts/${draftId}/approve`]: json({
+          id: draftId,
+          status: "approved",
+          approved_at: "2026-09-13T00:00:00Z",
+          sent_at: "2026-09-13T00:00:01Z",
+        }),
+      }),
+    }),
+    /unexpectedly sent/,
   );
 });

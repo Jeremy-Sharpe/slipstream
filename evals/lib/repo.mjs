@@ -19,6 +19,9 @@ export const PRODUCTION_SURFACES = [
 export const PRODUCTION_API_SURFACES = [
   { label: "API readiness and integration truth", path: "/ready" },
   { label: "Live campaign execution state", path: "/api/v1/campaigns" },
+  { label: "Executed Maya call record", path: "/api/v1/calls/e9981868-623b-5b59-ab18-5e0c342f2c15" },
+  { label: "Evidence-backed Maya CRM extraction", path: "/api/v1/calls/e9981868-623b-5b59-ab18-5e0c342f2c15/extraction" },
+  { label: "Audited approved-unsent Maya follow-up", path: "/api/v1/drafts/435108a7-6302-5627-b456-c0abd72602ac" },
 ];
 
 // Lines the README must carry so the checks (and the judges) can find the
