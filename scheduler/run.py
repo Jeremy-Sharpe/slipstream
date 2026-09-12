@@ -24,6 +24,10 @@ class SchedulerError(RuntimeError):
     pass
 
 
+def termination_requested(_signal_number: int, _frame: object) -> None:
+    raise SchedulerError("campaign scheduler was terminated")
+
+
 @contextmanager
 def wall_clock_deadline(seconds: float):
     previous_handler = signal.getsignal(signal.SIGALRM)
@@ -200,6 +204,7 @@ def _run_with_deadline(settings: Settings, opener: Opener | None) -> dict[str, o
 
 
 def main() -> int:
+    signal.signal(signal.SIGTERM, termination_requested)
     try:
         summary = run(load_settings(os.environ))
     except ConfigError as error:

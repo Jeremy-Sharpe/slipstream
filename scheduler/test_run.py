@@ -189,6 +189,36 @@ run(settings, SlowOpener(FakeResponse({})))
         self.assertNotEqual(completed.returncode, 0)
         self.assertIn("total deadline", completed.stderr)
 
+    def test_container_sigterm_exits_promptly_and_nonzero(self) -> None:
+        script = """
+import time
+import run as worker
+
+worker.run = lambda settings: time.sleep(10)
+raise SystemExit(worker.main())
+"""
+        environment = dict(os.environ)
+        environment.update(
+            {
+                "PYTHONPATH": os.path.dirname(__file__),
+                "SLIPSTREAM_API_URL": "https://api.example.test",
+                "SLIPSTREAM_INGEST_TOKEN": "secret",
+            }
+        )
+        process = subprocess.Popen(
+            [sys.executable, "-c", script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=environment,
+        )
+        time.sleep(0.1)
+        process.terminate()
+        stdout, stderr = process.communicate(timeout=1)
+        self.assertEqual(process.returncode, 1)
+        self.assertEqual(stdout, "")
+        self.assertIn("scheduler was terminated", stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
