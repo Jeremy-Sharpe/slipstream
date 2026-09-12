@@ -22,10 +22,10 @@ Order matters. The foundation rows unblock everything else and should be claimed
 | `ingest` | Upload or pick a fixture call, Scribe batch transcription with diarisation, transcript stored | `api/app/routers/calls.py`, `api/app/services/transcribe.py` | Jeremy's agent | feat/ingest | in progress | Building fixture and audio ingestion with a deterministic no-key path |
 | `extract` | Claude structured extraction to contacts, companies, deals, notes, tasks, activities, with confidence and transcript spans | `api/app/services/extract.py`, `api/app/prompts/extract-*.md`, `api/app/schemas/` | | | unclaimed | Depends on `ingest` |
 | `draft` | Follow-up email draft per call, approve marks sent and logs an activity | `api/app/services/draft.py`, `api/app/routers/drafts.py` | | | unclaimed | Depends on `extract` |
-| `scorecard` | Rubric document, LLM-as-judge scorecard per call, ten-call labelled eval and script | `api/app/services/score.py`, `api/evals/` | | | unclaimed | |
-| `icp` | Embed won-deal summaries, derive the ICP with evidence, generate the Origami brief | `api/app/services/icp.py` | | | unclaimed | Picks the embedding model |
-| `leads` | Origami search from the brief, job polling, rows to `leads`, similarity scoring against won deals | `api/app/services/origami.py`, `api/app/routers/leads.py` | Anna | | in progress | Start at `count: 10` |
-| `outreach` | Outreach draft per lead, approve | `api/app/services/outreach.py` | Anna | | in progress | Depends on `leads` |
+| `scorecard` | Rubric document, LLM-as-judge scorecard per call, ten-call labelled eval and script | `api/app/services/score.py`, `api/evals/` | Anna | feat/scorecard | in progress | Depends only on the fixture labels; separate test file from the icp lane |
+| `icp` | Embed won-deal summaries, derive the ICP with evidence, generate the Origami brief | `api/app/services/icp.py`, `api/app/routers/icp.py` | Anna | feat/icp-leads | in progress | Embedding model: OpenAI text-embedding-3-small (1536 dims match the schema, $0.02 per 1M tokens) |
+| `leads` | Origami search from the brief, job polling, rows to `leads`, similarity scoring against won deals | `api/app/services/origami.py`, `api/app/routers/leads.py` | Anna | feat/icp-leads | in progress | Start at `count: 10` |
+| `outreach` | Outreach draft per lead, approve | `api/app/services/outreach.py` | Anna | feat/icp-leads | in progress | Depends on `leads` |
 | `web-wire-conversations` | Replace mock conversations with Supabase reads and API calls: transcript, extracted fields with approval, scorecard, draft | `app/` conversation views, `lib/` | | | unclaimed | Keep the prototype's information architecture |
 | `web-wire-analysis` | Replace mock analysis and ICP data with live reads | `app/analysis` | | | unclaimed | |
 | `web-wire-leads` | Replace mock leads with live Origami results, similarity score, outreach approve | `app/leads` | | | unclaimed | |
@@ -40,4 +40,5 @@ Order matters. The foundation rows unblock everything else and should be claimed
 
 | Slug | Why | Unblocks when |
 |---|---|---|
-| | | |
+| `model-bakeoff` | Compare Claude, OpenAI and open-weight models on extraction, scorecard and risk flags over the fixtures; plan in `docs/model-bakeoff.md`. Owner Anna. | The demo loop runs end to end and the prompts in `api/app/prompts/` exist |
+| `draft-judge` | Pairwise blind judge for follow-up draft quality, part of the bake-off | After `model-bakeoff` |
