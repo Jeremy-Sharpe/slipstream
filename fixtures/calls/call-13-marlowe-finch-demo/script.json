@@ -1,11 +1,11 @@
 {
   "call_id": "call-13-marlowe-finch-demo",
   "seller": "Harbourline IT",
-  "rep": "Jordan Lee",
+  "rep": "Jordan Belfort",
   "prospect": {
-    "name": "Dev Patel",
+    "name": "Donnie Azoff",
     "role": "CFO",
-    "email": "dev@marlowefinch.example",
+    "email": "donnie@marlowefinch.example",
     "phone": "+61 3 7010 1113"
   },
   "company": {
@@ -25,152 +25,152 @@
   "turns": [
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
-      "text": "Dev Patel, Jordan Lee from Harbourline IT. I've heard Marlowe & Finch Accounting is the calmest thirty-four-person practice in Hawthorn, which means you must be hiding the chaos beautifully?"
+      "name": "Jordan Belfort",
+      "text": "Donnie Azoff, Jordan Belfort from Harbourline IT. I've heard Marlowe & Finch Accounting is the calmest thirty-four-person practice in Hawthorn, which means you must be hiding the chaos beautifully?"
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
-      "text": "That's generous. I'm Dev, CFO, and there's definitely chaos. We've got a cyber insurance renewal on my desk and the partners want it gone before quarter close."
+      "name": "Donnie Azoff",
+      "text": "That's generous. I'm Donnie, CFO, and there's definitely chaos. We've got a cyber insurance renewal on my desk and the partners want it gone before quarter close."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
-      "text": "Perfect, picture this: three firms on your street have already moved, and the onboarding price is gone Friday. You don't need another committee, you need Harbourline on the tools before the insurer decides accountants are this season's pi\u00f1ata."
+      "name": "Jordan Belfort",
+      "text": "Perfect, picture this: three firms on your street have already moved, and the onboarding price is gone Friday. You don't need another committee, you need Harbourline on the tools before the insurer decides accountants are this season's piñata."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "Hold on. I'm taking the call because we need options, not because we've chosen anyone. What exactly are you proposing?"
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Simple. Thirty seats, $135 per seat per month, managed IT, cyber hygiene, Microsoft 365, Xero access review, MFA, backups, helpdesk, partner-friendly reporting, the whole brass band. I can guarantee Essential Eight compliance inside a week."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "That's a very big promise. Also thirty seats is close, but we've thirty-four people including casual admin and seasonal tax support."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Thirty is the clean commercial start. We cover the core team now, catch the casuals in onboarding, and keep the invoice from looking like it swallowed a bowling ball. The annual figure is $48,600, and onboarding is at cost because I want this moving."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "Price is my first concern. Our incumbent charges less, and the partners are already grumpy about insurance premiums."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
-      "text": "Price is smoke, Dev, premium is fire. Your insurer will halve the premium once they see our report, so the monthly line item becomes a rounding error with a login screen."
+      "name": "Jordan Belfort",
+      "text": "Price is smoke, Donnie, premium is fire. Your insurer will halve the premium once they see our report, so the monthly line item becomes a rounding error with a login screen."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "You can't know that. The broker hasn't promised anything like a half reduction, and I can't sell fantasy savings to the partners."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Fair, fair, call it a sharp reduction rather than a tattoo. The point is the renewal asks for controls, and we package the answers so you aren't hunting screenshots from a router, a laptop and a drawer full of mystery passwords."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "That part is real. We struggled last year to prove MFA coverage and backup testing. Still, our current provider knows the practice and the partners trust them."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Trust is lovely. Receipts are lovelier. None of our clients has ever been breached, and we run the service like a tax file with a stopwatch: evidence, cadence, accountability, no heroic cousin with a USB stick."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "The incumbent isn't someone's cousin. They're a proper provider, and they've supported us for years."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "I hear you, and loyalty matters. The question is whether they're built for this renewal. Your incumbent is about to lose their certification, and even without that, you need insurer-grade evidence, not a nice bloke with fast email."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "About to lose certification? That's a pretty serious thing to say. I haven't heard that from anyone."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Let's not get stuck in the weeds. I'm saying the market's moving, auditors are waking up, insurers are grumpy, and you don't want Marlowe & Finch Accounting as the test case everyone whispers about at the Hawthorn lunch counter."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "I don't like being rushed. I do like the idea of evidence for the renewal, and a fixed commercial number helps. What would happen today if I said yes to reviewing it?"
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Today is easy. I turn the call into a plain proposal, no interpretive dance, no discovery workshop that eats your calendar. You'll see seats, scope, onboarding, renewal evidence, support hours, response targets and the Monday start plan in one clean pack."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "A clean pack is useful. I still need the managing partner to be comfortable before anyone signs."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Of course. Give the managing partner the tidy version: thirty core seats, insurer evidence first, no migration circus, and the finance line is predictable. I'll keep the terms sharp enough that nobody has to decode vendor soup at dinner."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "Good. Clear and short will help."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "Beautiful. I will get a proposal in your inbox today, with a signed 30-seat agreement at $135 per seat per month and onboarding at cost. You sign, we start Monday, and your broker gets grown-up answers before they sharpen the pencil."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "I said review it, not definitely sign it. But if the agreement is clean and onboarding is genuinely at cost, I can take it to the managing partner tonight."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
+      "name": "Jordan Belfort",
       "text": "That's the small step. Just say yes to the small step. I will send the proposal and 30-seat agreement by 5pm today, and we'll hold the Friday onboarding price while you get the signature."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "Fine. Send it by 5pm today, 11 September. I'll review it with the managing partner, and if the terms match what you've said, we'll sign the 30-seat agreement and start with onboarding Monday."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
-      "text": "Excellent. I'll send it to dev@marlowefinch.example, copy your office manager if you want, and keep the first page painfully clear: $48,600 annual managed service, onboarding at cost, insurer evidence first."
+      "name": "Jordan Belfort",
+      "text": "Excellent. I'll send it to donnie@marlowefinch.example, copy your office manager if you want, and keep the first page painfully clear: $48,600 annual managed service, onboarding at cost, insurer evidence first."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "Copy me only for now. And Jordan, trim the theatre from the email. The partners like numbers, not fireworks."
     },
     {
       "speaker": "rep",
-      "name": "Jordan Lee",
-      "text": "Numbers only, fireworks in a separate attachment that mysteriously never arrives. Thanks Dev, you've moved fast, which is exactly how we keep the renewal from becoming a Friday-night spreadsheet s\u00e9ance."
+      "name": "Jordan Belfort",
+      "text": "Numbers only, fireworks in a separate attachment that mysteriously never arrives. Thanks Donnie, you've moved fast, which is exactly how we keep the renewal from becoming a Friday-night spreadsheet séance."
     },
     {
       "speaker": "prospect",
-      "name": "Dev Patel",
+      "name": "Donnie Azoff",
       "text": "Right. Send the proposal. Bye."
     }
   ],
