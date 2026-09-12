@@ -78,7 +78,8 @@ create table public.conversations (
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (channel, source_external_id)
+  unique (channel, source_external_id),
+  unique (id, deal_id)
 );
 
 create table public.transcript_segments (
@@ -97,31 +98,33 @@ create table public.transcript_segments (
 create table public.notes (
   id uuid primary key default gen_random_uuid(),
   deal_id uuid not null references public.deals(id) on delete cascade,
-  conversation_id uuid references public.conversations(id) on delete set null,
+  conversation_id uuid,
   kind text not null check (kind in ('summary', 'promise', 'objection', 'next_step', 'general')),
   body text not null,
   confidence numeric(5,4) check (confidence is null or confidence between 0 and 1),
   evidence jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  foreign key (conversation_id, deal_id) references public.conversations(id, deal_id) on delete set null (conversation_id)
 );
 
 create table public.tasks (
   id uuid primary key default gen_random_uuid(),
   deal_id uuid not null references public.deals(id) on delete cascade,
-  conversation_id uuid references public.conversations(id) on delete set null,
+  conversation_id uuid,
   title text not null,
   due_at timestamptz,
   owner_name text,
   completed_at timestamptz,
   crm_external_id text unique,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  foreign key (conversation_id, deal_id) references public.conversations(id, deal_id) on delete set null (conversation_id)
 );
 
 create table public.drafts (
   id uuid primary key default gen_random_uuid(),
   deal_id uuid references public.deals(id) on delete cascade,
-  conversation_id uuid references public.conversations(id) on delete set null,
+  conversation_id uuid,
   lead_id uuid,
   kind text not null default 'follow_up' check (kind in ('follow_up', 'outreach')),
   recipient_name text,
@@ -135,7 +138,17 @@ create table public.drafts (
   approved_at timestamptz,
   sent_at timestamptz,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint drafts_parent_matches_kind check (
+    (kind = 'follow_up' and deal_id is not null and lead_id is null)
+    or (kind = 'outreach' and deal_id is null and conversation_id is null and lead_id is not null)
+  ),
+  constraint drafts_lifecycle_is_consistent check (
+    (status = 'draft' and approved_by is null and approved_at is null and sent_at is null)
+    or (status = 'approved' and nullif(btrim(approved_by), '') is not null and approved_at is not null and sent_at is null)
+    or (status = 'sent' and nullif(btrim(approved_by), '') is not null and approved_at is not null and sent_at is not null)
+  ),
+  foreign key (conversation_id, deal_id) references public.conversations(id, deal_id) on delete set null (conversation_id)
 );
 
 create table public.icp_profiles (
@@ -166,7 +179,7 @@ create table public.leads (
   location text,
   origami_row_id text unique,
   origami_relevance_score numeric(6,5) check (origami_relevance_score is null or origami_relevance_score between 0 and 1),
-  similarity_score numeric(6,5) check (similarity_score is null or similarity_score between 0 and 1),
+  similarity_score numeric(6,5) check (similarity_score is null or similarity_score between -1 and 1),
   status public.lead_status not null default 'new',
   embedding extensions.vector(1536),
   metadata jsonb not null default '{}'::jsonb,
@@ -181,25 +194,36 @@ create table public.activities (
   id bigint generated always as identity primary key,
   deal_id uuid references public.deals(id) on delete cascade,
   contact_id uuid references public.contacts(id) on delete set null,
-  conversation_id uuid references public.conversations(id) on delete set null,
+  conversation_id uuid,
   lead_id uuid references public.leads(id) on delete set null,
   actor text not null default 'slipstream',
   action text not null,
+  fixture_key text unique,
   details jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  foreign key (conversation_id, deal_id) references public.conversations(id, deal_id) on delete set null (conversation_id)
 );
 
 create index contacts_company_idx on public.contacts(company_id);
 create index deals_company_idx on public.deals(company_id);
+create index deals_primary_contact_idx on public.deals(primary_contact_id);
 create index deals_outcome_idx on public.deals(outcome, updated_at desc);
 create index conversations_deal_idx on public.conversations(deal_id, occurred_at desc);
+create index conversations_contact_idx on public.conversations(contact_id);
 create index conversations_status_idx on public.conversations(processing_status, occurred_at desc);
-create index transcript_segments_conversation_idx on public.transcript_segments(conversation_id, sequence);
 create index notes_deal_idx on public.notes(deal_id, created_at desc);
+create index notes_conversation_idx on public.notes(conversation_id);
+create index tasks_deal_idx on public.tasks(deal_id);
+create index tasks_conversation_idx on public.tasks(conversation_id);
 create index tasks_open_idx on public.tasks(deal_id, due_at) where completed_at is null;
-create index drafts_conversation_idx on public.drafts(conversation_id, created_at desc);
+create index drafts_conversation_idx on public.drafts(conversation_id);
+create index drafts_deal_idx on public.drafts(deal_id);
+create index drafts_lead_idx on public.drafts(lead_id);
 create index leads_profile_idx on public.leads(icp_profile_id, similarity_score desc);
 create index activities_deal_idx on public.activities(deal_id, created_at desc);
+create index activities_contact_idx on public.activities(contact_id);
+create index activities_conversation_idx on public.activities(conversation_id);
+create index activities_lead_idx on public.activities(lead_id);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -223,20 +247,33 @@ create trigger leads_set_updated_at before update on public.leads for each row e
 
 create or replace function public.match_deals(
   query_embedding extensions.vector(1536),
+  query_model text,
   match_count integer default 10,
   outcome_filter public.deal_outcome default 'won'
 )
 returns table (deal_id uuid, similarity double precision)
-language sql
+language plpgsql
 stable
 security invoker
 set search_path = ''
 as $$
-  select d.id, 1 - (d.embedding <=> query_embedding) as similarity
+begin
+  if query_embedding is null or extensions.vector_norm(query_embedding) = 0 then
+    raise exception 'query_embedding must be a non-zero 1536-dimensional vector';
+  end if;
+  if nullif(btrim(query_model), '') is null then
+    raise exception 'query_model is required';
+  end if;
+
+  return query
+  select d.id, 1 - (d.embedding OPERATOR(extensions.<=>) query_embedding) as similarity
   from public.deals d
-  where d.embedding is not null and (outcome_filter is null or d.outcome = outcome_filter)
-  order by d.embedding <=> query_embedding
-  limit greatest(1, least(match_count, 100));
+  where d.embedding is not null
+    and d.embedding_model = query_model
+    and (outcome_filter is null or d.outcome = outcome_filter)
+  order by d.embedding OPERATOR(extensions.<=>) query_embedding
+  limit greatest(1, least(coalesce(match_count, 10), 100));
+end;
 $$;
 
 alter table public.companies enable row level security;
@@ -268,7 +305,9 @@ create policy "demo read leads" on public.leads for select to anon, authenticate
 create policy "demo read activities" on public.activities for select to anon, authenticated using (true);
 
 grant usage on schema public to anon, authenticated, service_role;
-grant select on all tables in schema public to anon, authenticated;
+grant select on public.companies, public.contacts, public.deals, public.conversations,
+  public.transcript_segments, public.notes, public.tasks, public.drafts,
+  public.icp_profiles, public.leads, public.activities to anon, authenticated;
 grant all on all tables in schema public to service_role;
 grant usage, select on all sequences in schema public to service_role;
-grant execute on function public.match_deals(extensions.vector, integer, public.deal_outcome) to anon, authenticated, service_role;
+grant execute on function public.match_deals(extensions.vector, text, integer, public.deal_outcome) to anon, authenticated, service_role;
