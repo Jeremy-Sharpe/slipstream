@@ -41,6 +41,38 @@ def test_fixture_ingest_is_immediately_retrievable(client: TestClient) -> None:
     assert fetched.json() == record
 
 
+def test_call_idempotency_compares_metadata_and_structured_segments() -> None:
+    transcript = Transcript(
+        text="Buyer: Same words",
+        language_code="en",
+        segments=[
+            TranscriptSegment(
+                sequence=0,
+                speaker="Buyer",
+                body="Same words",
+                start_ms=0,
+                end_ms=900,
+            )
+        ],
+        provider="realtime_client",
+    )
+    original = calls._record(
+        source_external_id="same-source",
+        subject="Original",
+        occurred_at=datetime(2026, 9, 12, tzinfo=UTC),
+        transcript=transcript,
+        fixture=False,
+    )
+    changed_subject = original.model_copy(update={"subject": "Different"})
+    changed_timing = original.model_copy(
+        update={"segments": [original.segments[0].model_copy(update={"end_ms": 1200})]}
+    )
+
+    assert calls._same_call(original, original.model_copy())
+    assert not calls._same_call(original, changed_subject)
+    assert not calls._same_call(original, changed_timing)
+
+
 def test_unknown_or_malformed_fixture_is_not_exposed(client: TestClient) -> None:
     assert client.post("/api/v1/calls/fixtures/call-nope/ingest").status_code == 404
     assert client.post("/api/v1/calls/fixtures/../PROJECT/ingest").status_code == 404

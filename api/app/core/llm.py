@@ -70,6 +70,7 @@ def structured[SchemaT: BaseModel](
     user: str,
     schema: type[SchemaT],
     max_tokens: int = 4000,
+    timeout: float | None = None,
 ) -> ReasoningResult[SchemaT]:
     client = create_reasoning_client(reasoning) if isinstance(reasoning, Settings) else reasoning
     if client.provider == "anthropic":
@@ -80,9 +81,12 @@ def structured[SchemaT: BaseModel](
             user,
             schema,
             max_tokens,
+            timeout,
         )
     elif client.provider == "openai":
-        output = _openai_structured(client.client, client.model, system, user, schema, max_tokens)
+        output = _openai_structured(
+            client.client, client.model, system, user, schema, max_tokens, timeout
+        )
     else:
         output = _openrouter_structured(
             client.client,
@@ -91,6 +95,7 @@ def structured[SchemaT: BaseModel](
             user,
             schema,
             max_tokens,
+            timeout,
         )
     return ReasoningResult(output=output, model=client.model, provider=client.provider)
 
@@ -102,13 +107,16 @@ def _anthropic_structured[SchemaT: BaseModel](
     user: str,
     schema: type[SchemaT],
     max_tokens: int,
+    timeout: float | None,
 ) -> SchemaT:
+    request_options = {} if timeout is None else {"timeout": timeout}
     parsed_response = client.messages.parse(
         model=model,
         max_tokens=max_tokens,
         system=system,
         messages=[{"role": "user", "content": user}],
         output_format=schema,
+        **request_options,
     )
     parsed = parsed_response.parsed_output
     if parsed is None:
@@ -123,13 +131,16 @@ def _openai_structured[SchemaT: BaseModel](
     user: str,
     schema: type[SchemaT],
     max_tokens: int,
+    timeout: float | None,
 ) -> SchemaT:
+    request_options = {} if timeout is None else {"timeout": timeout}
     parsed_response = client.responses.parse(
         model=model,
         instructions=system,
         input=user,
         text_format=schema,
         max_output_tokens=max_tokens,
+        **request_options,
     )
     parsed = parsed_response.output_parsed
     if parsed is None:
@@ -144,7 +155,9 @@ def _openrouter_structured[SchemaT: BaseModel](
     user: str,
     schema: type[SchemaT],
     max_tokens: int,
+    timeout: float | None,
 ) -> SchemaT:
+    request_options = {} if timeout is None else {"timeout": timeout}
     messages = [
         {"role": "system", "content": _json_system_prompt(system, schema)},
         {"role": "user", "content": user},
@@ -163,12 +176,14 @@ def _openrouter_structured[SchemaT: BaseModel](
             messages=messages,
             max_tokens=max_tokens,
             response_format=response_format,
+            **request_options,
         )
     except Exception:
         completion = client.chat.completions.create(
             model=model,
             messages=messages,
             max_tokens=max_tokens,
+            **request_options,
         )
     return schema.model_validate_json(_strip_code_fences(_completion_text(completion)))
 
@@ -187,9 +202,7 @@ def _completion_text(completion: object) -> str:
         return content
     if isinstance(content, list):
         parts = [
-            item.get("text", "")
-            if isinstance(item, dict)
-            else getattr(item, "text", "")
+            item.get("text", "") if isinstance(item, dict) else getattr(item, "text", "")
             for item in content
         ]
         return "".join(parts)
