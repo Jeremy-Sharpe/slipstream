@@ -86,3 +86,29 @@ through the normal call repository and returns `completed` with the canonical ca
 object. Without a reasoning key, the same protocol uses local coaching rules; without
 an ElevenLabs key, fixture or already-transcribed turns still exercise the full
 endpoint.
+
+## Email ingestion
+
+`POST /api/v1/emails` accepts provider-neutral inbound and outbound messages. Every
+message includes its provider, mailbox ID and mailbox address, so provider-local
+message and thread IDs cannot collide across connected accounts. Recipients are
+labelled `to`, `cc` or `bcc`; automatic replies require exactly one safe external
+`to` recipient and never select a Bcc recipient.
+
+Read a thread with
+`GET /api/v1/emails/{provider}/mailboxes/{mailbox_id}/threads/{thread_id}` and create
+a reply with `POST` to the same URL plus `/draft-reply`. All three operations require
+`X-Slipstream-Ingest-Token` when `INGEST_TOKEN` is configured. Drafts are versioned
+by the exact target message, so a newly arrived message creates a new draft without
+mutating an approved one. Thread reads are capped at 5,000 messages and 8 MiB of
+serialized data; oversized threads return 413 without transferring message bodies.
+
+With Supabase configured, `20260912010000_email_ingestion.sql` installs the
+`ingest_email_conversation` transaction used by the API. It takes an advisory lock
+on the mailbox-scoped source ID, preserves existing CRM names and deal ownership,
+and commits the contact, deal and conversation together. Memory mode remains an
+explicit credential-free demo path and is not durable across restarts.
+
+`supabase test db supabase/tests/email_ingestion.sql` exercises the migration against
+local PostgreSQL, including rollback, idempotency, role permissions, CRM-field
+preservation and the exact 5,000-message overflow boundary.

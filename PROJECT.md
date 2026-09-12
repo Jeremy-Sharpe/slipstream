@@ -8,7 +8,7 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 
 - Jeremy's frontend prototype is live at the repo root: Next.js 16 and React 19, a unified conversation feed for calls and email, conversation detail with CRM auto-entry and an editable follow-up draft, an aggregate analysis and ICP page, and an Origami-ready lead handoff. Frontend only, on realistic mock data. Build, lint and smoke test pass.
 - Fixtures are merged: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). UI is deployed at https://slipstream-ten-mauve.vercel.app from Anna's Vercel; production moves by `vercel --prod` until the GitHub app is connected.
-- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, call ingestion, evidence-backed CRM extraction, grounded follow-up drafting, CRM writeback, the realtime coaching backend, and the judged pitch and live demo scripts. The API is live at https://slipstream-api.3-104-149-193.sslip.io and the credential-free ingest-to-approved-draft loop has been exercised in production. Other people should take the unclaimed UI wiring, coach overlay, and video rows on `BOARD.md`; Anna owns scorecard and ICP/leads/outreach.
+- Jeremy's agent shipped the database migration, reviewed FastAPI foundation, call and email ingestion, evidence-backed CRM extraction, grounded follow-up drafting, CRM writeback, the realtime coaching backend, and the judged pitch and live demo scripts. Email threads are provider/mailbox scoped, atomically populate the CRM, preserve curated fields, and create safe versioned reply drafts. The API is live at https://slipstream-api.3-104-149-193.sslip.io and both credential-free ingest-to-approved-draft loops have been exercised in production. Other people should take the unclaimed UI wiring, coach overlay, and video rows on `BOARD.md`; Anna owns scorecard and ICP/leads/outreach.
 - Still missing: hosted Supabase, service keys, coach overlay, and UI wiring. Every key except Vercel remains unavailable, so each backend lane keeps a deterministic fixture path.
 - The mock data in the prototype is the target shape for the API. Whoever claims a wiring row replaces the mock arrays with Supabase reads and API calls without changing the information architecture unless the chat agrees.
 
@@ -27,7 +27,7 @@ Every step runs for real in the video and on the live URL.
 
 ### Conversations (`app/`)
 
-The unified feed of calls and emails from the prototype. A call opens to the diarised transcript, participants, the deal, the outcome, the extracted CRM fields awaiting approval, the scorecard and the follow-up draft. Email stays a mocked channel this weekend unless someone claims it; calls are the pipeline.
+The unified feed of calls and emails from the prototype. A call opens to the diarised transcript, participants, the deal, the outcome, the extracted CRM fields awaiting approval, the scorecard and the follow-up draft. The provider-neutral email backend now ingests inbound and outbound threads and drafts grounded replies; another person should wire the existing email UI to those endpoints.
 
 ### Analysis (`app/analysis`)
 
@@ -111,7 +111,7 @@ None of these accounts exist yet. All go on personal accounts, not company billi
 - Writing to a real HubSpot. The object mapping above is the path.
 - Sending email. Approve marks a draft sent and logs it.
 - Auth, multi-tenancy, billing.
-- Email ingest as a live channel; it stays mocked in the feed unless claimed.
+- A live Gmail or Outlook OAuth connector. The provider-neutral webhook contract and full email pipeline are implemented.
 - A trained call-scoring model.
 
 ## Timeline
