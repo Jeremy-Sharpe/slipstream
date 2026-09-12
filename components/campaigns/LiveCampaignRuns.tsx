@@ -34,6 +34,7 @@ function dueLabel(value: string): string {
 
 export function LiveCampaignRuns() {
   const [state, setState] = useState<LoadState>({ status: "loading" });
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const controllerRef = useRef<AbortController>(null);
   const requestRef = useRef(0);
   const load = useCallback(() => {
@@ -102,7 +103,20 @@ export function LiveCampaignRuns() {
             const pending = campaign.counts.queued + campaign.counts.running + campaign.counts.retryable;
             const progress = Math.round((campaign.counts.sent / campaign.items.length) * 100);
             return (
-              <details key={campaign.id} className="group">
+              <details
+                key={campaign.id}
+                className="group"
+                open={expanded.has(campaign.id)}
+                onToggle={(event) => {
+                  const open = event.currentTarget.open;
+                  setExpanded((current) => {
+                    const next = new Set(current);
+                    if (open) next.add(campaign.id);
+                    else next.delete(campaign.id);
+                    return next;
+                  });
+                }}
+              >
                 <summary className="grid cursor-pointer list-none gap-3 px-5 py-4 marker:hidden md:grid-cols-[minmax(0,1fr)_130px_210px] md:items-center">
                   <div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{campaign.name}</p><p className="mt-0.5 text-xs text-muted-foreground">Created by {campaign.created_by} · due {dueLabel(campaign.scheduled_for)} · select for item outcomes</p></div>
                   <span className={cn("w-fit rounded-full px-2.5 py-1 text-xs font-semibold", campaign.status === "completed" ? "bg-emerald-50 text-emerald-700" : campaign.status === "attention" ? "bg-amber-50 text-amber-700" : "bg-blue-50 text-blue-700")}>{STATUS_LABEL[campaign.status]}</span>
