@@ -1,0 +1,50 @@
+{
+  "call_id": "call-09-port-phillip-physio-group",
+  "extraction": {
+    "contact": {
+      "name": "Aisha Rahman",
+      "role": "General Manager",
+      "email": "aisha@portphillipphysio.example",
+      "phone": "+61 3 7010 1109"
+    },
+    "company": {
+      "name": "Port Phillip Physio Group",
+      "industry": "Multi-site physiotherapy clinic",
+      "headcount": 76,
+      "location": "St Kilda and Cheltenham, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 109400,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the Essential Eight evidence plan and commercial proposal by Thursday",
+      "I will include the staged clinic rollout and receptionist training plan"
+    ],
+    "objections": [
+      {
+        "text": "Our current provider says they already do security, so I need to understand why this is different",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Jordan to send proposal and meet Aisha plus clinic director for decision.",
+      "due": "2026-09-10"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.5,
+    "notes": "Jordan slowed down, asked solid discovery questions and handled the incumbent objection with evidence rather than dismissal."
+  },
+  "icp_signals": {
+    "industry": "Multi-site physiotherapy clinic",
+    "headcount_band": "25-80",
+    "role": "General Manager",
+    "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+  },
+  "risk_flags": []
+}

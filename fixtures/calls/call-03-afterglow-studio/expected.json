@@ -1,0 +1,50 @@
+{
+  "call_id": "call-03-afterglow-studio",
+  "extraction": {
+    "contact": {
+      "name": "Priya Shah",
+      "role": "Founder",
+      "email": "priya@afterglowstudio.example",
+      "phone": "+61 3 7010 1103"
+    },
+    "company": {
+      "name": "Afterglow Studio",
+      "industry": "Creative branding studio",
+      "headcount": 12,
+      "location": "Collingwood, VIC"
+    },
+    "deal": {
+      "stage": "closed_lost",
+      "value_aud": 15400,
+      "outcome": "lost"
+    },
+    "promises": [
+      "I will send some info this afternoon"
+    ],
+    "objections": [
+      {
+        "text": "We are probably too small for a monthly managed service",
+        "handling": "ignored"
+      },
+      {
+        "text": "That is more than double what we pay now",
+        "handling": "ignored"
+      }
+    ],
+    "next_step": null
+  },
+  "scorecard": {
+    "discovery_questions": 0,
+    "next_step_secured": false,
+    "objection_handling": "ignored",
+    "rep_talk_ratio": 0.61,
+    "notes": "Jordan pitched the managed service before understanding the studio, ignored the size and price objections and left with no next step."
+  },
+  "icp_signals": {
+    "industry": "Creative branding studio",
+    "headcount_band": "under-15",
+    "role": "Founder",
+    "trigger": null
+  },
+  "risk_flags": []
+}

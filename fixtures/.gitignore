@@ -1,0 +1,7 @@
+.venv/
+.pytest_cache/
+__pycache__/
+.env
+calls/*/chunk-*.mp3
+calls/*/audio.mp3
+!calls/call-13-marlowe-finch-demo/audio.mp3

@@ -1,0 +1,46 @@
+{
+  "call_id": "call-05-craftwork",
+  "extraction": {
+    "contact": {
+      "name": "Lucy Beck",
+      "role": "Owner",
+      "email": "lucy@craftwork.example",
+      "phone": "+61 3 7010 1105"
+    },
+    "company": {
+      "name": "Craftwork",
+      "industry": "Independent craft retail and workshops",
+      "headcount": 8,
+      "location": "Northcote, VIC"
+    },
+    "deal": {
+      "stage": "closed_lost",
+      "value_aud": 9800,
+      "outcome": "lost"
+    },
+    "promises": [
+      "I will send a one-page managed services overview"
+    ],
+    "objections": [
+      {
+        "text": "My cousin helps us for cheap when the till or Wi-Fi plays up",
+        "handling": "ignored"
+      }
+    ],
+    "next_step": null
+  },
+  "scorecard": {
+    "discovery_questions": 0,
+    "next_step_secured": false,
+    "objection_handling": "ignored",
+    "rep_talk_ratio": 0.61,
+    "notes": "Jordan treated a tiny retail shop like a managed services prospect and did not adapt when Lucy named the cheap informal alternative."
+  },
+  "icp_signals": {
+    "industry": "Independent craft retail and workshops",
+    "headcount_band": "under-15",
+    "role": "Owner",
+    "trigger": null
+  },
+  "risk_flags": []
+}

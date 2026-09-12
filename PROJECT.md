@@ -7,14 +7,15 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 ## State of play, 12 September
 
 - Jeremy's frontend prototype is live at the repo root: Next.js 16 and React 19, a unified conversation feed for calls and email, conversation detail with CRM auto-entry and an editable follow-up draft, an aggregate analysis and ICP page, and an Origami-ready lead handoff. Frontend only, on realistic mock data. Build, lint and smoke test pass.
-- Nothing else exists yet: no API, no database, no fixtures, no coach, no keys. The foundation rows on the board unblock everything.
+- Fixtures exist on `feat/fixtures`: twelve labelled history calls plus the voiced demo call, a validator and tests (see `fixtures/README.md`). UI is deployed at https://slipstream-annaseku01-6642s-projects.vercel.app from Anna's Vercel; production moves by `vercel --prod` until the GitHub app is connected.
+- Still missing: API, database, coach, and every key except Vercel.
 - The mock data in the prototype is the target shape for the API. Whoever claims a wiring row replaces the mock arrays with Supabase reads and API calls without changing the information architecture unless the chat agrees.
 
 ## The demo loop
 
 Every step runs for real in the video and on the live URL.
 
-1. **A sales call happens.** Synthesised with ElevenLabs text-to-dialogue and played through speakers. Fixtures cover won, stalled, lost and no-show.
+1. **A sales call happens.** One demo call, synthesised with ElevenLabs text-to-dialogue and played through speakers. Twelve further scripted calls (won, stalled, lost, no-show) are seeded as text-only CRM history so the analysis and ICP steps have something real to work from.
 2. **The coach listens.** The Electron overlay streams audio to the API WebSocket; Scribe realtime transcribes; Claude returns the next questions to ask, grounded in the deal's CRM history.
 3. **The call writes itself into the CRM.** Scribe batch transcribes with diarisation; Claude extracts contact, company, deal stage, promises, objections and next step into our CRM tables, shown to the rep for approval.
 4. **The follow-up drafts itself.** A draft email attaches to the deal. Approve is one click, marks it sent, logs an activity. Nothing is delivered.
@@ -47,7 +48,7 @@ Translucent always-on-top window with click-through mode and keyboard shortcuts 
 app/          Next.js UI on Vercel. Reads Supabase directly for lists and detail; calls the API for actions.
 api/          FastAPI, Python 3.12, uv. Owns the AI pipeline. REST plus one WebSocket at /ws/coach. Deploys to Jeremy's VPS behind HTTPS.
 coach/        Electron overlay. Talks only to the API WebSocket.
-fixtures/     Call scripts, generated audio, transcripts, expected outcomes. Loaded through the real ingest path.
+fixtures/     Thirteen call scripts with expected extraction and scorecard labels; audio for the demo call only. Loaded through the real ingest path.
 supabase/     Migrations (pgvector enabled) and seed.
 ```
 

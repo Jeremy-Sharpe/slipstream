@@ -1,0 +1,41 @@
+{
+  "call_id": "call-12-dockside-dental",
+  "extraction": {
+    "contact": {
+      "name": "Ethan Clarke",
+      "role": "Practice Owner",
+      "email": "ethan@docksidedental.example",
+      "phone": "+61 3 7010 1112"
+    },
+    "company": {
+      "name": "Dockside Dental",
+      "industry": "Dental practice",
+      "headcount": 18,
+      "location": "Williamstown, VIC"
+    },
+    "deal": {
+      "stage": "discovery",
+      "value_aud": 0,
+      "outcome": "no_show"
+    },
+    "promises": [
+      "I will send a quick email with a couple of times to reschedule"
+    ],
+    "objections": [],
+    "next_step": null
+  },
+  "scorecard": {
+    "discovery_questions": 0,
+    "next_step_secured": false,
+    "objection_handling": "none_raised",
+    "rep_talk_ratio": 0.65,
+    "notes": "Jordan reached reception instead of Ethan and left a brief reschedule message, so no sales conversation occurred."
+  },
+  "icp_signals": {
+    "industry": "Dental practice",
+    "headcount_band": "15-24",
+    "role": "Practice Owner",
+    "trigger": null
+  },
+  "risk_flags": []
+}

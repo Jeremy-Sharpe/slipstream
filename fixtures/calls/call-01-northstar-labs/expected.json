@@ -1,0 +1,50 @@
+{
+  "call_id": "call-01-northstar-labs",
+  "extraction": {
+    "contact": {
+      "name": "Maya Chen",
+      "role": "Managing Partner",
+      "email": "maya@northstarlabs.example",
+      "phone": "+61 3 7010 1101"
+    },
+    "company": {
+      "name": "Northstar Labs",
+      "industry": "Architecture and lab planning consultancy",
+      "headcount": 42,
+      "location": "Southbank, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 58400,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the mapped Essential Eight gap summary by Thursday",
+      "I will include the onboarding sequence and the fixed project range"
+    ],
+    "objections": [
+      {
+        "text": "Our insurer is asking for Essential Eight evidence, and I am worried we will pay for a managed service but still fail the questionnaire",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.",
+      "due": "2026-09-03"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.44,
+    "notes": "Sam uncovered the renewal trigger, mapped risk to a clear proposal and secured a dated review with the decision makers."
+  },
+  "icp_signals": {
+    "industry": "Architecture and lab planning consultancy",
+    "headcount_band": "25-80",
+    "role": "Managing Partner",
+    "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+  },
+  "risk_flags": []
+}

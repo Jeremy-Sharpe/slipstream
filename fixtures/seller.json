@@ -1,0 +1,46 @@
+{
+  "name": "Harbourline IT",
+  "description": "A 12-person managed IT and cybersecurity provider in Melbourne, selling managed services agreements and onboarding projects to Australian firms with 15 to 120 staff.",
+  "location": "Melbourne, VIC",
+  "team_size": 12,
+  "reps": [
+    {
+      "name": "Sam Whitfield",
+      "role": "Senior account executive",
+      "strengths": [
+        "Patient discovery",
+        "Clear commercial framing",
+        "Secures dated next steps"
+      ],
+      "risks": []
+    },
+    {
+      "name": "Jordan Lee",
+      "role": "Account executive",
+      "strengths": [
+        "Energetic product knowledge",
+        "Good follow-up when coached"
+      ],
+      "risks": [
+        "Pitches before discovery",
+        "Leaves next steps vague"
+      ]
+    }
+  ],
+  "pricing": {
+    "currency": "AUD",
+    "managed_services_per_seat_monthly_low": 90,
+    "managed_services_per_seat_monthly_high": 160,
+    "onboarding_project_aud_low": 3500,
+    "onboarding_project_aud_high": 18000
+  },
+  "voice_config_notes": "Placeholder voice ids. Run generate_audio.py --list-voices after adding ELEVENLABS_API_KEY, then replace these values before generating audio.",
+  "voices": {
+    "rep": {
+      "Sam Whitfield": "replace-with-sam-voice-id",
+      "Jordan Lee": "replace-with-jordan-voice-id"
+    },
+    "prospect_default": "replace-with-prospect-default-voice-id",
+    "prospect_overrides": {}
+  }
+}

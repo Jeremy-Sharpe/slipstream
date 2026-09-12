@@ -1,0 +1,176 @@
+{
+  "call_id": "call-10-lumen-lane-retail",
+  "seller": "Harbourline IT",
+  "rep": "Jordan Lee",
+  "prospect": {
+    "name": "Noah Spencer",
+    "role": "Co-owner",
+    "email": "noah@lumenlaneretail.example",
+    "phone": "+61 3 7010 1110"
+  },
+  "company": {
+    "name": "Lumen Lane Retail",
+    "industry": "Boutique lighting retailer",
+    "headcount": 10,
+    "location": "Prahran, VIC",
+    "domain": "lumenlaneretail.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-09T10:30:00+10:00",
+  "duration_target_seconds": 355,
+  "outcome": "lost",
+  "deal_value_aud": 11200,
+  "trigger": null,
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Noah Spencer, thanks for the call. Harbourline IT gives small businesses a full managed IT service for $98 per seat per month, which covers helpdesk, device management, Microsoft 365, backups and security monitoring."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "Thanks Jordan. Lumen Lane Retail is ten people if you count casuals. We sell lighting from a Prahran showroom and online. I'm mostly checking prices because our current arrangement is informal."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Informal support is risky for a retailer. If the point-of-sale terminal, Wi-Fi, Xero or email fails, sales stop. A monthly plan means you can call one team and know the fundamentals are being maintained."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "We are comparing you to a break-fix provider who charges by the hour. They quoted a lower rate, and we only call when something is actually wrong."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Break-fix looks cheaper on paper, but it doesn't include prevention. Our agreement includes patching, endpoint protection, backup checks and admin reviews, which is what keeps the hourly emergencies down."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "Maybe, but some months we've zero issues. We're not keen to add another subscription while foot traffic is uneven."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "You also need to think about cyber risk. Retailers hold customer details, supplier records and payment systems. If an account is compromised, you want documented controls, not a frantic call to whoever can come out tomorrow."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "I understand, but nobody has asked us for documentation. We don't have a board or a procurement team. It's me, my co-owner and a spreadsheet of expenses."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The onboarding project would clean all that up. For Lumen Lane Retail, it would probably be around $3,800, then the monthly per-seat fee. We'd set MFA, standardise devices and document the environment."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "That's too much for what we need. We were thinking of a few hundred dollars here and there, not a standing agreement."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The issue with a few hundred here and there's that nobody owns the outcome. Managed IT gives you accountability, reporting and a support process that doesn't depend on your co-owner knowing which cable to restart."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "The cable restart isn't worth ten grand a year. We might grow into something like this, but not while the business is this size."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I hear you. Still, the cost of one serious outage can be larger than the annual difference, especially if it happens during a sale or before Christmas."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "That feels a bit hypothetical for us. I wanted to know whether you could beat the hourly provider or offer a small retainer."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "We don't really compete on hourly rates. Harbourline IT's built for proactive managed services, so the value is in coverage rather than being the cheapest emergency contact."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "Then I think we will go with the other provider. They fit the way we buy at the moment."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I will send the managed IT brochure in case you want to revisit it later."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "Sure, but no need to follow up hard. Thanks for explaining it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Another thing to consider is that hourly providers aren't usually watching for slow drift. Licences pile up, former staff keep access, routers age out and backups fail quietly until someone finally notices."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "That may be true, but it still feels like buying a large umbrella for a drizzle."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The managed model also gives you reporting. You would see patch status, security alerts, Microsoft 365 settings and recommendations each quarter, instead of only hearing from IT during a fault."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "Reports sound nice, but I don't need another report to read."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I get that, but the report is how you know the basics are actually happening. Without it, the cheap option is largely trust and reaction time."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "Trust and reaction time are mostly enough for us right now."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "If you change your mind, the brochure explains the minimum standard we recommend for any retailer, even if you don't use us. It might still help you challenge the hourly quote."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "That's useful, but it probably confirms we're shopping in a different category."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I will also include a comparison table between hourly break-fix and managed services. It will show what is included, what is excluded and where responsibility sits, so the decision is clear even if you choose the cheaper path."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "That's fine. A comparison table will probably help my co-owner see why we're saying no, at least for now."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Thanks Noah. Good luck with the showroom."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Noah Spencer",
+      "text": "Thanks, bye."
+    }
+  ]
+}

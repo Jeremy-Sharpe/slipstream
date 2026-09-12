@@ -1,0 +1,50 @@
+{
+  "call_id": "call-02-arcwell-health",
+  "extraction": {
+    "contact": {
+      "name": "Felix Morgan",
+      "role": "Operations Manager",
+      "email": "felix@arcwellhealth.example",
+      "phone": "+61 3 7010 1102"
+    },
+    "company": {
+      "name": "Arcwell Health",
+      "industry": "Multi-site allied health clinic",
+      "headcount": 64,
+      "location": "Brunswick and Essendon, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 103600,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the incident-response checklist and onboarding proposal by Friday",
+      "I will include the two clinic rollout plan and the cyber insurance evidence register"
+    ],
+    "objections": [
+      {
+        "text": "Data sovereignty is the thing our clinical director will ask about",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send proposal and meet Felix plus clinical director for rollout approval.",
+      "due": "2026-09-04"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 4,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.46,
+    "notes": "Sam connected a recent phishing incident to clinic operations, answered the sovereignty concern and agreed a dated proposal review."
+  },
+  "icp_signals": {
+    "industry": "Multi-site allied health clinic",
+    "headcount_band": "25-80",
+    "role": "Operations Manager",
+    "trigger": "Phishing incident and follow-up cyber insurance conditions"
+  },
+  "risk_flags": []
+}
