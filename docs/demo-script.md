@@ -42,7 +42,7 @@ Say: “Approval and delivery are separate, so this screen never claims an email
 
 Action: If the production Campaigns tab has the live “Delivery execution” card, switch to it and point to the `Live API` badge, the paused “Hackathon demo — intentionally unsent” record, its zero sent count, and the labelled evaluation sequence below. Do not resume or send the campaign on stage.
 
-Say: “This is a real campaign record built from our synthetic demo call, not a hard-coded card. The approved draft was enrolled by exact ID, scheduled for 2099, then paused through the authenticated server action. It shows one queued, zero sent and zero attempts. With Resend configured, a Railway worker would claim eight at a time and separate confirmed sends, safe retries, failures and anything needing reconciliation. We deliberately left delivery keyless rather than fake a success.”
+Say: “This is a real campaign record, not a hard-coded card. The same synthetic account produced a genuine local-model call extraction and follow-up draft; the campaign recipient comes from the validated sender on its email thread. That approved reply was enrolled by exact ID, scheduled for 2099, then paused through the authenticated server action. It shows one queued, zero sent and zero attempts. With Resend configured, a Railway worker would claim eight at a time and separate confirmed sends, safe retries, failures and anything needing reconciliation. We deliberately left delivery keyless rather than fake a success.”
 
 Fallback: Use the API commands below, then show the returned `status: approved`, approver, approval timestamp, and empty `sent_at`.
 
