@@ -248,6 +248,21 @@ def test_local_structured_rejects_a_truncated_completion() -> None:
         )
 
 
+def test_local_structured_rejects_an_empty_completion() -> None:
+    client = FakeOpenRouterClient()
+    completion = FakeCompletion()
+    completion.choices = []
+    client.chat.completions.create = lambda **_: completion
+
+    with pytest.raises(ValueError, match="no completion choices"):
+        structured(
+            ReasoningClient(provider="local", model="local-qwen", client=client),
+            system="System",
+            user="User",
+            schema=MiniOutput,
+        )
+
+
 def test_structured_returns_no_usage_when_provider_omits_it() -> None:
     class ParsedWithoutUsage:
         parsed_output = MiniOutput(subject="A", body="B")
@@ -328,7 +343,15 @@ def test_create_reasoning_client_uses_explicit_local_model(
 ) -> None:
     _clear_provider_env(monkeypatch)
     FakeOpenAIClient.instances = []
+    captured_http_options: dict[str, object] = {}
+    local_http_client = object()
+
+    def fake_http_client(**kwargs: object) -> object:
+        captured_http_options.update(kwargs)
+        return local_http_client
+
     monkeypatch.setattr("app.core.llm.OpenAI", FakeOpenAIClient)
+    monkeypatch.setattr("app.core.llm.httpx.Client", fake_http_client)
     settings = Settings(
         _env_file=None,
         environment="test",
@@ -344,7 +367,9 @@ def test_create_reasoning_client_uses_explicit_local_model(
     assert FakeOpenAIClient.instances[-1].kwargs == {
         "api_key": "loopback-only",
         "base_url": "http://127.0.0.1:8081/v1",
+        "http_client": local_http_client,
     }
+    assert captured_http_options == {"trust_env": False, "follow_redirects": False}
 
 
 def test_openrouter_embedding_client_prefixes_openai_models(

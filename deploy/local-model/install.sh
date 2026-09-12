@@ -47,12 +47,19 @@ install -d -m 0755 -o root -g root /etc/systemd/system/slipstream-api.service.d
 install -m 0644 -o root -g root "$API_DROP_IN_SOURCE" \
   /etc/systemd/system/slipstream-api.service.d/local-model.conf
 systemctl daemon-reload
-systemctl enable --now slipstream-local-model.service
+systemctl enable slipstream-local-model.service
+systemctl restart slipstream-local-model.service
 
 for _ in {1..90}; do
   if curl --fail --silent --show-error --connect-timeout 1 --max-time 2 \
     http://127.0.0.1:8081/v1/models \
     | grep -Fq 'slipstream-qwen2.5-1.5b-instruct-q4-k-m'; then
+    expected_image_id="$(docker image inspect "$IMAGE" --format '{{.Id}}')"
+    running_image_id="$(docker inspect slipstream-local-model --format '{{.Image}}')"
+    if [[ "$running_image_id" != "$expected_image_id" ]]; then
+      echo "Running model container does not use the pinned image" >&2
+      exit 1
+    fi
     echo "Slipstream local model is ready on loopback"
     exit 0
   fi

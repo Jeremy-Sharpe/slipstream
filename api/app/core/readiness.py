@@ -24,6 +24,8 @@ class LocalModelReadinessProbe:
                 base_url=settings.local_model_base_url,
                 timeout=httpx.Timeout(3.0, connect=1.0),
                 transport=transport,
+                trust_env=False,
+                follow_redirects=False,
             )
             if settings.reasoning_provider == "local" and settings.local_model_base_url
             else None

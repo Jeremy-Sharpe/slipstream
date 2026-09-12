@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import Literal
 
+import httpx
 from anthropic import Anthropic
 from openai import BadRequestError, NotFoundError, OpenAI
 from pydantic import BaseModel
@@ -92,7 +93,11 @@ def create_openrouter_client(settings: Settings) -> OpenAI:
 def create_local_client(settings: Settings) -> OpenAI:
     if settings.local_model_base_url is None:
         raise MissingReasoningProviderError("local")
-    return OpenAI(api_key="loopback-only", base_url=settings.local_model_base_url)
+    return OpenAI(
+        api_key="loopback-only",
+        base_url=settings.local_model_base_url,
+        http_client=httpx.Client(trust_env=False, follow_redirects=False),
+    )
 
 
 def create_reasoning_client(settings: Settings) -> ReasoningClient:
@@ -301,6 +306,8 @@ def _local_structured[SchemaT: BaseModel](
         },
         **request_options,
     )
+    if not completion.choices:
+        raise ValueError("Local model returned no completion choices")
     if getattr(completion.choices[0], "finish_reason", None) == "length":
         raise ValueError("Local model output exceeded the requested token budget")
     return (
