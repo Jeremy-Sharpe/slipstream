@@ -1,13 +1,16 @@
 "use client";
 
 import { AlertCircle, CheckCircle2, Loader2, Server } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   API_BASE_URL,
   approveDraft as approveLiveDraft,
   mergeLivePipeline,
+  mergeLiveScorecard,
   runFixturePipeline,
+  scoreCall,
+  type ApiCall,
 } from "@/lib/api/slipstream";
 import { patchConversation, useConversations } from "@/lib/store/conversations";
 import type { ConversationStatus } from "@/lib/types";
@@ -32,12 +35,26 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
   const [pipelineStatus, setPipelineStatus] = useState<"idle" | "live" | "error">("idle");
   const [pipelineRevision, setPipelineRevision] = useState(0);
   const [pipelineError, setPipelineError] = useState<string>();
+  const [scoreTarget, setScoreTarget] = useState<ApiCall>();
+  const [scorecardState, setScorecardState] = useState<{
+    source: "evaluation" | "live";
+    model?: string;
+    scoring: boolean;
+    error?: string;
+  }>({ source: "evaluation", scoring: false });
   const [highlight, setHighlight] = useState<number | null>(null);
   const [timeline, setTimeline] = useState<TimelineEntry[]>(call.timeline);
   const pipelineInFlight = useRef(false);
   const approvalInFlight = useRef(false);
   const draftIdRef = useRef<string | undefined>(undefined);
   const syncedRef = useRef(status === "synced");
+  const scoreGenerationRef = useRef(0);
+  const scoreControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => {
+    scoreGenerationRef.current += 1;
+    scoreControllerRef.current?.abort();
+  }, []);
 
   const log = useCallback((title: string, meta: string, icon: TimelineEntry["icon"]) => {
     setTimeline((t) => [{ title, meta, at: new Date().toISOString(), icon }, ...t]);
@@ -48,17 +65,27 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
       throw new Error("Another live action is still running");
     }
     pipelineInFlight.current = true;
+    scoreGenerationRef.current += 1;
+    scoreControllerRef.current?.abort();
+    setScoreTarget(undefined);
+    setScorecardState((current) => ({ ...current, scoring: false }));
     setRerunning(true);
     setPipelineError(undefined);
     try {
       const live = await runFixturePipeline(call.id);
-      setActiveCall(mergeLivePipeline(call, live));
+      const merged = mergeLivePipeline(call, live);
+      setActiveCall(merged);
+      scoreControllerRef.current?.abort();
+      scoreGenerationRef.current += 1;
+      setScoreTarget(live.call);
+      setScorecardState({ source: "evaluation", scoring: false });
       setPipelineRevision((revision) => revision + 1);
       setDraftId(live.draft.id);
       draftIdRef.current = live.draft.id;
       setApprovedDraftId(live.draft.status === "sent" ? live.draft.id : undefined);
       setPipelineStatus("live");
       log("Live pipeline completed", "API · transcript → CRM fields → draft", "sparkles");
+
       return live.draft.id;
     } catch (error) {
       const message = error instanceof Error ? error.message : "The live pipeline did not complete";
@@ -70,6 +97,32 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
       setRerunning(false);
     }
   }, [call, log]);
+
+  const runScorecard = async () => {
+    if (!scoreTarget || scorecardState.scoring || pipelineInFlight.current) return;
+    scoreControllerRef.current?.abort();
+    const controller = new AbortController();
+    scoreControllerRef.current = controller;
+    const generation = ++scoreGenerationRef.current;
+    setScorecardState((current) => ({ ...current, scoring: true, error: undefined }));
+    const timeout = window.setTimeout(() => controller.abort(), 30_000);
+    try {
+      const scorecard = await scoreCall(scoreTarget, call.outcome, controller.signal);
+      if (scoreGenerationRef.current !== generation || controller.signal.aborted) return;
+      setActiveCall((current) => mergeLiveScorecard(current, scorecard));
+      setScorecardState({ source: "live", model: scorecard.model, scoring: false });
+      log("Call scored", `${scorecard.model} · ${scorecard.rubric_version}`, "gauge");
+    } catch (error) {
+      if (scoreGenerationRef.current !== generation) return;
+      setScorecardState((current) => ({
+        ...current,
+        scoring: false,
+        error: controller.signal.aborted ? "Scoring timed out" : error instanceof Error ? error.message : "Live scorecard unavailable",
+      }));
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  };
 
   const sync = async () => {
     if (pipelineStatus !== "live") {
@@ -120,7 +173,15 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
             {rerunning ? "Running the live sales pipeline…" : pipelineError ? (pipelineStatus === "live" ? "Live API action needs attention" : "Live API unavailable — showing labelled demo data") : pipelineStatus === "live" ? "Live API result" : "Labelled demo data ready"}
           </p>
           <p className="truncate text-[12px] text-muted-foreground">
-            {pipelineError ?? (pipelineStatus === "live" ? "Live transcript, CRM extraction and draft. Scorecard remains labelled fixture data." : API_BASE_URL)}
+            {pipelineError ?? (pipelineStatus === "live"
+              ? scorecardState.source === "live"
+                ? `Live transcript, CRM extraction, draft and ${scorecardState.model} scorecard.`
+                : scorecardState.scoring
+                  ? "Live transcript, CRM extraction and draft · scoring against the rubric…"
+                  : scorecardState.error
+                    ? `Live transcript, CRM extraction and draft · labelled evaluation scorecard (${scorecardState.error}).`
+                    : "Live transcript, CRM extraction and draft · labelled evaluation scorecard."
+              : API_BASE_URL)}
           </p>
         </div>
         <Button variant="outline" className="h-9 rounded-md px-3 text-[13px]" onClick={() => void runPipeline().catch(() => undefined)} disabled={rerunning || approving}>
@@ -132,7 +193,7 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
           <AudioPlayer duration={activeCall.durationSeconds} />
           <Intelligence call={activeCall} />
           <Transcript call={activeCall} highlight={highlight} />
-          <ScorecardCard call={activeCall} onHover={setHighlight} />
+          <ScorecardCard call={activeCall} onHover={setHighlight} source={scorecardState.source === "live" ? `Live · ${scorecardState.model}` : "Labelled evaluation"} canGenerate={scoreTarget != null && !rerunning} generating={scorecardState.scoring} error={scorecardState.error} onGenerate={() => void runScorecard()} />
           <FollowUpDraft key={`${draftId ?? "fixture"}:${pipelineRevision}`} call={activeCall} approved={approvedDraftId === draftId && draftId != null} locked={draftId != null} busy={approving} onApprove={() => void approveDraft()} />
         </div>
         <div className="sticky top-6 self-start rounded-xl border border-line bg-card p-6 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">

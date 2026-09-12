@@ -162,6 +162,62 @@ export type ApiLeadSourceStatus = {
   phase: string | null;
 };
 
+export type ApiScorecard = {
+  call_id: string;
+  request_id: string | null;
+  source_external_id: string | null;
+  source_revision: string | null;
+  scorecard_revision: string | null;
+  source_turns: Array<{ speaker: "rep" | "prospect"; name: string; text: string }> | null;
+  rep: string;
+  outcome: "won" | "stalled" | "lost" | "no_show" | null;
+  discovery_questions: number;
+  discovery_evidence: Array<{ turn_index: number; quote: string }>;
+  next_step_secured: boolean;
+  next_step_evidence: { turn_index: number; quote: string } | null;
+  objection_handling: Handling;
+  objection_evidence: Array<{ turn_index: number; quote: string }>;
+  rep_talk_ratio: number;
+  talk_ratio_band: "healthy" | "heavy" | "monologue";
+  went_well: string[];
+  to_improve: string[];
+  summary: string;
+  model: string;
+  rubric_version: string;
+  scored_at: string;
+};
+
+export type ApiPlaybook = {
+  sources: Array<{
+    call_id: string;
+    source_external_id: string;
+    source_revision: string;
+    scorecard_revision: string;
+    rubric_version: string;
+    outcome: "won" | "stalled" | "lost" | "no_show" | null;
+  }>;
+  stats: Array<{
+    outcome_group: "won" | "not_won";
+    calls: number;
+    mean_discovery: number;
+    next_step_rate: number;
+    objection_handled_rate: number;
+    mean_talk_ratio: number;
+  }>;
+  reps: Array<{
+    rep: string;
+    calls: number;
+    won: number;
+    mean_discovery: number;
+    next_step_rate: number;
+    mean_talk_ratio: number;
+  }>;
+  patterns: Array<{ behaviour: string; why_it_matters: string; call_ids: string[]; quotes: string[] }>;
+  coaching_focus: string[];
+  model: string;
+  generated_at: string;
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -304,6 +360,69 @@ function parseEmailRecord(value: unknown): ApiEmailRecord {
   return value as ApiEmailRecord;
 }
 
+function validEvidence(value: unknown): boolean {
+  return isRecord(value) && Number.isSafeInteger(value.turn_index) && Number(value.turn_index) >= 1 && typeof value.quote === "string" && value.quote.trim().length >= 3;
+}
+
+function parseScorecard(value: unknown): ApiScorecard {
+  const outcomes = new Set(["won", "stalled", "lost", "no_show"]);
+  const handling = new Set(["handled", "partial", "ignored", "none_raised"]);
+  const bands = new Set(["healthy", "heavy", "monologue"]);
+  if (
+    !isRecord(value) ||
+    typeof value.call_id !== "string" ||
+    !nullableString(value.request_id) ||
+    !nullableString(value.source_external_id) ||
+    !nullableString(value.source_revision) ||
+    !nullableString(value.scorecard_revision) ||
+    !(value.source_turns === null || Array.isArray(value.source_turns) && value.source_turns.every((item) => isRecord(item) && ["rep", "prospect"].includes(String(item.speaker)) && typeof item.name === "string" && typeof item.text === "string")) ||
+    typeof value.rep !== "string" ||
+    !(value.outcome === null || (typeof value.outcome === "string" && outcomes.has(value.outcome))) ||
+    !Number.isSafeInteger(value.discovery_questions) || Number(value.discovery_questions) < 0 ||
+    !Array.isArray(value.discovery_evidence) || !value.discovery_evidence.every(validEvidence) ||
+    typeof value.next_step_secured !== "boolean" ||
+    !(value.next_step_evidence === null || validEvidence(value.next_step_evidence)) ||
+    typeof value.objection_handling !== "string" || !handling.has(value.objection_handling) ||
+    !Array.isArray(value.objection_evidence) || !value.objection_evidence.every(validEvidence) ||
+    typeof value.rep_talk_ratio !== "number" || !Number.isFinite(value.rep_talk_ratio) || value.rep_talk_ratio < 0 || value.rep_talk_ratio > 1 ||
+    typeof value.talk_ratio_band !== "string" || !bands.has(value.talk_ratio_band) ||
+    !isStringArray(value.went_well) || !isStringArray(value.to_improve) ||
+    typeof value.summary !== "string" || typeof value.model !== "string" ||
+    typeof value.rubric_version !== "string" || typeof value.scored_at !== "string" ||
+    !Number.isFinite(Date.parse(value.scored_at))
+  ) {
+    throw new ApiError("Slipstream API returned malformed scorecard data", 502);
+  }
+  return value as ApiScorecard;
+}
+
+function validRate(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1;
+}
+
+function parsePlaybook(value: unknown): ApiPlaybook {
+  if (!isRecord(value) || !Array.isArray(value.sources) || !Array.isArray(value.stats) || !Array.isArray(value.reps) || !Array.isArray(value.patterns) || !isStringArray(value.coaching_focus) || typeof value.model !== "string" || typeof value.generated_at !== "string" || !Number.isFinite(Date.parse(value.generated_at))) {
+    throw new ApiError("Slipstream API returned malformed playbook data", 502);
+  }
+  const nonnegativeInteger = (item: unknown) => Number.isSafeInteger(item) && Number(item) >= 0;
+  const nonnegativeNumber = (item: unknown) => typeof item === "number" && Number.isFinite(item) && item >= 0;
+  const validSources = value.sources.length >= 2 && value.sources.every((item) => isRecord(item) && typeof item.call_id === "string" && typeof item.source_external_id === "string" && typeof item.source_revision === "string" && typeof item.scorecard_revision === "string" && typeof item.rubric_version === "string" && ["won", "stalled", "lost"].includes(String(item.outcome)));
+  const validStats = value.stats.every((item) => isRecord(item) && ["won", "not_won"].includes(String(item.outcome_group)) && nonnegativeInteger(item.calls) && validRate(item.next_step_rate) && validRate(item.objection_handled_rate) && validRate(item.mean_talk_ratio) && nonnegativeNumber(item.mean_discovery));
+  const validReps = value.reps.every((item) => isRecord(item) && typeof item.rep === "string" && nonnegativeInteger(item.calls) && nonnegativeInteger(item.won) && Number(item.won) <= Number(item.calls) && nonnegativeNumber(item.mean_discovery) && validRate(item.next_step_rate) && validRate(item.mean_talk_ratio));
+  const validPatterns = value.patterns.every((item) => isRecord(item) && typeof item.behaviour === "string" && typeof item.why_it_matters === "string" && isStringArray(item.call_ids) && isStringArray(item.quotes) && item.call_ids.length === item.quotes.length);
+  const groups = value.stats.map((item) => isRecord(item) ? item.outcome_group : null);
+  const hasExactGroups = groups.length === 2 && groups.filter((item) => item === "won").length === 1 && groups.filter((item) => item === "not_won").length === 1;
+  const sourceIds = value.sources.map((item) => isRecord(item) ? item.call_id : null);
+  const sourceRevisions = value.sources.map((item) => isRecord(item) ? item.source_revision : null);
+  const scorecardRevisions = value.sources.map((item) => isRecord(item) ? item.scorecard_revision : null);
+  const sourceOutcomes = value.sources.map((item) => isRecord(item) ? item.outcome : null);
+  const wonCalls = value.stats.find((item) => isRecord(item) && item.outcome_group === "won");
+  const notWonCalls = value.stats.find((item) => isRecord(item) && item.outcome_group === "not_won");
+  const sourceCountsMatch = isRecord(wonCalls) && isRecord(notWonCalls) && wonCalls.calls === sourceOutcomes.filter((item) => item === "won").length && notWonCalls.calls === sourceOutcomes.filter((item) => item === "lost" || item === "stalled").length;
+  if (!validSources || !validStats || !validReps || !validPatterns || !hasExactGroups || new Set(sourceIds).size !== sourceIds.length || new Set(sourceRevisions).size !== sourceRevisions.length || new Set(scorecardRevisions).size !== scorecardRevisions.length || !sourceCountsMatch) throw new ApiError("Slipstream API returned malformed playbook data", 502);
+  return value as ApiPlaybook;
+}
+
 export async function getReadiness(): Promise<ApiReadiness> {
   const response = await fetch(`${API_BASE_URL}/ready`);
   if (!response.ok) throw new ApiError(`Slipstream API returned ${response.status}`, response.status);
@@ -394,6 +513,115 @@ export async function draftEmailReply(
 ): Promise<ApiDraft> {
   const path = `/emails/${encodeURIComponent(provider)}/mailboxes/${encodeURIComponent(mailboxExternalId)}/threads/${encodeURIComponent(threadExternalId)}/draft-reply`;
   return parseDraft(await request<unknown>(path, { method: "POST", signal }));
+}
+
+export async function getScorecard(callId: string, signal?: AbortSignal): Promise<ApiScorecard | null> {
+  try {
+    const scorecard = parseScorecard(await request<unknown>(`/scorecards/${encodeURIComponent(callId)}`, { signal }));
+    if (!scorecard.source_external_id || !scorecard.source_revision) return null;
+    if (scorecard.source_external_id !== callId && scorecard.call_id !== callId) {
+      throw new ApiError("Slipstream API returned a scorecard for a different call", 409);
+    }
+    return scorecard;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+export async function scoreCall(call: ApiCall, outcome: CallRecord["outcome"], signal?: AbortSignal): Promise<ApiScorecard> {
+  const rep = call.rep ?? "Unknown rep";
+  const repKey = rep.trim().toLocaleLowerCase();
+  const speakers = call.segments.map((segment) => segment.speaker.trim().toLocaleLowerCase());
+  if (!repKey || speakers.some((speaker) => !speaker) || new Set(speakers).size !== 2 || !speakers.includes(repKey)) {
+    throw new ApiError("Call speakers could not be mapped safely for scoring", 422);
+  }
+  const requestId = crypto.randomUUID();
+  const scorecard = parseScorecard(await request<unknown>("/scorecards", {
+    method: "POST",
+    body: JSON.stringify({
+      call_id: call.source_external_id,
+      request_id: requestId,
+      rep,
+      outcome: outcome === "open" ? null : outcome,
+      turns: call.segments.map((segment) => ({
+        speaker: segment.speaker.trim().toLocaleLowerCase() === repKey ? "rep" : "prospect",
+        name: segment.speaker,
+        text: segment.body,
+      })),
+    }),
+    signal,
+  }));
+  const expectedOutcome = outcome === "open" ? null : outcome;
+  const expectedTurns = call.segments.map((segment) => ({
+    speaker: segment.speaker.trim().toLocaleLowerCase() === repKey ? "rep" : "prospect",
+    name: segment.speaker,
+    text: segment.body,
+  }));
+  const sourceMatches = scorecard.source_turns != null && scorecard.source_turns.length === expectedTurns.length && scorecard.source_turns.every((turn, index) => turn.speaker === expectedTurns[index].speaker && turn.name === expectedTurns[index].name && turn.text === expectedTurns[index].text);
+  if (
+    ![call.id, call.source_external_id].includes(scorecard.call_id) ||
+    scorecard.source_external_id !== call.source_external_id ||
+    scorecard.request_id !== requestId ||
+    typeof scorecard.source_revision !== "string" ||
+    typeof scorecard.scorecard_revision !== "string" ||
+    scorecard.rep.trim().toLocaleLowerCase() !== repKey ||
+    scorecard.outcome !== expectedOutcome ||
+    !sourceMatches
+  ) {
+    throw new ApiError("Slipstream API returned a scorecard for a different call revision", 409);
+  }
+  const evidence = [...scorecard.discovery_evidence, ...scorecard.objection_evidence, ...(scorecard.next_step_evidence ? [scorecard.next_step_evidence] : [])];
+  const evidenceGrounded = evidence.every((item) => {
+    const segment = call.segments[item.turn_index - 1];
+    return segment != null && segment.body.includes(item.quote);
+  });
+  const discoveryConsistent = scorecard.discovery_questions === new Set(scorecard.discovery_evidence.map((item) => item.turn_index)).size && scorecard.discovery_evidence.every((item) => speakers[item.turn_index - 1] === repKey);
+  const nextStepConsistent = scorecard.next_step_secured === (scorecard.next_step_evidence != null);
+  const objectionConsistent = scorecard.objection_handling === "none_raised" ? scorecard.objection_evidence.length === 0 : scorecard.objection_evidence.length > 0;
+  if (!evidenceGrounded || !discoveryConsistent || !nextStepConsistent || !objectionConsistent) {
+    throw new ApiError("Slipstream API returned an ungrounded scorecard", 502);
+  }
+  return scorecard;
+}
+
+export async function derivePlaybook(scorecards: ApiScorecard[], signal?: AbortSignal): Promise<ApiPlaybook> {
+  const callIds = scorecards.map((item) => item.call_id);
+  const uniqueCallIds = [...new Set(callIds)];
+  if (uniqueCallIds.length !== callIds.length || uniqueCallIds.length < 2 || scorecards.some((item) => !item.source_revision || !item.scorecard_revision || !item.source_external_id || !item.outcome)) {
+    throw new ApiError("A playbook needs at least two distinct scorecards", 422);
+  }
+  const playbook = parsePlaybook(await request<unknown>("/playbook", {
+    method: "POST",
+    body: JSON.stringify({
+      call_ids: uniqueCallIds,
+      expected_sources: scorecards.map((item) => ({
+        call_id: item.call_id,
+        source_revision: item.source_revision,
+        scorecard_revision: item.scorecard_revision,
+        rubric_version: item.rubric_version,
+        outcome: item.outcome,
+      })),
+    }),
+    signal,
+  }));
+  const statsCalls = playbook.stats.reduce((sum, item) => sum + item.calls, 0);
+  const citedIds = new Set(playbook.patterns.flatMap((item) => item.call_ids));
+  const sourceIds = playbook.sources.map((item) => item.call_id);
+  const sourceRubrics = new Set(playbook.sources.map((item) => item.rubric_version));
+  const expectedSources = new Map(scorecards.map((item) => [item.call_id, item]));
+  const sourceMismatch = playbook.sources.some((item) => {
+    const expected = expectedSources.get(item.call_id);
+    return !expected || item.source_external_id !== expected.source_external_id || item.source_revision !== expected.source_revision || item.scorecard_revision !== expected.scorecard_revision || item.rubric_version !== expected.rubric_version || item.outcome !== expected.outcome;
+  });
+  const wonSources = playbook.sources.filter((item) => item.outcome === "won").length;
+  const notWonSources = playbook.sources.filter((item) => item.outcome === "lost" || item.outcome === "stalled").length;
+  const wonStats = playbook.stats.find((item) => item.outcome_group === "won")?.calls;
+  const notWonStats = playbook.stats.find((item) => item.outcome_group === "not_won")?.calls;
+  if (statsCalls !== uniqueCallIds.length || sourceIds.length !== uniqueCallIds.length || sourceIds.some((id) => !uniqueCallIds.includes(id)) || new Set(sourceIds).size !== sourceIds.length || sourceRubrics.size !== 1 || sourceMismatch || wonStats !== wonSources || notWonStats !== notWonSources || !wonSources || !notWonSources || [...citedIds].some((id) => !uniqueCallIds.includes(id))) {
+    throw new ApiError("Slipstream API returned a playbook for a different scorecard cohort", 409);
+  }
+  return playbook;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -502,5 +730,29 @@ export function mergeLivePipeline(fallback: CallRecord, live: LivePipeline): Cal
     turns,
     extraction,
     draft: { subject: draft.subject, body: draft.body },
+  };
+}
+
+export function mergeLiveScorecard(call: CallRecord, scorecard: ApiScorecard): CallRecord {
+  const span = (evidence: { turn_index: number } | null | undefined) =>
+    evidence ? call.turns[evidence.turn_index - 1]?.index ?? null : null;
+  return {
+    ...call,
+    scorecard: {
+      discoveryQuestions: {
+        value: scorecard.discovery_questions,
+        span: span(scorecard.discovery_evidence[0]),
+      },
+      nextStepSecured: {
+        value: scorecard.next_step_secured,
+        span: span(scorecard.next_step_evidence),
+      },
+      objectionHandling: {
+        value: scorecard.objection_handling,
+        span: span(scorecard.objection_evidence[0]),
+      },
+      talkRatio: scorecard.rep_talk_ratio,
+      notes: scorecard.summary,
+    },
   };
 }

@@ -32,6 +32,7 @@ class TranscriptTurn(BaseModel):
 
 class Transcript(BaseModel):
     call_id: Identifier
+    request_id: Identifier | None = None
     rep: PersonName
     outcome: Outcome | None = None
     turns: list[TranscriptTurn] = Field(min_length=1, max_length=MAX_TRANSCRIPT_TURNS)
@@ -65,6 +66,11 @@ class JudgedScorecard(BaseModel):
 
 class Scorecard(BaseModel):
     call_id: Identifier
+    request_id: Identifier | None = None
+    source_external_id: Identifier | None = None
+    source_revision: Identifier | None = None
+    scorecard_revision: Identifier | None = None
+    source_turns: list[TranscriptTurn] | None = None
     rep: PersonName
     outcome: Outcome | None = None
     discovery_questions: int = Field(ge=0, le=50)
@@ -145,10 +151,45 @@ class JudgedPlaybook(BaseModel):
     coaching_focus: list[Narrative] = Field(max_length=10)
 
 
+class PlaybookSource(BaseModel):
+    call_id: Identifier
+    source_external_id: Identifier
+    source_revision: Identifier
+    scorecard_revision: Identifier
+    rubric_version: Identifier
+    outcome: Outcome | None = None
+
+
 class Playbook(BaseModel):
+    sources: list[PlaybookSource] = Field(min_length=2, max_length=MAX_PLAYBOOK_SCORECARDS)
     stats: list[OutcomeStats]
     reps: list[RepProfile]
     patterns: list[WinningPattern]
     coaching_focus: list[str]
     model: str
     generated_at: datetime
+
+    @model_validator(mode="after")
+    def consistent_cohort(self) -> Playbook:
+        ids = [source.call_id for source in self.sources]
+        revisions = [source.source_revision for source in self.sources]
+        rubrics = {source.rubric_version for source in self.sources}
+        outcomes = [source.outcome for source in self.sources]
+        stats = {item.outcome_group: item.calls for item in self.stats}
+        if len(ids) != len(set(ids)) or len(revisions) != len(set(revisions)):
+            raise ValueError("Playbook sources must be distinct revisions")
+        if len(rubrics) != 1 or any(
+            outcome not in {"won", "lost", "stalled"} for outcome in outcomes
+        ):
+            raise ValueError("Playbook sources must use one rubric and eligible outcomes")
+        won = sum(outcome == "won" for outcome in outcomes)
+        not_won = len(outcomes) - won
+        if (
+            set(stats) != {"won", "not_won"}
+            or stats["won"] != won
+            or stats["not_won"] != not_won
+            or not won
+            or not not_won
+        ):
+            raise ValueError("Playbook statistics must match source outcomes")
+        return self

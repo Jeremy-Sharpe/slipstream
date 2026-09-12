@@ -1,9 +1,10 @@
 "use client";
 
 import { AlertCircle, ArrowRightLeft, CheckCircle2, ListChecks, Loader2, MessageSquareWarning, Mic, Server, Target, Zap, type LucideIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { defaultBrief } from "@/lib/data/brief";
-import { API_BASE_URL, getLatestIcp, getReadiness, type ApiIcpProfile, type ApiReadiness } from "@/lib/api/slipstream";
+import { API_BASE_URL, derivePlaybook, getLatestIcp, getReadiness, getScorecard, type ApiIcpProfile, type ApiPlaybook, type ApiReadiness, type ApiScorecard } from "@/lib/api/slipstream";
 import type { Intelligence } from "@/lib/types/intelligence";
 import { IntelligenceHeader } from "./IntelligenceHeader";
 import { BriefCard, DerivedIcp, NextSteps, Objections, TalkRatio, Tiles, TrainingLens, Triggers } from "./sections";
@@ -42,10 +43,18 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
     { data: Intelligence; status: "checking" | "error" } |
     { data: Intelligence; status: "ready"; readiness: ApiReadiness }
   >({ data, status: "checking" });
+  const [playbookState, setPlaybookState] = useState<
+    { data: Intelligence; status: "checking" | "missing" } |
+    { data: Intelligence; status: "available" | "generating"; scorecards: ApiScorecard[] } |
+    { data: Intelligence; status: "live"; playbook: ApiPlaybook } |
+    { data: Intelligence; status: "error"; message: string }
+  >({ data, status: "checking" });
+  const playbookControllerRef = useRef<AbortController>(null);
   const currentProfileState = profileState.data === data ? profileState : { data, status: "checking" as const };
   const currentReadinessState = readinessState.data === data ? readinessState : { data, status: "checking" as const };
+  const currentPlaybookState = playbookState.data === data ? playbookState : { data, status: "checking" as const };
   const liveProfile = currentProfileState.status === "live" ? currentProfileState.profile : null;
-  const displayData = useMemo(() => {
+  const profileData = useMemo(() => {
     if (!liveProfile) return data;
     const knownCalls = new Map(
       data.icp.attributes.flatMap((attribute) => attribute.evidence).map((item) => [item.id, item]),
@@ -70,6 +79,23 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
       },
     };
   }, [data, liveProfile]);
+  const livePlaybook = currentPlaybookState.status === "live" ? currentPlaybookState.playbook : null;
+  const displayData = useMemo(() => {
+    if (!livePlaybook) return profileData;
+    const won = livePlaybook.stats.find((item) => item.outcome_group === "won");
+    const notWon = livePlaybook.stats.find((item) => item.outcome_group === "not_won");
+    if (!won || !notWon) return profileData;
+    const pct = (value: number) => `${Math.round(value * 100)}%`;
+    return {
+      ...profileData,
+      lens: [
+        { label: "Secured a dated next step", wins: { value: pct(won.next_step_rate), share: won.next_step_rate }, others: { value: pct(notWon.next_step_rate), share: notWon.next_step_rate }, takeaway: "Live rubric result for stored won and not-won scorecards." },
+        { label: "Discovery questions before pricing", wins: { value: `${won.mean_discovery.toFixed(1)} avg`, share: Math.min(1, won.mean_discovery / 6) }, others: { value: `${notWon.mean_discovery.toFixed(1)} avg`, share: Math.min(1, notWon.mean_discovery / 6) }, takeaway: "Live mean of transcript-grounded discovery questions." },
+        { label: "Objection handled", wins: { value: pct(won.objection_handled_rate), share: won.objection_handled_rate }, others: { value: pct(notWon.objection_handled_rate), share: notWon.objection_handled_rate }, takeaway: "Live rate of objections judged handled with evidence." },
+        { label: "Rep talk ratio", wins: { value: pct(won.mean_talk_ratio), share: won.mean_talk_ratio }, others: { value: pct(notWon.mean_talk_ratio), share: notWon.mean_talk_ratio }, takeaway: "Live deterministic word-share mean by outcome." },
+      ],
+    };
+  }, [livePlaybook, profileData]);
   const brief = liveProfile?.profile.origami_brief ?? defaultBrief;
   const text = useMemo(() => sectionText(displayData, brief), [displayData, brief]);
   const q = query.trim().toLowerCase();
@@ -78,6 +104,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
     getLatestIcp()
       .then((profile) => {
         if (cancelled) return;
@@ -88,26 +115,95 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
         setProfileState({ data, status: "error", message: error instanceof Error ? error.message : "Analysis service unavailable" });
       });
     getReadiness()
-      .then((readiness) => { if (!cancelled) setReadinessState({ data, status: "ready", readiness }); })
-      .catch(() => { if (!cancelled) setReadinessState({ data, status: "error" }); });
-    return () => { cancelled = true; };
+      .then(async (readiness) => {
+        if (cancelled) return;
+        setReadinessState({ data, status: "ready", readiness });
+        try {
+          const judgeConfigured = readiness.integrations.openrouter === true || readiness.integrations.openai === true || readiness.integrations.anthropic === true;
+          if (!judgeConfigured) {
+            setPlaybookState({ data, status: "missing" });
+            return;
+          }
+          const scorecards = (await Promise.all(data.talkRatios.map((item) => getScorecard(item.call.id, controller.signal)))).filter((item) => item != null);
+          if (cancelled) return;
+          const eligible = scorecards.filter((item) => item.outcome === "won" || item.outcome === "lost" || item.outcome === "stalled");
+          const hasWon = eligible.some((item) => item.outcome === "won");
+          const hasNotWon = eligible.some((item) => item.outcome === "lost" || item.outcome === "stalled");
+          if (eligible.length < 2 || !hasWon || !hasNotWon || new Set(eligible.map((item) => item.call_id)).size !== eligible.length || new Set(eligible.map((item) => item.rubric_version)).size !== 1) {
+            if (!cancelled) setPlaybookState({ data, status: "missing" });
+            return;
+          }
+          setPlaybookState({ data, status: "available", scorecards: eligible });
+        } catch (error) {
+          if (!cancelled) setPlaybookState({ data, status: "error", message: error instanceof Error ? error.message : "Playbook service unavailable" });
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setReadinessState({ data, status: "error" });
+        setPlaybookState({ data, status: "error", message: "API health unavailable" });
+      });
+    return () => { cancelled = true; controller.abort(); };
   }, [data]);
+
+  useEffect(() => () => {
+    playbookControllerRef.current?.abort();
+    playbookControllerRef.current = null;
+  }, [data]);
+
+  const generatePlaybook = async () => {
+    if (currentPlaybookState.status !== "available") return;
+    const scorecards = currentPlaybookState.scorecards;
+    playbookControllerRef.current?.abort();
+    const controller = new AbortController();
+    playbookControllerRef.current = controller;
+    setPlaybookState({ data, status: "generating", scorecards });
+    let timedOut = false;
+    const timeout = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 45_000);
+    try {
+      const playbook = await derivePlaybook(scorecards, controller.signal);
+      if (playbookControllerRef.current === controller && !controller.signal.aborted) setPlaybookState({ data, status: "live", playbook });
+    } catch (error) {
+      if (playbookControllerRef.current !== controller || controller.signal.aborted && !timedOut) return;
+      setPlaybookState({ data, status: "error", message: timedOut ? "Playbook generation timed out" : error instanceof Error ? error.message : "Playbook service unavailable" });
+    } finally {
+      window.clearTimeout(timeout);
+      if (playbookControllerRef.current === controller) playbookControllerRef.current = null;
+    }
+  };
 
   const evaluationLabel = `${data.callsAnalysed}-call labelled evaluation`;
   const readiness = currentReadinessState.status === "ready" ? currentReadinessState.readiness : null;
-  const configured = readiness?.integrations.openrouter === true || readiness?.integrations.anthropic === true
+  const configured = readiness?.integrations.openrouter === true || readiness?.integrations.openai === true || readiness?.integrations.anthropic === true
     ? true
-    : readiness?.integrations.openrouter === false && readiness?.integrations.anthropic === false
+    : readiness?.integrations.openrouter === false && readiness?.integrations.openai === false && readiness?.integrations.anthropic === false
       ? false
       : null;
   const revision = readiness ? `${readiness.revision.slice(0, 7)} connected` : currentReadinessState.status === "error" ? "API health unavailable" : "checking API health";
+  const playbookNote = currentPlaybookState.status === "live"
+    ? `win-pattern lens loaded live from stored scorecards (${currentPlaybookState.playbook.model}); all other coaching sections remain the ${evaluationLabel}`
+    : currentPlaybookState.status === "error"
+      ? `live playbook unavailable (${currentPlaybookState.message})`
+      : currentPlaybookState.status === "checking"
+        ? "checking for a live playbook"
+        : currentPlaybookState.status === "available"
+          ? `${currentPlaybookState.scorecards.length} revision-pinned scorecards are ready for explicit playbook generation; the page has not spent model credits`
+          : currentPlaybookState.status === "generating"
+            ? "generating a live win-pattern lens from stored scorecards"
+        : `win-pattern lens remains the ${evaluationLabel}`;
+  const liveLensMeta = livePlaybook
+    ? `${livePlaybook.stats.reduce((sum, item) => sum + item.calls, 0)} stored scorecards · live ${livePlaybook.model}`
+    : undefined;
   const sourceNote = currentProfileState.status === "live"
-    ? `ICP v${currentProfileState.profile.version} and Origami brief loaded live · all other sections remain the ${evaluationLabel} · ${revision}`
+    ? `ICP v${currentProfileState.profile.version} and Origami brief loaded live · ${playbookNote} · ${revision}`
     : currentProfileState.status === "missing"
-      ? `${revision} · no stored ICP yet${configured === false ? " · model key not configured" : ""} · showing the ${evaluationLabel}`
-      : currentProfileState.status === "error"
-        ? `${currentProfileState.message} · showing the ${evaluationLabel} · ${revision}`
-        : `Showing the ${evaluationLabel} while checking for a stored live ICP · ${revision}`;
+      ? `${revision} · no stored ICP yet${configured === false ? " · model key not configured" : ""} · ${playbookNote}`
+    : currentProfileState.status === "error"
+        ? `${currentProfileState.message} · ${playbookNote} · ${revision}`
+        : `Showing the ${evaluationLabel} while checking for a stored live ICP · ${playbookNote} · ${revision}`;
 
   useEffect(() => {
     if (!active) return;
@@ -128,9 +224,11 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
       <div role="status" aria-atomic="true" className="mt-7 flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-[14px]">
         {currentProfileState.status === "checking" ? <Loader2 className="size-4 animate-spin text-primary" /> : currentProfileState.status === "live" ? <CheckCircle2 className="size-4 text-primary" /> : currentProfileState.status === "error" ? <AlertCircle className="size-4 text-destructive" /> : <Server className="size-4 text-muted-foreground" />}
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-foreground">{currentProfileState.status === "live" ? "Live ICP + labelled evaluation analysis" : "Labelled evaluation analysis"}</p>
+          <p className="font-medium text-foreground">{currentProfileState.status === "live" || currentPlaybookState.status === "live" ? "Live intelligence + labelled evaluation analysis" : "Labelled evaluation analysis"}</p>
           <p className="text-[12px] text-muted-foreground">{sourceNote}</p>
         </div>
+        {currentPlaybookState.status === "available" && <Button variant="outline" className="h-9 shrink-0 text-[12px]" onClick={() => void generatePlaybook()}>Generate live playbook</Button>}
+        {currentPlaybookState.status === "generating" && <Button variant="outline" className="h-9 shrink-0 text-[12px]" disabled><Loader2 className="size-3.5 animate-spin" /> Generating…</Button>}
         <a href={`${API_BASE_URL}/ready`} target="_blank" rel="noreferrer" className="text-[12px] font-medium text-muted-foreground hover:text-foreground">API status</a>
       </div>
 
@@ -166,7 +264,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
       ) : (
         <div className="mt-[42px] flex flex-col gap-6">
           {!q && <Tiles data={displayData} />}
-          {show("patterns") && <TrainingLens data={displayData} active={active} />}
+          {show("patterns") && <TrainingLens data={displayData} active={active} meta={liveLensMeta} />}
           {show("icp") && <DerivedIcp data={displayData} active={active} />}
           {show("objections") && <Objections data={displayData} active={active} />}
           {show("talk-ratio") && <TalkRatio data={displayData} active={active} />}

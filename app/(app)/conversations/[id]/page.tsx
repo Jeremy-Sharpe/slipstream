@@ -12,7 +12,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const { id } = await params;
   const others = calls.map((c) => ({ id: c.id, company: c.company, prospect: c.prospect }));
   const call = callById(id);
-  if (call) return <ConversationDetail call={call} others={others} />;
+  if (call) return <ConversationDetail key={call.id} call={call} others={others} />;
   const email = emailById(id);
   if (email) return <EmailConversationDetail key={email.id} thread={email} />;
   // Not a fixture: it may be a call added in this session (client store only).
