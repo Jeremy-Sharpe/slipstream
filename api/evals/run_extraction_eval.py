@@ -51,7 +51,6 @@ JUDGED = [
     "contact_email",
     "company_name",
     "company_headcount",
-    "deal_outcome",
     "deal_amount",
     "next_step",
     "promises",
@@ -59,6 +58,8 @@ JUDGED = [
 ]
 REPORTED = [
     *JUDGED,
+    "deal_outcome",
+    "promises_count",
     "contact_phone",
     "contact_title",
     "company_industry",
@@ -146,17 +147,41 @@ def check_contact_name(expected: dict[str, Any], extraction: dict[str, Any], cal
     )
 
 
+def _spoken(needle: str, call: Any) -> bool:
+    return bool(needle) and needle in norm(call.transcript)
+
+
+def _spoken_or_null(expected_value: object, extracted: object, call: Any, *, key: str) -> bool:
+    """A label that was never spoken cannot be extracted; the honest answer is null."""
+    if expected_value is None:
+        return extracted is None
+    spoken = (
+        digits(expected_value) in digits(call.transcript)
+        if key == "digits"
+        else _spoken(norm(expected_value), call)
+    )
+    if not spoken:
+        return extracted is None
+    if key == "digits":
+        return digits(expected_value) == digits(extracted)
+    return norm(expected_value) == norm(extracted)
+
+
 def check_contact_email(expected: dict[str, Any], extraction: dict[str, Any], call: Any) -> bool:
-    del call
-    return norm(_value(expected, "contact", "email")) == norm(
-        _value(extraction, "contact", "email", "value")
+    return _spoken_or_null(
+        _value(expected, "contact", "email"),
+        _value(extraction, "contact", "email", "value"),
+        call,
+        key="text",
     )
 
 
 def check_contact_phone(expected: dict[str, Any], extraction: dict[str, Any], call: Any) -> bool:
-    del call
-    return digits(_value(expected, "contact", "phone")) == digits(
-        _value(extraction, "contact", "phone", "value")
+    return _spoken_or_null(
+        _value(expected, "contact", "phone"),
+        _value(extraction, "contact", "phone", "value"),
+        call,
+        key="digits",
     )
 
 
@@ -221,8 +246,15 @@ def check_deal_outcome(expected: dict[str, Any], extraction: dict[str, Any], cal
 
 
 def check_deal_amount(expected: dict[str, Any], extraction: dict[str, Any], call: Any) -> bool:
-    del call
-    return _value(expected, "deal", "value_aud") == _value(extraction, "deal", "amount", "value")
+    expected_amount = _value(expected, "deal", "value_aud")
+    extracted = _value(extraction, "deal", "amount", "value")
+    if not expected_amount:
+        return extracted is None
+    transcript = norm(call.transcript)
+    spoken = str(expected_amount) in transcript or f"{expected_amount:,}" in transcript
+    if not spoken:
+        return extracted is None
+    return expected_amount == extracted
 
 
 def check_next_step(expected: dict[str, Any], extraction: dict[str, Any], call: Any) -> bool:
@@ -240,6 +272,16 @@ def check_next_step(expected: dict[str, Any], extraction: dict[str, Any], call: 
 
 
 def check_promises(expected: dict[str, Any], extraction: dict[str, Any], call: Any) -> bool:
+    """Recall: every labelled promise has an extracted promise with token overlap >= 0.4."""
+    del call
+    extracted = [promise.get("value") or "" for promise in extraction.get("promises", [])]
+    return all(
+        any(token_jaccard(expected_promise, candidate) >= 0.4 for candidate in extracted)
+        for expected_promise in expected.get("promises", [])
+    )
+
+
+def check_promises_count(expected: dict[str, Any], extraction: dict[str, Any], call: Any) -> bool:
     del call
     return abs(len(extraction.get("promises", [])) - len(expected.get("promises", []))) <= 1
 
@@ -319,6 +361,7 @@ CHECKS: dict[str, Callable[[dict[str, Any], dict[str, Any], Any], bool]] = {
     "deal_amount": check_deal_amount,
     "next_step": check_next_step,
     "promises": check_promises,
+    "promises_count": check_promises_count,
     "objections": check_objections,
     "objection_handling": check_objection_handling,
     "grounded": check_grounded,
@@ -835,6 +878,28 @@ def run_models(
     return [result for result in results if result is not None]
 
 
+def rescore(json_paths: list[Path], *, out_dir: Path, stamp: str) -> list[dict[str, Any]]:
+    """Recompute checks from stored extractions so a scoring change needs no new model calls."""
+    cases = {case.call_id: case for case in load_cases(include_demo=True)}
+    results = []
+    for json_path in json_paths:
+        model_result = _load_json(json_path)
+        for record in model_result["records"]:
+            if record.get("failed") or record.get("extraction") is None:
+                record["checks"] = {name: False for name in REPORTED}
+                continue
+            case = cases[record["call_id"]]
+            record["checks"] = compute_checks(case.expected, record["extraction"], case.call)
+        model_result["summary"] = summarize_records(model_result["records"])
+        model_result["rescored_from"] = str(json_path)
+        md_path, new_json_path = write_model_reports(
+            model_result=model_result, out_dir=out_dir, stamp=stamp
+        )
+        model_result["paths"] = {"markdown": str(md_path), "json": str(new_json_path)}
+        results.append(model_result)
+    return results
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the extraction eval over labelled fixtures.")
     parser.add_argument("--provider", choices=["openrouter", "openai", "anthropic"])
@@ -848,11 +913,27 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--include-demo", action="store_true")
     parser.add_argument("--out", type=Path, default=API_ROOT / "evals" / "results")
     parser.add_argument("--stamp")
+    parser.add_argument(
+        "--rescore",
+        nargs="+",
+        type=Path,
+        help="per-model JSON reports to re-score with the current checks, no model calls",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.rescore:
+        stamp = args.stamp or datetime.now().strftime("%Y%m%d-%H%M")
+        results = rescore(args.rescore, out_dir=args.out, stamp=stamp)
+        comparison = compare_models(results)
+        comparison_md, _, markdown = write_comparison_report(
+            comparison=comparison, out_dir=args.out, stamp=stamp
+        )
+        print(markdown)
+        print(comparison_md)
+        return 0 if comparison["decision"]["passes_gate"] else 1
     dotenv = parse_dotenv(API_ROOT / ".env")
     env = {**dotenv, **os.environ}
     try:

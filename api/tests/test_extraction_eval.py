@@ -57,8 +57,8 @@ def _base_extraction(call: Any) -> dict[str, Any]:
         "contact": {
             "name": {"value": "Maya  Chen", "evidence": evidence},
             "title": {"value": "managing partner", "evidence": evidence},
-            "email": {"value": "MAYA@example.test", "evidence": evidence},
-            "phone": {"value": "+61 3 7010 1101", "evidence": evidence},
+            "email": {"value": None, "evidence": []},
+            "phone": {"value": None, "evidence": []},
         },
         "company": {
             "name": {"value": "northstar labs", "evidence": evidence},
@@ -72,7 +72,7 @@ def _base_extraction(call: Any) -> dict[str, Any]:
         "deal": {
             "stage": {"value": "customer", "evidence": evidence},
             "outcome": {"value": "stalled", "evidence": evidence},
-            "amount": {"value": 58400, "evidence": evidence},
+            "amount": {"value": None, "evidence": []},
         },
         "promises": [
             {"value": "Send a gap summary", "evidence": evidence},
@@ -126,6 +126,7 @@ def test_each_check_passes_and_fails_on_hand_built_pair() -> None:
         "deal_outcome": ("deal", "outcome", "value", "open"),
         "deal_amount": ("deal", "amount", "value", 1),
         "promises": ("promises", None, None, []),
+        "promises_count": ("promises", None, None, [{}, {}, {}, {}]),
         "objections": ("objections", None, None, [{}, {}, {}]),
         "objection_handling": ("objections", 0, "handling", "ignored"),
     }
@@ -242,8 +243,8 @@ def _payload_from_labels(case: Any) -> ExtractionPayload:
     return ExtractionPayload(
         contact=ContactFields(
             name=_field(expected["contact"]["name"], _quote(call, 0)),
-            email=_field(expected["contact"]["email"], _quote(call, 0)),
-            phone=_field(expected["contact"]["phone"], _quote(call, 0)),
+            email=_field(None, ""),
+            phone=_field(None, ""),
             title=_field(expected["contact"]["role"], _quote(call, 1), 1),
         ),
         company=CompanyFields(
@@ -264,7 +265,7 @@ def _payload_from_labels(case: Any) -> ExtractionPayload:
                 confidence=0.9,
                 evidence=[EvidenceSpan(sequence=19, quote=_quote(call, 19))],
             ),
-            amount=_int_field(expected["deal"]["value_aud"], _quote(call, 17), 17),
+            amount=_int_field(None, ""),
         ),
         promises=[
             _field(expected["promises"][0], _quote(call, 14), 14),
