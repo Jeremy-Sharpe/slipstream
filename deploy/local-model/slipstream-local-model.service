@@ -19,6 +19,7 @@ ExecStart=/usr/bin/docker run --rm --name slipstream-local-model \
   --memory=4g \
   --cpus=2 \
   --tmpfs /tmp:size=64m,noexec,nosuid,nodev \
+  --network slipstream-models \
   --publish 127.0.0.1:8081:8080 \
   --volume /var/lib/slipstream-models:/models:ro \
   ghcr.io/ggml-org/llama.cpp@sha256:cbcdcb52d484e08e23bfc0135afa5beadd2d540513bbb7c65b233231fa033ff4 \

@@ -34,11 +34,12 @@ def derive_icp(
     if len(won) < 2:
         raise ValueError("At least two eligible won deals are required to derive an ICP")
     summaries = [_deal_summary_text(deal) for deal in deals]
-    vectors = _embed(embedder, settings.embedding_model, summaries)
+    embedding_model = settings.effective_embedding_model
+    vectors = _embed(embedder, embedding_model, summaries)
     for deal, vector in zip(deals, vectors, strict=True):
-        store.update_deal_embedding(str(deal.id), vector, settings.embedding_model)
+        store.update_deal_embedding(str(deal.id), vector, embedding_model)
         deal.embedding = vector
-        deal.embedding_model = settings.embedding_model
+        deal.embedding_model = embedding_model
     user = json.dumps(_cohort_payload(deals), separators=(",", ":"))
     reasoning = _structured(
         llm,
@@ -52,7 +53,7 @@ def derive_icp(
         version=store.max_icp_version() + 1,
         profile=profile,
         model=reasoning.model,
-        embedding_model=settings.embedding_model,
+        embedding_model=embedding_model,
     )
     for deal in won:
         attributes = [

@@ -16,6 +16,7 @@ def _clear_provider_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "OPENAI_API_KEY",
         "OPENROUTER_API_KEY",
         "LOCAL_MODEL_BASE_URL",
+        "LOCAL_EMBEDDING_BASE_URL",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -98,6 +99,8 @@ def test_checked_in_example_accepts_blank_optional_credentials(
         "LOCAL_MODEL_BASE_URL",
         "LOCAL_MODEL_NAME",
         "LOCAL_MODEL_CONTEXT_TOKENS",
+        "LOCAL_EMBEDDING_BASE_URL",
+        "LOCAL_EMBEDDING_NAME",
         "ELEVENLABS_API_KEY",
         "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
@@ -367,6 +370,14 @@ def test_local_model_url_rejects_non_loopback_or_ambiguous_endpoints(url: str) -
         Settings(_env_file=None, local_model_base_url=url)
 
 
+def test_local_embedding_url_uses_the_same_strict_loopback_boundary() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            local_embedding_base_url="http://embedding.example/v1",
+        )
+
+
 def test_local_model_context_must_match_a_supported_runtime_size() -> None:
     with pytest.raises(ValidationError):
         Settings(_env_file=None, local_model_context_tokens=4096)
@@ -378,6 +389,11 @@ def test_local_model_context_must_match_a_supported_runtime_size() -> None:
         ({}, None, False),
         ({"openai_api_key": "openai-test"}, "openai", True),
         ({"openrouter_api_key": "openrouter-test"}, "openrouter", True),
+        (
+            {"local_embedding_base_url": "http://127.0.0.1:8082/v1"},
+            "local",
+            True,
+        ),
     ],
 )
 def test_embedding_provider_and_flag(
@@ -391,3 +407,33 @@ def test_embedding_provider_and_flag(
 
     assert settings.embedding_provider == provider
     assert settings.integration_flags["embeddings"] is flag
+
+
+def test_local_embedding_configuration_is_canonical_and_named(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        local_embedding_base_url="HTTP://LOCALHOST:8082/v1/",
+        local_embedding_name="  local-nomic  ",
+    )
+
+    assert settings.local_embedding_base_url == "http://localhost:8082/v1"
+    assert settings.embedding_provider == "local"
+    assert settings.effective_embedding_model == "local-nomic"
+
+
+def test_hosted_embedding_provider_takes_priority_over_local(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(
+        _env_file=None,
+        openrouter_api_key="hosted-key",
+        local_embedding_base_url="http://127.0.0.1:8082/v1",
+    )
+
+    assert settings.embedding_provider == "openrouter"
+    assert settings.effective_embedding_model == "text-embedding-3-small"

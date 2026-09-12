@@ -1,4 +1,5 @@
 import json
+import math
 from dataclasses import dataclass
 from typing import Literal
 
@@ -21,7 +22,7 @@ class MissingReasoningProviderError(RuntimeError):
 class MissingEmbeddingProviderError(RuntimeError):
     def __init__(self) -> None:
         super().__init__(
-            "No embedding provider is configured (set OPENAI_API_KEY or OPENROUTER_API_KEY)"
+            "No embedding provider is configured (set a hosted key or local embedding URL)"
         )
 
 
@@ -60,7 +61,75 @@ class _OpenRouterEmbeddings:
 
 class _OpenRouterEmbeddingClient:
     def __init__(self, client: OpenAI) -> None:
+        self._client = client
         self.embeddings = _OpenRouterEmbeddings(client)
+
+    def close(self) -> None:
+        self._client.close()
+
+
+class _LocalEmbeddings:
+    def __init__(self, client: OpenAI, tokenizer: httpx.Client) -> None:
+        self._client = client
+        self._tokenizer = tokenizer
+
+    def create(self, *, model: str, input: object) -> object:
+        if isinstance(input, str):
+            prepared: object = f"search_document: {input}"
+        elif isinstance(input, list) and all(isinstance(item, str) for item in input):
+            prepared = [f"search_document: {item}" for item in input]
+        else:
+            prepared = input
+        texts = [prepared] if isinstance(prepared, str) else prepared
+        if isinstance(texts, list) and all(isinstance(item, str) for item in texts):
+            for text in texts:
+                response = self._tokenizer.post(
+                    "tokenize",
+                    json={
+                        "content": text,
+                        "add_special": True,
+                        "parse_special": False,
+                    },
+                )
+                response.raise_for_status()
+                payload = response.json()
+                tokens = payload.get("tokens") if isinstance(payload, dict) else None
+                if (
+                    not isinstance(tokens, list)
+                    or not tokens
+                    or not all(type(token) is int for token in tokens)
+                    or len(tokens) > 2048
+                ):
+                    raise ValueError(
+                        "Local embedding input exceeds the 2048-token model context"
+                    )
+        response = self._client.embeddings.create(model=model, input=prepared)
+        if getattr(response, "model", None) != model:
+            raise ValueError("Local embedding response used an unexpected model")
+        data = getattr(response, "data", None)
+        if not isinstance(data, list) or not data:
+            raise ValueError("Local embedding response did not contain vectors")
+        for item in data:
+            vector = getattr(item, "embedding", None)
+            if (
+                not isinstance(vector, list)
+                or len(vector) != 768
+                or not all(
+                    type(value) in (int, float) and math.isfinite(value)
+                    for value in vector
+                )
+            ):
+                raise ValueError("Local embedding response contained an invalid vector")
+        return response
+
+
+class _LocalEmbeddingClient:
+    def __init__(self, client: OpenAI, tokenizer: httpx.Client) -> None:
+        self._client = client
+        self.embeddings = _LocalEmbeddings(client, tokenizer)
+
+    def close(self) -> None:
+        self._client.close()
 
 
 class _LocalClient:
@@ -157,6 +226,21 @@ def create_embedding_client(settings: Settings) -> object:
                 api_key=settings.openrouter_api_key.get_secret_value(),
                 base_url=settings.openrouter_base_url,
             )
+        )
+    if provider == "local" and settings.local_embedding_base_url is not None:
+        http_client = httpx.Client(
+            base_url=settings.local_embedding_base_url.removesuffix("/v1") + "/",
+            trust_env=False,
+            follow_redirects=False,
+            timeout=httpx.Timeout(30.0, connect=1.0),
+        )
+        return _LocalEmbeddingClient(
+            OpenAI(
+                api_key="loopback-only",
+                base_url=settings.local_embedding_base_url,
+                http_client=http_client,
+            ),
+            http_client,
         )
     raise MissingEmbeddingProviderError()
 
