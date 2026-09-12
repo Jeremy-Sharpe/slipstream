@@ -40,8 +40,10 @@ unavailable deployment credentials or submitting the external form was verified 
 
 - The installed Railway CLI is unauthenticated. `scheduler/` is deploy-ready, but the
   service and its `SLIPSTREAM_INGEST_TOKEN` variable still need an account owner.
-- The VPS has no Supabase, Resend, Origami or model credentials. Do not add them to Git,
-  Vercel browser variables, screenshots or the public demo terminal.
+- The VPS has no Supabase, Resend or Origami credentials. It does run an explicitly
+  labelled, credential-free local reasoning model on loopback; `/ready` must report
+  `local_model: true` while unrelated integration flags remain false. Do not add secrets
+  to Git, Vercel browser variables, screenshots or the public demo terminal.
 
 ## Human-only finish line
 
@@ -54,8 +56,9 @@ unavailable deployment credentials or submitting the external form was verified 
 3. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)" --exercise-fixture` to confirm both
    deployments and the protected campaign boundary immediately before submitting.
 4. If a VPS restart cleared the memory-backed campaign, recreate it on the VPS with
-   `sudo bash -lc 'set -a; source /etc/slipstream/api.env; export SLIPSTREAM_INGEST_TOKEN="$INGEST_TOKEN"; cd /opt/slipstream/current; npm run seed:demo-campaign'`.
-   The command refuses durable storage or configured email delivery.
+   `sudo bash -lc 'set -a; source /etc/slipstream/api.env; export SLIPSTREAM_INGEST_TOKEN="$INGEST_TOKEN"; export SLIPSTREAM_API_URL=http://127.0.0.1:8000; cd /opt/slipstream/current; npm run seed:demo-campaign'`.
+   Loopback avoids the public reverse proxy deadline while CPU inference runs. The command
+   refuses durable storage or configured email delivery; the model port remains private.
 5. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
    **Track 1: Improve an Existing Business Capability** and also enter the
    **Built With ElevenLabs** special track.
