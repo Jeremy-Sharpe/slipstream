@@ -16,6 +16,8 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
     assert response.json()["integrations"] == {
         "supabase": False,
         "anthropic": False,
+        "openai": False,
+        "openrouter": False,
         "elevenlabs": False,
         "origami": False,
     }

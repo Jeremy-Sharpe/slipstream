@@ -11,6 +11,8 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         "SUPABASE_URL",
         "SUPABASE_SERVICE_ROLE_KEY",
         "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
         "ELEVENLABS_API_KEY",
         "ORIGAMI_API_KEY",
         "WEB_ORIGIN",

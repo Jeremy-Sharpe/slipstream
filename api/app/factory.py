@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import Settings, get_settings
 from app.core.readiness import StorageReadinessProbe
-from app.routers import health
+from app.routers import health, icp, leads
+from app.services.icp_leads_store import create_icp_leads_store
 
 
 @asynccontextmanager
@@ -29,6 +30,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = runtime_settings
     app.state.readiness = StorageReadinessProbe(runtime_settings)
+    app.state.icp_leads_store = create_icp_leads_store(runtime_settings)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=runtime_settings.web_origins,
@@ -38,4 +40,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(health.router, prefix="/api/v1")
+    app.include_router(icp.router)
+    app.include_router(icp.router, prefix="/api/v1")
+    app.include_router(leads.router)
+    app.include_router(leads.router, prefix="/api/v1")
     return app
