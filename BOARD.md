@@ -10,9 +10,9 @@ Order matters. The foundation rows unblock everything else and should be claimed
 |---|---|---|---|---|---|---|
 | `web-skeleton` | Next.js app, layout, the three surfaces as routes, mock data | `app/` | Jeremy | main | done | Prototype at repo root, mock data. Deploy to Vercel still to do |
 | `schema` | Supabase project, pgvector, migrations for the tables in PROJECT.md, seed script | `supabase/` | Jeremy's agent | feat/schema | in progress | Blocks every lane |
-| `fixtures` | 8 to 12 synthesised sales calls via ElevenLabs text-to-dialogue: scripts, audio, expected outcomes. Varied: won, stalled, lost, no-show | `fixtures/` | | | unclaimed | Every surface is judged against these |
+| `fixtures` | 8 to 12 synthesised sales calls via ElevenLabs text-to-dialogue: scripts, audio, expected outcomes. Varied: won, stalled, lost, no-show | `fixtures/` | Anna | feat/fixtures | in progress | Every surface is judged against these |
 | `api-skeleton` | FastAPI app, settings, Supabase client, health route, CORS for the web origin, VPS deploy | `api/` | | | unclaimed | Deploys to Jeremy's VPS behind HTTPS, not Render |
-| `web-deploy` | Vercel project for the UI, env vars, production URL in README | Vercel, `README.md` | | | unclaimed | |
+| `web-deploy` | Vercel project for the UI, env vars, production URL in README | Vercel, `README.md` | Anna | main | in progress | |
 | `web-split` | Move analysis and leads markup out of `app/page.tsx` into `app/analysis` and `app/leads`, nav into `components/shell/`, then break the conversations surface into components and data modules | `app/page.tsx`, `app/conversations/`, `components/`, `lib/` | | | unclaimed | Hour one unblocks Max's UI lane; see `docs/start-here.md` for the folder split |
 
 ## Lanes
