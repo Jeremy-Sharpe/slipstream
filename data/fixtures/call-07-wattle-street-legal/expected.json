@@ -1,0 +1,50 @@
+{
+  "call_id": "call-07-wattle-street-legal",
+  "extraction": {
+    "contact": {
+      "name": "Olivia Hart",
+      "role": "Practice Manager",
+      "email": "olivia@wattlestreetlegal.example",
+      "phone": "+61 3 7010 1107"
+    },
+    "company": {
+      "name": "Wattle Street Legal",
+      "industry": "Family law firm",
+      "headcount": 37,
+      "location": "Hawthorn, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 59600,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the transition plan and fixed onboarding quote by Tuesday",
+      "I will include the leaver checklist and after-hours file migration window"
+    ],
+    "objections": [
+      {
+        "text": "I am nervous about changing provider while our internal IT coordinator is leaving",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send transition plan and meet Olivia plus principal solicitor for sign-off.",
+      "due": "2026-09-08"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.48,
+    "notes": "Sam explored the operational risk around a departing coordinator and turned it into a concrete transition plan with a dated approval call."
+  },
+  "icp_signals": {
+    "industry": "Family law firm",
+    "headcount_band": "25-80",
+    "role": "Practice Manager",
+    "trigger": "Outgoing internal IT coordinator leaving in three weeks"
+  },
+  "risk_flags": []
+}

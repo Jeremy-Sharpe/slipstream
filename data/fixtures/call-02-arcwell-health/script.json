@@ -1,0 +1,166 @@
+{
+  "call_id": "call-02-arcwell-health",
+  "seller": "Harbourline IT",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Felix Morgan",
+    "role": "Operations Manager",
+    "email": "felix@arcwellhealth.example",
+    "phone": "+61 3 7010 1102"
+  },
+  "company": {
+    "name": "Arcwell Health",
+    "industry": "Multi-site allied health clinic",
+    "headcount": 64,
+    "location": "Brunswick and Essendon, VIC",
+    "domain": "arcwellhealth.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-01T14:30:00+10:00",
+  "duration_target_seconds": 450,
+  "outcome": "won",
+  "deal_value_aud": 103600,
+  "trigger": "Phishing incident and follow-up cyber insurance conditions",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Felix Morgan, Sam Whitfield from Harbourline IT. I have Arcwell Health as a two-site allied health group with you looking after operations, is that still right?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That's right. We've physios, occupational therapists, reception and a small finance team across Brunswick and Essendon. The reason I booked this is a phishing incident last month that rattled the directors."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What happened in the phishing incident, and what did it expose about the current setup?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "A receptionist approved a fake supplier bank change. We caught it before money moved, but the mailbox was compromised for a day. Our current IT person cleaned it up, but there was no proper incident note or training follow-up."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How does support work between the two clinics when reception, clinicians and practice software are all busy?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Honestly, everyone messages me first. Then I triage whether it's Best Practice, Xero, Microsoft 365 or the internet. It's workable until a Monday morning when both clinics have full books."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Who needs to be confident before Arcwell Health changes provider?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "The clinical director, me, and one GP who sits on the board. The clinicians care about uptime and privacy. The board cares about insurance, audit trail and not paying for theatre."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What would you want fixed in the first thirty days if we started?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "MFA everywhere, a reliable joiner and leaver process, backup testing for shared drives and someone running security awareness without making staff feel silly. I'd also like one helpdesk number instead of five workarounds."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Where does the cyber insurance renewal sit in the calendar?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "The broker wants updated answers by 18 September. They specifically asked about admin accounts, patching cadence and whether we can prove backups have been restored."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "For sixty-four staff, Harbourline would likely be $128 per seat per month, plus an onboarding project to clean identity, backups and device management before the insurer deadline."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Data sovereignty is the thing our clinical director will ask about. We deal with patient information, and she will not accept a vague answer about where tickets or backups go."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Good, she should ask. We keep Microsoft 365 data in your Australian tenant, document where backup metadata sits, and make any remote access auditable. I will send the incident-response checklist and onboarding proposal by Friday so she can see the detail."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That would take heat out of the conversation. What about the rollout? We can't close both clinics or interrupt appointments."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will include the two clinic rollout plan and the cyber insurance evidence register. The first week is discovery and identity controls, then we schedule endpoint work in reception gaps and after-hours windows."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That sounds sensible. The price is higher than our current person, but I can justify it if the board sees risk reduction and not just support tickets."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Can we book Friday 4 September at 11am for you, the clinical director and me to walk through the proposal before it goes to the board?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Yes, Friday 4 September at 11am is good. Send me the invite and I will add Dr Patel. If the checklist answers her privacy questions, I think we will proceed."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "On the clinical side, we'd keep the change visible but lightweight. Reception gets a single contact path, clinicians get clear timing for MFA changes, and the board gets evidence without needing to read technical logs."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That balance matters. If clinicians feel the security work is being done to them rather than with them, I will spend a month smoothing frustration instead of running the clinics."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "We can make the first staff message plain: why the changes are happening, what will change this week, and where to get help if a login prompt appears before an appointment."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Good. The phishing incident embarrassed people, and I don't want training that sounds like a lecture. A practical tone will land much better."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will also note that the board can start with the insurance evidence and then decide whether any deeper maturity work waits until after the renewal."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That's sensible. They will approve urgent controls quickly, but anything that smells like a giant transformation will get pushed into a later meeting."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Perfect. I will send the invite, proposal and checklist by Thursday afternoon so you've time to read it before Friday."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Thanks Sam. This is the first call where I have felt someone understood the clinic constraints, not only the security words."
+    }
+  ]
+}

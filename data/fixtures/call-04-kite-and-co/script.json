@@ -1,0 +1,176 @@
+{
+  "call_id": "call-04-kite-and-co",
+  "seller": "Harbourline IT",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Daniel Ortiz",
+    "role": "Operations Lead",
+    "email": "daniel@kiteandco.example",
+    "phone": "+61 3 7010 1104"
+  },
+  "company": {
+    "name": "Kite & Co",
+    "industry": "Commercial law firm",
+    "headcount": 95,
+    "location": "Melbourne CBD, VIC",
+    "domain": "kiteandco.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-02T16:00:00+10:00",
+  "duration_target_seconds": 430,
+  "outcome": "stalled",
+  "deal_value_aud": 132000,
+  "trigger": "Procurement security questionnaire before panel appointment",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Daniel, thanks for joining. I have you as Daniel Ortiz, operations lead at Kite & Co, a commercial law firm in the CBD. What prompted the conversation with Harbourline IT?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "That's right. We're reviewing our panel of suppliers after a procurement refresh. IT support is bundled into that, partly because our partners have started asking for clearer security reporting."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What does the partner group want to see that they aren't getting today?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "They want fewer surprises. When a barrister can't access a brief or a senior associate is locked out before court, it becomes an operational incident. The current provider fixes things eventually, but there's no rhythm or account management."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How are your systems set up across document management, Microsoft 365 and remote access?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "We're on Microsoft 365, Xero for finance, and a cloud document platform for matters. Remote access is mostly browser based, but some partners still have old habits around local files and personal devices."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Who will decide whether a new provider is worth moving to?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "The managing partner signs off, the finance director checks the numbers, and procurement controls the process. I can recommend a shortlist, but I can't award it on this call."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What would make you confident enough to recommend Harbourline IT for that shortlist?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "I need evidence that you understand confidentiality, response times and change management. We're ninety-five staff, but partner influence makes us feel larger. A botched migration would be painful politically."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Where are the current risks most visible day to day?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "Joiners and leavers are messy, shared mailboxes are inconsistent, and procurement keeps asking me for supplier documents I have to chase. There's also a cyber insurance renewal in November, but it's not the only driver."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "At that size, the managed services agreement would normally sit around $140 per seat per month, with a scoped onboarding project for identity, device management and documentation."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "Procurement will not let us progress without the full questionnaire and insurance certificates. They will ask about data handling, subcontractors, incident response and professional indemnity before a partner even reads the proposal."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That makes sense. I can answer the supplier side and show our standard controls, although some items depend on the final scope. I will send the security pack and a sample service schedule so you can test whether procurement is comfortable."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "That would help, but it may disappear into the vendor portal for a while. Our procurement manager is methodical and the managing partner is away until the week after next."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Would it be useful to pencil a review with the managing partner when he is back?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "Possibly, but I don't want to put a date in before procurement accepts the documents. If they bounce the questionnaire, the partner call would be premature."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Understood. I will send the pack and service schedule today, and you can tell me what procurement comes back with."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "Yes, send it through. I'm interested, but I need the process to move first. Once procurement clears the basics, we can talk about who joins the next call."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "The sample service schedule will spell out response targets, account review cadence and what evidence is produced monthly. That way procurement can compare more than hourly rates."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "That will be useful. They tend to reduce vendors to a spreadsheet, and IT support is hard to compare unless the service boundaries are explicit."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "If procurement wants clarification, I can answer in writing or join a short call with them before the partner group spends time on it."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "Possibly. I need to see how they react first. They can be quite strict about keeping suppliers out until the formal shortlist is set."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "No problem. I will make the pack self-contained, including our insurance certificates, data handling summary and a plain-English incident response outline."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "That gives me a decent chance of getting it through the first gate. After that the internal politics are the bigger unknown."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will also avoid assuming the current provider has done nothing. The comparison should be about service evidence and accountability, not throwing stones at people who may have been operating under a loose brief."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "That tone will help. The partners dislike vendor drama, and the incumbent still supports us while this process runs."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Thanks Daniel. I will keep it concise and label the parts procurement usually wants first."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Daniel Ortiz",
+      "text": "Appreciated. That will make my life easier even if the timetable isn't completely in my hands."
+    }
+  ]
+}

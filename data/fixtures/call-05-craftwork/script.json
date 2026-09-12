@@ -1,0 +1,186 @@
+{
+  "call_id": "call-05-craftwork",
+  "seller": "Harbourline IT",
+  "rep": "Jordan Lee",
+  "prospect": {
+    "name": "Lucy Beck",
+    "role": "Owner",
+    "email": "lucy@craftwork.example",
+    "phone": "+61 3 7010 1105"
+  },
+  "company": {
+    "name": "Craftwork",
+    "industry": "Independent craft retail and workshops",
+    "headcount": 8,
+    "location": "Northcote, VIC",
+    "domain": "craftwork.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-03T11:30:00+10:00",
+  "duration_target_seconds": 360,
+  "outcome": "lost",
+  "deal_value_aud": 9800,
+  "trigger": null,
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Hi Lucy Beck, Jordan Lee from Harbourline IT. Thanks for speaking with me about Craftwork. Our managed services plan starts at $95 per seat per month and gives small teams a proper IT helpdesk, security stack and regular maintenance."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "Hi Jordan. I should say upfront we're a small shop in Northcote with eight people, some casual. We run workshops, sell online a bit, and mainly need the till and Wi-Fi to behave."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That's exactly why a managed agreement is helpful. Retail downtime is expensive, and a predictable monthly fee means you can call us instead of trying to work out whether the issue is Shopify, Xero, the router or a laptop."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "My cousin helps us for cheap when the till or Wi-Fi plays up. He knows our setup, and most of the time he can pop in after work or talk me through it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Family help is common, but it usually has gaps. If there's a ransomware issue, a lost laptop, or a staff member leaving with access, you want proper offboarding, endpoint protection and backup checks instead of favours."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "I get that, but we're not a law firm. We've a handful of iPads, a point-of-sale machine, two laptops and some craft teachers who use their own devices."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The package would still cover those devices, plus Microsoft 365 or Google Workspace, password policy, domain security, and quarterly reports. For Craftwork, onboarding would likely be around $3,500, which gets the environment documented."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "That would be a lot for us. Some weeks we're watching every invoice, especially outside school holiday workshop periods."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The way I'd think about it's risk smoothing. Instead of a surprise emergency bill and lost trading time, you pay a smaller monthly amount and know the basics are covered by a team."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "But our surprise emergency bills have been pretty small. The last one was a new router, and my cousin charged us a slab and the parts."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That works until the problem isn't a router. Cyber insurance, payment security and customer data expectations are increasing, and a managed provider helps show you're taking reasonable steps."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "We don't have cyber insurance, and nobody has asked us about Essential Eight. I mostly answered your email because I wondered if there was an affordable health check."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "We can do health checks, but Harbourline IT's really set up for ongoing managed services. A one-off check without ongoing support can find problems and then leave you with no one accountable for fixing them."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "Then I think we're not your customer right now. I'm not saying never, but it's hard to justify before there's a real trigger."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I will send a one-page managed services overview. It will show what is included and give you something to keep on file if you decide to professionalise support later."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "Sure, send it, but please don't put me into a heavy follow-up sequence. I know the answer for this quarter."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The managed service also gives you continuity when staff change. Casual retail teams can end up with shared passwords, old accounts and nobody quite sure who has access to the online store."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "We do have some messy passwords, but I can fix that with a password manager without signing up to a whole IT service."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "A password manager is a good start, but it's still only one piece. We'd also look at MFA, device updates, DNS records, backups, user permissions and support documentation."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "That sounds thorough, just bigger than the problem I have."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I understand the scale concern, but a lot of small shops only call us after an avoidable issue has already cost them a weekend. I'd rather help before it becomes urgent."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "And I'd rather wait until there's something urgent enough to justify it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Fair enough. Keep the overview somewhere handy, because if you open a second store or start handling more online orders, the maths changes quickly."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "If we open a second store, I will probably call. Right now we're trying to make this one smoother."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The one-page overview will be practical rather than glossy. I will include the minimum controls, the support inclusions, the onboarding assumptions and the reasons we usually avoid tiny retainers that can't be properly accountable."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "Okay. I will read it with that frame, but I'm still expecting it to be more than we need."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I'd still encourage you to compare the annual cost against the risk of a bad trading day, because a Saturday outage or compromised mailbox can be more expensive than it feels when everything is calm. The managed plan is meant to remove that uncertainty."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "I hear you, but calm is where we're."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Even if you don't choose us, I'd make sure the hourly provider can name who owns backups, account removal, MFA and support response during trading hours, because those are the areas that usually fall between casual arrangements."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "I can ask them that."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "No problem. I will send the overview and check back down the track."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Lucy Beck",
+      "text": "Thanks Jordan. Good luck with it, but for now we will stay as we're."
+    }
+  ]
+}

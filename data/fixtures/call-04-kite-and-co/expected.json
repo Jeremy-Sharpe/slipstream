@@ -1,0 +1,49 @@
+{
+  "call_id": "call-04-kite-and-co",
+  "extraction": {
+    "contact": {
+      "name": "Daniel Ortiz",
+      "role": "Operations Lead",
+      "email": "daniel@kiteandco.example",
+      "phone": "+61 3 7010 1104"
+    },
+    "company": {
+      "name": "Kite & Co",
+      "industry": "Commercial law firm",
+      "headcount": 95,
+      "location": "Melbourne CBD, VIC"
+    },
+    "deal": {
+      "stage": "evaluation",
+      "value_aud": 132000,
+      "outcome": "stalled"
+    },
+    "promises": [
+      "I will send the security pack and a sample service schedule"
+    ],
+    "objections": [
+      {
+        "text": "Procurement will not let us progress without the full questionnaire and insurance certificates",
+        "handling": "partial"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send security pack and sample service schedule for Daniel to circulate.",
+      "due": null
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": false,
+    "objection_handling": "partial",
+    "rep_talk_ratio": 0.43,
+    "notes": "The firm had a real procurement trigger, but the managing partner was absent and the next step stayed vague."
+  },
+  "icp_signals": {
+    "industry": "Commercial law firm",
+    "headcount_band": "81-120",
+    "role": "Operations Lead",
+    "trigger": "Procurement security questionnaire before panel appointment"
+  },
+  "risk_flags": []
+}

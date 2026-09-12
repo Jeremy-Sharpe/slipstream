@@ -1,0 +1,49 @@
+{
+  "call_id": "call-11-banksia-architects",
+  "extraction": {
+    "contact": {
+      "name": "Grace Kim",
+      "role": "Studio Operations Manager",
+      "email": "grace@banksiaarchitects.example",
+      "phone": "+61 3 7010 1111"
+    },
+    "company": {
+      "name": "Banksia Architects",
+      "industry": "Architecture studio",
+      "headcount": 44,
+      "location": "Fitzroy, VIC"
+    },
+    "deal": {
+      "stage": "evaluation",
+      "value_aud": 66400,
+      "outcome": "stalled"
+    },
+    "promises": [
+      "I will send a short findings note and an office move risk checklist"
+    ],
+    "objections": [
+      {
+        "text": "The directors will not approve anything until the new financial year budget is clearer",
+        "handling": "partial"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send findings note and risk checklist for Grace to discuss with directors.",
+      "due": null
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": false,
+    "objection_handling": "partial",
+    "rep_talk_ratio": 0.47,
+    "notes": "Sam did good discovery, but the directors were missing and budget timing kept the next step vague."
+  },
+  "icp_signals": {
+    "industry": "Architecture studio",
+    "headcount_band": "25-80",
+    "role": "Studio Operations Manager",
+    "trigger": "Office move planning and cyber insurance evidence gap"
+  },
+  "risk_flags": []
+}
