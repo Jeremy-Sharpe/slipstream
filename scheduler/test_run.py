@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import io
 import json
+import os
+import subprocess
+import sys
+import time
 import unittest
 from typing import Self
 from urllib.error import HTTPError
@@ -106,6 +110,8 @@ class SchedulerTests(unittest.TestCase):
             {"SLIPSTREAM_CAMPAIGN_BATCH_LIMIT": "9"},
             {"SLIPSTREAM_SCHEDULER_TIMEOUT_SECONDS": "71"},
             {"SLIPSTREAM_INGEST_TOKEN": ""},
+            {"SLIPSTREAM_INGEST_TOKEN": "secret\nheader"},
+            {"SLIPSTREAM_INGEST_TOKEN": "non-ascii-🔑"},
         ):
             with self.subTest(overrides=overrides), self.assertRaises(ConfigError):
                 self.settings(**overrides)
@@ -138,9 +144,50 @@ class SchedulerTests(unittest.TestCase):
                     "status": "invented",
                 },
             },
+            {
+                "claimed_count": 1,
+                "campaign": {
+                    "id": "3ba7550e-759c-4f13-bc91-70d5e0453e7a",
+                    "status": [],
+                },
+            },
         ):
             with self.subTest(payload=payload), self.assertRaises(SchedulerError):
                 run(self.settings(), FakeOpener(FakeResponse(payload)))
+
+        nested = FakeResponse(None)
+        nested._raw = b'{"claimed_count":' + (b"9" * 5_000) + b',"campaign":null}'
+        with self.assertRaisesRegex(SchedulerError, "malformed JSON"):
+            run(self.settings(), FakeOpener(nested))
+
+    def test_wall_clock_deadline_stops_a_stalled_transport(self) -> None:
+        script = """
+import time
+from run import Settings, run
+from test_run import FakeOpener, FakeResponse
+
+class SlowOpener(FakeOpener):
+    def open(self, request, *, timeout):
+        time.sleep(2)
+        return FakeResponse({"claimed_count": 0, "campaign": None})
+
+settings = Settings("https://api.example.test", "secret", 8, 0.1, None)
+run(settings, SlowOpener(FakeResponse({})))
+"""
+        environment = dict(os.environ)
+        environment["PYTHONPATH"] = os.path.dirname(__file__)
+        started = time.monotonic()
+        completed = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True,
+            text=True,
+            timeout=1,
+            env=environment,
+            check=False,
+        )
+        self.assertLess(time.monotonic() - started, 1)
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("total deadline", completed.stderr)
 
 
 if __name__ == "__main__":

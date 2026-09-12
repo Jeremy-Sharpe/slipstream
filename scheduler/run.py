@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import sys
 from collections.abc import Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Protocol, Self
 from urllib.error import HTTPError, URLError
@@ -20,6 +22,24 @@ class ConfigError(ValueError):
 
 class SchedulerError(RuntimeError):
     pass
+
+
+@contextmanager
+def wall_clock_deadline(seconds: float):
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.getitimer(signal.ITIMER_REAL)
+
+    def deadline_reached(_signal_number: int, _frame: object) -> None:
+        raise SchedulerError("campaign scheduler exceeded its total deadline")
+
+    signal.signal(signal.SIGALRM, deadline_reached)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        signal.setitimer(signal.ITIMER_REAL, *previous_timer)
 
 
 class Response(Protocol):
@@ -52,7 +72,7 @@ class Settings:
 
 def load_settings(environment: Mapping[str, str]) -> Settings:
     api_url = environment.get("SLIPSTREAM_API_URL", "").strip().rstrip("/")
-    token = environment.get("SLIPSTREAM_INGEST_TOKEN", "").strip()
+    token = environment.get("SLIPSTREAM_INGEST_TOKEN", "")
     parsed = urlsplit(api_url)
     if (
         parsed.scheme != "https"
@@ -63,8 +83,12 @@ def load_settings(environment: Mapping[str, str]) -> Settings:
         or parsed.fragment
     ):
         raise ConfigError("SLIPSTREAM_API_URL must be an HTTPS origin or base path")
-    if not token:
-        raise ConfigError("SLIPSTREAM_INGEST_TOKEN is required")
+    if not token or any(
+        ord(character) < 33 or ord(character) > 126 for character in token
+    ):
+        raise ConfigError(
+            "SLIPSTREAM_INGEST_TOKEN must contain visible ASCII characters only"
+        )
     try:
         limit = int(environment.get("SLIPSTREAM_CAMPAIGN_BATCH_LIMIT", "8"))
     except ValueError as error:
@@ -95,6 +119,11 @@ def load_settings(environment: Mapping[str, str]) -> Settings:
 
 
 def run(settings: Settings, opener: Opener | None = None) -> dict[str, object]:
+    with wall_clock_deadline(settings.timeout_seconds):
+        return _run_with_deadline(settings, opener)
+
+
+def _run_with_deadline(settings: Settings, opener: Opener | None) -> dict[str, object]:
     body: dict[str, object] = {"limit": settings.limit}
     if settings.campaign_id is not None:
         body["campaign_id"] = settings.campaign_id
@@ -126,7 +155,7 @@ def run(settings: Settings, opener: Opener | None = None) -> dict[str, object]:
         raise SchedulerError("campaign scheduler response exceeded the size limit")
     try:
         payload = json.loads(raw)
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+    except (UnicodeDecodeError, ValueError, RecursionError) as error:
         raise SchedulerError("campaign scheduler returned malformed JSON") from error
     if not isinstance(payload, dict):
         raise SchedulerError("campaign scheduler returned an invalid response")
@@ -150,13 +179,18 @@ def run(settings: Settings, opener: Opener | None = None) -> dict[str, object]:
             )
         except ValueError:
             parsed_campaign_id = None
-        if parsed_campaign_id is None or campaign_status not in {
-            "scheduled",
-            "running",
-            "paused",
-            "completed",
-            "attention",
-        }:
+        if (
+            parsed_campaign_id is None
+            or not isinstance(campaign_status, str)
+            or campaign_status
+            not in {
+                "scheduled",
+                "running",
+                "paused",
+                "completed",
+                "attention",
+            }
+        ):
             raise SchedulerError(
                 "campaign scheduler returned malformed campaign status"
             )
@@ -173,6 +207,10 @@ def main() -> int:
         return 2
     except SchedulerError as error:
         print(f"scheduler error: {error}", file=sys.stderr)
+        return 1
+    # Never let an unexpected HTTP-library error print request headers and secrets.
+    except Exception:  # noqa: BLE001
+        print("scheduler error: unexpected failure", file=sys.stderr)
         return 1
     print(json.dumps(summary, separators=(",", ":"), sort_keys=True))
     return 0
