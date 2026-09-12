@@ -4,6 +4,7 @@ const DEFAULT_UI_URL = "https://slipstream-hackathon.vercel.app";
 const DEFAULT_API_URL = "https://slipstream-api.3-104-149-193.sslip.io";
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_BODY_BYTES = 1_048_576;
+const PRIMARY_FIXTURE_ID = "call-01-northstar-labs";
 
 const requiredCampaignOperations = {
   "/api/v1/campaigns": ["get", "post"],
@@ -18,13 +19,18 @@ function parseArgs(argv) {
     uiUrl: process.env.SLIPSTREAM_UI_URL || DEFAULT_UI_URL,
     apiUrl: process.env.SLIPSTREAM_API_URL || DEFAULT_API_URL,
     expectedRevision: undefined,
+    exerciseFixture: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
+    if (flag === "--exercise-fixture") {
+      options.exerciseFixture = true;
+      continue;
+    }
     const value = argv[index + 1];
     if (!["--ui", "--api", "--revision"].includes(flag) || !value) {
-      throw new Error(`Usage: npm run smoke:production -- [--revision SHA] [--ui URL] [--api URL]`);
+      throw new Error(`Usage: npm run smoke:production -- [--revision SHA] [--ui URL] [--api URL] [--exercise-fixture]`);
     }
     if (flag === "--ui") options.uiUrl = value;
     if (flag === "--api") options.apiUrl = value;
@@ -32,6 +38,76 @@ function parseArgs(argv) {
     index += 1;
   }
   return options;
+}
+
+async function exercisePrimaryFixture(apiUrl, fetchImpl) {
+  const ingest = await request(
+    `${apiUrl}/api/v1/calls/fixtures/${PRIMARY_FIXTURE_ID}/ingest`,
+    { method: "POST" },
+    fetchImpl,
+  );
+  assert(ingest.response.status === 200, `fixture ingest returned ${ingest.response.status}`);
+  const call = parseJson(ingest.body, "fixture ingest");
+  assert(call?.fixture === true && call?.provider === "fixture", "fixture ingest lost its provenance");
+  assert(call?.source_external_id === PRIMARY_FIXTURE_ID, "fixture ingest returned the wrong call");
+  assert(call?.subject === "Northstar Labs — Maya Chen", "fixture ingest returned the wrong subject");
+  assert(Array.isArray(call?.segments) && call.segments.length >= 10, "fixture transcript is incomplete");
+
+  const extractionResponse = await request(
+    `${apiUrl}/api/v1/calls/${call.id}/extract`,
+    { method: "POST" },
+    fetchImpl,
+  );
+  assert(extractionResponse.response.status === 200, `CRM extraction returned ${extractionResponse.response.status}`);
+  const extraction = parseJson(extractionResponse.body, "CRM extraction");
+  assert(extraction?.conversation_id === call.id, "CRM extraction belongs to another call");
+  assert(extraction?.source === "fixture_labels", "CRM extraction lost its labelled-fixture provenance");
+  assert(extraction?.contact?.name?.value === "Maya Chen", "CRM extraction returned the wrong contact");
+  assert(extraction?.company?.name?.value === "Northstar Labs", "CRM extraction returned the wrong company");
+  assert(extraction?.contact?.name?.evidence?.length > 0, "CRM extraction is missing source evidence");
+
+  const draftResponse = await request(
+    `${apiUrl}/api/v1/drafts/from-call/${call.id}`,
+    { method: "POST" },
+    fetchImpl,
+  );
+  assert(draftResponse.response.status === 200, `follow-up draft returned ${draftResponse.response.status}`);
+  const draft = parseJson(draftResponse.body, "follow-up draft");
+  assert(draft?.conversation_id === call.id, "follow-up draft belongs to another call");
+  assert(draft?.recipient_name === "Maya Chen", "follow-up draft returned the wrong recipient");
+  assert(draft?.status === "draft" || draft?.status === "approved", "follow-up draft has an invalid status");
+  assert(draft?.sent_at == null, "follow-up draft was unexpectedly sent");
+
+  const approvalResponse = await request(
+    `${apiUrl}/api/v1/drafts/${draft.id}/approve`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ approved_by: "Production smoke" }),
+    },
+    fetchImpl,
+  );
+  assert(approvalResponse.response.status === 200, `draft approval returned ${approvalResponse.response.status}`);
+  const approved = parseJson(approvalResponse.body, "draft approval");
+  assert(approved?.id === draft.id && approved?.status === "approved", "draft approval was not recorded");
+  assert(approved?.approved_at, "draft approval is missing its audit time");
+  assert(approved?.sent_at == null, "approved draft was unexpectedly sent");
+
+  for (const [label, path, expectedId] of [
+    ["stored call", `/api/v1/calls/${call.id}`, call.id],
+    ["stored extraction", `/api/v1/calls/${call.id}/extraction`, call.id],
+    ["stored draft", `/api/v1/drafts/${draft.id}`, draft.id],
+  ]) {
+    const storedResponse = await request(`${apiUrl}${path}`, {}, fetchImpl);
+    assert(storedResponse.response.status === 200, `${label} returned ${storedResponse.response.status}`);
+    const stored = parseJson(storedResponse.body, label);
+    assert((stored.id || stored.conversation_id) === expectedId, `${label} returned the wrong record`);
+    if (label === "stored draft") {
+      assert(stored.status === "approved" && stored.sent_at == null, "stored draft is not approved-unsent");
+    }
+  }
+
+  return { conversationId: call.id, draftId: draft.id, status: "approved-unsent" };
 }
 
 function normalizeHttpsUrl(value, label) {
@@ -143,6 +219,10 @@ export async function runSmoke(rawOptions = {}) {
   );
   assert(protectedResponse.response.status === 401, `unauthenticated pause returned ${protectedResponse.response.status}`);
 
+  const fixtureLoop = rawOptions.exerciseFixture
+    ? await exercisePrimaryFixture(apiUrl, fetchImpl)
+    : undefined;
+
   return {
     revision: ready.revision,
     storage: ready.storage,
@@ -150,6 +230,7 @@ export async function runSmoke(rawOptions = {}) {
     configuredIntegrations: Object.entries(ready.integrations || {})
       .filter(([, configured]) => configured === true)
       .map(([name]) => name),
+    ...(fixtureLoop ? { fixtureLoop } : {}),
   };
 }
 
@@ -160,7 +241,10 @@ if (import.meta.url === new URL(process.argv[1], "file:").href) {
       ? result.configuredIntegrations.join(",")
       : "none";
     console.log(
-      `production smoke passed revision=${result.revision} storage=${result.storage} campaigns=${result.campaignCount} integrations=${integrations}`,
+      `production smoke passed revision=${result.revision} storage=${result.storage} campaigns=${result.campaignCount} integrations=${integrations}` +
+        (result.fixtureLoop
+          ? ` fixture=${result.fixtureLoop.conversationId} draft=${result.fixtureLoop.draftId} state=${result.fixtureLoop.status}`
+          : ""),
     );
   } catch (error) {
     console.error(`production smoke failed: ${error instanceof Error ? error.message : "unknown error"}`);

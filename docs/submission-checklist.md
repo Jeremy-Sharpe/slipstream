@@ -28,9 +28,11 @@ unavailable deployment credentials or submitting the external form was verified 
 - The public fallback video is 4:30, 1440×900 H.264 with AAC narration. Its public
   ranged download, sampled frames, stream metadata, loudness and silence profile were
   verified; exact source and checksum are in `docs/video/`.
-- `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` performs a
-  credential-free, non-mutating check of the live Campaigns surface, API revision,
-  public campaign reads, OpenAPI contract and unauthenticated control rejection.
+- `npm run smoke:production -- --revision "$(git rev-parse HEAD)" --exercise-fixture` performs a
+  credential-free check of the live Campaigns surface, API revision, public campaign
+  reads, OpenAPI contract and unauthenticated control rejection. Its opt-in fixture step
+  idempotently ingests Maya's labelled call, extracts evidence-backed CRM fields, drafts
+  the grounded follow-up and records an approved-unsent audit state; it cannot deliver.
 - The production campaign list contains one synthetic record named “Hackathon demo —
   intentionally unsent”; it is paused, scheduled for 2099, and reports zero sends.
 
@@ -49,7 +51,7 @@ unavailable deployment credentials or submitting the external form was verified 
    updating the README URL.
 2. Pull `main`, then run `npm run evals:dry`. It must report `PASSED`; do not waive a
    failing check.
-3. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` to confirm both
+3. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)" --exercise-fixture` to confirm both
    deployments and the protected campaign boundary immediately before submitting.
 4. If a VPS restart cleared the memory-backed campaign, recreate it on the VPS with
    `sudo bash -lc 'set -a; source /etc/slipstream/api.env; export SLIPSTREAM_INGEST_TOKEN="$INGEST_TOKEN"; cd /opt/slipstream/current; npm run seed:demo-campaign'`.
