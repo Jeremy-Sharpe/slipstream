@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Phone, Target } from "lucide-react";
+import { House, LineChart, Phone } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { cn } from "./ui";
 
 const NAV = [
   { href: "/", label: "Home", icon: House },
   { href: "/calls", label: "Calls", icon: Phone },
-  { href: "/leads", label: "Leads", icon: Target },
+  { href: "/leads", label: "Leads", icon: LineChart },
 ];
 
 export function Sidebar() {
@@ -19,7 +19,7 @@ export function Sidebar() {
       <Link href="/" className="flex items-center gap-2 px-3 text-[16px] font-semibold tracking-[-0.04em] text-ink">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/slipstream-mark.svg" alt="" width={22} height={22} className="rounded-md" />
-        <span>slipstream<span className="text-accent">.</span></span>
+        <span>Slipstream<span className="text-accent">.</span></span>
       </Link>
       <nav className="mt-8 flex flex-col gap-1">
         {NAV.map((n) => {
@@ -33,7 +33,7 @@ export function Sidebar() {
                 active ? "bg-surface text-ink" : "text-soft hover:bg-surface hover:text-ink",
               )}
             >
-              <n.icon className="size-4" strokeWidth={active ? 2 : 1.75} />
+              <n.icon className="size-[17px]" strokeWidth={1.75} />
               {n.label}
             </Link>
           );
