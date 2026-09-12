@@ -13,7 +13,7 @@ def test_icp_derive_returns_503_with_missing_integration(client: TestClient) -> 
     response = client.post("/icp/derive", json={"include_demo": False})
 
     assert response.status_code == 503
-    assert "openai" in response.json()["detail"]
+    assert "embeddings" in response.json()["detail"]
 
 
 def test_lead_source_returns_503_with_missing_integration(client: TestClient) -> None:
@@ -68,7 +68,7 @@ def test_lead_source_returns_202_when_integrations_present(monkeypatch: pytest.M
         return None
 
     monkeypatch.setattr("app.routers.leads._origami_client", lambda _: FakeOrigami())
-    monkeypatch.setattr("app.routers.leads.get_openai_client", lambda _: object())
+    monkeypatch.setattr("app.routers.leads.get_embedding_client", lambda _: object())
     monkeypatch.setattr("app.routers.leads.complete_search", no_complete)
 
     with TestClient(app) as configured_client:
@@ -80,3 +80,48 @@ def test_lead_source_returns_202_when_integrations_present(monkeypatch: pytest.M
         "icp_profile_id": "profile-1",
         "status": "running",
     }
+
+
+def test_icp_derive_gets_past_integration_check_with_openrouter_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        openrouter_api_key=SecretStr("openrouter-test"),
+    )
+    app = create_app(settings)
+
+    def fake_derive_icp(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        assert kwargs["include_demo"] is False
+        return {
+            "id": "profile-1",
+            "version": 1,
+            "status": "ready",
+            "profile": {
+                "summary": "Fit",
+                "industries": ["Professional services"],
+                "headcount_band": "25-80",
+                "roles": ["Practice Manager"],
+                "triggers": ["Compliance"],
+                "disqualifiers": [],
+                "evidence": [],
+                "confidence": 0.8,
+                "origami_brief": "Find fit.",
+            },
+            "evidence": [],
+            "origami_brief": "Find fit.",
+            "model": "openai/gpt-5.4",
+            "embedding_model": "text-embedding-3-small",
+            "created_at": None,
+        }
+
+    monkeypatch.setattr("app.routers.icp.get_embedding_client", lambda _: object())
+    monkeypatch.setattr("app.routers.icp.derive_icp", fake_derive_icp)
+
+    with TestClient(app) as configured_client:
+        response = configured_client.post("/icp/derive", json={"include_demo": False})
+
+    assert response.status_code == 200
+    assert response.json()["model"] == "openai/gpt-5.4"
+    assert response.json()["embedding_model"] == "text-embedding-3-small"

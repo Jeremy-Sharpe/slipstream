@@ -17,6 +17,13 @@ class MissingReasoningProviderError(RuntimeError):
         super().__init__(f"{provider} integration is not configured")
 
 
+class MissingEmbeddingProviderError(RuntimeError):
+    def __init__(self) -> None:
+        super().__init__(
+            "No embedding provider is configured (set OPENAI_API_KEY or OPENROUTER_API_KEY)"
+        )
+
+
 @dataclass(frozen=True)
 class ReasoningClient:
     provider: ReasoningProvider
@@ -29,6 +36,28 @@ class ReasoningResult[SchemaT: BaseModel]:
     output: SchemaT
     model: str
     provider: ReasoningProvider
+
+
+class _OpenRouterEmbeddings:
+    def __init__(self, client: OpenAI) -> None:
+        self._client = client
+
+    def create(self, *, model: str, input: object) -> object:
+        return self._client.embeddings.create(
+            model=openrouter_model_id(model, "openai"),
+            input=input,
+        )
+
+
+class _OpenRouterEmbeddingClient:
+    def __init__(self, client: OpenAI) -> None:
+        self.embeddings = _OpenRouterEmbeddings(client)
+
+
+def openrouter_model_id(model: str, native: str) -> str:
+    if "/" in model or native not in {"openai", "anthropic"}:
+        return model
+    return f"{native}/{model}"
 
 
 def create_anthropic_client(settings: Settings) -> Anthropic:
@@ -54,13 +83,35 @@ def create_openrouter_client(settings: Settings) -> OpenAI:
 
 def create_reasoning_client(settings: Settings) -> ReasoningClient:
     provider = settings.reasoning_provider
+    native = settings._native_reasoning_provider
+    model = settings.reasoning_model
     if provider == "anthropic":
         client = create_anthropic_client(settings)
     elif provider == "openai":
         client = create_openai_client(settings)
     else:
         client = create_openrouter_client(settings)
-    return ReasoningClient(provider=provider, model=settings.reasoning_model, client=client)
+        if native != provider:
+            model = openrouter_model_id(model, native)
+    return ReasoningClient(provider=provider, model=model, client=client)
+
+
+def create_embedding_client(settings: Settings) -> object:
+    provider = settings.embedding_provider
+    if provider == "openai":
+        if settings.openai_api_key is None:
+            raise MissingEmbeddingProviderError()
+        return OpenAI(api_key=settings.openai_api_key.get_secret_value())
+    if provider == "openrouter":
+        if settings.openrouter_api_key is None:
+            raise MissingEmbeddingProviderError()
+        return _OpenRouterEmbeddingClient(
+            OpenAI(
+                api_key=settings.openrouter_api_key.get_secret_value(),
+                base_url=settings.openrouter_base_url,
+            )
+        )
+    raise MissingEmbeddingProviderError()
 
 
 def structured[SchemaT: BaseModel](
@@ -187,9 +238,7 @@ def _completion_text(completion: object) -> str:
         return content
     if isinstance(content, list):
         parts = [
-            item.get("text", "")
-            if isinstance(item, dict)
-            else getattr(item, "text", "")
+            item.get("text", "") if isinstance(item, dict) else getattr(item, "text", "")
             for item in content
         ]
         return "".join(parts)

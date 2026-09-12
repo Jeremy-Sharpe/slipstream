@@ -78,7 +78,7 @@ CRM tables mirror HubSpot objects so the path to a real integration is a field m
 
 ## AI pipeline
 
-The reasoning model is not fixed: `REASONING_MODEL` selects it, and one `structured()` helper in `api/app/core/llm.py` routes to Anthropic, OpenAI or OpenRouter (open-weight models) by model name. The bake-off in `docs/model-bakeoff.md` picks the production default; until then the default is `gpt-5.4`. Embeddings are OpenAI `text-embedding-3-small` (1536 dimensions, matching the schema). Implementation notes:
+The reasoning model is not fixed: `REASONING_MODEL` selects it, and one `structured()` helper in `api/app/core/llm.py` routes to Anthropic, OpenAI or OpenRouter (open-weight models) by model name. When the model's native key is absent and `OPENROUTER_API_KEY` is set, the same model is routed through OpenRouter under its vendor-prefixed id (`gpt-5.4` becomes `openai/gpt-5.4`), so one OpenRouter key runs the whole reasoning and embedding path. The bake-off in `docs/model-bakeoff.md` picks the production default; until then the default is `gpt-5.4`. Embeddings are OpenAI `text-embedding-3-small` (1536 dimensions, matching the schema), called directly with `OPENAI_API_KEY` or through OpenRouter as `openai/text-embedding-3-small`; the stored `embedding_model` value is the same either way. Implementation notes:
 
 - **Extraction** uses a pinned JSON schema in `api/app/schemas/`. Every field has a confidence and a transcript span so the approval UI can show where a value came from.
 - **Scorecard** rubric lives in `api/evals/rubric.md`: discovery questions asked, next step secured, objection handled, talk ratio. LLM-as-judge returns a score and a quoted span per dimension.

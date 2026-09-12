@@ -18,9 +18,7 @@ async def start_search(
     quality: str = "fast",
 ) -> tuple[Job, str]:
     profile = (
-        store.get_icp_profile(icp_profile_id)
-        if icp_profile_id
-        else store.latest_icp_profile()
+        store.get_icp_profile(icp_profile_id) if icp_profile_id else store.latest_icp_profile()
     )
     if profile is None:
         raise ValueError("No ready ICP profile found")
