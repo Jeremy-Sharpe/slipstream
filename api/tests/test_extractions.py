@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
+import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from app.core.llm import ReasoningResult
 from app.routers.calls import CallResponse, SegmentResponse
@@ -11,6 +13,7 @@ from app.schemas.extraction import (
     DealFields,
     EvidenceSpan,
     ExtractionPayload,
+    ExtractionResult,
     GroundingReport,
     IntegerField,
     NextStep,
@@ -259,6 +262,91 @@ def test_model_extraction_repairs_paraphrased_evidence(
     )
     assert extraction["grounding"] == {"repaired": 1, "dropped": 0}
     _assert_evidence_is_grounded(call, extraction)
+
+
+def test_grounding_locates_model_evidence_with_no_sequence() -> None:
+    call = CallResponse(
+        id=uuid4(),
+        source_external_id="missing-sequence",
+        subject="Grounding boundary",
+        occurred_at=datetime.now(UTC),
+        duration_seconds=3,
+        transcript="Buyer: Marlowe & Finch Accounting",
+        segments=[
+            SegmentResponse(
+                sequence=4,
+                speaker="Buyer",
+                body="Marlowe & Finch Accounting needs a safer follow-up.",
+                start_ms=0,
+                end_ms=3000,
+            )
+        ],
+        provider="test",
+    )
+    payload = _minimal_payload(call)
+    for section in (payload.contact, payload.company):
+        for field_name in type(section).model_fields:
+            getattr(section, field_name).evidence = []
+    for field_name in ("amount", "stage", "outcome"):
+        getattr(payload.deal, field_name).evidence = []
+    payload.promises = []
+    payload.objections = []
+    payload.next_step = None
+    payload.contact.name.evidence = [EvidenceSpan(quote="Marlowe & Finch Accounting")]
+
+    grounded, report = ground(payload, call)
+
+    assert grounded.contact.name.evidence == [
+        EvidenceSpan(sequence=4, quote="Marlowe & Finch Accounting")
+    ]
+    assert report == GroundingReport(repaired=1, dropped=0)
+
+
+def test_model_extraction_repairs_missing_evidence_sequence(
+    client: TestClient,
+    monkeypatch,
+) -> None:
+    call = client.post("/api/v1/calls/fixtures/call-13-marlowe-finch-demo/ingest").json()
+    payload = _minimal_payload(CallResponse.model_validate(call))
+    payload.contact.name.evidence = [EvidenceSpan(quote="Donnie Azoff")]
+
+    def fake(reasoning, *, system, user, schema, max_tokens=4000, timeout=None):
+        return _model_result(payload)
+
+    monkeypatch.setattr("app.services.extract.structured", fake)
+
+    response = client.post(f"/api/v1/calls/{call['id']}/extract")
+
+    assert response.status_code == 200
+    extraction = response.json()
+    assert extraction["contact"]["name"]["evidence"] == [
+        {"source": "transcript", "sequence": 0, "quote": "Donnie Azoff"}
+    ]
+    assert extraction["grounding"] == {"repaired": 1, "dropped": 0}
+
+
+def test_canonical_extraction_rejects_unindexed_transcript_evidence() -> None:
+    call = CallResponse(
+        id=uuid4(),
+        source_external_id="canonical-boundary",
+        subject="Canonical boundary",
+        occurred_at=datetime.now(UTC),
+        duration_seconds=1,
+        transcript="Buyer: evidence",
+        segments=[],
+        provider="test",
+    )
+    payload = _minimal_payload(call)
+    payload.contact.name.evidence = [EvidenceSpan(quote="evidence")]
+
+    with pytest.raises(ValidationError, match="requires a segment sequence"):
+        ExtractionResult(
+            **payload.model_dump(),
+            conversation_id=call.id,
+            source="model",
+            model="fake/model",
+            prompt_version="extract-v2",
+        )
 
 
 def test_model_extraction_drops_unmatched_evidence_without_failing(

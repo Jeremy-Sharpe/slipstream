@@ -81,6 +81,8 @@ figures with annual contract value. Next-step misses are dominated by a label co
 lost/no-show labels omit courtesy follow-ups that models correctly observe in the call.
 Objection-handling misses cluster around the ambiguous `partial` versus `handled` boundary.
 Claude Haiku failed five parses and DeepSeek one because those outputs omitted evidence
-sequence numbers; the grounding pass can locate quotes, but the schema rejects them first.
-These are documented follow-ups, not hidden failures. Claude Sonnet, Claude Opus and repeat
-runs were not completed because the shared OpenRouter credit was exhausted.
+sequence numbers. The raw model schema now accepts that recoverable shape long enough for
+the grounding pass to locate the quote, while the canonical result still rejects any
+transcript evidence left without an index. The historical table is intentionally unchanged;
+the models must be rerun before claiming an improved score. Claude Sonnet, Claude Opus and
+repeat runs were not completed because the shared OpenRouter credit was exhausted.

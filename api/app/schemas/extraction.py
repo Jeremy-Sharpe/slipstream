@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from datetime import date
 from typing import Literal
 from uuid import UUID
@@ -11,12 +12,6 @@ class EvidenceSpan(BaseModel):
     source: Literal["transcript", "fixture_label"] = "transcript"
     sequence: int | None = Field(default=None, ge=0)
     quote: str = Field(min_length=1, max_length=500)
-
-    @model_validator(mode="after")
-    def transcript_evidence_needs_a_sequence(self) -> EvidenceSpan:
-        if self.source == "transcript" and self.sequence is None:
-            raise ValueError("Transcript evidence requires a segment sequence")
-        return self
 
 
 class StringField(BaseModel):
@@ -125,9 +120,41 @@ class GroundingReport(BaseModel):
     dropped: int = 0
 
 
+def _evidence_spans(payload: ExtractionPayload) -> Iterator[EvidenceSpan]:
+    for field in (
+        *payload.promises,
+        payload.contact.name,
+        payload.contact.email,
+        payload.contact.phone,
+        payload.contact.title,
+        payload.company.name,
+        payload.company.domain,
+        payload.company.industry,
+        payload.company.employee_count,
+        payload.company.location,
+        payload.deal.amount,
+        payload.deal.stage,
+        payload.deal.outcome,
+    ):
+        yield from field.evidence
+    for objection in payload.objections:
+        yield from objection.evidence
+    if payload.next_step is not None:
+        yield from payload.next_step.evidence
+
+
 class ExtractionResult(ExtractionPayload):
     conversation_id: UUID
     source: Literal["fixture_labels", "model"]
     model: str
     prompt_version: str
     grounding: GroundingReport = Field(default_factory=GroundingReport)
+
+    @model_validator(mode="after")
+    def transcript_evidence_is_canonical(self) -> ExtractionResult:
+        if any(
+            evidence.source == "transcript" and evidence.sequence is None
+            for evidence in _evidence_spans(self)
+        ):
+            raise ValueError("Canonical transcript evidence requires a segment sequence")
+        return self
