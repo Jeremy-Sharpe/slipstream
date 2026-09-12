@@ -1,7 +1,7 @@
 # Submission handoff
 
 Use this as the final pre-submit runbook. Everything that can be checked without the
-finished video was verified on 12 September 2026.
+finished video or unavailable deployment credentials was verified on 13 September 2026.
 
 ## Verified now
 
@@ -10,16 +10,30 @@ finished video was verified on 12 September 2026.
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
-- API Ruff checks and all 176 tests pass, including scorecard/playbook revision, coach lifecycle,
-  email concurrency and provider-environment isolation coverage.
+- API Ruff checks and all 289 tests pass, including scorecard/playbook revision, coach lifecycle,
+  email concurrency, campaign leasing/controls and provider-environment isolation coverage.
 - All six fixture tests pass.
-- The email migration executes against PostgreSQL and its committed Supabase test
-  covers permissions, idempotency, rollback, CRM-field preservation, and message and
-  byte boundaries. The scorecard migration adds a service-role-only, stale-write-safe
-  conversation update. The playbook migration adds an atomic revision-checked cohort
-  upsert. All four migrations and all three pgTAP suites pass in ephemeral Supabase CI.
+- All nine Supabase migrations and seven pgTAP suites pass from an empty ephemeral
+  database in CI. Coverage includes email ingestion, scorecards, playbooks, unified ICP
+  evidence, exact-content delivery reservations, campaign leases and pause/resume RPC
+  permissions and state transitions.
+- The one-shot Railway scheduler passes seven tests covering secret hygiene, redirect and
+  response validation, wall-clock timeout, SIGTERM, empty work and exact request shape.
+- The production API exposes campaign create/list/detail/run/pause/resume routes and
+  rejects unauthenticated scheduler/control calls. It still reports memory storage and
+  `email_delivery: false`, so no live send is claimed.
 - The deterministic rubric-sync eval passes. Every deterministic submission check
   except the required demo-video URL passes.
+
+## Deployment-only gaps
+
+- Vercel has intermittently refused new production promotions after the project exceeded
+  100 free deployments in one day. The existing production URL remains healthy; show the
+  Campaigns beat only after its “Delivery execution” card is visible there.
+- The installed Railway CLI is unauthenticated. `scheduler/` is deploy-ready, but the
+  service and its `SLIPSTREAM_INGEST_TOKEN` variable still need an account owner.
+- The VPS has no Supabase, Resend, Origami or model credentials. Do not add them to Git,
+  Vercel browser variables, screenshots or the public demo terminal.
 
 ## Human-only finish line
 
@@ -32,7 +46,8 @@ finished video was verified on 12 September 2026.
 5. Pull `main`, then run `npm run evals:dry`. It must report `PASSED`; do not waive a
    failing check.
 6. Confirm both production URLs return HTTP 200 and the API `/ready` revision matches
-   the latest GitHub `main` commit.
+   the latest GitHub `main` commit. If Vercel has not promoted the campaign UI, follow
+   the conditional skip already written into `docs/demo-script.md`.
 7. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
    **Track 1: Improve an Existing Business Capability** and also enter the
    **Built With ElevenLabs** special track.
