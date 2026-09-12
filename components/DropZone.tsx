@@ -101,10 +101,10 @@ export function DropZone() {
           onDragOver={(e) => { e.preventDefault(); setOver(true); }}
           onDragLeave={() => setOver(false)}
           onDrop={(e) => { e.preventDefault(); setOver(false); onFiles(e.dataTransfer.files); }}
-          className={cn(CARD, "cursor-pointer border border-dashed outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2", over ? "border-solid border-ink" : "border-line hover:border-[#d4d4d4]")}
+          className={cn(CARD, "cursor-pointer outline-none transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2", over && "shadow-[inset_0_0_0_1px_#181925]")}
         >
           <FileTiles lifted={over} />
-          <p className="mt-4 text-[15px] font-semibold text-ink">Drop a call recording</p>
+          <p className="mt-4 text-[15px] font-semibold text-ink">Drop a call recording or video</p>
           <Button className="mt-3 h-8 bg-white px-3.5 text-[13px] shadow-[inset_0_0_0_1px_#e8e8e8] hover:bg-surface-2" onClick={(e) => { e.stopPropagation(); input.current?.click(); }}>
             Choose file
           </Button>
