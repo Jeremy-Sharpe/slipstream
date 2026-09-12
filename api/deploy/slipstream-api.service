@@ -1,0 +1,27 @@
+[Unit]
+Description=Slipstream FastAPI service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=slipstream
+Group=slipstream
+WorkingDirectory=/opt/slipstream/current/api
+EnvironmentFile=-/etc/slipstream/api.env
+EnvironmentFile=/opt/slipstream/current/.release.env
+Environment=ENVIRONMENT=production
+ExecStart=/opt/slipstream/current/api/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
