@@ -32,7 +32,7 @@ The live URL exposes the complete product surface and an executable fixture loop
 1. **A sales call happens.** For the demo the call is synthesised with ElevenLabs text-to-dialogue (two voices, realistic objections) and played through speakers. Fixtures cover won, stalled, lost and no-show outcomes.
 2. **The coach listens.** An always-on-top desktop overlay can stream the consented rep microphone to ElevenLabs Scribe realtime and shows the rep the next question to ask, grounded in this deal's CRM history. Its credential-free manual mode demonstrates both sides; this build does not claim mixed call-audio capture.
 3. **The call writes itself into the CRM.** With ElevenLabs configured, a recording is transcribed with Scribe and diarised. The configured reasoning model extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves. Without provider credentials, the deployed fixture path loads labelled transcript segments through the same downstream contract and labels its source.
-4. **The follow-up drafts itself.** A follow-up email is generated from the transcript and attached to the deal. Approve is one click and marks it sent. No email leaves the system.
+4. **The follow-up drafts itself.** A follow-up email is generated from the transcript and attached to the deal. Approval is a separate, audited state. A server-side delivery action can then send that exact approved copy through Resend when credentials are installed; the current keyless deployment stops after approval.
 5. **The team learns from the call.** The analysis view scores the call against a written rubric, shows across all calls which moves correlate with won deals, and derives the ideal customer profile from the deals that closed.
 6. **The ICP finds the next customer.** The derived ICP becomes an Origami brief. Leads come back, are scored against the won-deal profile, and each gets a one-click outreach draft.
 
@@ -94,7 +94,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 
 - The CRM is our own Postgres tables shaped like HubSpot objects, not a live HubSpot.
 - No phone system integration. Audio arrives as a file or through the coach overlay.
-- Approving a draft marks it sent and logs it; no email is actually delivered.
+- Approval never claims delivery. The Resend adapter can deliver the exact approved draft through a separately authenticated server-side endpoint, but the current deployment has no email-provider credential.
 - Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
 - Extraction is grounded but not perfect: a value whose quote cannot be found verbatim in the transcript is dropped rather than shown, so a rep can see a null where the model paraphrased. Deal outcome and stage are model judgement calls scored against hand labels in the eval, not ground truth.
 - Single tenant, no auth, no billing.

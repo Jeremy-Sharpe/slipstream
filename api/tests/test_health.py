@@ -22,6 +22,7 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
         "elevenlabs": False,
         "origami": False,
         "crm_webhook": False,
+        "email_delivery": False,
     }
 
 

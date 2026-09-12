@@ -92,7 +92,7 @@ def test_outreach_approval_is_bound_to_the_reviewed_draft(client: TestClient) ->
 
     assert response.status_code == 200
     assert response.json()["id"] == str(draft.id)
-    assert response.json()["status"] == "sent"
+    assert response.json()["status"] == "approved"
 
 
 def test_outreach_approval_waits_for_concurrent_redraft(

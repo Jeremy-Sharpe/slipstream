@@ -35,7 +35,7 @@ require `X-Slipstream-Ingest-Token` when `INGEST_TOKEN` is configured.
 
 ## ICP, leads and outreach
 
-The ICP lane loads the labelled fixture calls as CRM history, derives the ideal customer profile from fixture-sourced won deals, starts an Origami lead search from the generated brief, scores returned leads against the won-deal centroid, and drafts one-click outreach emails that are marked sent on approval.
+The ICP lane loads the labelled fixture calls as CRM history, derives the ideal customer profile from fixture-sourced won deals, starts an Origami lead search from the generated brief, scores returned leads against the won-deal centroid, and drafts one-click outreach emails. Approval records review without claiming delivery.
 
 Approved call extraction can also leave Slipstream's HubSpot-shaped staging store through
 the provider-neutral CRM webhook. Configure `CRM_WEBHOOK_URL`, a 32-byte-or-longer
@@ -44,6 +44,13 @@ the provider-neutral CRM webhook. Configure `CRM_WEBHOOK_URL`, a 32-byte-or-long
 receiver contract, signature verification and idempotency requirements are documented in
 [`../docs/crm-webhook.md`](../docs/crm-webhook.md). The webhook excludes transcripts,
 evidence quotes, objections and promises; a receiver gets only bounded CRM fields.
+
+Approved follow-up and outreach drafts can be delivered through Resend by configuring
+`RESEND_API_KEY`, `RESEND_FROM`, and `INGEST_TOKEN`, then calling
+`POST /api/v1/drafts/{draft_id}/deliver` with the ingest-token header. Delivery sends the
+exact stored recipient, subject, and plain-text body, uses a content-bound idempotency key,
+and records the provider receipt before returning `status=sent`. See
+[`../docs/email-delivery.md`](../docs/email-delivery.md) for the retry contract.
 
 Every row written by this lane carries `metadata.source = "fixtures"` where the table has metadata, and ICP derivation reads only deals with that marker. The demo call is loaded with `metadata.demo = true` and is excluded from ICP derivation by default.
 

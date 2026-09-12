@@ -19,6 +19,9 @@ def clean_external_service_environment(monkeypatch: pytest.MonkeyPatch) -> None:
         "ORIGAMI_API_KEY",
         "CRM_WEBHOOK_URL",
         "CRM_WEBHOOK_SECRET",
+        "RESEND_API_KEY",
+        "RESEND_FROM",
+        "RESEND_BASE_URL",
         "WEB_ORIGIN",
         "WEB_ORIGINS",
     ):

@@ -160,13 +160,13 @@ def draft_with_model(
     )
 
 
-def mark_sent(draft: DraftResponse, approved_by: str) -> DraftResponse:
+def mark_approved(draft: DraftResponse, approved_by: str) -> DraftResponse:
     now = datetime.now(UTC)
     return draft.model_copy(
         update={
-            "status": "sent",
+            "status": "approved",
             "approved_by": approved_by,
             "approved_at": now,
-            "sent_at": now,
+            "sent_at": None,
         }
     )

@@ -219,7 +219,7 @@ export default function LeadsPage() {
       if (draft.id !== lead.draft.id) throw new Error("Backend returned a different outreach draft; approval state was not applied");
       if (!mounted.current || controller.signal.aborted) return;
       replaceLead(lead.id, (current) => ({ ...current, status: "approved", draft: toDraft(draft) }));
-      setNotice(`Backend approved the reviewed outreach for ${lead.person} and logged the action. Delivery remains simulated.`);
+      setNotice(`Backend approved the reviewed outreach for ${lead.person} and logged the action. It has not been sent.`);
     } catch (error) {
       if (mounted.current && !isAbort(error)) setNotice(error instanceof Error ? error.message : "Could not approve outreach");
     } finally {
@@ -258,7 +258,7 @@ export default function LeadsPage() {
         replaceLead(lead.id, (current) => ({ ...current, status: "approved", draft: toDraft(draft) }));
         approved += 1;
       }
-      if (mounted.current && !controller.signal.aborted) setNotice(`${approved} backend outreach approval${approved === 1 ? "" : "s"} logged; delivery remains simulated. ${evaluationIds.size} evaluation approval${evaluationIds.size === 1 ? "" : "s"} stayed local.`);
+      if (mounted.current && !controller.signal.aborted) setNotice(`${approved} backend outreach approval${approved === 1 ? "" : "s"} logged; no email was sent. ${evaluationIds.size} evaluation approval${evaluationIds.size === 1 ? "" : "s"} stayed local.`);
     } catch (error) {
       if (mounted.current && !isAbort(error)) setNotice(error instanceof Error ? error.message : "Bulk approval stopped");
     } finally {

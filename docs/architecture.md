@@ -15,7 +15,7 @@ The phone system is mocked by design: the thirteen synthetic calls in `fixtures/
 3. **Scorecard** (`api/app/services/score.py`, rubric `api/evals/rubric.md`, prompt `scorecard-v1.md`). See the judge pattern below.
 4. **ICP derivation** (`api/app/services/icp.py`, prompt `icp-derive-v1.md`). Each deal gets a summary text embedded with `text-embedding-3-small` (1536 dimensions, matching the pgvector column). The won deals and the contrast deals go to the reasoning model, which names the profile and cites the deal ids behind each attribute. The citations are stored as `icp_source_deals` rows so the UI can show which won deals produced which attribute. Lead similarity is cosine distance to the centroid of the won-deal vectors.
 5. **Leads** (`api/app/services/leads.py`, `api/app/services/origami.py`). The profile is rendered as a natural-language brief for Origami's v3 Leads API. A search job is started, polled to a terminal status, and the returned rows are mapped to lead records, embedded with the same model, and scored against the won centroid. Searches start at `count: 10` because Origami bills per row.
-6. **Outreach** (`api/app/services/outreach.py`, prompt `outreach-v1.md`). One draft per lead from the profile, the lead's research fields and the seller description; approve marks it sent and logs an activity. Nothing is sent externally this weekend.
+6. **Outreach and delivery** (`api/app/services/outreach.py`, `api/app/services/email_delivery.py`, prompt `outreach-v1.md`). One draft per lead from the profile, research fields and seller description. Approval is audited without sending; a credential-gated Resend adapter can deliver only the exact approved copy and persist its receipt.
 
 ## The LLM-as-judge pattern (scorecard)
 

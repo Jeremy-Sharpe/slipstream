@@ -16,7 +16,7 @@ from app.services.draft import (
     draft_follow_up,
     draft_id,
     draft_with_model,
-    mark_sent,
+    mark_approved,
 )
 
 router = APIRouter(prefix="/drafts", tags=["drafts"])
@@ -118,7 +118,7 @@ def _approve(client: Any, draft: DraftResponse, approved_by: str) -> DraftRespon
             "conversation_id": str(draft.conversation_id),
             "action": "follow_up_approved",
             "fixture_key": activity_key,
-            "details": {"approved_by": approved_by, "delivery": "simulated"},
+            "details": {"approved_by": approved_by, "delivery": "not_sent"},
         },
         on_conflict="fixture_key",
         ignore_duplicates=True,
@@ -137,14 +137,14 @@ def _approve(client: Any, draft: DraftResponse, approved_by: str) -> DraftRespon
     canonical_time = activities[0]["created_at"]
     client.table("drafts").update(
         {
-            "status": "sent",
+            "status": "approved",
             "approved_by": canonical_approver,
             "approved_at": canonical_time,
-            "sent_at": canonical_time,
+            "sent_at": None,
         }
     ).eq("id", str(draft.id)).eq("status", "draft").execute()
     stored = _read_draft(client, draft.id)
-    if stored is None or stored.status != "sent":
+    if stored is None or stored.status not in {"approved", "sent"}:
         raise RuntimeError("Draft approval did not complete")
     return stored
 
@@ -243,17 +243,17 @@ async def approve_draft(
     draft = await _get(request, draft_id)
     if draft is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found")
-    if draft.status == "sent" and request.app.state.supabase is None:
+    if draft.status in {"approved", "sent"}:
         return draft
     if request.app.state.supabase is None:
-        sent = mark_sent(draft, approved_by)
-        request.app.state.draft_store[str(draft_id)] = sent
+        approved = mark_approved(draft, approved_by)
+        request.app.state.draft_store[str(draft_id)] = approved
         request.app.state.activity_store[f"draft-approved:{draft_id}"] = {
             "action": "follow_up_approved",
             "approved_by": approved_by,
-            "delivery": "simulated",
+            "delivery": "not_sent",
         }
-        return sent
+        return approved
     try:
         return await asyncio.to_thread(_approve, request.app.state.supabase, draft, approved_by)
     except Exception as error:

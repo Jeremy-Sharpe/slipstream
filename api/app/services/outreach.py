@@ -80,15 +80,7 @@ def approve_outreach(store: IcpLeadsStore, *, draft_id: str, actor: str) -> Draf
     if draft.status != "draft":
         raise ValueError("Only draft outreach can be approved")
     when = datetime.now(UTC)
-    sent = store.update_draft_sent(draft_id, actor=actor, when=when)
-    store.update_lead_status(str(sent.lead_id), "contacted")
-    store.log_activity(
-        "outreach.approved",
-        actor=actor,
-        lead_id=str(sent.lead_id),
-        details={"draft_id": str(sent.id)},
-    )
-    return sent
+    return store.approve_outreach_draft(draft_id, actor=actor, when=when)
 
 
 def _structured(

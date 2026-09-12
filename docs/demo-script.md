@@ -16,7 +16,7 @@ Action: Start on the production Conversations screen with Maya Chen at Northstar
 
 Say: “This is the bit we think changes sales software. A call should not disappear into a recorder. Slipstream turns it into the CRM record, the safe follow-up, the coaching evidence and—once the team has history—the next customer to call. Here Maya confirmed legal is ready after the security questionnaire. That fact is already a deal update and an action, with its exact source beside it.”
 
-Action: Click one evidence/confidence marker, point to “Approve & sync changes,” then point to “Approve & send.” Do not approve yet.
+Action: Click one evidence/confidence marker, point to “Approve & sync changes,” then point to “Approve.” Do not approve yet.
 
 Fallback: If the page does not load, use the pre-opened tab. If both fail, begin with the terminal fallback and say, “I’ll show the same pipeline directly through our production API.”
 
@@ -36,11 +36,11 @@ Action: Show the CRM preview beside Maya’s transcript. Point to company, conta
 
 Say: “Those are HubSpot-shaped records, not a blob of notes. With Supabase connected, the same action idempotently upserts the company, contact and deal without erasing stronger fields already in the CRM. Now the follow-up drafts itself from grounded facts. Notice what is missing: Jordan claimed the insurer would halve the premium, but that risky claim is not repeated here. The draft includes only the agreed proposal, commercial terms and next step.”
 
-Action: Click Approve. Show status change from Draft to Sent and the approval timestamp.
+Action: Click Approve. Show status change from Draft to Approved and the approval timestamp.
 
-Say: “For the hackathon, send is deliberately simulated—no judge gets surprise email. The approval is idempotent and audited, so refreshing cannot send twice. A Gmail or HubSpot delivery adapter is the final replaceable step.”
+Say: “Approval and delivery are separate, so this screen never claims an email went out when it did not. The production Resend adapter sends only this exact approved copy, behind a server token and a content-bound idempotency key. We deliberately left the public demo keyless, so no judge gets a surprise email.”
 
-Fallback: Use the API commands below, then show the returned `status: sent`, approver, and identical approval/sent timestamps.
+Fallback: Use the API commands below, then show the returned `status: approved`, approver, approval timestamp, and empty `sent_at`.
 
 ## 2:05–2:50 — The team learns who to call next
 
@@ -86,6 +86,6 @@ If the VPS is unreachable, use the production UI’s already-loaded deterministi
 
 ## Likely judge interruptions
 
-- “What is mocked?” The businesses and calls are synthetic, and the default screen is explicitly labelled evaluation data. The ingestion, transcript, structured extraction, draft, approval, scorecard, ICP and Origami paths are executable through real adapters when configured; the current production readiness response says which integrations are actually installed. Sending email is simulated, and unavailable paid actions fail closed instead of presenting fixture output as live.
+- “What is mocked?” The businesses and calls are synthetic, and the default screen is explicitly labelled evaluation data. The ingestion, transcript, structured extraction, draft, approval, scorecard, ICP, Origami and email-delivery paths are executable through real adapters when configured; the current production readiness response says which integrations are actually installed. The public deployment has no email-provider key, and unavailable paid actions fail closed instead of presenting fixture output as live.
 - “Is this really a CRM integration?” The demo writes to Postgres tables shaped like HubSpot company, contact, deal, engagement and task objects. A production connector swaps those writes for HubSpot APIs; the extraction contract does not change.
 - “What happens without keys?” Fixture ingestion, extraction and drafting remain deterministic and tested. Paid transcription fails closed, and cannot be enabled in production without an ingest token.

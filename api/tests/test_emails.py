@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from app.core.config import Settings
 from app.factory import create_app
 from app.routers import emails
-from app.services.draft import mark_sent
+from app.services.draft import mark_approved
 from app.services.email import EmailIngest, record_email, scoped_email_id
 
 THREAD = "/api/v1/emails/demo/mailboxes/sales/threads/thread-1"
@@ -100,7 +100,8 @@ def test_email_thread_ingests_idempotently_and_drafts_reply(client: TestClient) 
     assert "Yes, tomorrow works." in draft["body"]
     approved = client.post(f"/api/v1/drafts/{draft['id']}/approve", json={"approved_by": "Jeremy"})
     assert approved.status_code == 200
-    assert approved.json()["status"] == "sent"
+    assert approved.json()["status"] == "approved"
+    assert approved.json()["sent_at"] is None
 
 
 def test_email_ids_are_namespaced_by_mailbox(client: TestClient) -> None:
@@ -361,7 +362,7 @@ def test_supabase_draft_clears_stale_memory_cache(
     )
     record = record_email(message)
     generated = emails.draft_thread_reply([record])
-    canonical = mark_sent(generated, "Database approver")
+    canonical = mark_approved(generated, "Database approver")
 
     async def load_thread(*_: object) -> list:
         return [record]
@@ -374,7 +375,7 @@ def test_supabase_draft_clears_stale_memory_cache(
     response = client.post(f"{THREAD}/draft-reply")
 
     assert response.status_code == 200
-    assert response.json()["status"] == "sent"
+    assert response.json()["status"] == "approved"
     assert str(generated.id) not in client.app.state.draft_store
 
 

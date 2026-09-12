@@ -31,7 +31,7 @@ def test_follow_up_is_grounded_and_idempotent(client: TestClient) -> None:
     assert draft["prompt_version"] == "grounded-template-v1"
 
 
-def test_approval_marks_sent_without_delivering_and_is_idempotent(client: TestClient) -> None:
+def test_approval_stays_unsent_and_is_idempotent(client: TestClient) -> None:
     _, draft = _pipeline(client)
 
     approved = client.post(
@@ -44,12 +44,13 @@ def test_approval_marks_sent_without_delivering_and_is_idempotent(client: TestCl
     )
 
     assert approved.status_code == 200
-    assert approved.json()["status"] == "sent"
+    assert approved.json()["status"] == "approved"
     assert approved.json()["approved_by"] == "Jordan Lee"
-    assert approved.json()["approved_at"] == approved.json()["sent_at"]
+    assert approved.json()["approved_at"] is not None
+    assert approved.json()["sent_at"] is None
     assert repeated.json() == approved.json()
     assert (
-        client.app.state.activity_store[f"draft-approved:{draft['id']}"]["delivery"] == "simulated"
+        client.app.state.activity_store[f"draft-approved:{draft['id']}"]["delivery"] == "not_sent"
     )
 
 
@@ -184,8 +185,8 @@ def test_approval_works_for_model_draft(client: TestClient, monkeypatch) -> None
     )
 
     assert approved.status_code == 200
-    assert approved.json()["status"] == "sent"
+    assert approved.json()["status"] == "approved"
     assert approved.json()["source"] == "model"
     assert (
-        client.app.state.activity_store[f"draft-approved:{draft['id']}"]["delivery"] == "simulated"
+        client.app.state.activity_store[f"draft-approved:{draft['id']}"]["delivery"] == "not_sent"
     )

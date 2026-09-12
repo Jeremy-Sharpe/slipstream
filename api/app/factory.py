@@ -3,6 +3,7 @@ import logging
 import threading
 from collections import OrderedDict, deque
 from collections.abc import AsyncIterator
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 
 import httpx
@@ -12,7 +13,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.database import create_supabase
 from app.core.readiness import StorageReadinessProbe
-from app.routers import calls, crm, drafts, emails, extractions, health, icp, leads, scorecards
+from app.routers import (
+    calls,
+    crm,
+    deliveries,
+    drafts,
+    emails,
+    extractions,
+    health,
+    icp,
+    leads,
+    scorecards,
+)
 from app.services.icp_leads_store import create_icp_leads_store
 from app.services.score import build_judge
 from app.ws import coach
@@ -29,6 +41,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         limits=httpx.Limits(max_connections=4, max_keepalive_connections=2),
         follow_redirects=False,
     )
+    app.state.email_delivery_client = httpx.AsyncClient(
+        timeout=httpx.Timeout(10, connect=5),
+        limits=httpx.Limits(max_connections=4, max_keepalive_connections=2),
+        follow_redirects=False,
+    )
     try:
         yield
     finally:
@@ -37,7 +54,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             await asyncio.to_thread(close_judge)
         await app.state.transcription_client.aclose()
         await app.state.crm_webhook_client.aclose()
+        await app.state.email_delivery_client.aclose()
         await app.state.readiness.close()
+        app.state.email_delivery_db_executor.shutdown(wait=False, cancel_futures=True)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -62,11 +81,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.scorecard_store = OrderedDict()
     app.state.playbook_store = OrderedDict()
     app.state.crm_sync_receipts = OrderedDict()
+    app.state.email_delivery_attempts = {}
     app.state.transcription_slots = asyncio.Semaphore(2)
     app.state.ingest_locks = [asyncio.Lock() for _ in range(32)]
     app.state.extraction_locks = [asyncio.Lock() for _ in range(32)]
     app.state.crm_sync_locks = [asyncio.Lock() for _ in range(32)]
     app.state.crm_sync_admission_slots = asyncio.Semaphore(4)
+    app.state.email_delivery_locks = [asyncio.Lock() for _ in range(64)]
+    app.state.email_delivery_admission_slots = asyncio.Semaphore(4)
+    app.state.email_delivery_db_slots = asyncio.Semaphore(4)
+    app.state.email_delivery_db_executor = ThreadPoolExecutor(
+        max_workers=4, thread_name_prefix="slipstream-email-delivery"
+    )
     app.state.coach_slots = asyncio.Semaphore(4)
     app.state.coach_handshake_slots = asyncio.Semaphore(16)
     app.state.coach_reasoning_slots = asyncio.Semaphore(2)
@@ -112,6 +138,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(calls.router, prefix="/api/v1")
     app.include_router(extractions.router, prefix="/api/v1")
     app.include_router(crm.router, prefix="/api/v1")
+    app.include_router(deliveries.router, prefix="/api/v1")
     app.include_router(drafts.router, prefix="/api/v1")
     app.include_router(emails.router, prefix="/api/v1")
     app.include_router(icp.router)
