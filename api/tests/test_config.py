@@ -11,7 +11,12 @@ from app.core.config import Settings
 
 
 def _clear_provider_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY"):
+    for name in (
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "LOCAL_MODEL_BASE_URL",
+    ):
         monkeypatch.delenv(name, raising=False)
 
 
@@ -90,6 +95,8 @@ def test_checked_in_example_accepts_blank_optional_credentials(
         "ANTHROPIC_API_KEY",
         "OPENAI_API_KEY",
         "OPENROUTER_API_KEY",
+        "LOCAL_MODEL_BASE_URL",
+        "LOCAL_MODEL_NAME",
         "ELEVENLABS_API_KEY",
         "INGEST_TOKEN",
         "ORIGAMI_API_KEY",
@@ -306,6 +313,54 @@ def test_reasoning_provider_stays_native_when_no_key_is_set(
     settings = Settings(_env_file=None, environment="test", reasoning_model="gpt-5.4")
 
     assert settings.reasoning_provider == "openai"
+
+
+def test_local_model_is_credential_free_reasoning_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        reasoning_model="gpt-5.4",
+        local_model_base_url="HTTP://LOCALHOST:8081/v1/",
+        local_model_name="  local-qwen  ",
+    )
+
+    assert settings.local_model_base_url == "http://localhost:8081/v1"
+    assert settings.local_model_name == "local-qwen"
+    assert settings.reasoning_provider == "local"
+    assert settings.integration_flags["local_model"] is True
+
+
+def test_hosted_reasoning_provider_takes_priority_over_local_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        reasoning_model="gpt-5.4",
+        openrouter_api_key="hosted-key",
+        local_model_base_url="http://127.0.0.1:8081/v1",
+    )
+
+    assert settings.reasoning_provider == "openrouter"
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://model.example/v1",
+        "http://127.0.0.1/v1",
+        "http://127.0.0.1:8081/not-v1",
+        "http://user:secret@127.0.0.1:8081/v1",
+        "http://127.0.0.1:8081/v1?token=secret",
+    ],
+)
+def test_local_model_url_rejects_non_loopback_or_ambiguous_endpoints(url: str) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, local_model_base_url=url)
 
 
 @pytest.mark.parametrize(

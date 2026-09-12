@@ -17,7 +17,12 @@ from app.core.llm import (
 
 
 def _clear_provider_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY"):
+    for name in (
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "LOCAL_MODEL_BASE_URL",
+    ):
         monkeypatch.delenv(name, raising=False)
 
 
@@ -190,6 +195,26 @@ def test_structured_validates_openrouter_fenced_json() -> None:
     assert client.chat.completions.kwargs["extra_body"] == {"usage": {"include": True}}
 
 
+def test_structured_validates_local_schema_constrained_json() -> None:
+    client = FakeOpenRouterClient()
+
+    result = structured(
+        ReasoningClient(provider="local", model="local-qwen", client=client),
+        system="System",
+        user="User",
+        schema=MiniOutput,
+        timeout=90,
+    )
+
+    assert result.output == MiniOutput(subject="R", body="S")
+    assert result.model == "local-qwen"
+    assert result.provider == "local"
+    assert result.usage == Usage(input_tokens=13, output_tokens=5, cost_usd=0.0017)
+    assert client.chat.completions.kwargs["response_format"]["type"] == "json_schema"
+    assert client.chat.completions.kwargs["timeout"] == 90
+    assert "extra_body" not in client.chat.completions.kwargs
+
+
 def test_structured_returns_no_usage_when_provider_omits_it() -> None:
     class ParsedWithoutUsage:
         parsed_output = MiniOutput(subject="A", body="B")
@@ -263,6 +288,30 @@ def test_create_reasoning_client_prefixes_native_models_for_openrouter(
 
     assert client.provider == "openrouter"
     assert client.model == expected
+
+
+def test_create_reasoning_client_uses_explicit_local_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_provider_env(monkeypatch)
+    FakeOpenAIClient.instances = []
+    monkeypatch.setattr("app.core.llm.OpenAI", FakeOpenAIClient)
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        reasoning_model="gpt-5.4",
+        local_model_base_url="http://127.0.0.1:8081/v1",
+        local_model_name="local-qwen",
+    )
+
+    client = create_reasoning_client(settings)
+
+    assert client.provider == "local"
+    assert client.model == "local-qwen"
+    assert FakeOpenAIClient.instances[-1].kwargs == {
+        "api_key": "loopback-only",
+        "base_url": "http://127.0.0.1:8081/v1",
+    }
 
 
 def test_openrouter_embedding_client_prefixes_openai_models(

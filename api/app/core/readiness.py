@@ -10,6 +10,45 @@ class StorageUnavailableError(RuntimeError):
     pass
 
 
+class ReasoningUnavailableError(RuntimeError):
+    pass
+
+
+class LocalModelReadinessProbe:
+    def __init__(
+        self, settings: Settings, transport: httpx.AsyncBaseTransport | None = None
+    ) -> None:
+        self._model = settings.local_model_name
+        self._client = (
+            httpx.AsyncClient(
+                base_url=settings.local_model_base_url,
+                timeout=httpx.Timeout(3.0, connect=1.0),
+                transport=transport,
+            )
+            if settings.local_model_base_url
+            else None
+        )
+
+    async def check(self) -> None:
+        if self._client is None:
+            return
+        try:
+            response = await self._client.get("models")
+            response.raise_for_status()
+            payload = response.json()
+            models = payload.get("data") if isinstance(payload, dict) else None
+            if not isinstance(models, list) or not any(
+                isinstance(item, dict) and item.get("id") == self._model for item in models
+            ):
+                raise ValueError("Configured local model is not loaded")
+        except (httpx.HTTPError, ValueError) as error:
+            raise ReasoningUnavailableError("Configured local model is unavailable") from error
+
+    async def close(self) -> None:
+        if self._client:
+            await self._client.aclose()
+
+
 class StorageReadinessProbe:
     def __init__(
         self, settings: Settings, transport: httpx.AsyncBaseTransport | None = None

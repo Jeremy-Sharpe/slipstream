@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from app.core.config import Settings
 
-ReasoningProvider = Literal["anthropic", "openai", "openrouter"]
+ReasoningProvider = Literal["anthropic", "openai", "openrouter", "local"]
 
 
 class MissingReasoningProviderError(RuntimeError):
@@ -89,6 +89,12 @@ def create_openrouter_client(settings: Settings) -> OpenAI:
     )
 
 
+def create_local_client(settings: Settings) -> OpenAI:
+    if settings.local_model_base_url is None:
+        raise MissingReasoningProviderError("local")
+    return OpenAI(api_key="loopback-only", base_url=settings.local_model_base_url)
+
+
 def create_reasoning_client(settings: Settings) -> ReasoningClient:
     provider = settings.reasoning_provider
     native = settings._native_reasoning_provider
@@ -97,10 +103,13 @@ def create_reasoning_client(settings: Settings) -> ReasoningClient:
         client = create_anthropic_client(settings)
     elif provider == "openai":
         client = create_openai_client(settings)
-    else:
+    elif provider == "openrouter":
         client = create_openrouter_client(settings)
         if native != provider:
             model = openrouter_model_id(model, native)
+    else:
+        client = create_local_client(settings)
+        model = settings.local_model_name
     return ReasoningClient(provider=provider, model=model, client=client)
 
 
@@ -146,8 +155,18 @@ def structured[SchemaT: BaseModel](
         output, usage = _openai_structured(
             client.client, client.model, system, user, schema, max_tokens, timeout
         )
-    else:
+    elif client.provider == "openrouter":
         output, usage = _openrouter_structured(
+            client.client,
+            client.model,
+            system,
+            user,
+            schema,
+            max_tokens,
+            timeout,
+        )
+    else:
+        output, usage = _local_structured(
             client.client,
             client.model,
             system,
@@ -248,6 +267,39 @@ def _openrouter_structured[SchemaT: BaseModel](
             extra_body={"usage": {"include": True}},
             **request_options,
         )
+    return (
+        schema.model_validate_json(_strip_code_fences(_completion_text(completion))),
+        _openrouter_usage(completion),
+    )
+
+
+def _local_structured[SchemaT: BaseModel](
+    client: object,
+    model: str,
+    system: str,
+    user: str,
+    schema: type[SchemaT],
+    max_tokens: int,
+    timeout: float | None,
+) -> tuple[SchemaT, Usage | None]:
+    request_options = {} if timeout is None else {"timeout": timeout}
+    completion = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": _json_system_prompt(system, schema)},
+            {"role": "user", "content": user},
+        ],
+        max_tokens=max_tokens,
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": schema.__name__,
+                "strict": True,
+                "schema": schema.model_json_schema(),
+            },
+        },
+        **request_options,
+    )
     return (
         schema.model_validate_json(_strip_code_fences(_completion_text(completion))),
         _openrouter_usage(completion),

@@ -18,6 +18,7 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
         "anthropic": False,
         "openai": False,
         "openrouter": False,
+        "local_model": False,
         "embeddings": False,
         "elevenlabs": False,
         "origami": False,
@@ -74,3 +75,17 @@ def test_readiness_fails_closed_when_configured_storage_is_missing(
     assert response.status_code == 503
     assert response.json() == {"detail": "Configured storage is unavailable"}
     assert "sentinel-secret" not in response.text
+
+
+def test_readiness_fails_closed_when_configured_local_model_is_missing() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        local_model_base_url="http://127.0.0.1:1/v1",
+    )
+
+    with TestClient(create_app(settings)) as configured_client:
+        response = configured_client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Configured reasoning model is unavailable"}

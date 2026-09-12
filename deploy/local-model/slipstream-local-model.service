@@ -1,0 +1,37 @@
+[Unit]
+Description=Slipstream local reasoning model
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=180
+TimeoutStopSec=30
+ExecStartPre=-/usr/bin/docker rm -f slipstream-local-model
+ExecStart=/usr/bin/docker run --rm --name slipstream-local-model \
+  --read-only \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges \
+  --pids-limit=256 \
+  --memory=4g \
+  --cpus=2 \
+  --tmpfs=/tmp:size=64m,noexec,nosuid,nodev \
+  --publish=127.0.0.1:8081:8080 \
+  --volume=/var/lib/slipstream-models:/models:ro \
+  ghcr.io/ggml-org/llama.cpp@sha256:cbcdcb52d484e08e23bfc0135afa5beadd2d540513bbb7c65b233231fa033ff4 \
+  --model=/models/qwen2.5-1.5b-instruct-q4_k_m.gguf \
+  --alias=slipstream-qwen2.5-1.5b-instruct-q4-k-m \
+  --host=0.0.0.0 \
+  --port=8080 \
+  --ctx-size=16384 \
+  --parallel=1 \
+  --threads=2 \
+  --threads-batch=2 \
+  --no-webui
+ExecStop=-/usr/bin/docker stop --time=20 slipstream-local-model
+
+[Install]
+WantedBy=multi-user.target
