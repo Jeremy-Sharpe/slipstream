@@ -1,6 +1,6 @@
 # Status
 
-Who is on what, what the live environment actually holds, and what only a human can unblock. Updated 12 September 2026, 21:00 AEST.
+Who is on what, what the live environment actually holds, and what only a human can unblock. Updated 12 September 2026, 22:00 AEST.
 
 `BOARD.md` stays the source of truth for per-feature status. Do not restate board rows here. This file answers three questions the board does not: who is working on what right now, which keys and URLs are real, and what is waiting on a person.
 
@@ -8,8 +8,8 @@ Who is on what, what the live environment actually holds, and what only a human 
 
 | Person | Lanes | Where they are up to |
 |---|---|---|
-| Anna | `fixtures`, `scorecard`, `icp`, `leads`, `outreach`, `live-extraction`, `model-bakeoff` | Fixtures, scorecard and ICP are done. ICP runs end to end on an OpenRouter key alone. Leads and outreach are built and unit-tested but have never run live because the Origami key is still a placeholder. `live-extraction` is in progress on its own branch and lands by PR because it touches Jeremy's done lanes. |
-| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, the three `web-wire-*` lanes, `coach-shell`, `submission` | The secure coach shell is merged and packageable. `submission` is auditing production, with the 174-test API suite now isolated from credentials in developer shells. Two migrations are merged but not applied to the hosted database, which is the single biggest live gap. |
+| Anna | `fixtures`, `scorecard`, `icp`, `leads`, `outreach`, `live-extraction`, `model-bakeoff` | Fixtures, scorecard, ICP and live extraction are merged. ICP ran end to end on an OpenRouter key alone. Leads and outreach are built and unit-tested but have never run against Origami because the key is still a placeholder. |
+| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, all four `web-wire-*` lanes, `coach-shell`, `submission` | The secure coach shell and all web wiring are merged. `submission` is auditing production; 174 API tests are isolated from developer-shell credentials. Two migrations are merged but not applied to hosted Supabase, so the VPS remains on its tested in-memory store. |
 | Max (Maxim Durand) | Clay-style conversations UI foundation | Merged into main on 12 September and since wired to the live pipeline by Jeremy's agent. |
 | Romain | Not recorded on the board | No commits under this name and no board rows. Confirm what he is building before Sunday, or reassign `video`, which is still unclaimed. |
 
@@ -17,8 +17,8 @@ Who is on what, what the live environment actually holds, and what only a human 
 
 | Thing | Where | State |
 |---|---|---|
-| Production UI | https://slipstream-hackathon.vercel.app | Live, connected to GitHub |
-| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live on Jeremy's VPS, CORS verified for the UI origin |
+| Production UI | https://slipstream-hackathon.vercel.app | Live from `main` at `77d909f`; call, email, Intelligence and lead routes return successfully |
+| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at backend revision `f540be0`; readiness healthy, CORS verified, storage `memory`, integration flags false |
 | API environment file | `/etc/slipstream/api.env` on the VPS, root owned, 0600 | Loaded by the systemd unit. Every key the API needs has to exist here as well as locally |
 | Local API environment | `api/.env`, 0600, gitignored | Created 12 September. Supabase and ElevenLabs filled, Origami and OpenAI blank |
 | Hosted database | Supabase | Only migration `20260912000000` is applied. `20260912010000_email_ingestion` and `20260912020000_scorecard_persistence` are merged but never pushed, so the email and scorecard functions do not exist live |
@@ -59,3 +59,4 @@ Embeddings are noise at this volume. Origami credits are the only variable cost 
 4. Regenerate the demo call audio once ElevenLabs credits allow, with `generate_audio.py --demo`.
 5. Decide the fate of `feat/scorecard-wire` on origin: it is superseded by the scorecard store that merged with PR #4 and must not be merged as is; port its list, derive-over-all and latest-playbook endpoints or delete it. Details under Follow-ups in `docs/architecture.md`.
 6. Wire the scorecard into the UI: conversation detail still shows the labelled fixture scorecard and Intelligence never calls `POST /playbook`, which needs two or more call ids and the ingest token server-side.
+7. Record and publish the 3-to-5-minute demo video, paste its public URL into `README.md`, and submit the external form. This is the only submission check an unattended coding agent cannot truthfully complete.
