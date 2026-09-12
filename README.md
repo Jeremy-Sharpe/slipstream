@@ -25,11 +25,11 @@ Demo video: (added at submission)
 
 ## How it works
 
-Every step runs for real on the live URL over synthesised fixture calls. No canned results, no demo-only code paths.
+The live URL exposes the complete loop. Call and email CRM writeback and drafting run against the deployed API; analysis and lead screens consume validated live responses when their integrations are available and otherwise show explicitly labelled evaluation data. No screen silently presents fallback data as live.
 
 1. **A sales call happens.** For the demo the call is synthesised with ElevenLabs text-to-dialogue (two voices, realistic objections) and played through speakers. Fixtures cover won, stalled, lost and no-show outcomes.
-2. **The coach listens.** An always-on-top desktop overlay streams the audio to ElevenLabs Scribe realtime and shows the rep the next question to ask, grounded in this deal's CRM history. Suggestions, not scripts.
-3. **The call writes itself into the CRM.** The recording is transcribed with Scribe (diarised). Claude extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves.
+2. **The coach listens.** An always-on-top desktop overlay can stream the consented rep microphone to ElevenLabs Scribe realtime and shows the rep the next question to ask, grounded in this deal's CRM history. Its credential-free manual mode demonstrates both sides; this build does not claim mixed call-audio capture.
+3. **The call writes itself into the CRM.** The recording is transcribed with Scribe (diarised). The configured reasoning model extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves. Without provider credentials, the deployed fixture path remains deterministic and labels its source.
 4. **The follow-up drafts itself.** A follow-up email is generated from the transcript and attached to the deal. Approve is one click and marks it sent. No email leaves the system.
 5. **The team learns from the call.** The analysis view scores the call against a written rubric, shows across all calls which moves correlate with won deals, and derives the ideal customer profile from the deals that closed.
 6. **The ICP finds the next customer.** The derived ICP becomes an Origami brief. Leads come back, are scored against the won-deal profile, and each gets a one-click outreach draft.
@@ -37,7 +37,7 @@ Every step runs for real on the live URL over synthesised fixture calls. No cann
 ## Architecture
 
 ```
-app/          Next.js 16 + React 19 UI (Vercel). Conversations, analysis, leads. Reads Supabase directly.
+app/          Next.js 16 + React 19 UI (Vercel). Conversations, analysis, leads. Calls the API for live data and actions.
 api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts. REST plus one WebSocket.
 coach/        Electron live-coach overlay, forked from Cheating Daddy (GPL-3.0). Talks only to the api WebSocket.
 fixtures/     Twelve labelled sales-call scripts as seeded CRM history, plus one voiced demo call.
@@ -45,7 +45,7 @@ supabase/     Postgres migrations (pgvector enabled) and seed.
 evals/        Judge evals and submission checks (see docs/judging-evals.md).
 ```
 
-Supabase Postgres is the single store. The API writes; the UI reads Supabase for lists and calls the API for actions. The CRM tables mirror HubSpot objects (contacts, companies, deals, notes, tasks, activities) so a real HubSpot integration is a field mapping, not a redesign. Full data model and data flow in `PROJECT.md`.
+Supabase Postgres is the durable store design and the API owns access. The deployed VPS currently uses the same repository interface in memory because its Supabase credentials and two later migrations are not installed; that operational boundary is reported by `/ready`. The CRM tables mirror HubSpot objects (contacts, companies, deals, notes, tasks, activities) so a real HubSpot integration is a field mapping, not a redesign. Full data model and data flow in `PROJECT.md`.
 
 Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector clients, eval tooling); the UI half wants a hosted Next.js app; one API seam between them is what a telephony or CRM integration plugs into later.
 
@@ -57,8 +57,9 @@ Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector
 | Batch transcription | ElevenLabs Scribe, `scribe_v2`, diarised | Word timestamps and speaker labels feed the scorecard (talk ratio, who committed to what) |
 | Live transcription | ElevenLabs Scribe v2 Realtime over WebSocket | About 150 ms latency; same vendor as batch so the coach and the record agree |
 | Extraction and follow-up draft | The model named by `REASONING_MODEL` through one provider-agnostic structured-output helper (Anthropic, OpenAI or OpenRouter open-weight models), pinned JSON schema, then a deterministic grounding pass that repairs or drops any quote that is not verbatim in the transcript | Runs on whichever key the team has, so the demo never falls back to canned labels; the grounding pass makes evidence a property of the pipeline rather than a hope about the model. The extraction eval in `api/evals/extraction-eval.md` picks the cheapest model within one call of the best on every judged field |
-| Scorecard, ICP naming, coach suggestions | Same helper; scorecard judge chosen by its own bake-off | One helper for all reasoning keeps prompts and evals in one place |
-| Embeddings | Chosen at build time, stored in pgvector | Won-deal similarity for ICP derivation and lead scoring |
+| Scorecard | `deepseek/deepseek-v3.2` through OpenRouter | Won the predeclared eleven-model rule: within one call of the best on every judged dimension and about 25 times cheaper than the accuracy-first runner-up |
+| ICP naming and coach suggestions | Same provider-agnostic helper, configured by environment | One helper keeps prompts, schema validation and provider failover in one place |
+| Embeddings | `text-embedding-3-small` through OpenAI or OpenRouter, stored in pgvector | Won-deal similarity for ICP derivation and lead scoring; the stored model identity is provider-independent |
 | Lead discovery | Origami v3 Leads API | Agent-driven sourcing from a natural-language brief generated from the derived ICP |
 
 **Evaluation.** The scorecard rubric is a written document in the repo. All thirteen fixture calls are hand-labelled for the rubric dimensions and the extraction fields. `api/evals/run_extraction_eval.py` runs the live extraction path per model and reports per-field agreement, grounding repairs, latency and billed cost, with the results and the model decision recorded in `api/evals/extraction-eval.md`; the scorecard eval does the same for the judge. Judge evals in `evals/` score this README and the live app against the hackathon rubric.
@@ -83,7 +84,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 
 - Telephony: replace the file upload with a recording webhook from Aircall or Twilio, or a meeting bot for video calls. The pipeline does not change.
 - CRM: swap the Supabase CRM tables for HubSpot writes using the object mapping; keep Supabase for calls, embeddings and ICP state.
-- Cost per call: one transcription, three or four Claude calls, one embedding. Cents, not dollars. Origami credits are the only variable cost and are spent deliberately.
+- Cost per call: one transcription, three or four reasoning calls, one embedding. Measured fixture costs are in `PROJECT.md`; Origami credits are the only material variable cost and are spent deliberately.
 - Privacy: call recording consent is jurisdiction-specific; recording runs only through the rep's consent flow and transcripts stay in the customer's own database.
 - Adoption: the coach and the auto-draft deliver value on the first call, before there is enough history for an ICP. The loop gets better as the team sells.
 
@@ -95,6 +96,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 - Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
 - Extraction is grounded but not perfect: a value whose quote cannot be found verbatim in the transcript is dropped rather than shown, so a rep can see a null where the model paraphrased. Deal outcome and stage are model judgement calls scored against hand labels in the eval, not ground truth.
 - Single tenant, no auth, no billing.
+- The hosted API currently uses in-memory persistence and has no production model or Origami keys; deterministic fixture flows remain available and the UI identifies evaluation fallbacks.
 
 ## Run locally
 
