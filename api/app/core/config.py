@@ -79,6 +79,7 @@ class Settings(BaseSettings):
     supabase_service_role_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
     elevenlabs_api_key: SecretStr | None = None
+    ingest_token: SecretStr | None = None
     origami_api_key: SecretStr | None = None
 
     @field_validator("log_level", mode="before")
@@ -91,6 +92,7 @@ class Settings(BaseSettings):
         "supabase_service_role_key",
         "anthropic_api_key",
         "elevenlabs_api_key",
+        "ingest_token",
         "origami_api_key",
         mode="before",
     )
@@ -108,6 +110,12 @@ class Settings(BaseSettings):
             self.supabase_url = _canonical_http_origin(
                 self.supabase_url, production=self.environment == "production"
             )
+        if (
+            self.environment == "production"
+            and self.elevenlabs_api_key is not None
+            and self.ingest_token is None
+        ):
+            raise ValueError("INGEST_TOKEN is required with ELEVENLABS_API_KEY in production")
         return self
 
     @property
