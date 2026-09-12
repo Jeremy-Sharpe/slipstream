@@ -62,6 +62,9 @@ The bake-off (`api/evals/run_scorecard_eval.py`) runs the judge over the twelve 
 - Extraction falls back to fixture labels when no Anthropic key is set; the live deployment must have the key or that step is not real.
 - Two OpenRouter code paths exist: the shared `structured()` client for reasoning steps and the httpx judge in `score.py` that also records usage, latency and retries. Consolidating them is a follow-up.
 - With `require_parameters` on, sending `temperature` excludes GPT-5.4 endpoints, which do not accept it. The judge sends no temperature.
+- The playbook is cached in the API process, not in a table. After a restart `GET /playbook/latest` returns 404 until `POST /playbook/derive` runs again, so the demo prep includes one derive call. A `playbooks` table with a version column is the follow-up and touches the shared migrations.
+- For calls that did not come from a fixture, the rep name defaults to "Rep" unless the scorecard request body names the rep or the Scribe speaker label (for example `speaker_0`). Without it every turn is treated as the prospect's and the talk ratio is 0. Extraction does not yet return a rep name to fill this in.
+- The playbook's won-versus-not-won split treats a call with no known outcome as not won. Live calls only get an outcome once the extraction sets one, so early playbooks over live calls lean on fixture history.
 
 ## Change log
 
