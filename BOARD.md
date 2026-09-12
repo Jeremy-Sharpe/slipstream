@@ -36,7 +36,7 @@ Order matters. The foundation rows unblock everything else and should be claimed
 | `pitch` | `docs/pitch.md`: 400 to 700 spoken words plus a Q&A section, scored by evals F1 and F3 | `docs/pitch.md` | Jeremy's agent | feat/pitch | done | 528 spoken words; model judges pass F1 at 5/6 and F3 at 6/6; questions split across all four teammates |
 | `demo-script` | `docs/demo-script.md`: step by step against the live app with a fallback, scored by eval F2 | `docs/demo-script.md` | Jeremy's agent | feat/demo-script | done | Live API fallback exercised; model judge F2 passes at 7/8 after production-evidence revision |
 | `video` | 3 to 5 minute demo video on the live URL, per-feature walkthroughs | `docs/video/` | | | unclaimed | Starts Sunday once the loop runs |
-| `submission` | README lines filled, `npm run evals:dry` green, form submitted before Monday 12:00pm | `README.md` | | | unclaimed | |
+| `submission` | README lines filled, `npm run evals:dry` green, form submitted before Monday 12:00pm | `README.md` | Jeremy's agent | feat/submission-readiness | in progress | Auditing repository, production URLs, deterministic judge checks and handoff; a teammate must add the final video URL and submit the external form |
 
 ## Blocked and parked
 
