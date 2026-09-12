@@ -1,9 +1,16 @@
-import { EmptySurface, PageShell } from "@/components/shell/PageShell";
+"use client";
 
-export default function Page() {
+import { GetStarted } from "@/components/home/GetStarted";
+import { RecentSection } from "@/components/home/RecentSection";
+import { useAddCall } from "@/components/home/useAddCall";
+
+export default function HomePage() {
+  const addCall = useAddCall();
   return (
-    <PageShell title="Home" description="What needs your attention today.">
-      <EmptySurface label="Nothing here yet." />
-    </PageShell>
+    <div className="flex flex-col pb-10">
+      <GetStarted onAddCall={addCall.open} />
+      <RecentSection onAddCall={addCall.open} />
+      {addCall.mount}
+    </div>
   );
 }
