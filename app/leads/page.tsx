@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { ActionBar } from "@/components/leads/ActionBar";
+import { FiltersPanel } from "@/components/leads/FiltersPanel";
 import { LeadTable } from "@/components/leads/LeadTable";
 import { ResultBar } from "@/components/leads/ResultBar";
 import { leads as seed } from "@/lib/data/leads";
 import type { Lead } from "@/lib/types";
-
-const WON_DEALS = 5;
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>(seed);
@@ -18,9 +17,14 @@ export default function LeadsPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-background">
-      <ResultBar count={leads.length} dealCount={WON_DEALS} />
-      <div className="h-4 shrink-0" />
-      <LeadTable leads={leads} onChange={setLeads} />
+      <div className="flex min-h-0 flex-1">
+        <FiltersPanel />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <ResultBar count={leads.length} total={leads.length} />
+          <div className="h-5 shrink-0" />
+          <LeadTable leads={leads} onChange={setLeads} />
+        </div>
+      </div>
       <ActionBar pending={pending} onApproveAll={approveAll} />
     </div>
   );
