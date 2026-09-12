@@ -9,6 +9,8 @@
 /build
 
 # local files
+# agent worktrees and session context live here; never commit them
+.claude/
 .DS_Store
 *.pem
 .env*

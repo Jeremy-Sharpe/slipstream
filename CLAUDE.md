@@ -1,6 +1,6 @@
 # Slipstream
 
-Hackathon entry for Forward: AI in Business (DSCubed and RAID, sponsored by ElevenLabs and Eleno). Read in this order before building anything: `README.md` (the judge-facing pitch and architecture), `PROJECT.md` (the build plan, surfaces, data model, pipeline, setup), `docs/hackathon.md` (the full rubric, submission requirements, timeline and tracks), `docs/start-here.md` (who owns which lane and what to start on), then `BOARD.md` to claim a feature.
+Hackathon entry for Forward: AI in Business (DSCubed and RAID, sponsored by ElevenLabs and Eleno). Read in this order before building anything: `README.md` (the judge-facing pitch and architecture), `PROJECT.md` (the build plan, surfaces, data model, pipeline, setup), `docs/hackathon.md` (the full rubric, submission requirements, timeline and tracks), `docs/start-here.md` (who owns which lane and what to start on), then `BOARD.md` to claim a feature. `STATUS.md` carries what the board does not: who is working on what right now, the live URLs and which keys are real, and the actions waiting on a human.
 
 **Submission deadline: 12:00PM Monday 14 September 2026.** Finalists announced 4:00PM, live pitch 5:30PM the same day.
 
