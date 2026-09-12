@@ -68,15 +68,13 @@ export function RunTimeline({ call, steps, open, toggle, finished, onHighlight }
 
   const field = (label: string, value: ReactNode, conf: number, span: number | null) => (
     <div
-      className="flex items-start justify-between gap-4 rounded-lg px-2 py-1.5 transition-colors duration-150 hover:bg-white"
+      className="grid grid-cols-[96px_minmax(0,1fr)_40px] items-start gap-x-3 rounded-lg px-2 py-1.5 transition-colors duration-150 hover:bg-white"
       onMouseEnter={() => onHighlight(span)}
       onMouseLeave={() => onHighlight(null)}
     >
-      <div className="min-w-0">
-        <p className="text-[11.5px] text-faint">{label}</p>
-        <p className="text-[13.5px] text-ink">{value}</p>
-      </div>
-      <span className="mt-3 font-mono text-[11.5px] tabular-nums text-faint">{pct(conf)}</span>
+      <p className="pt-px text-[13.5px] text-soft">{label}</p>
+      <p className="min-w-0 text-[14px] text-ink">{value}</p>
+      <span className="pt-px text-right text-[13.5px] tabular-nums text-soft">{pct(conf)}</span>
     </div>
   );
 
@@ -105,9 +103,9 @@ export function RunTimeline({ call, steps, open, toggle, finished, onHighlight }
       case "score": {
         const s = call.scorecard;
         const row = (label: string, value: string, span: number | null) => (
-          <div className="flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-150 hover:bg-white" onMouseEnter={() => onHighlight(span)} onMouseLeave={() => onHighlight(null)}>
-            <span className="text-[13px] text-soft">{label}</span>
-            <span className="text-[13px] text-ink">{value}</span>
+          <div className="grid grid-cols-[minmax(0,1fr)_96px] items-center gap-x-3 rounded-lg px-2 py-1.5 transition-colors duration-150 hover:bg-white" onMouseEnter={() => onHighlight(span)} onMouseLeave={() => onHighlight(null)}>
+            <span className="text-[13.5px] text-soft">{label}</span>
+            <span className="text-right text-[14px] tabular-nums text-ink">{value}</span>
           </div>
         );
         return (
@@ -139,13 +137,13 @@ export function RunTimeline({ call, steps, open, toggle, finished, onHighlight }
         return (
           <div>
             <p className="text-[13.5px] text-ink">{icp.sentence}</p>
-            <p className="mt-1 text-[12.5px] text-faint">From {icp.wonDeals} won deals · v{icp.version}</p>
+            <p className="mt-1 text-[13.5px] text-soft">From {icp.wonDeals} won deals · v{icp.version}</p>
             {call.icp && (
               <ul className="mt-3 flex flex-col gap-1">
                 {[["Industry", call.icp.industry], ["Size", call.icp.headcount_band + " staff"], ["Buyer", call.icp.role], ["Trigger", call.icp.trigger ?? "none"]].map(([k, v]) => (
                   <li key={k} className="flex items-center gap-2 text-[13px]">
                     <Check className={cn("size-3.5", call.outcome === "won" ? "text-success" : "text-faint")} strokeWidth={2.25} />
-                    <span className="text-faint">{k}</span>
+                    <span className="w-14 text-soft">{k}</span>
                     <span className="text-ink">{v}</span>
                   </li>
                 ))}
@@ -155,16 +153,16 @@ export function RunTimeline({ call, steps, open, toggle, finished, onHighlight }
         );
       case "search":
         if (search.status === "running") {
-          return <p className="text-[13px] text-soft">Origami is searching Victoria for {icp.sentence.split(" with ")[0].toLowerCase()} · <span className="font-mono tabular-nums text-ink">{search.progress ?? 0} of 10</span></p>;
+          return <p className="text-[13px] text-soft">Origami is searching Victoria for {icp.sentence.split(" with ")[0].toLowerCase()} · <span className="tabular-nums text-ink">{search.progress ?? 0} of 10</span></p>;
         }
         return (
           <div>
             <ul className="flex flex-col">
               {top.map((l) => (
-                <li key={l.id} className="flex h-9 items-center gap-2.5 rounded-lg px-2 transition-colors duration-150 hover:bg-white">
-                  <CompanyTile name={l.company} size={20} />
-                  <span className="min-w-0 flex-1 truncate text-[13px] text-ink">{l.company} <span className="text-faint">· {l.title}</span></span>
-                  <Score value={l.similarity} />
+                <li key={l.id} className="grid h-9 grid-cols-[24px_minmax(0,1fr)_40px] items-center gap-x-2.5 rounded-lg px-2 transition-colors duration-150 hover:bg-white">
+                  <CompanyTile name={l.company} size={24} />
+                  <span className="min-w-0 truncate text-[14px] text-ink">{l.company} <span className="text-soft">· {l.title}</span></span>
+                  <span className="text-right"><Score value={l.similarity} /></span>
                 </li>
               ))}
             </ul>
@@ -196,7 +194,7 @@ export function RunTimeline({ call, steps, open, toggle, finished, onHighlight }
                 className="-mx-1 flex w-[calc(100%+8px)] items-baseline gap-2 rounded-md px-1 text-left transition-colors duration-150 enabled:hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               >
                 <span className={cn("text-[14px] font-medium", muted ? "text-faint" : "text-ink")}>{title(st.id)}</span>
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-faint">{st.status === "skipped" ? st.note : summary(st.id, st)}</span>
+                <span className="min-w-0 flex-1 truncate text-[13.5px] tabular-nums text-soft">{st.status === "skipped" ? st.note : summary(st.id, st)}</span>
               </button>
               <div
                 className="grid transition-[grid-template-rows] duration-200 ease-out"

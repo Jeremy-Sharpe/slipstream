@@ -32,7 +32,7 @@ export function RunView({ call }: { call: CallRecord }) {
             <OutcomePill outcome={call.outcome} />
             <span>{call.rep}</span>
             <span className="text-faint">·</span>
-            <span className="font-mono text-[12px] tabular-nums">{fmtDate(call.at)} · {fmtTime(call.at)} · {mmss(call.duration)}</span>
+            <span className="text-[13.5px] tabular-nums">{fmtDate(call.at)} · {fmtTime(call.at)} · {mmss(call.duration)}</span>
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={run.rerun}><RotateCcw className="size-3.5" strokeWidth={1.75} /> Re-run</Button>

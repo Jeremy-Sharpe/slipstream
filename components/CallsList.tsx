@@ -19,22 +19,24 @@ export function CallsList({ query = "" }: { query?: string }) {
           <li key={c.id}>
             <Link
               href={`/calls/${c.id}`}
-              className="flex h-14 items-center gap-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              className="grid h-14 grid-cols-[minmax(0,1.1fr)_minmax(0,1.7fr)_104px_72px_128px_120px] items-center gap-x-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              <Avatar name={c.contact} size={28} />
-              <span className="w-[150px] truncate text-[13.5px] font-medium text-ink">{c.contact}</span>
-              <span className="flex min-w-0 flex-1 items-center gap-2.5">
-                <CompanyTile name={c.company} size={22} />
-                <span className="truncate text-[13.5px] text-ink">{c.company}</span>
-                <span className="truncate text-[13px] text-faint">· {c.title}</span>
+              <span className="flex min-w-0 items-center gap-3">
+                <Avatar name={c.contact} size={28} />
+                <span className="truncate text-[14px] font-medium text-ink">{c.contact}</span>
               </span>
-              <OutcomePill outcome={c.outcome} />
-              <span className="w-[70px] truncate text-[13px] text-soft">{c.rep.split(" ")[0]}</span>
-              <span className="w-[112px] font-mono text-[12px] tabular-nums text-soft">{fmtDate(c.at)} · {fmtTime(c.at)}</span>
-              <span className="flex w-[110px] items-center justify-end gap-1.5 text-[12.5px]">
+              <span className="flex min-w-0 items-center gap-2.5">
+                <CompanyTile name={c.company} size={28} />
+                <span className="truncate text-[14px] text-ink">{c.company}</span>
+                <span className="truncate text-[13.5px] text-soft">· {c.title}</span>
+              </span>
+              <span className="flex items-center"><OutcomePill outcome={c.outcome} /></span>
+              <span className="truncate text-[13.5px] text-soft">{c.rep.split(" ")[0]}</span>
+              <span className="text-[13.5px] tabular-nums text-soft">{fmtDate(c.at)} · {fmtTime(c.at)}</span>
+              <span className="flex items-center justify-end gap-1.5 text-[13.5px]">
                 {run === "running" && <><span className="pulse-dot size-2 rounded-full bg-accent" /><span className="text-soft">Running</span></>}
                 {run === "review" && <><span className="size-2 rounded-full bg-accent" /><span className="text-soft">Needs review</span></>}
-                {run === "done" && <><Check className="size-3.5 text-faint" strokeWidth={2} /><span className="text-faint">Done</span></>}
+                {run === "done" && <><Check className="size-3.5 text-faint" strokeWidth={2} /><span className="text-soft">Done</span></>}
               </span>
             </Link>
           </li>

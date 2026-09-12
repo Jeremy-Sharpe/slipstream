@@ -51,7 +51,7 @@ export function DropZone() {
       <div className="rounded-2xl bg-surface-2 p-6">
         <p className="truncate text-[15px] font-semibold text-ink">{phase.name}</p>
         <p className="mt-1 text-[13px] text-soft">
-          Transcribing… <span className="font-mono tabular-nums text-ink">{mmss(phase.at)} / {mmss(phase.total)}</span>
+          Transcribing… <span className="tabular-nums text-ink">{mmss(phase.at)} / {mmss(phase.total)}</span>
         </p>
         <div className="mt-4 h-1 overflow-hidden rounded-full bg-line">
           <div className="h-full rounded-full bg-ink transition-[width] duration-100 ease-linear" style={{ width: `${pct}%` }} />

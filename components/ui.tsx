@@ -33,7 +33,7 @@ const OUTCOME: Record<Outcome, { label: string; cls: string; dot: string }> = {
 export function OutcomePill({ outcome }: { outcome: Outcome }) {
   const o = OUTCOME[outcome];
   return (
-    <span className={cn("inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium", o.cls)}>
+    <span className={cn("inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium leading-none", o.cls)}>
       <span className={cn("size-1.5 rounded-full", o.dot)} />
       {o.label}
     </span>
@@ -44,7 +44,7 @@ export function Pill({ children, tone = "grey", className }: { children: ReactNo
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium",
+        "inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium leading-none",
         tone === "grey" && "bg-surface text-soft",
         tone === "green" && "bg-success-tint text-success",
         tone === "accent" && "bg-accent-tint text-[#c2410c]",
@@ -57,7 +57,7 @@ export function Pill({ children, tone = "grey", className }: { children: ReactNo
 }
 
 export function Score({ value }: { value: number }) {
-  return <span className={cn("font-mono text-[13px] tabular-nums", value >= 80 ? "text-success" : "text-ink")}>{value}</span>;
+  return <span className={cn("text-[13.5px] font-medium tabular-nums", value >= 80 ? "text-success" : "text-ink")}>{value}</span>;
 }
 
 export const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;

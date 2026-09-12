@@ -59,13 +59,13 @@ export function LeadsView() {
             <span className="text-[13px] text-soft">Find</span>
             <div className="flex h-8 items-center rounded-full bg-white px-1 shadow-[var(--shadow-card)]">
               <button type="button" aria-label="Fewer" onClick={() => setCount((c) => Math.max(5, c - 5))} className="flex size-6 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><Minus className="size-3" strokeWidth={2} /></button>
-              <span className="w-7 text-center font-mono text-[13px] tabular-nums text-ink">{count}</span>
+              <span className="w-7 text-center text-[13.5px] tabular-nums text-ink">{count}</span>
               <button type="button" aria-label="More" onClick={() => setCount((c) => Math.min(50, c + 5))} className="flex size-6 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><Plus className="size-3" strokeWidth={2} /></button>
             </div>
             <span className="text-[13px] text-soft">companies</span>
           </div>
           <div className="flex items-center gap-3">
-            {phase === "searching" && <span className="flex items-center gap-2 text-[13px] text-soft"><span className="pulse-dot size-2 rounded-full bg-accent" />Searching · <span className="font-mono tabular-nums text-ink">{shown} of {Math.min(count, leads.length)}</span></span>}
+            {phase === "searching" && <span className="flex items-center gap-2 text-[13px] text-soft"><span className="pulse-dot size-2 rounded-full bg-accent" />Searching · <span className="tabular-nums text-ink">{shown} of {Math.min(count, leads.length)}</span></span>}
             {phase === "scoring" && <span className="flex items-center gap-2 text-[13px] text-soft"><span className="pulse-dot size-2 rounded-full bg-accent" />Scoring against won deals</span>}
             {phase === "done" && <span className="text-[13px] text-soft">{shown} leads · scored</span>}
             <Button variant="primary" onClick={find} disabled={phase === "searching" || phase === "scoring"}>Find leads</Button>
@@ -97,18 +97,20 @@ function LeadRow({ lead, open, onToggle, scoring }: { lead: Lead; open: boolean;
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex h-14 w-full items-center gap-4 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+        className="grid h-14 w-full grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_128px_40px_92px_16px] items-center gap-x-4 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
       >
-        <CompanyTile name={lead.company} size={28} />
-        <span className="w-[230px] truncate text-[13.5px] font-medium text-ink">{lead.company}</span>
-        <span className="flex min-w-0 flex-1 items-center gap-2">
-          <Avatar name={lead.contact} size={20} />
-          <span className="truncate text-[13.5px] text-ink">{lead.contact}</span>
-          <span className="truncate text-[13px] text-faint">· {lead.title}</span>
+        <span className="flex min-w-0 items-center gap-3">
+          <CompanyTile name={lead.company} size={28} />
+          <span className="truncate text-[14px] font-medium text-ink">{lead.company}</span>
         </span>
-        <span className="w-[130px] truncate text-[13px] text-soft">{lead.location}</span>
-        <span className="w-10 text-right">{scoring ? <span className="font-mono text-[13px] text-faint">…</span> : <Score value={lead.similarity} />}</span>
-        <span className="w-[86px]">{lead.status === "approved" ? <Pill tone="green">Approved</Pill> : <Pill>Drafted</Pill>}</span>
+        <span className="flex min-w-0 items-center gap-2.5">
+          <Avatar name={lead.contact} size={28} />
+          <span className="truncate text-[14px] text-ink">{lead.contact}</span>
+          <span className="truncate text-[13.5px] text-soft">· {lead.title}</span>
+        </span>
+        <span className="truncate text-[13.5px] text-soft">{lead.location}</span>
+        <span className="text-right">{scoring ? <span className="text-[13.5px] tabular-nums text-faint">…</span> : <Score value={lead.similarity} />}</span>
+        <span className="flex items-center">{lead.status === "approved" ? <Pill tone="green">Approved</Pill> : <Pill>Drafted</Pill>}</span>
         <ChevronDown className={cn("size-4 text-faint transition-transform duration-150", open && "rotate-180")} strokeWidth={1.75} />
       </button>
       <div className="grid transition-[grid-template-rows] duration-200 ease-out" style={{ gridTemplateRows: open ? "1fr" : "0fr" }}>
@@ -118,11 +120,13 @@ function LeadRow({ lead, open, onToggle, scoring }: { lead: Lead; open: boolean;
               <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-faint">Why this matched</p>
               <ul className="mt-3 flex flex-col gap-4">
                 {lead.evidence.map((e, i) => (
-                  <li key={i}>
-                    <p className="text-[12px] text-faint">{e.attribute}</p>
-                    <p className="text-[13.5px] font-medium text-ink">{e.value}</p>
-                    <p className="mt-1 text-[13.5px] leading-5 text-text">“{e.quote}”</p>
-                    <p className="mt-0.5 text-[12px] text-faint">{e.call} · <span className="font-mono">{e.t}</span></p>
+                  <li key={i} className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-3">
+                    <p className="pt-px text-[13.5px] text-soft">{e.attribute}</p>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-medium text-ink">{e.value}</p>
+                      <p className="mt-1 text-[13.5px] leading-5 text-text">“{e.quote}”</p>
+                      <p className="mt-0.5 text-[13.5px] text-soft">{e.call} · <span className="tabular-nums">{e.t}</span></p>
+                    </div>
                   </li>
                 ))}
               </ul>
