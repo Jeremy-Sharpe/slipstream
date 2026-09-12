@@ -19,34 +19,36 @@ The minimum loop that scores is: fixture call in, transcript, extracted CRM fiel
 
 - UI: Vercel, deployed from `main`. Anna owns it.
 - API: Jeremy's VPS, deployed from `main` by a script in `api/`. Jeremy owns it. This replaces the Render plan in `PROJECT.md`.
-- Database: Supabase, hosted. Anna owns the project; migrations live in `supabase/`.
+- Database: Supabase, hosted. Jeremy owns the project; migrations live in `supabase/`.
 
-## Anna: schema, deploys, fixtures, then ICP to leads
+## Anna: Vercel deploy, fixtures, then ICP to leads
 
-Rows: `schema`, `web-deploy`, `fixtures`, then `icp`, `leads`, `outreach`.
+Rows: `web-deploy`, `fixtures`, then `icp`, `leads`, `outreach`.
 
-Accounts to create today, on personal billing: Supabase (enable the `vector` extension), Anthropic API key, Vercel (connect the repo), ElevenLabs, Origami (paid plan, key from Settings then Developers). Share the keys in the group chat.
+Accounts to create today, on personal billing: Anthropic API key, Vercel (connect the repo), ElevenLabs, Origami (paid plan, key from Settings then Developers). Share the keys in the group chat.
 
-Saturday: schema and seed merged first, because every other lane reads them. Vercel connected and the production URL on the README `Production URL:` line. Then fixtures: 8 to 12 two-speaker sales call scripts in `fixtures/`, one target customer segment (agree it with Max, it has to match the README), outcomes spread across won, stalled, lost and no-show, the good calls showing discovery questions, a secured next step and a handled objection, the bad ones missing them, each with an expected-outcome file. Generate the audio with ElevenLabs text-to-dialogue. Sunday: ICP derivation from won-deal embeddings, the Origami brief and leads flow, outreach drafts. Every Origami search starts at `count: 10`; credits are spent per row, so no searches until the ICP is real. Run `npm run evals -- --scenario T4` and `I2` on Sunday night and fix the gaps.
+Saturday: Vercel connected and the production URL on the README `Production URL:` line. Then fixtures: 8 to 12 two-speaker sales call scripts in `fixtures/`, one target customer segment (agree it with Max, it has to match the README), outcomes spread across won, stalled, lost and no-show, the good calls showing discovery questions, a secured next step and a handled objection, the bad ones missing them, each with an expected-outcome file. Generate the audio with ElevenLabs text-to-dialogue. Sunday: ICP derivation from won-deal embeddings, the Origami brief and leads flow, outreach drafts. Every Origami search starts at `count: 10`; credits are spent per row, so no searches until the ICP is real. Run `npm run evals -- --scenario T4` and `I2` on Sunday night and fix the gaps.
 
 Paste into Claude:
 
 ```
-Read CLAUDE.md, BOARD.md, PROJECT.md and docs/start-here.md. I am Anna. My rows are schema, web-deploy, fixtures, then icp, leads and outreach, in that order. Claim each row on BOARD.md before starting it. Work only in the folders the row lists. Every row is done when it runs on the live URL, not localhost. Before I claim a criterion is met, run its judge scenario from evals/ and quote the score.
+Read CLAUDE.md, BOARD.md, PROJECT.md and docs/start-here.md. I am Anna. My rows are web-deploy, fixtures, then icp, leads and outreach, in that order. Claim each row on BOARD.md before starting it. Work only in the folders the row lists. Every row is done when it runs on the live URL, not localhost. Before I claim a criterion is met, run its judge scenario from evals/ and quote the score.
 ```
 
-## Jeremy: the API on the VPS and the call pipeline
+## Jeremy: schema, the API on the VPS, the call pipeline
 
-Rows: `api-skeleton`, then `ingest`, `extract`, `draft`, `scorecard`.
+Rows: `schema` (already claimed), `api-skeleton`, then `ingest`, `extract`, `draft`, `scorecard`.
+
+Accounts: Supabase, with the `vector` extension enabled. Share the URL and keys in the group chat.
 
 Infrastructure: the API runs on your VPS. Add a deploy script under `api/` that pulls `main`, installs with `uv`, and restarts the service, and post the public API URL in the chat so Anna can set `NEXT_PUBLIC_API_BASE_URL` on Vercel and `WEB_ORIGIN` on the API. HTTPS matters: the browser will refuse a plain-HTTP API from a Vercel page, so put Caddy or nginx with a certificate in front of uvicorn.
 
-Saturday: FastAPI skeleton with settings, Supabase client, health route and CORS, running on the VPS behind HTTPS, merged. Then ingest: a fixture call uploaded or picked, Scribe batch transcription with diarisation, transcript stored. Sunday: extract (Claude structured output with a pinned schema, confidence and transcript span per field), draft (follow-up email per call, approve marks it sent and logs an activity), scorecard (rubric in `api/evals/rubric.md`, LLM-as-judge per call, the ten-call labelled eval and its script, which is the artefact for the Use of Data criterion). Run `npm run evals -- --scenario T1`, `T2` and `T4` on Sunday night and fix the gaps.
+Saturday: schema and seed merged first, because every other lane reads them. Then the FastAPI skeleton with settings, Supabase client, health route and CORS, running on the VPS behind HTTPS, merged. Then ingest: a fixture call uploaded or picked, Scribe batch transcription with diarisation, transcript stored. Sunday: extract (Claude structured output with a pinned schema, confidence and transcript span per field), draft (follow-up email per call, approve marks it sent and logs an activity), scorecard (rubric in `api/evals/rubric.md`, LLM-as-judge per call, the ten-call labelled eval and its script, which is the artefact for the Use of Data criterion). Run `npm run evals -- --scenario T1`, `T2` and `T4` on Sunday night and fix the gaps.
 
 Paste into Claude:
 
 ```
-Read CLAUDE.md, BOARD.md, PROJECT.md and docs/start-here.md. I am Jeremy. My rows are api-skeleton, then ingest, extract, draft and scorecard, in that order. The API deploys to my VPS from main, not Render; add the deploy script under api/ and put HTTPS in front of uvicorn. Claim each row on BOARD.md before starting it. The schema in supabase/ is Anna's; api/app/schemas is mine but tell the chat before changing a shape the UI reads. Every row is done when it runs on the live API URL.
+Read CLAUDE.md, BOARD.md, PROJECT.md and docs/start-here.md. I am Jeremy. My rows are schema, api-skeleton, then ingest, extract, draft and scorecard, in that order. The API deploys to my VPS from main, not Render; add the deploy script under api/ and put HTTPS in front of uvicorn. Claim each row on BOARD.md before starting it. supabase/ and api/app/schemas are mine, but tell the chat before changing a shape the UI reads. Every row is done when it runs on the live API URL.
 ```
 
 ## Frontend: two lanes that never touch the same file
@@ -60,7 +62,7 @@ Romain and Max split the UI by surface, not by task, so both run in parallel fro
 | Writing | `docs/demo-script.md`, `docs/video/` | README pitch sections, `docs/pitch.md` |
 | Judge scenarios to run | T1, T3 | B1, B2, B3, I3, F1, F3 |
 
-The one dependency: the current `app/page.tsx` holds every surface in a single file. Romain's first hour moves the analysis and leads markup out verbatim into `app/analysis/page.tsx` and `app/leads/page.tsx`, puts the nav in `components/shell/`, and merges. Max spends that hour on the README, which touches no code. After that merge the folders above are the boundary: Max's Claude never edits `app/globals.css` or anything under `components/shell/`, and Romain's never edits `app/analysis` or `app/leads`. If either needs a change on the other side, ask in the chat. Shared types in `lib/types.ts` mirror Jeremy's `api/app/schemas`; Romain owns the file, Max adds fields by asking.
+The one dependency: the current `app/page.tsx` holds every surface in a single file. Romain's first hour moves the analysis and leads markup out verbatim into `app/analysis/page.tsx` and `app/leads/page.tsx`, puts the nav in `components/shell/`, and merges. Max spends that hour on the README, which touches no code. After that merge the folders above are the boundary: Max's Claude never edits `app/globals.css` or anything under `components/shell/`, and Romain's never edits `app/analysis` or `app/leads`. If either needs a change on the other side, ask in the chat. Shared types in `lib/types.ts` mirror Jeremy's `api/app/schemas` and `supabase/` tables; Romain owns the file, Max adds fields by asking.
 
 ## Romain: conversations surface, demo script, video
 
