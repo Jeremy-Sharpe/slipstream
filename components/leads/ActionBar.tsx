@@ -9,8 +9,8 @@ const COLUMNS: [string, (l: Lead) => string | number][] = [
   ["Person", (l) => l.person],
   ["Title", (l) => l.title],
   ["Location", (l) => l.location],
-  ["Relevance", (l) => l.relevance_score],
-  ["Similarity", (l) => l.similarity],
+  ["Relevance", (l) => l.relevance_score ?? ""],
+  ["Similarity", (l) => l.similarity ?? ""],
   ["Status", (l) => l.status],
 ];
 

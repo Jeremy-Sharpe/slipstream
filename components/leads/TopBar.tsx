@@ -23,11 +23,13 @@ const SHORTCUTS = [
   ["Esc", "Close a dialog or menu"],
 ];
 
-export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
+export function TopBar({ searching, disabled, onRunSearch, brief, onBriefChange, integrations }: {
   searching: boolean;
+  disabled: boolean;
   onRunSearch: () => void;
   brief: string;
   onBriefChange: (brief: string) => void;
+  integrations: { supabase: boolean | null; origami: boolean | null };
 }) {
   const router = useRouter();
   const [briefOpen, setBriefOpen] = useState(false);
@@ -64,7 +66,7 @@ export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
         <button
           type="button"
           onClick={onRunSearch}
-          disabled={searching}
+          disabled={searching || disabled}
           className="mr-6 flex h-9 items-center gap-2 rounded-md bg-primary px-3.5 text-base font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-70"
         >
           {searching ? <Loader2 className="size-[18px] animate-spin" strokeWidth={2} /> : <Sparkles className="size-[18px]" strokeWidth={2} />}
@@ -82,11 +84,11 @@ export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
           <DropdownMenuContent align="end" className="w-60">
             <DropdownMenuGroup>
               <DropdownMenuLabel>Pipeline</DropdownMenuLabel>
-              {[["Supabase", "not connected"], ["Origami", "no API key"]].map(([name, state]) => (
+              {([["Supabase", integrations.supabase], ["Origami", integrations.origami]] as const).map(([name, connected]) => (
                 <DropdownMenuItem key={name} disabled className="text-muted-foreground">
-                  <span className="size-2 rounded-full bg-inactive" />
+                  <span className={`size-2 rounded-full ${connected === true ? "bg-primary" : "bg-inactive"}`} />
                   <span className="text-foreground">{name}</span>
-                  <span>— {state}</span>
+                  <span>— {connected === true ? "connected" : connected === false ? "not configured" : "checking"}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
@@ -121,7 +123,7 @@ export function TopBar({ searching, onRunSearch, brief, onBriefChange }: {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Origami brief</DialogTitle>
-            <DialogDescription>The ICP as the search brief. Edit it before running a search.</DialogDescription>
+            <DialogDescription>Preview the current ICP brief. Live searches use the latest brief stored by the backend.</DialogDescription>
           </DialogHeader>
           <textarea
             value={draftBrief}

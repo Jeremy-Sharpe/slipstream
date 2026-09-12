@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import threading
 from collections import OrderedDict, deque
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -68,6 +69,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.coach_suggestion_lock = asyncio.Lock()
     app.state.scorecard_slots = asyncio.Semaphore(2)
     app.state.scorecard_admission_slots = asyncio.Semaphore(8)
+    app.state.outreach_locks = [threading.Lock() for _ in range(64)]
     try:
         app.state.scorecard_judge = build_judge(runtime_settings)
     except RuntimeError:

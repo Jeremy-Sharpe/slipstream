@@ -25,7 +25,7 @@ export const lists: List[] = [
       company: l.company,
       enrich: sizeOf(l.match_evidence) || `${l.title} · ${l.location}`,
       linkedin: l.linkedin_url ?? "",
-      similarity: l.similarity,
+      similarity: l.similarity ?? "",
       draft: l.draft?.subject ?? "—",
     })),
   },

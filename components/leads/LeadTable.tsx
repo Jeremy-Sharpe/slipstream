@@ -27,7 +27,7 @@ function ColumnGlyph({ glyph }: { glyph: Glyph }) {
   return <Type className={cls} strokeWidth={1.75} />;
 }
 
-export function LeadTable({ leads, onChange }: { leads: Lead[]; onChange: (next: Lead[]) => void }) {
+export function LeadTable({ leads, onChange, onApprove, onCreateDraft, busyLeadId }: { leads: Lead[]; onChange: (next: Lead[]) => void; onApprove: (lead: Lead) => void; onCreateDraft: (lead: Lead) => void; busyLeadId: string | null }) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const update = (id: string, patch: (lead: Lead) => Lead) => onChange(leads.map((l) => (l.id === id ? patch(l) : l)));
@@ -72,7 +72,9 @@ export function LeadTable({ leads, onChange }: { leads: Lead[]; onChange: (next:
                 open={openId === lead.id}
                 onToggle={() => setOpenId((cur) => (cur === lead.id ? null : lead.id))}
                 onDraftChange={(draft: Draft) => update(lead.id, (l) => ({ ...l, draft }))}
-                onApprove={() => update(lead.id, (l) => ({ ...l, status: "approved", draft: l.draft ? { ...l.draft, status: "approved" } : l.draft }))}
+                onApprove={() => onApprove(lead)}
+                onCreateDraft={() => onCreateDraft(lead)}
+                busy={busyLeadId === "*" || busyLeadId === lead.id}
               />
             ))}
           </tbody>
