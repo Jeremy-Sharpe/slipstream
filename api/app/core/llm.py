@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from anthropic import Anthropic
-from openai import OpenAI
+from openai import BadRequestError, NotFoundError, OpenAI
 from pydantic import BaseModel
 
 from app.core.config import Settings
@@ -238,7 +238,9 @@ def _openrouter_structured[SchemaT: BaseModel](
             extra_body={"usage": {"include": True}},
             **request_options,
         )
-    except Exception:
+    except (BadRequestError, NotFoundError):
+        # The provider rejected the schema or the response_format parameter; ask for plain
+        # JSON instead. Every other failure (auth, credit, rate limit, timeout) propagates.
         completion = client.chat.completions.create(
             model=model,
             messages=messages,

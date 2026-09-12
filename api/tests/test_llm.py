@@ -1,4 +1,6 @@
+import httpx
 import pytest
+from openai import BadRequestError, PermissionDeniedError
 from pydantic import BaseModel
 
 from app.core.config import Settings
@@ -304,3 +306,51 @@ def test_create_embedding_client_raises_without_provider(
     assert str(error.value) == (
         "No embedding provider is configured (set OPENAI_API_KEY or OPENROUTER_API_KEY)"
     )
+
+
+class _RaisingCompletions:
+    def __init__(self, error: Exception) -> None:
+        self.error = error
+        self.calls: list[dict[str, object]] = []
+
+    def create(self, **kwargs: object) -> FakeCompletion:
+        self.calls.append(kwargs)
+        if len(self.calls) == 1:
+            raise self.error
+        return FakeCompletion()
+
+
+def _openai_error(cls: type, status_code: int) -> Exception:
+    response = httpx.Response(status_code, request=httpx.Request("POST", "https://x"))
+    return cls("boom", response=response, body=None)
+
+
+def test_openrouter_falls_back_to_plain_json_only_on_schema_rejection() -> None:
+    client = FakeOpenRouterClient()
+    client.chat.completions = _RaisingCompletions(_openai_error(BadRequestError, 400))
+
+    result = structured(
+        ReasoningClient(provider="openrouter", model="x/y", client=client),
+        system="System",
+        user="User",
+        schema=MiniOutput,
+    )
+
+    assert result.output == MiniOutput(subject="R", body="S")
+    assert len(client.chat.completions.calls) == 2
+    assert "response_format" not in client.chat.completions.calls[1]
+
+
+def test_openrouter_does_not_retry_on_credit_or_rate_limit_errors() -> None:
+    client = FakeOpenRouterClient()
+    client.chat.completions = _RaisingCompletions(_openai_error(PermissionDeniedError, 402))
+
+    with pytest.raises(PermissionDeniedError):
+        structured(
+            ReasoningClient(provider="openrouter", model="x/y", client=client),
+            system="System",
+            user="User",
+            schema=MiniOutput,
+        )
+
+    assert len(client.chat.completions.calls) == 1
