@@ -40,4 +40,5 @@ Order matters. The foundation rows unblock everything else and should be claimed
 
 | Slug | Why | Unblocks when |
 |---|---|---|
-| | | |
+| `model-bakeoff` | Compare Claude, OpenAI and open-weight models on extraction, scorecard and risk flags over the fixtures; plan in `docs/model-bakeoff.md`. Owner Anna. | The demo loop runs end to end and the prompts in `api/app/prompts/` exist |
+| `draft-judge` | Pairwise blind judge for follow-up draft quality, part of the bake-off | After `model-bakeoff` |
