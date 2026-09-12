@@ -92,6 +92,7 @@ export type ApiReadiness = {
 };
 
 export type ApiIcpProfile = {
+  id: string;
   version: number;
   evidence: Array<{ attribute: string; deal_ids: string[]; why: string }>;
   profile: {
@@ -103,6 +104,39 @@ export type ApiIcpProfile = {
     confidence: number;
     origami_brief: string;
   };
+};
+
+export type ApiLead = {
+  id: string;
+  icp_profile_id: string | null;
+  origami_row_id: string;
+  company_name: string;
+  person_name: string | null;
+  title: string | null;
+  location: string | null;
+  linkedin_url: string | null;
+  origami_relevance_score: number | null;
+  similarity_score: number | null;
+  status: "new" | "reviewed" | "approved" | "contacted" | "rejected";
+};
+
+export type ApiOutreachDraft = {
+  id: string;
+  lead_id: string;
+  subject: string;
+  body: string;
+  status: "draft" | "approved" | "sent";
+};
+
+export type ApiLeadSource = {
+  origami_job_id: string;
+  icp_profile_id: string;
+  status: string;
+};
+
+export type ApiLeadSourceStatus = {
+  status: string;
+  phase: string | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -127,7 +161,7 @@ function parseReadiness(value: unknown): ApiReadiness {
 }
 
 function parseIcpProfile(value: unknown): ApiIcpProfile {
-  if (!isRecord(value) || !Number.isInteger(value.version) || !Array.isArray(value.evidence) || !isRecord(value.profile)) {
+  if (!isRecord(value) || typeof value.id !== "string" || !Number.isInteger(value.version) || !Array.isArray(value.evidence) || !isRecord(value.profile)) {
     throw new ApiError("Slipstream API returned malformed ICP data", 502);
   }
   const profile = value.profile;
@@ -154,6 +188,50 @@ function parseIcpProfile(value: unknown): ApiIcpProfile {
   return value as ApiIcpProfile;
 }
 
+function nullableString(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
+}
+
+function nullableNumber(value: unknown): value is number | null {
+  return value === null || (typeof value === "number" && Number.isFinite(value));
+}
+
+function parseLead(value: unknown): ApiLead {
+  const statuses = new Set(["new", "reviewed", "approved", "contacted", "rejected"]);
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    !nullableString(value.icp_profile_id) ||
+    typeof value.origami_row_id !== "string" ||
+    typeof value.company_name !== "string" ||
+    !nullableString(value.person_name) ||
+    !nullableString(value.title) ||
+    !nullableString(value.location) ||
+    !nullableString(value.linkedin_url) ||
+    !nullableNumber(value.origami_relevance_score) ||
+    !nullableNumber(value.similarity_score) ||
+    typeof value.status !== "string" ||
+    !statuses.has(value.status)
+  ) {
+    throw new ApiError("Slipstream API returned malformed lead data", 502);
+  }
+  return value as ApiLead;
+}
+
+function parseOutreachDraft(value: unknown): ApiOutreachDraft {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.lead_id !== "string" ||
+    typeof value.subject !== "string" ||
+    typeof value.body !== "string" ||
+    !["draft", "approved", "sent"].includes(String(value.status))
+  ) {
+    throw new ApiError("Slipstream API returned malformed outreach draft", 502);
+  }
+  return value as ApiOutreachDraft;
+}
+
 export async function getReadiness(): Promise<ApiReadiness> {
   const response = await fetch(`${API_BASE_URL}/ready`);
   if (!response.ok) throw new ApiError(`Slipstream API returned ${response.status}`, response.status);
@@ -168,6 +246,52 @@ export async function getLatestIcp(): Promise<ApiIcpProfile | null> {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
   }
+}
+
+export async function getLeads(icpProfileId?: string, signal?: AbortSignal): Promise<ApiLead[]> {
+  const query = icpProfileId ? `?icp_profile_id=${encodeURIComponent(icpProfileId)}` : "";
+  const payload = await request<unknown>(`/leads${query}`, { signal });
+  if (!Array.isArray(payload)) throw new ApiError("Slipstream API returned malformed leads data", 502);
+  return payload.map(parseLead);
+}
+
+export async function sourceLeads(count = 10, signal?: AbortSignal): Promise<ApiLeadSource> {
+  const payload = await request<unknown>("/leads/source", {
+    method: "POST",
+    body: JSON.stringify({ count, quality: "fast" }),
+    signal,
+  });
+  if (
+    !isRecord(payload) ||
+    typeof payload.origami_job_id !== "string" ||
+    typeof payload.icp_profile_id !== "string" ||
+    typeof payload.status !== "string"
+  ) throw new ApiError("Slipstream API returned malformed lead-search data", 502);
+  return payload as ApiLeadSource;
+}
+
+export async function getLeadSourceStatus(jobId: string, signal?: AbortSignal): Promise<ApiLeadSourceStatus> {
+  const payload = await request<unknown>(`/leads/source/${encodeURIComponent(jobId)}`, { signal });
+  if (!isRecord(payload) || typeof payload.status !== "string" || !nullableString(payload.phase)) {
+    throw new ApiError("Slipstream API returned malformed lead-search status", 502);
+  }
+  return payload as ApiLeadSourceStatus;
+}
+
+export async function draftLeadOutreach(leadId: string, signal?: AbortSignal): Promise<ApiOutreachDraft> {
+  return parseOutreachDraft(await request<unknown>(`/leads/${encodeURIComponent(leadId)}/outreach`, {
+    method: "POST",
+    body: JSON.stringify({ rep_name: "Sam" }),
+    signal,
+  }));
+}
+
+export async function approveLeadOutreach(leadId: string, draftId: string, signal?: AbortSignal): Promise<ApiOutreachDraft> {
+  return parseOutreachDraft(await request<unknown>(`/leads/${encodeURIComponent(leadId)}/outreach/approve`, {
+    method: "POST",
+    body: JSON.stringify({ actor: "Hackathon demo", draft_id: draftId }),
+    signal,
+  }));
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

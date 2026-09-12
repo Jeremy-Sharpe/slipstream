@@ -53,7 +53,7 @@ curl -s -X POST http://localhost:8000/icp/derive -H 'Content-Type: application/j
 curl -s -X POST http://localhost:8000/leads/source -H 'Content-Type: application/json' -d '{"count": 10, "quality": "fast"}'
 curl -s http://localhost:8000/leads
 curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach -H 'Content-Type: application/json' -d '{"rep_name": "Sam Whitfield"}'
-curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach/approve -H 'Content-Type: application/json' -d '{"actor": "anna"}'
+curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach/approve -H 'Content-Type: application/json' -d '{"actor": "anna", "draft_id": "<reviewed_draft_id>"}'
 ```
 
 ## Live coach protocol

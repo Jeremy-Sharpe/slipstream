@@ -9,13 +9,15 @@ import { ScoreBar } from "./ScoreBar";
 
 const CELL = "h-[49px] border-r border-b border-line px-3 text-base text-ink truncate";
 
-export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove }: {
+export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove, onCreateDraft, busy }: {
   lead: Lead;
   index: number;
   open: boolean;
   onToggle: () => void;
   onDraftChange: (draft: Draft) => void;
   onApprove: () => void;
+  onCreateDraft: () => void;
+  busy: boolean;
 }) {
   return (
     <>
@@ -67,7 +69,7 @@ export function LeadRow({ lead, index, open, onToggle, onDraftChange, onApprove 
             className={cn("grid overflow-hidden transition-[grid-template-rows] duration-150 motion-reduce:transition-none", open ? "grid-rows-[1fr] border-b border-line" : "grid-rows-[0fr]")}
           >
             <div className="min-h-0">
-              {open && <LeadExpansion lead={lead} onDraftChange={onDraftChange} onApprove={onApprove} />}
+              {open && <LeadExpansion lead={lead} onDraftChange={onDraftChange} onApprove={onApprove} onCreateDraft={onCreateDraft} busy={busy} />}
             </div>
           </div>
         </td>

@@ -34,7 +34,7 @@ export type Conversation = {
 // Leads surface. snake_case because these mirror the Supabase `leads` row and
 // its embedded evidence/draft JSON; components take these shapes whole.
 
-export type LeadStatus = "new" | "drafted" | "approved";
+export type LeadStatus = "new" | "drafted" | "approved" | "rejected";
 
 export type MatchEvidence = {
   attribute: string; // "Buying trigger"
@@ -44,7 +44,7 @@ export type MatchEvidence = {
   timestamp_ms: number;
 };
 
-export type Draft = { id: string; subject: string; body: string; status: "draft" | "approved" };
+export type Draft = { id: string; subject: string; body: string; status: "draft" | "approved"; source?: "evaluation" | "live" };
 
 export type Lead = {
   id: string;
@@ -54,9 +54,10 @@ export type Lead = {
   title: string;
   location: string;
   linkedin_url: string | null;
-  relevance_score: number; // 0-100, Origami
-  similarity: number; // 0-100, cosine vs won-deal centroid
+  relevance_score: number | null; // 0-100, Origami; null when unavailable
+  similarity: number | null; // 0-100, cosine vs won-deal centroid; null when unavailable
   status: LeadStatus;
   match_evidence: MatchEvidence[];
   draft: Draft | null;
+  source?: "evaluation" | "live";
 };

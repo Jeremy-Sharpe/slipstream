@@ -5,9 +5,10 @@ const STYLE: Record<LeadStatus, string> = {
   new: "bg-muted text-ink-2",
   drafted: "bg-primary-soft text-ink",
   approved: "bg-foreground text-background",
+  rejected: "bg-destructive/10 text-destructive",
 };
 
-const LABEL: Record<LeadStatus, string> = { new: "New", drafted: "Drafted", approved: "Approved" };
+const LABEL: Record<LeadStatus, string> = { new: "New", drafted: "Drafted", approved: "Approved", rejected: "Rejected" };
 
 export function Badge({ status }: { status: LeadStatus }) {
   return (
