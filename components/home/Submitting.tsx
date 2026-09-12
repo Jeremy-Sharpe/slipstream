@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 import { cn, mmss } from "@/components/ui";
-import { LoaderGrid, fmtElapsed, useElapsed } from "@/components/run/WorkingLine";
+import { fmtElapsed, useElapsed } from "@/components/run/WorkingLine";
 
 /* The handoff after submit, shared by file, recording and paste: pixel-grid
    loader + shimmering label + elapsed timer, one line of meta, then the
@@ -41,9 +41,7 @@ export function Submitting({ source, error, onDone, onReset, variant = "card" }:
           <X className="size-3.5 text-soft" strokeWidth={2.5} style={{ animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both" }} />
         ) : settled ? (
           <Check className="size-3.5 text-ink" strokeWidth={2.5} style={{ animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both" }} />
-        ) : (
-          <LoaderGrid />
-        )}
+        ) : null}
         {error ? (
           <span className="text-[14px] font-medium text-soft" style={{ animation: "fade-in 300ms ease-out both" }}>{error}</span>
         ) : settled ? (
