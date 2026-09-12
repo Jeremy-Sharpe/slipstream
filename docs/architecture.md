@@ -63,6 +63,16 @@ The bake-off (`api/evals/run_scorecard_eval.py`) runs the judge over the twelve 
 - Two OpenRouter code paths exist: the shared `structured()` client for reasoning steps and the httpx judge in `score.py` that also records usage, latency and retries. Consolidating them is a follow-up.
 - With `require_parameters` on, sending `temperature` excludes GPT-5.4 endpoints, which do not accept it. The judge sends no temperature.
 
+## Follow-ups (as of 12 Sep 2026, evening)
+
+- **Rubric v2 for objection handling.** Every model scored lowest on this dimension (50% to 75%) and the misses sit on the `partial` boundary. Add two worked examples per label to `api/evals/rubric.md`, bump `RUBRIC_VERSION`, re-run the bake-off. This is the cheapest accuracy gain available; swapping models is not.
+- **OpenRouter key on the VPS.** `OPENROUTER_API_KEY` must be in `/etc/slipstream/api.env` or `POST /scorecards` answers 503 by design. Owner: Jeremy's deploy.
+- **Coach tests.** `tests/test_coach.py::test_empty_disconnected_session_does_not_consume_checkpoint_capacity` and `test_active_resumed_checkpoint_is_not_expired` fail on a clean `origin/main`; they predate the scorecard merge and belong to the coach lane.
+- **One OpenRouter client.** Fold the judge's usage, latency and retry accounting into the shared `structured()` client and delete the httpx path in `score.py`.
+- **Playbook persistence.** The derived playbook is cached in-process; a VPS restart needs a re-derive. Add a table or store it on the ICP profile row.
+- **Demo call audio.** Call 13 needs regenerating once ElevenLabs credits allow, with the voices already cast.
+- **Judge latency in the demo.** DeepSeek V3.2 averages 17 seconds per call; if the walkthrough needs the scorecard to appear faster, set `SCORECARD_JUDGE_MODEL=openai/gpt-5.4` (5 seconds, the accuracy leader, 25 times the cost per call, still under two cents).
+
 ## Change log
 
 - **12 Sep 2026, Jeremy**: schema and seed; API skeleton on the VPS with atomic releases; ingest with Scribe batch; grounded extraction with evidence verification.
