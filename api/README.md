@@ -12,6 +12,6 @@ The liveness endpoint is available at `/health` and `/api/v1/health`. `/ready` a
 
 ## Deployment
 
-`Dockerfile` and `railway.toml` support a Railway service. Set the Railway service root directory to `api/` and its Config File path to `/api/railway.toml`; these are separate monorepo settings. The container honours Railway's injected `PORT` and runs as an unprivileged user.
+`Dockerfile` and `railway.toml` support a Railway service. Leave the Railway service root at `/` and set its Config File path to `/api/railway.toml` so the image includes both `api/` and the deterministic `fixtures/` dataset. The container honours Railway's injected `PORT` and runs as an unprivileged user. Build the same image locally from the repository root with `docker build -f api/Dockerfile .`.
 
 `deploy/` contains the systemd service, Caddy HTTPS example, one-time provisioner, and locked atomic release script for the project VPS. The deployer creates an immutable Git worktree per revision, builds a separate virtual environment, atomically switches `current`, verifies the exact revision through `/ready`, and rolls back on failure. Provisioning installs the stable entrypoint at `/usr/local/sbin/slipstream-deploy`; use that path for every later release. Add secrets directly to the root-owned mode-0600 `/etc/slipstream/api.env`; never store them in the checkout.
