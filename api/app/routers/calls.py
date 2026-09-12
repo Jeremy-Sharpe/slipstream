@@ -30,6 +30,10 @@ MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 MAX_UPLOAD_REQUEST_BYTES = MAX_UPLOAD_BYTES + 2 * 1024 * 1024
 
 
+class RealtimeCallConflictError(RuntimeError):
+    """Raised when a realtime idempotency key is reused for different content."""
+
+
 class UploadSizeLimitMiddleware:
     def __init__(self, app: ASGIApp, max_bytes: int = MAX_UPLOAD_REQUEST_BYTES) -> None:
         self.app = app
@@ -173,6 +177,18 @@ def _record(
     )
 
 
+def _same_call(left: CallResponse, right: CallResponse) -> bool:
+    return (
+        left.source_external_id == right.source_external_id
+        and left.subject == right.subject
+        and left.occurred_at == right.occurred_at
+        and left.transcript == right.transcript
+        and left.provider == right.provider
+        and left.fixture == right.fixture
+        and left.segments == right.segments
+    )
+
+
 def _persist_to_supabase(client: Any, record: CallResponse) -> CallResponse:
     conversation = {
         "channel": "call",
@@ -198,11 +214,13 @@ def _persist_to_supabase(client: Any, record: CallResponse) -> CallResponse:
     if existing:
         existing_record = _read_from_supabase(client, UUID(existing[0]["id"]))
         if existing_record is not None and existing_record.processing_status == "ready":
-            return existing_record
+            if _same_call(existing_record, record):
+                return existing_record
+            raise RealtimeCallConflictError("Source ID already belongs to another transcript")
         raise RuntimeError("A prior ingestion for this source did not complete")
     try:
         created = client.table("conversations").insert(conversation).execute().data
-    except Exception:
+    except Exception as error:
         raced = (
             client.table("conversations")
             .select("id")
@@ -215,7 +233,11 @@ def _persist_to_supabase(client: Any, record: CallResponse) -> CallResponse:
         if raced:
             raced_record = _read_from_supabase(client, UUID(raced[0]["id"]))
             if raced_record is not None and raced_record.processing_status == "ready":
-                return raced_record
+                if _same_call(raced_record, record):
+                    return raced_record
+                raise RealtimeCallConflictError(
+                    "Source ID already belongs to another transcript"
+                ) from error
         raise
     if not created:
         raise RuntimeError("Supabase did not return the created conversation")
@@ -281,6 +303,11 @@ async def _persist(request: Request, record: CallResponse) -> CallResponse:
     if client is not None:
         try:
             return await asyncio.to_thread(_persist_to_supabase, client, record)
+        except RealtimeCallConflictError as error:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Source ID already belongs to another transcript",
+            ) from error
         except Exception as error:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -288,6 +315,33 @@ async def _persist(request: Request, record: CallResponse) -> CallResponse:
             ) from error
     request.app.state.call_store[str(record.id)] = record
     return record
+
+
+async def persist_realtime_call(
+    request: Request,
+    *,
+    source_external_id: str,
+    subject: str,
+    occurred_at: datetime,
+    transcript: Transcript,
+) -> CallResponse:
+    """Persist a completed realtime transcript through the canonical call store."""
+    record = _record(
+        source_external_id=source_external_id,
+        subject=subject,
+        occurred_at=occurred_at,
+        transcript=transcript,
+        fixture=False,
+    )
+    existing = await _find_by_source(request, source_external_id)
+    if existing is not None:
+        if _same_call(existing, record):
+            return existing
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Source ID already belongs to another transcript",
+        )
+    return await _persist(request, record)
 
 
 async def _find_by_source(request: Request, source_external_id: str) -> CallResponse | None:
