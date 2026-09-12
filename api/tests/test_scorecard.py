@@ -4,12 +4,14 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 import httpx
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from app.core.config import Settings
+from app.routers.scorecards import _list_stored, _read_stored, _store
 from app.schemas.scorecard import (
     Evidence,
     JudgedPlaybook,
@@ -48,8 +50,10 @@ class FakeJudge:
     ) -> None:
         self.scorecard = scorecard or _judged_scorecard()
         self.playbook = playbook or _judged_playbook()
+        self.calls = 0
 
     def __call__(self, *, system: str, user: str, schema: type[Any]) -> JudgeResult[Any]:
+        self.calls += 1
         output = self.playbook if schema is JudgedPlaybook else self.scorecard
         return JudgeResult(
             output=output,
@@ -67,8 +71,7 @@ def test_deterministic_metrics_agree_with_fixture_labels() -> None:
 
         assert abs(rep_talk_ratio(transcript.turns) - expected["rep_talk_ratio"]) <= 0.03
         assert (
-            abs(heuristic_discovery_count(transcript.turns) - expected["discovery_questions"])
-            <= 1
+            abs(heuristic_discovery_count(transcript.turns) - expected["discovery_questions"]) <= 1
         )
 
 
@@ -234,9 +237,7 @@ def test_openrouter_status_error_sanitises_key() -> None:
         "secret-key",
         "test/model",
         prices={"test/model": (1.0, 1.0)},
-        transport=httpx.MockTransport(
-            lambda _: httpx.Response(429, text="slow down secret-key")
-        ),
+        transport=httpx.MockTransport(lambda _: httpx.Response(429, text="slow down secret-key")),
     )
 
     try:
@@ -397,6 +398,156 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     assert client.post("/scorecards", json={"call_id": "broken"}).status_code == 422
 
 
+def test_score_stored_fixture_call_persists_fixture_labels_and_validated_evidence(
+    client: TestClient,
+) -> None:
+    call = client.post("/api/v1/calls/fixtures/call-01-northstar-labs/ingest").json()
+    script = _read_json(FIXTURES_ROOT / "call-01-northstar-labs" / "script.json")
+    judged = _judged_scorecard().model_copy(
+        update={
+            "discovery_questions": [
+                Evidence(turn_index=1, quote=script["turns"][0]["text"][0:22]),
+                Evidence(turn_index=1, quote="not a real quote"),
+            ]
+        }
+    )
+    client.app.state.judge_factory = lambda: FakeJudge(scorecard=judged)
+
+    response = client.post(f"/api/v1/calls/{call['id']}/scorecard")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["rep"] == "Sam Whitfield"
+    assert payload["outcome"] == "won"
+    assert payload["conversation_id"] == call["id"]
+    assert payload["discovery_questions"] == 1
+    assert payload["model"] == "fake"
+    assert 0 < payload["rep_talk_ratio"] < 1
+
+
+def test_score_stored_call_is_idempotent_until_force_is_requested(
+    client: TestClient,
+) -> None:
+    call = client.post("/api/v1/calls/fixtures/call-01-northstar-labs/ingest").json()
+    judge = FakeJudge()
+    client.app.state.judge_factory = lambda: judge
+
+    first = client.post(f"/api/v1/calls/{call['id']}/scorecard")
+    second = client.post(f"/api/v1/calls/{call['id']}/scorecard")
+    forced = client.post(f"/api/v1/calls/{call['id']}/scorecard?force=true")
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert forced.status_code == 200
+    assert second.json()["scored_at"] == first.json()["scored_at"]
+    assert judge.calls == 2
+    assert forced.json()["scored_at"] != first.json()["scored_at"]
+
+
+def test_score_stored_call_body_overrides_fixture_rep_and_outcome(
+    client: TestClient,
+) -> None:
+    call = client.post("/api/v1/calls/fixtures/call-01-northstar-labs/ingest").json()
+    client.app.state.judge_factory = lambda: FakeJudge()
+
+    response = client.post(
+        f"/api/v1/calls/{call['id']}/scorecard?force=true",
+        json={"rep": "Alex Doe", "outcome": "lost"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["rep"] == "Alex Doe"
+    assert response.json()["outcome"] == "lost"
+
+
+def test_stored_scorecard_read_missing_call_and_missing_judge_responses(
+    client: TestClient,
+) -> None:
+    call = client.post("/api/v1/calls/fixtures/call-01-northstar-labs/ingest").json()
+    client.app.state.judge_factory = lambda: FakeJudge()
+    stored = client.post(f"/api/v1/calls/{call['id']}/scorecard").json()
+    unknown_id = uuid4()
+
+    get_response = client.get(f"/api/v1/calls/{call['id']}/scorecard")
+    missing_get = client.get(f"/api/v1/calls/{unknown_id}/scorecard")
+    missing_post = client.post(f"/api/v1/calls/{unknown_id}/scorecard")
+
+    def no_judge():
+        raise RuntimeError("No scorecard judge is configured")
+
+    client.app.state.scorecard_store.clear()
+    client.app.state.judge_factory = no_judge
+    unconfigured = client.post(f"/api/v1/calls/{call['id']}/scorecard")
+
+    assert get_response.status_code == 200
+    assert get_response.json() == stored
+    assert missing_get.status_code == 404
+    assert missing_get.json() == {"detail": "Scorecard not found"}
+    assert missing_post.status_code == 404
+    assert missing_post.json() == {"detail": "Call not found"}
+    assert unconfigured.status_code == 503
+    assert unconfigured.json() == {"detail": "No scorecard judge is configured"}
+
+
+def test_list_scorecards_returns_stored_scorecard(client: TestClient) -> None:
+    call = client.post("/api/v1/calls/fixtures/call-01-northstar-labs/ingest").json()
+    client.app.state.judge_factory = lambda: FakeJudge()
+    stored = client.post(f"/api/v1/calls/{call['id']}/scorecard").json()
+
+    response = client.get("/api/v1/scorecards")
+
+    assert response.status_code == 200
+    assert response.json() == [stored]
+
+
+def test_derive_playbook_uses_stored_scorecards_and_caches_latest(
+    client: TestClient,
+) -> None:
+    assert client.post("/api/v1/playbook/derive").status_code == 400
+    assert client.get("/api/v1/playbook/latest").status_code == 404
+
+    call = client.post("/api/v1/calls/fixtures/call-01-northstar-labs/ingest").json()
+    client.app.state.judge_factory = lambda: FakeJudge()
+    assert client.post(f"/api/v1/calls/{call['id']}/scorecard").status_code == 200
+
+    derived = client.post("/api/v1/playbook/derive")
+    latest = client.get("/api/v1/playbook/latest")
+
+    assert derived.status_code == 200
+    assert derived.json()["model"] == "fake"
+    assert latest.status_code == 200
+    assert latest.json()["generated_at"] == derived.json()["generated_at"]
+
+
+def test_supabase_scorecard_helpers_store_read_list_and_raise_on_missing_row() -> None:
+    conversation_id = uuid4()
+    empty_id = uuid4()
+    missing_id = uuid4()
+    client = _FakeSupabase(
+        {
+            str(conversation_id): {"id": str(conversation_id), "scorecard": {}},
+            str(empty_id): {"id": str(empty_id), "scorecard": {}},
+            "invalid": {"id": "invalid", "scorecard": {"call_id": "broken"}},
+        }
+    )
+    scorecard = _scorecard("call-1", "Sam Whitfield", "won").model_copy(
+        update={"conversation_id": str(conversation_id)}
+    )
+
+    _store(client, conversation_id, scorecard)
+
+    assert client.rows[str(conversation_id)]["scorecard"] == scorecard.model_dump(mode="json")
+    assert _read_stored(client, conversation_id) == scorecard
+    assert _read_stored(client, empty_id) is None
+    assert _list_stored(client) == [scorecard]
+    try:
+        _store(client, missing_id, scorecard)
+    except RuntimeError as error:
+        assert str(error) == "Scorecard update returned no row"
+    else:
+        raise AssertionError("expected RuntimeError")
+
+
 def test_comparison_summariser_picks_cheapest_model_within_spread() -> None:
     decision = compare_models(
         [
@@ -513,6 +664,58 @@ def _openrouter_response(content: str) -> httpx.Response:
             "usage": {"prompt_tokens": 1000, "completion_tokens": 500},
         },
     )
+
+
+class _FakeResult:
+    def __init__(self, data: list[dict[str, Any]]) -> None:
+        self.data = data
+
+
+class _FakeSupabase:
+    def __init__(self, rows: dict[str, dict[str, Any]]) -> None:
+        self.rows = rows
+
+    def table(self, name: str) -> _FakeTable:
+        assert name == "conversations"
+        return _FakeTable(self.rows)
+
+
+class _FakeTable:
+    def __init__(self, rows: dict[str, dict[str, Any]]) -> None:
+        self.rows = rows
+        self.filters: list[tuple[str, str, Any]] = []
+        self.update_payload: dict[str, Any] | None = None
+
+    def select(self, columns: str) -> _FakeTable:
+        return self
+
+    def update(self, payload: dict[str, Any]) -> _FakeTable:
+        self.update_payload = payload
+        return self
+
+    def eq(self, column: str, value: Any) -> _FakeTable:
+        self.filters.append(("eq", column, value))
+        return self
+
+    def neq(self, column: str, value: Any) -> _FakeTable:
+        self.filters.append(("neq", column, value))
+        return self
+
+    def limit(self, count: int) -> _FakeTable:
+        return self
+
+    def execute(self) -> _FakeResult:
+        rows = list(self.rows.values())
+        for operator, column, value in self.filters:
+            if operator == "eq":
+                rows = [row for row in rows if row.get(column) == value]
+            if operator == "neq":
+                rows = [row for row in rows if row.get(column) != value and row.get(column) != {}]
+        if self.update_payload is not None:
+            for row in rows:
+                row.update(self.update_payload)
+            return _FakeResult(rows)
+        return _FakeResult(rows)
 
 
 def _model_summary(

@@ -43,6 +43,7 @@ class JudgedScorecard(BaseModel):
 
 class Scorecard(BaseModel):
     call_id: str
+    conversation_id: str | None = None
     rep: str
     outcome: Outcome | None = None
     discovery_questions: int

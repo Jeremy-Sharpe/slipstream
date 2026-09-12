@@ -30,7 +30,7 @@ Embeddings use `EMBEDDING_MODEL`, defaulting to OpenAI `text-embedding-3-small`,
 
 Use a Claude model such as `claude-opus-5` with `ANTHROPIC_API_KEY`, an OpenAI model such as `gpt-5.4` or `o4-mini` with `OPENAI_API_KEY`, or an OpenRouter model such as `meta-llama/llama-4-maverick` with `OPENROUTER_API_KEY`. Origami calls use `ORIGAMI_BASE_URL`, defaulting to `https://origami.chat/api/v3`.
 
-Endpoints are registered both bare and under `/api/v1`: `POST /icp/history/load`, `POST /icp/derive`, `GET /icp/latest`, `POST /leads/source`, `GET /leads/source/{job_id}`, `GET /leads`, `POST /leads/{lead_id}/outreach`, and `POST /leads/{lead_id}/outreach/approve`.
+Endpoints are registered both bare and under `/api/v1`: `POST /icp/history/load`, `POST /icp/derive`, `GET /icp/latest`, `POST /leads/source`, `GET /leads/source/{job_id}`, `GET /leads`, `POST /leads/{lead_id}/outreach`, `POST /leads/{lead_id}/outreach/approve`, `POST /calls/<conversation_id>/scorecard`, `GET /calls/<conversation_id>/scorecard`, `GET /scorecards`, `POST /playbook/derive`, and `GET /playbook/latest`.
 
 Run the local demo sequence after starting the API with configured Anthropic, OpenAI and Origami keys:
 
@@ -41,6 +41,10 @@ curl -s -X POST http://localhost:8000/leads/source -H 'Content-Type: application
 curl -s http://localhost:8000/leads
 curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach -H 'Content-Type: application/json' -d '{"rep_name": "Sam Whitfield"}'
 curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach/approve -H 'Content-Type: application/json' -d '{"actor": "anna"}'
+curl -s -X POST http://localhost:8000/calls/<conversation_id>/scorecard -H 'Content-Type: application/json' -d '{}'
+curl -s http://localhost:8000/calls/<conversation_id>/scorecard
+curl -s -X POST http://localhost:8000/playbook/derive
+curl -s http://localhost:8000/playbook/latest
 ```
 
 ## Live coach protocol
