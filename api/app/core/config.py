@@ -15,14 +15,11 @@ from pydantic import (
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
-def _canonical_http_origin(
-    value: str, *, production: bool = False, allow_loopback_http: bool = False
-) -> str:
+def _canonical_http_origin(value: str, *, production: bool = False) -> str:
     parsed = urlsplit(value.strip())
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         raise ValueError("URL must be an absolute HTTP(S) origin")
-    loopback = parsed.hostname in {"127.0.0.1", "localhost", "::1"}
-    if production and parsed.scheme != "https" and not (allow_loopback_http and loopback):
+    if production and parsed.scheme != "https":
         raise ValueError("URL must use HTTPS in production")
     has_disallowed_part = (
         parsed.username
@@ -176,9 +173,7 @@ class Settings(BaseSettings):
             raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set together")
         if self.supabase_url:
             self.supabase_url = _canonical_http_origin(
-                self.supabase_url,
-                production=self.environment == "production",
-                allow_loopback_http=True,
+                self.supabase_url, production=self.environment == "production"
             )
         if (
             self.environment == "production"
