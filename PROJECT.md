@@ -1,5 +1,19 @@
 # Slipstream
 
+## Build coordination — 12 September 2026
+
+- **Jeremy's agent completed:** the first complete frontend prototype: a unified email-and-call inbox, conversation detail with CRM auto-entry and editable reply draft, plus an aggregate analysis/ICP page and an Origami-ready lead-generation handoff. This work is frontend-only and uses realistic mock data. Production build, lint, responsive visual QA, and the core interaction smoke test pass.
+- **Other collaborators should work on next:** producing/curating realistic call and email fixtures, defining the CRM adapter contract, and exploring the Origami lead-generation API/data contract. The frontend shell and core screens are now available to build against; coordinate in this file before changing their information architecture.
+- **Coordination note:** keep all integrations mocked for the hackathon UI; no live email sending, CRM writes, or Origami requests are part of Jeremy's agent's current work.
+
+### Frontend decisions now represented in the prototype
+
+- Next.js 16 + React 19, deployed independently from any future integration services.
+- Calls and email are one conversation type with channel-specific detail views.
+- CRM write-back and outbound sending require explicit human approval in the UI.
+- HubSpot is the named demo CRM, but the field panel is intentionally adapter-shaped.
+- Origami receives the derived ICP and returns staged lead candidates; it does not send automatically in this phase.
+
 Accelerated sales. A layer that sits on top of a CRM, listens to what happened
 on the phone, and turns each call into the next action: a drafted follow-up, a
 record in the CRM, and a read on who you should be selling to next.
