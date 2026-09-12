@@ -91,7 +91,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 - The CRM is our own Postgres tables shaped like HubSpot objects, not a live HubSpot.
 - No phone system integration. Audio arrives as a file or through the coach overlay.
 - Approving a draft marks it sent and logs it; no email is actually delivered.
-- Call scoring is rubric-based LLM-as-judge with a ten-call spot check, not a trained model.
+- Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
 - Single tenant, no auth, no billing.
 
 ## Run locally

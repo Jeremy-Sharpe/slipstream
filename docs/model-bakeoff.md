@@ -1,5 +1,7 @@
 # Model bake-off (parked until the demo loop runs)
 
+Status: the scorecard task is now runnable through `api/evals/run_scorecard_eval.py` over OpenRouter, using one key across vendors; extraction and risk-flag tasks still wait on the prompts from the extract and coach lanes, and the snapshot prices live in `api/evals/openrouter-prices.json`.
+
 Decided 12 September, Anna: run a small evaluation to choose the model for each AI step, include cheap open-weight models, and put the result in the video and README. Parked until the loop works end to end so nobody spends the weekend tuning models on a product that does not exist yet. This is the artefact for the "Use of Data / Models" criterion (6 points: deliberate choices with reasoning and some evaluation).
 
 ## What gets measured
