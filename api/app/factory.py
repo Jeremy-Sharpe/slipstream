@@ -1,6 +1,7 @@
 import asyncio
 import logging
-from collections import deque
+import threading
+from collections import OrderedDict, deque
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -11,8 +12,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.database import create_supabase
 from app.core.readiness import StorageReadinessProbe
-from app.routers import calls, drafts, extractions, health, icp, leads
+from app.routers import calls, drafts, emails, extractions, health, icp, leads, scorecards
 from app.services.icp_leads_store import create_icp_leads_store
+from app.services.score import build_judge
 from app.ws import coach
 
 
@@ -25,6 +27,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         yield
     finally:
+        close_judge = getattr(app.state.scorecard_judge, "close", None)
+        if callable(close_judge):
+            await asyncio.to_thread(close_judge)
         await app.state.transcription_client.aclose()
         await app.state.readiness.close()
 
@@ -46,6 +51,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.extraction_store = {}
     app.state.draft_store = {}
     app.state.activity_store = {}
+    app.state.email_store = {}
+    app.state.email_threads = {}
+    app.state.scorecard_store = OrderedDict()
     app.state.transcription_slots = asyncio.Semaphore(2)
     app.state.ingest_locks = [asyncio.Lock() for _ in range(32)]
     app.state.extraction_locks = [asyncio.Lock() for _ in range(32)]
@@ -59,7 +67,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.coach_token_lock = asyncio.Lock()
     app.state.coach_suggestion_started_at = deque()
     app.state.coach_suggestion_lock = asyncio.Lock()
+    app.state.scorecard_slots = asyncio.Semaphore(2)
+    app.state.scorecard_admission_slots = asyncio.Semaphore(8)
+    app.state.outreach_locks = [threading.Lock() for _ in range(64)]
+    try:
+        app.state.scorecard_judge = build_judge(runtime_settings)
+    except RuntimeError:
+        app.state.scorecard_judge = None
     app.add_middleware(calls.UploadSizeLimitMiddleware)
+    app.add_middleware(scorecards.ScorecardSizeLimitMiddleware)
+
+    def judge_factory():
+        if app.state.scorecard_judge is None:
+            raise RuntimeError("No scorecard judge is configured")
+        return app.state.scorecard_judge
+
+    app.state.judge_factory = judge_factory
     app.add_middleware(
         CORSMiddleware,
         allow_origins=runtime_settings.web_origins,
@@ -73,10 +96,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ],
     )
     app.include_router(health.router)
+    app.include_router(scorecards.router)
     app.include_router(health.router, prefix="/api/v1")
+    app.include_router(scorecards.router, prefix="/api/v1")
     app.include_router(calls.router, prefix="/api/v1")
     app.include_router(extractions.router, prefix="/api/v1")
     app.include_router(drafts.router, prefix="/api/v1")
+    app.include_router(emails.router, prefix="/api/v1")
     app.include_router(icp.router)
     app.include_router(icp.router, prefix="/api/v1")
     app.include_router(leads.router)

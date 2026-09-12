@@ -10,6 +10,23 @@ uv run pytest
 
 The liveness endpoint is available at `/health` and `/api/v1/health`. `/ready` additionally probes Supabase when configured and returns 503 if storage is unavailable. Both report optional integration configuration without exposing secret values.
 
+## Scorecard judge
+
+Scorecards use OpenRouter when `OPENROUTER_API_KEY` is set, with `SCORECARD_JUDGE_MODEL` defaulting to `deepseek/deepseek-v3.2`, the pick from the 12 September bake-off in `evals/README.md`; if OpenRouter is not configured, the API falls back to direct Anthropic via `ANTHROPIC_API_KEY`.
+
+`POST /scorecards` accepts a bounded diarised transcript. In durable mode it uses the
+call ID to reload the canonical stored segments and outcome, validates every cited
+quote against that revision, derives deterministic talk-time and consistency fields,
+and conditionally stores the result only if the conversation did not change while the
+judge ran. Memory mode scores the submitted synthetic transcript. `GET /scorecards/{call_id}` reads it
+back by conversation UUID or source ID. `POST /playbook` accepts distinct stored call
+IDs and requires both won and lost/stalled outcomes before deriving aggregate patterns;
+caller-authored scorecards are never trusted as evidence. Endpoints are
+also available under `/api/v1`. In credential-free memory mode, scorecard readback is
+process-local; with Supabase, `20260912020000_scorecard_persistence.sql` provides the
+service-role-only, source-revision-safe persistence function. Both mutation endpoints
+require `X-Slipstream-Ingest-Token` when `INGEST_TOKEN` is configured.
+
 ## Deployment
 
 `Dockerfile` and `railway.toml` support a Railway service. Leave the Railway service root at `/` and set its Config File path to `/api/railway.toml` so the image includes both `api/` and the deterministic `fixtures/` dataset. The container honours Railway's injected `PORT` and runs as an unprivileged user. Build the same image locally from the repository root with `docker build -f api/Dockerfile .`.
@@ -36,7 +53,7 @@ curl -s -X POST http://localhost:8000/icp/derive -H 'Content-Type: application/j
 curl -s -X POST http://localhost:8000/leads/source -H 'Content-Type: application/json' -d '{"count": 10, "quality": "fast"}'
 curl -s http://localhost:8000/leads
 curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach -H 'Content-Type: application/json' -d '{"rep_name": "Sam Whitfield"}'
-curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach/approve -H 'Content-Type: application/json' -d '{"actor": "anna"}'
+curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach/approve -H 'Content-Type: application/json' -d '{"actor": "anna", "draft_id": "<reviewed_draft_id>"}'
 ```
 
 ## Live coach protocol
@@ -86,3 +103,29 @@ through the normal call repository and returns `completed` with the canonical ca
 object. Without a reasoning key, the same protocol uses local coaching rules; without
 an ElevenLabs key, fixture or already-transcribed turns still exercise the full
 endpoint.
+
+## Email ingestion
+
+`POST /api/v1/emails` accepts provider-neutral inbound and outbound messages. Every
+message includes its provider, mailbox ID and mailbox address, so provider-local
+message and thread IDs cannot collide across connected accounts. Recipients are
+labelled `to`, `cc` or `bcc`; automatic replies require exactly one safe external
+`to` recipient and never select a Bcc recipient.
+
+Read a thread with
+`GET /api/v1/emails/{provider}/mailboxes/{mailbox_id}/threads/{thread_id}` and create
+a reply with `POST` to the same URL plus `/draft-reply`. All three operations require
+`X-Slipstream-Ingest-Token` when `INGEST_TOKEN` is configured. Drafts are versioned
+by the exact target message, so a newly arrived message creates a new draft without
+mutating an approved one. Thread reads are capped at 5,000 messages and 8 MiB of
+serialized data; oversized threads return 413 without transferring message bodies.
+
+With Supabase configured, `20260912010000_email_ingestion.sql` installs the
+`ingest_email_conversation` transaction used by the API. It takes an advisory lock
+on the mailbox-scoped source ID, preserves existing CRM names and deal ownership,
+and commits the contact, deal and conversation together. Memory mode remains an
+explicit credential-free demo path and is not durable across restarts.
+
+`supabase test db supabase/tests/email_ingestion.sql` exercises the migration against
+local PostgreSQL, including rollback, idempotency, role permissions, CRM-field
+preservation and the exact 5,000-message overflow boundary.
