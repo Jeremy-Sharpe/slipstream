@@ -5,7 +5,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 from threading import Event
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import httpx
 import pytest
@@ -331,3 +331,75 @@ def test_memory_store_preserves_future_retry_and_exclusive_claim() -> None:
     assert scheduled.status == "scheduled"
     assert scheduled.scheduled_for == retry_at
     assert stored.requested_scheduled_for < retry_at
+
+
+def test_campaign_pause_and_resume_are_authenticated_and_idempotent(
+    client: TestClient,
+) -> None:
+    requests: list[httpx.Request] = []
+
+    def accepted(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json={"id": "provider-after-resume"})
+
+    _configure(client, httpx.MockTransport(accepted))
+    draft_id = _approved_draft(client, "Paused")
+    campaign = _create(
+        client, [draft_id], scheduled_for=datetime.now(UTC) - timedelta(minutes=1)
+    ).json()
+    path = f"/api/v1/campaigns/{campaign['id']}"
+
+    unauthorized = client.post(f"{path}/pause")
+    paused = client.post(f"{path}/pause", headers={"X-Slipstream-Ingest-Token": "ingest-secret"})
+    paused_again = client.post(
+        f"{path}/pause", headers={"X-Slipstream-Ingest-Token": "ingest-secret"}
+    )
+    while_paused = _run(client, campaign["id"])
+    resumed = client.post(f"{path}/resume", headers={"X-Slipstream-Ingest-Token": "ingest-secret"})
+    resumed_again = client.post(
+        f"{path}/resume", headers={"X-Slipstream-Ingest-Token": "ingest-secret"}
+    )
+    delivered = _run(client, campaign["id"])
+
+    assert unauthorized.status_code == 401
+    assert paused.json()["status"] == "paused"
+    assert paused_again.json()["status"] == "paused"
+    assert while_paused.json() == {"claimed_count": 0, "campaign": None}
+    assert resumed.json()["status"] == "scheduled"
+    assert resumed_again.json()["status"] == "scheduled"
+    assert delivered.json()["campaign"]["status"] == "completed"
+    assert len(requests) == 1
+
+
+def test_campaign_controls_reject_missing_running_and_terminal_campaigns(
+    client: TestClient,
+) -> None:
+    _configure(client, httpx.MockTransport(lambda _: httpx.Response(200, json={"id": "sent"})))
+    token = {"X-Slipstream-Ingest-Token": "ingest-secret"}
+    missing = client.post(f"/api/v1/campaigns/{uuid4()}/pause", headers=token)
+    draft_id = _approved_draft(client, "ControlConflict")
+    campaign = _create(
+        client, [draft_id], scheduled_for=datetime.now(UTC) - timedelta(minutes=1)
+    ).json()
+    claim = client.app.state.campaign_store.claim_due(
+        owner=new_campaign_id(), limit=1, campaign_id=UUID(campaign["id"])
+    )
+    running = client.post(f"/api/v1/campaigns/{campaign['id']}/pause", headers=token)
+    assert claim is not None
+    client.app.state.campaign_store.record(
+        campaign_id=UUID(campaign["id"]),
+        owner=claim.owner,
+        results=[
+            campaigns.CampaignItemResult(
+                draft_id=UUID(draft_id),
+                state="failed",
+                outcome="not_deliverable",
+                http_status=409,
+            )
+        ],
+    )
+    terminal = client.post(f"/api/v1/campaigns/{campaign['id']}/pause", headers=token)
+
+    assert missing.status_code == 404
+    assert running.status_code == 409
+    assert terminal.status_code == 409

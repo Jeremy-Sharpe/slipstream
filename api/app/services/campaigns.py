@@ -75,6 +75,10 @@ class CampaignConflictError(CampaignStoreError):
     pass
 
 
+class CampaignNotFoundError(CampaignStoreError):
+    pass
+
+
 class CampaignStore(Protocol):
     def create(
         self,
@@ -105,6 +109,8 @@ class CampaignStore(Protocol):
         owner: UUID,
         results: list[CampaignItemResult],
     ) -> Campaign: ...
+
+    def set_paused(self, campaign_id: UUID, *, paused: bool) -> Campaign: ...
 
 
 class InMemoryCampaignStore:
@@ -264,6 +270,37 @@ class InMemoryCampaignStore:
             self._lease_until.pop(campaign_id, None)
             return campaign.model_copy(deep=True)
 
+    def set_paused(self, campaign_id: UUID, *, paused: bool) -> Campaign:
+        now = datetime.now(UTC)
+        with self._lock:
+            campaign = self._campaigns.get(campaign_id)
+            if campaign is None:
+                raise CampaignNotFoundError("Campaign not found")
+            if paused:
+                if campaign.status == "paused":
+                    return campaign.model_copy(deep=True)
+                if campaign.status != "scheduled":
+                    raise CampaignConflictError("Only a scheduled campaign can be paused")
+                campaign.status = "paused"
+            else:
+                if campaign.status == "scheduled":
+                    return campaign.model_copy(deep=True)
+                if campaign.status != "paused":
+                    raise CampaignConflictError("Only a paused campaign can be resumed")
+                pending = [
+                    item.next_attempt_at or now
+                    for item in campaign.items
+                    if item.state in {"queued", "retryable"}
+                ]
+                if not pending:
+                    raise CampaignConflictError("Campaign has no unfinished work")
+                campaign.status = "scheduled"
+                campaign.scheduled_for = min(pending)
+            campaign.updated_at = now
+            self._owners.pop(campaign_id, None)
+            self._lease_until.pop(campaign_id, None)
+            return campaign.model_copy(deep=True)
+
     @staticmethod
     def _terminal_status(items: list[CampaignItem]) -> CampaignStatus:
         if any(item.state in {"failed", "reconcile"} for item in items):
@@ -376,6 +413,26 @@ class SupabaseCampaignStore:
         campaign = self.get(campaign_id)
         if campaign is None:
             raise CampaignStoreError("Recorded campaign was not readable")
+        return campaign
+
+    def set_paused(self, campaign_id: UUID, *, paused: bool) -> Campaign:
+        try:
+            self._client.rpc(
+                "set_email_campaign_paused",
+                {
+                    "requested_campaign_id": str(campaign_id),
+                    "requested_paused": paused,
+                },
+            ).execute()
+        except Exception as error:
+            if getattr(error, "code", None) == "PT404":
+                raise CampaignNotFoundError("Campaign not found") from error
+            if getattr(error, "code", None) == "PT409":
+                raise CampaignConflictError("Campaign cannot change pause state") from error
+            raise
+        campaign = self.get(campaign_id)
+        if campaign is None:
+            raise CampaignStoreError("Updated campaign was not readable")
         return campaign
 
     @staticmethod
