@@ -80,6 +80,17 @@ def test_email_thread_ingests_idempotently_and_drafts_reply(client: TestClient) 
         scoped_email_id("source", "demo", "sales", "email-1"),
     ]
     assert email_deal.metadata["channels"] == ["email"]
+    inventory = client.get("/api/v1/icp/evidence").json()
+    assert inventory == {
+        "deals": 1,
+        "calls": 0,
+        "emails": 2,
+        "outcome_labelled": 0,
+        "won_deals": 0,
+        "contrast_deals": 0,
+        "active_deals": 1,
+        "ready_to_derive": False,
+    }
 
     response = client.post(f"{THREAD}/draft-reply")
     assert response.status_code == 200

@@ -5,7 +5,13 @@ from typing import Any
 
 from app.core.config import Settings
 from app.core.llm import ReasoningResult, structured
-from app.schemas.icp import DealRecord, IcpProfile, IcpSourceSummary, StoredIcpProfile
+from app.schemas.icp import (
+    DealRecord,
+    IcpEvidenceInventory,
+    IcpProfile,
+    IcpSourceSummary,
+    StoredIcpProfile,
+)
 from app.services.embeddings import embed_texts
 from app.services.icp_leads_store import IcpLeadsStore
 
@@ -67,6 +73,22 @@ def derive_icp(
         details={"profile_id": str(stored.id), "version": stored.version, "won_deals": len(won)},
     )
     return stored
+
+
+def evidence_inventory(
+    store: IcpLeadsStore, *, include_demo: bool = False
+) -> IcpEvidenceInventory:
+    deals = _fit_model_budget(store.list_icp_deals(include_demo=include_demo))
+    summary = _source_summary(deals)
+    won_deals = sum(deal.outcome == "won" for deal in deals)
+    contrast_deals = sum(deal.outcome in {"lost", "stalled"} for deal in deals)
+    return IcpEvidenceInventory(
+        **summary.model_dump(),
+        won_deals=won_deals,
+        contrast_deals=contrast_deals,
+        active_deals=sum(deal.outcome == "open" for deal in deals),
+        ready_to_derive=won_deals >= 2,
+    )
 
 
 def won_centroid(store: IcpLeadsStore, profile_id: str) -> list[float]:
