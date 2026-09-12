@@ -10,6 +10,13 @@ const DEMO_PROVIDER = "slipstream-demo";
 const DEMO_MAILBOX = "hackathon";
 const DEMO_THREAD = "marlowe-finch-campaign";
 
+class ApiResponseError extends Error {
+  constructor(status) {
+    super(`API request failed with HTTP ${status}`);
+    this.status = status;
+  }
+}
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -70,7 +77,7 @@ async function requestJson(fetchImpl, url, { payload, token, timeoutMs = TIMEOUT
     signal: AbortSignal.timeout(timeoutMs),
   });
   const body = await readBounded(response);
-  assert(response.ok, `API request failed with HTTP ${response.status}`);
+  if (!response.ok) throw new ApiResponseError(response.status);
   try {
     return JSON.parse(body);
   } catch {
@@ -78,10 +85,51 @@ async function requestJson(fetchImpl, url, { payload, token, timeoutMs = TIMEOUT
   }
 }
 
+async function readStoredExtraction(fetchImpl, base, callId) {
+  try {
+    return await requestJson(fetchImpl, `${base}/api/v1/calls/${callId}/extraction`);
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+async function recoverStoredExtraction(
+  fetchImpl,
+  base,
+  callId,
+  originalError,
+  deadline,
+  nowImpl,
+  sleepImpl,
+) {
+  while (nowImpl() < deadline) {
+    try {
+      const stored = await readStoredExtraction(fetchImpl, base, callId);
+      if (stored !== null) return stored;
+    } catch (error) {
+      throw new AggregateError(
+        [originalError, error],
+        "local inference disconnected and stored-result recovery failed",
+      );
+    }
+    await sleepImpl(1000);
+  }
+  throw originalError;
+}
+
+function assertExtractionProvenance(extraction, ready) {
+  if (ready?.reasoning_configured !== true) return;
+  assert(extraction?.source === "model", "demo extraction did not use the configured model");
+  assert(extraction?.model === ready?.reasoning_model, "demo extraction used the wrong model");
+}
+
 export async function seedDemoCampaign({
   apiUrl = DEFAULT_API_URL,
   token,
   fetchImpl = fetch,
+  nowImpl = Date.now,
+  sleepImpl = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
 } = {}) {
   const base = normalizeApiUrl(apiUrl);
   const ingestToken = validateToken(token);
@@ -93,14 +141,30 @@ export async function seedDemoCampaign({
   const call = await requestJson(fetchImpl, `${base}/api/v1/calls/fixtures/call-13-marlowe-finch-demo/ingest`, { payload: {} });
   assert(typeof call?.id === "string", "fixture ingest did not return a call ID");
   const modelTimeout = ready?.reasoning_configured === true ? MODEL_TIMEOUT_MS : TIMEOUT_MS;
-  const extraction = await requestJson(fetchImpl, `${base}/api/v1/calls/${call.id}/extract`, {
-    payload: {},
-    timeoutMs: modelTimeout,
-  });
-  if (ready?.reasoning_configured === true) {
-    assert(extraction?.source === "model", "demo extraction did not use the configured model");
-    assert(extraction?.model === ready?.reasoning_model, "demo extraction used the wrong model");
+  let extraction = await readStoredExtraction(fetchImpl, base, call.id);
+  if (extraction !== null) assertExtractionProvenance(extraction, ready);
+  if (extraction === null) {
+    try {
+      extraction = await requestJson(fetchImpl, `${base}/api/v1/calls/${call.id}/extract`, {
+        payload: {},
+        timeoutMs: modelTimeout,
+      });
+    } catch (error) {
+      const isNodeTransportDisconnect = error instanceof TypeError
+        && ["fetch failed", "terminated"].includes(error.message);
+      if (ready?.reasoning_provider !== "local" || !isNodeTransportDisconnect) throw error;
+      extraction = await recoverStoredExtraction(
+        fetchImpl,
+        base,
+        call.id,
+        error,
+        nowImpl() + modelTimeout,
+        nowImpl,
+        sleepImpl,
+      );
+    }
   }
+  assertExtractionProvenance(extraction, ready);
   const draft = await requestJson(fetchImpl, `${base}/api/v1/drafts/from-call/${call.id}`, {
     payload: {},
     timeoutMs: modelTimeout,
