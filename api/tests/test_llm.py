@@ -216,7 +216,7 @@ def test_structured_validates_local_schema_constrained_json() -> None:
     assert "extra_body" not in client.chat.completions.kwargs
 
 
-def test_local_structured_has_a_bounded_default_request() -> None:
+def test_local_structured_preserves_the_callers_output_budget() -> None:
     client = FakeOpenRouterClient()
 
     structured(
@@ -227,8 +227,25 @@ def test_local_structured_has_a_bounded_default_request() -> None:
         max_tokens=5000,
     )
 
-    assert client.chat.completions.kwargs["max_tokens"] == 1800
+    assert client.chat.completions.kwargs["max_tokens"] == 5000
     assert client.chat.completions.kwargs["timeout"] == 600.0
+
+
+def test_local_structured_rejects_a_truncated_completion() -> None:
+    client = FakeOpenRouterClient()
+    completion = FakeCompletion()
+    truncated_choice = FakeChoice()
+    truncated_choice.finish_reason = "length"
+    completion.choices = [truncated_choice]
+    client.chat.completions.create = lambda **_: completion
+
+    with pytest.raises(ValueError, match="exceeded"):
+        structured(
+            ReasoningClient(provider="local", model="local-qwen", client=client),
+            system="System",
+            user="User",
+            schema=MiniOutput,
+        )
 
 
 def test_structured_returns_no_usage_when_provider_omits_it() -> None:

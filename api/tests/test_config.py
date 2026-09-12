@@ -330,6 +330,8 @@ def test_local_model_is_credential_free_reasoning_fallback(
     assert settings.local_model_base_url == "http://localhost:8081/v1"
     assert settings.local_model_name == "local-qwen"
     assert settings.reasoning_provider == "local"
+    assert settings.effective_reasoning_model == "local-qwen"
+    assert settings.reasoning_configured is True
     assert settings.integration_flags["local_model"] is True
 
 
@@ -346,6 +348,7 @@ def test_hosted_reasoning_provider_takes_priority_over_local_model(
     )
 
     assert settings.reasoning_provider == "openrouter"
+    assert settings.effective_reasoning_model == "openai/gpt-5.4"
 
 
 @pytest.mark.parametrize(

@@ -18,6 +18,9 @@ class HealthResponse(BaseModel):
     environment: str
     storage: Literal["supabase", "memory"]
     integrations: dict[str, bool]
+    reasoning_provider: Literal["anthropic", "openai", "openrouter", "local"]
+    reasoning_model: str
+    reasoning_configured: bool
     timestamp: datetime
 
 
@@ -35,6 +38,9 @@ async def health(request: Request) -> HealthResponse:
         environment=settings.environment,
         storage=settings.storage_mode,
         integrations=settings.integration_flags,
+        reasoning_provider=settings.reasoning_provider,
+        reasoning_model=settings.effective_reasoning_model,
+        reasoning_configured=settings.reasoning_configured,
         timestamp=datetime.now(UTC),
     )
 

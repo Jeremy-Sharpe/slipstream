@@ -151,11 +151,14 @@ test("requires model provenance when production enables the local model", async 
       revision,
       storage: "memory",
       integrations: { local_model: true },
+      reasoning_provider: "local",
+      reasoning_model: "custom-local-model",
+      reasoning_configured: true,
     }),
     [`https://api.example/api/v1/calls/${conversationId}/extract`]: json({
       conversation_id: conversationId,
       source: "model",
-      model: "slipstream-qwen2.5-1.5b-instruct-q4-k-m",
+      model: "custom-local-model",
       contact: { name: { value: "Maya Chen", evidence: [{ sequence: 0 }] } },
       company: { name: { value: "Northstar Labs" } },
     }),
@@ -169,6 +172,38 @@ test("requires model provenance when production enables the local model", async 
   });
 
   assert.deepEqual(result.configuredIntegrations, ["local_model"]);
+  assert.equal(result.fixtureLoop.status, "approved-unsent");
+});
+
+test("requires hosted-model provenance when a hosted provider takes priority", async () => {
+  const fetchImpl = fixtureFetch({
+    "https://api.example/ready": json({
+      status: "ok",
+      environment: "production",
+      revision,
+      storage: "memory",
+      integrations: { openrouter: true, local_model: true },
+      reasoning_provider: "openrouter",
+      reasoning_model: "openai/gpt-5.4",
+      reasoning_configured: true,
+    }),
+    [`https://api.example/api/v1/calls/${conversationId}/extract`]: json({
+      conversation_id: conversationId,
+      source: "model",
+      model: "openai/gpt-5.4",
+      contact: { name: { value: "Maya Chen", evidence: [{ sequence: 0 }] } },
+      company: { name: { value: "Northstar Labs" } },
+    }),
+  });
+
+  const result = await runSmoke({
+    uiUrl: "https://ui.example",
+    apiUrl: "https://api.example",
+    exerciseFixture: true,
+    fetchImpl,
+  });
+
+  assert.deepEqual(result.configuredIntegrations, ["openrouter", "local_model"]);
   assert.equal(result.fixtureLoop.status, "approved-unsent");
 });
 

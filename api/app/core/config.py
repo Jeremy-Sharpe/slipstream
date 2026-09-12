@@ -261,6 +261,26 @@ class Settings(BaseSettings):
         return native
 
     @property
+    def reasoning_configured(self) -> bool:
+        return {
+            "anthropic": self.anthropic_api_key is not None,
+            "openai": self.openai_api_key is not None,
+            "openrouter": self.openrouter_api_key is not None,
+            "local": self.local_model_base_url is not None,
+        }[self.reasoning_provider]
+
+    @property
+    def effective_reasoning_model(self) -> str:
+        provider = self.reasoning_provider
+        if provider == "local":
+            return self.local_model_name
+        if provider == "openrouter" and self._native_reasoning_provider != "openrouter":
+            native = self._native_reasoning_provider
+            if "/" not in self.reasoning_model:
+                return f"{native}/{self.reasoning_model}"
+        return self.reasoning_model
+
+    @property
     def embedding_provider(self) -> Literal["openai", "openrouter"] | None:
         if self.openai_api_key is not None:
             return "openai"

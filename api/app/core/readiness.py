@@ -25,7 +25,7 @@ class LocalModelReadinessProbe:
                 timeout=httpx.Timeout(3.0, connect=1.0),
                 transport=transport,
             )
-            if settings.local_model_base_url
+            if settings.reasoning_provider == "local" and settings.local_model_base_url
             else None
         )
 

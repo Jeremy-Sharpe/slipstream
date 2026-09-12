@@ -289,7 +289,7 @@ def _local_structured[SchemaT: BaseModel](
             {"role": "system", "content": _json_system_prompt(system, schema)},
             {"role": "user", "content": user},
         ],
-        max_tokens=min(max_tokens, 1800),
+        max_tokens=max_tokens,
         temperature=0,
         response_format={
             "type": "json_schema",
@@ -301,6 +301,8 @@ def _local_structured[SchemaT: BaseModel](
         },
         **request_options,
     )
+    if getattr(completion.choices[0], "finish_reason", None) == "length":
+        raise ValueError("Local model output exceeded the requested token budget")
     return (
         schema.model_validate_json(_strip_code_fences(_completion_text(completion))),
         _openrouter_usage(completion),
