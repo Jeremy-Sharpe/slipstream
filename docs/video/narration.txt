@@ -1,0 +1,26 @@
+This is Slipstream: the sales layer that sits on top of the CRM your team already uses.
+
+Sales teams do not usually lose context because their CRM is missing fields. They lose it because the useful information is trapped across calls, inboxes, and individual reps' memories. Updating the CRM happens after the conversation, follow-up gets delayed, and leadership sees activity without understanding why deals win.
+
+Slipstream turns that scattered history into one evidence-backed workflow.
+
+The Conversations workspace brings calls and email threads into one queue. This demonstration uses thirteen labelled call fixtures and two labelled email threads so the entire product remains reviewable without sharing customer data or provider credentials. Live and evaluation states are labelled in the interface. Every row keeps the person, company, channel, preview, time, and action state visible, so a rep starts with the next decision instead of another blank record.
+
+Open the Marlowe and Finch renewal call. At the top, Slipstream identifies the commercial signal: a strong buying signal, the CFO, thirty-four staff, an insurance renewal trigger, and positive sentiment. The right-hand CRM panel proposes structured fields for the existing record: stage, annual value, owner, next action, close date, source, promises, and coach flags.
+
+The important part is evidence. Extracted claims carry transcript quotes and segment numbers. A deterministic grounding pass checks every quote against the call before the result can become canonical. If a model cites the wrong segment, Slipstream repairs the citation to the exact matching segment. If the quote is absent, the claim is dropped. The rep reviews the result before syncing, and approval is recorded separately from delivery.
+
+The transcript remains beside the proposed CRM update, so the rep can audit the reasoning instead of trusting an unexplained summary. Lower on the page, the same conversation receives a scorecard for discovery, next-step quality, objection handling, and talk ratio. The follow-up email is drafted from the call and its verified commitments. In this public deployment, approval is truthfully shown as approved but unsent; the credential-gated Resend adapter is the only path that can record a confirmed send.
+
+Slipstream then moves from one conversation to the whole sales motion. Intelligence compares won deals with stalled and lost calls. In this labelled evaluation cohort, every win secured a dated next step, winning reps asked more discovery questions before pricing, handled the real objection, and spoke less. The page derives an ideal customer profile from outcome-labelled CRM deals enriched with both call and email evidence. Judges can inspect the evidence inventory and provenance instead of receiving a black-box persona.
+
+That ideal customer profile becomes a bounded Origami search brief. Leads are ranked against the won-deal pattern, while known CRM companies are excluded. The public page shows labelled evaluation leads because no paid Origami key is installed; the backend already implements the published Origami version-three search, polling, pagination, and typed-row contract. Outreach drafts remain bound to the exact lead and exact approved copy.
+
+Campaigns close the loop without putting delivery credentials in the browser. A trusted Railway or Marcel scheduler claims small, resumable batches. Durable per-item outcomes distinguish confirmed sends, retries, failures, and ambiguous results that require reconciliation. The live API panel here is real: this synthetic campaign is intentionally paused until the year twenty ninety-nine, with one pending item, zero sends, and zero attempts. It cannot accidentally contact anyone during judging.
+
+Underneath the interface is a FastAPI service, a Supabase schema with vector search, a Next.js application, and a transparent Electron coaching overlay. Provider integrations fail closed when credentials are absent. The repository includes twelve outcome-labelled history calls plus this demo call, deterministic tests, model evaluation reports, ephemeral database tests, and production smoke checks.
+
+Slipstream does not replace the CRM. It makes the CRM current, makes every follow-up reviewable, and turns the team's real conversations into a repeatable sales playbook.
+
+That is the full loop: conversation, evidence-backed CRM update, grounded reply, aggregate intelligence, ideal-customer lead discovery, and safe campaign execution.
+
