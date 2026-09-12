@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ActionBar } from "@/components/leads/ActionBar";
-import { FiltersPanel, applyFilters, useFiltersPanelState, type FilterValues } from "@/components/leads/FiltersPanel";
+import { FiltersPanel, applyFilters, defaultFilterState, useFiltersPanelState, type FilterState } from "@/components/leads/FiltersPanel";
 import { LeadTable } from "@/components/leads/LeadTable";
 import { ResultBar } from "@/components/leads/ResultBar";
 import { TopBar } from "@/components/leads/TopBar";
@@ -14,7 +14,7 @@ const WON_DEALS = 5;
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>(seed);
-  const [filters, setFilters] = useState<FilterValues>({});
+  const [filters, setFilters] = useState<FilterState>(defaultFilterState);
   const [filtersHidden, setFiltersHidden] = useFiltersPanelState();
   const [brief, setBrief] = useState(defaultBrief);
   const [searching, setSearching] = useState(false);
@@ -37,7 +37,7 @@ export default function LeadsPage() {
       <TopBar searching={searching} onRunSearch={runSearch} brief={brief} onBriefChange={setBrief} />
       <div className="flex min-h-0 flex-1 flex-col bg-background">
         <div className="flex min-h-0 flex-1">
-          {!filtersHidden && <FiltersPanel values={filters} onChange={setFilters} brief={brief} onHide={() => setFiltersHidden(true)} />}
+          {!filtersHidden && <FiltersPanel state={filters} onChange={setFilters} brief={brief} onHide={() => setFiltersHidden(true)} />}
           <div className="flex min-w-0 flex-1 flex-col">
             <ResultBar count={visible.length} total={leads.length} dealCount={WON_DEALS} updatedAt={updatedAt} filtersHidden={filtersHidden} onShowFilters={() => setFiltersHidden(false)} />
             <div className="h-5 shrink-0" />

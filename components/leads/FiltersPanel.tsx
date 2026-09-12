@@ -1,54 +1,24 @@
 "use client";
 
-import { Building2, ChevronDown, ChevronRight, Code2, Link2, MapPin, PanelLeft, Save, Search, SlidersHorizontal, Trash2, Type, Users, X, Zap, type LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, Code2, PanelLeft, Plus, Save, Search, SlidersHorizontal, Trash2, Users, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { Lead } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { IconButton } from "./IconButton";
+import { RuleRow } from "./filters/RuleRow";
+import { activeCriteria, CRITERIA, defaultFilterState, joinValues, splitValues, type FilterKey, type FilterState, type TargetMode } from "./filters/model";
 
-// The filter column for a lead search, built on our ICP criteria. Chips become
-// editable filter rows; the values filter the table client-side.
-export type FilterKey = "industry" | "size" | "buyer_title" | "trigger" | "region" | "target";
-export type FilterValues = Partial<Record<FilterKey, string>>;
-
-const CRITERIA: { key: FilterKey; label: string; icon: LucideIcon; placeholder: string }[] = [
-  { key: "industry", label: "Industry", icon: Building2, placeholder: "Legal, accounting, allied health, architecture" },
-  { key: "size", label: "Company size", icon: Users, placeholder: "25–80 staff" },
-  { key: "buyer_title", label: "Buyer title", icon: Type, placeholder: "Practice manager, operations manager, director" },
-  { key: "trigger", label: "Trigger", icon: Zap, placeholder: "Cyber-insurance renewal, office move, M365 migration, IT person leaving" },
-  { key: "region", label: "Region", icon: MapPin, placeholder: "Victoria, Australia" },
-  { key: "target", label: "Target companies", icon: Link2, placeholder: "Paste domains or names" },
-];
+export { applyFilters, defaultFilterState, type FilterKey, type FilterState, type FilterValues } from "./filters/model";
 
 const STORAGE_KEY = "slipstream.leadsFilters";
 
-const has = (hay: string, needle: string) => hay.toLowerCase().includes(needle.trim().toLowerCase());
-
-/** Comma-separated terms match if any term is found. */
-function matchesAny(hay: string, value?: string) {
-  if (!value || !value.trim()) return true;
-  return value.split(",").map((t) => t.trim()).filter(Boolean).some((t) => has(hay, t));
-}
-
-export function applyFilters(leads: Lead[], f: FilterValues): Lead[] {
-  return leads.filter(
-    (l) =>
-      matchesAny(`${l.company} ${l.title}`, f.industry) &&
-      matchesAny(l.title, f.buyer_title) &&
-      matchesAny(l.match_evidence.map((e) => `${e.attribute} ${e.value}`).join(" "), f.trigger) &&
-      matchesAny(l.location, f.region) &&
-      matchesAny(l.company, f.target),
-    // size is not on the row yet; it becomes a real filter once headcount lands.
-  );
-}
-
-function Section({ title, open, onToggle, children }: { title: string; open: boolean; onToggle: () => void; children?: ReactNode }) {
+function Section({ title, open, onToggle, trailing, children }: { title: string; open: boolean; onToggle: () => void; trailing?: ReactNode; children?: ReactNode }) {
   return (
     <section className="border-b border-line">
       <button type="button" onClick={onToggle} aria-expanded={open} className="flex h-[60px] w-full items-center gap-2.5 px-6 text-left text-[15px] font-semibold text-ink focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary focus-visible:outline-none">
         {open ? <ChevronDown className="size-4 text-muted-foreground" strokeWidth={2} /> : <ChevronRight className="size-4 text-muted-foreground" strokeWidth={2} />}
         <span className="flex-1">{title}</span>
+        {trailing}
       </button>
       {open && children}
     </section>
@@ -68,23 +38,109 @@ export function useFiltersPanelState(): [boolean, (next: boolean) => void] {
   return [collapsed, set];
 }
 
-export function FiltersPanel({ values, onChange, brief, onHide }: { values: FilterValues; onChange: (next: FilterValues) => void; brief: string; onHide: () => void }) {
+/** A "+ Add" control that expands into an input; Enter commits a chip. */
+function AddChips({ items, onAdd, onRemove, placeholder, label }: { items: string[]; onAdd: (v: string) => void; onRemove: (v: string) => void; placeholder: string; label: string }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const commit = () => {
+    draft.split(/[,\n]/).map((s) => s.trim()).filter(Boolean).forEach(onAdd);
+    setDraft("");
+    setEditing(false);
+  };
+  return (
+    <div className="flex flex-col gap-2">
+      {items.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {items.map((v) => (
+            <span key={v} className="inline-flex h-7 items-center gap-1 rounded-md border border-line bg-muted px-2 text-[13px] text-ink">
+              {v}
+              <button type="button" onClick={() => onRemove(v)} aria-label={`Remove ${v}`} className="text-muted-foreground hover:text-foreground"><X className="size-3" strokeWidth={2} /></button>
+            </span>
+          ))}
+        </div>
+      )}
+      {editing ? (
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } if (e.key === "Escape") { setDraft(""); setEditing(false); } }}
+          placeholder={placeholder}
+          aria-label={label}
+          className="h-11 w-full rounded-lg border border-primary px-3.5 text-[15px] text-ink outline-none ring-2 ring-primary/30 placeholder:text-muted-foreground"
+        />
+      ) : (
+        <button type="button" onClick={() => setEditing(true)} className="flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-line text-[15px] text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+          <Plus className="size-4" strokeWidth={2} /> Add
+        </button>
+      )}
+    </div>
+  );
+}
+
+function NumberField({ label, help, value, min, onChange }: { label: string; help?: string; value: number; min: number; onChange: (n: number) => void }) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[15px] font-semibold text-ink">{label}</span>
+      {help && <span className="text-sm text-muted-foreground">{help}</span>}
+      <input
+        type="number"
+        min={min}
+        value={value}
+        onChange={(e) => onChange(Math.max(min, Number(e.target.value) || min))}
+        className="h-11 w-full rounded-lg border border-line px-3.5 text-[15px] text-ink tabular-nums outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+      />
+    </label>
+  );
+}
+
+const TARGET_MODES: { key: TargetMode; label: string }[] = [
+  { key: "in_hubspot", label: "In HubSpot already" },
+  { key: "not_in_hubspot", label: "Not in HubSpot" },
+  { key: "any", label: "Any" },
+];
+
+export function FiltersPanel({ state, onChange, brief, onHide }: { state: FilterState; onChange: (next: FilterState) => void; brief: string; onHide: () => void }) {
   const [view, setView] = useState<"filters" | "code">("filters");
-  const [open, setOpen] = useState<Record<string, boolean>>({ criteria: true });
+  const [open, setOpen] = useState<Record<string, boolean>>({ criteria: true, target: true, exclude: true, limits: true });
   const [showSuggested, setShowSuggested] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [query, setQuery] = useState("");
+  const [openKey, setOpenKey] = useState<FilterKey | null>(null);
 
+  const patch = (p: Partial<FilterState>) => onChange({ ...state, ...p });
   const toggle = (k: string) => setOpen((s) => ({ ...s, [k]: !s[k] }));
-  // A key present in `values` (even empty) is an active filter row, so the
-  // rows survive the panel being hidden and shown again.
-  const active = CRITERIA.map((c) => c.key).filter((k) => k in values);
-  const add = (k: FilterKey) => { if (!(k in values)) onChange({ ...values, [k]: "" }); };
-  const remove = (k: FilterKey) => { const next = { ...values }; delete next[k]; onChange(next); };
-  const reset = () => onChange({});
-  const saveView = () => { setSaved(true); window.setTimeout(() => setSaved(false), 2000); };
-  const suggested = CRITERIA.filter((f) => !active.includes(f.key));
 
-  const code = JSON.stringify({ brief, filters: Object.fromEntries(active.map((k) => [k, values[k] ?? ""])) }, null, 2);
+  const active = activeCriteria(state.criteria);
+  const add = (k: FilterKey) => {
+    if (!(k in state.criteria)) patch({ criteria: { ...state.criteria, [k]: "" } });
+    setOpenKey(k);
+  };
+  const setValues = (k: FilterKey, values: string[]) => patch({ criteria: { ...state.criteria, [k]: joinValues(values) } });
+  const remove = (k: FilterKey) => {
+    const next = { ...state.criteria }; delete next[k];
+    patch({ criteria: next });
+    if (openKey === k) setOpenKey(null);
+  };
+  const reset = () => { onChange({ ...defaultFilterState, total: state.total, perCompany: state.perCompany }); setOpenKey(null); };
+  const saveView = () => { setSaved(true); window.setTimeout(() => setSaved(false), 2000); };
+
+  const q = query.trim().toLowerCase();
+  const suggested = CRITERIA.filter((f) => !active.includes(f.key) && (!q || f.label.toLowerCase().includes(q)));
+  const filterCount = active.length;
+
+  const code = JSON.stringify(
+    {
+      brief,
+      filters: Object.fromEntries(active.map((k) => [k, splitValues(state.criteria[k])])),
+      target_companies: { mode: state.targetMode, list: state.targets },
+      exclude_from_crm: state.excluded,
+      limits: { total: state.total, leads_per_company: state.perCompany },
+    },
+    null,
+    2,
+  );
 
   return (
     <aside className="flex w-[380px] shrink-0 flex-col border-r border-line bg-card">
@@ -117,32 +173,20 @@ export function FiltersPanel({ values, onChange, brief, onHide }: { values: Filt
         <pre className="min-h-0 flex-1 overflow-auto p-5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-ink">{code}</pre>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <Section title="Criteria" open={!!open.criteria} onToggle={() => toggle("criteria")}>
+          <Section
+            title="Criteria"
+            open={!!open.criteria}
+            onToggle={() => toggle("criteria")}
+            trailing={filterCount > 0 && <span className="text-sm font-normal text-ink">{filterCount} {filterCount === 1 ? "filter" : "filters"}</span>}
+          >
             <div className="px-6 pb-5">
               <label className="flex h-11 items-center gap-2.5 rounded-lg border border-line px-3.5 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
                 <Search className="size-4" strokeWidth={1.75} />
-                <input placeholder="Search filters" className="w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-muted-foreground" />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search filters" className="w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-muted-foreground" />
+                {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="hover:text-foreground"><X className="size-3.5" strokeWidth={2} /></button>}
               </label>
 
-              {active.length > 0 && (
-                <ul className="mt-4 flex flex-col gap-2">
-                  {active.map((k) => {
-                    const f = CRITERIA.find((c) => c.key === k)!;
-                    const Icon = f.icon;
-                    return (
-                      <li key={k} className="rounded-lg border border-line">
-                        <div className="flex h-9 items-center gap-2 border-b border-line px-3 text-[13px] font-medium text-ink">
-                          <Icon className="size-3.5 text-muted-foreground" strokeWidth={2} />{f.label}
-                          <button type="button" onClick={() => remove(k)} aria-label={`Remove ${f.label}`} className="ml-auto text-muted-foreground hover:text-foreground"><X className="size-3.5" strokeWidth={2} /></button>
-                        </div>
-                        <input autoFocus value={values[k] ?? ""} onChange={(e) => onChange({ ...values, [k]: e.target.value })} placeholder={f.placeholder} className="h-10 w-full bg-transparent px-3 text-sm text-ink outline-none placeholder:text-muted-foreground" />
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-
-              {suggested.length > 0 && (
+              {(suggested.length > 0 || q) && (
                 <>
                   <div className="mt-4 flex items-center justify-between text-[15px]">
                     <span className="text-muted-foreground">Suggested filters</span>
@@ -150,6 +194,7 @@ export function FiltersPanel({ values, onChange, brief, onHide }: { values: Filt
                   </div>
                   {showSuggested && (
                     <div className="mt-2.5 flex flex-wrap gap-2">
+                      {suggested.length === 0 && <span className="text-sm text-muted-foreground">No filter matches “{query}”.</span>}
                       {suggested.map((f) => {
                         const Icon = f.icon;
                         return (
@@ -162,17 +207,63 @@ export function FiltersPanel({ values, onChange, brief, onHide }: { values: Filt
                   )}
                 </>
               )}
+
+              {active.length > 0 && (
+                <div className="mt-5">
+                  <div className="mb-2.5 flex items-center gap-2 text-[15px] text-ink">
+                    <Users className="size-4 text-muted-foreground" strokeWidth={1.75} />
+                    Leads match:
+                  </div>
+                  <ul className="flex flex-col gap-2">
+                    {active.map((k) => (
+                      <li key={k}>
+                        <RuleRow
+                          filterKey={k}
+                          values={splitValues(state.criteria[k])}
+                          open={openKey === k}
+                          onOpenChange={(o) => setOpenKey(o ? k : openKey === k ? null : openKey)}
+                          onChange={(vals) => setValues(k, vals)}
+                          onRemove={() => remove(k)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </Section>
 
           <Section title="Target companies" open={!!open.target} onToggle={() => toggle("target")}>
-            <div className="px-6 pb-5 text-sm text-muted-foreground">Add a list of companies to search inside, or leave empty to search everywhere.</div>
+            <div className="flex flex-col gap-3 px-6 pb-5">
+              <div role="radiogroup" aria-label="Target companies" className="flex flex-col gap-2.5">
+                {TARGET_MODES.map((m) => {
+                  const on = state.targetMode === m.key;
+                  return (
+                    <button key={m.key} type="button" role="radio" aria-checked={on} onClick={() => patch({ targetMode: m.key })} className="flex items-center gap-2.5 text-left text-[15px] text-ink focus-visible:outline-none">
+                      <span className={cn("flex size-[18px] items-center justify-center rounded-full border", on ? "border-primary" : "border-muted-foreground/60")}>
+                        {on && <span className="size-2.5 rounded-full bg-primary" />}
+                      </span>
+                      {m.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <AddChips items={state.targets} onAdd={(v) => patch({ targets: state.targets.includes(v) ? state.targets : [...state.targets, v] })} onRemove={(v) => patch({ targets: state.targets.filter((x) => x !== v) })} placeholder="Paste domains or names, comma separated" label="Add target companies" />
+            </div>
           </Section>
+
           <Section title="Exclude from CRM" open={!!open.exclude} onToggle={() => toggle("exclude")}>
-            <div className="px-6 pb-5 text-sm text-muted-foreground">Companies already in HubSpot or on a won/lost deal are skipped.</div>
+            <div className="flex flex-col gap-3 px-6 pb-5">
+              <p className="text-sm text-muted-foreground">Companies already in HubSpot or on a won/lost deal are skipped.</p>
+              <AddChips items={state.excluded} onAdd={(v) => patch({ excluded: state.excluded.includes(v) ? state.excluded : [...state.excluded, v] })} onRemove={(v) => patch({ excluded: state.excluded.filter((x) => x !== v) })} placeholder="Company name or domain" label="Add excluded companies" />
+            </div>
           </Section>
+
           <Section title="Result limits" open={!!open.limits} onToggle={() => toggle("limits")}>
-            <div className="px-6 pb-5 text-sm text-muted-foreground">Start at 10 leads per search; Origami credits are spent per row.</div>
+            <div className="flex flex-col gap-4 px-6 pb-5">
+              <NumberField label="Total" help="Start at 10 leads per search; Origami credits are spent per row." value={state.total} min={1} onChange={(n) => patch({ total: n })} />
+              <NumberField label="Leads per company" value={state.perCompany} min={1} onChange={(n) => patch({ perCompany: n })} />
+            </div>
           </Section>
         </div>
       )}
