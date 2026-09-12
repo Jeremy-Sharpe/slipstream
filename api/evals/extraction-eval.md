@@ -43,23 +43,44 @@ The judged checks are `contact_name`, `contact_email`, `company_name`, `company_
 
 ## Results
 
-Run on 12 September 2026, all thirteen fixture calls including the demo call, one pass per model, prompt `extract-v2`. The three OpenAI models ran directly through the OpenAI Responses API (cost is not billed per request there, so the table shows tokens via latency only); the open-weight and Claude models run through OpenRouter and are recorded below as they complete. Per-call reports are in `results/`; the comparison is `results/extraction-comparison-20260912-openai.md`.
+Anna Sekulic ran one pass over all thirteen fixture calls, including the demo call, on
+12 September 2026 with prompt `extract-v2`. Three OpenAI models ran directly and four
+models ran sequentially through OpenRouter after a concurrent attempt hit the shared
+account's credit ceiling. The direct-provider runner did not report OpenAI cost, so those
+rows are marked `not billed`; that means “not measured here”, not “free”. The preserved
+comparison is `results/extraction-comparison-20260912-final.md` and the per-call reports
+remain in `results/`. This evidence-only port from Anna's PR #7 deliberately excludes that
+branch's obsolete implementation changes.
 
-| Model | Contact name | Contact email | Company name | Headcount | Deal amount | Next step | Promises | Objection handling | Grounded | Parse failures | Mean latency |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `openai/gpt-5.4-nano` | 85% | 92% | 100% | 85% | 69% | 77% | 77% | 23% | 100% | 0 | 9.3 s |
-| `openai/gpt-5.4-mini` | 100% | 100% | 100% | 92% | 62% | 69% | 100% | 46% | 100% | 0 | 7.3 s |
-| `openai/gpt-5.4` | 100% | 100% | 100% | 92% | 54% | 62% | 100% | 15% | 100% | 0 | 8.8 s |
+| Model | Contact name | Contact email | Company name | Headcount | Deal amount | Next step | Promises | Objection handling | Grounded | Parse failures | Mean latency | Measured cost/call |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `openai/gpt-5.4-nano` | 85% | 92% | 100% | 85% | 69% | 77% | 77% | 23% | 100% | 0 | 9.3 s | not billed |
+| `openai/gpt-5.4-mini` | 100% | 100% | 100% | 92% | 62% | 69% | 100% | 46% | 100% | 0 | 7.3 s | not billed |
+| `openai/gpt-5.4` | 100% | 100% | 100% | 92% | 54% | 62% | 100% | 15% | 100% | 0 | 8.8 s | not billed |
+| `deepseek/deepseek-v3.2` | 92% | 92% | 92% | 85% | 69% | 62% | 69% | 23% | 92% | 1 | 29.7 s | $0.0014 |
+| `meta-llama/llama-4-maverick` | 100% | 100% | 85% | 85% | 85% | 69% | 31% | 23% | 100% | 0 | 14.1 s | $0.0013 |
+| `mistralai/mistral-medium-3.1` | 92% | 100% | 92% | 92% | 100% | 69% | 92% | 54% | 100% | 0 | 7.4 s | $0.0034 |
+| `anthropic/claude-haiku-4.5` | 62% | 62% | 62% | 62% | 23% | 46% | 46% | 15% | 62% | 5 | 10.5 s | $0.0081 |
 
-**Decision so far.** `openai/gpt-5.4-mini` is the pick among the OpenAI models by the rule above (within one call of the best on every judged check, cheapest of those), and it misses the 75 percent gate on three checks: deal amount, next step and objection handling. The gate is a target, not a pass mark we lowered; the misses are explained below and the first two are prompt and label work, not model work. `REASONING_MODEL` stays `gpt-5.4` until the OpenRouter models are in, because the demo path was verified live on it.
+**Decision.** `mistralai/mistral-medium-3.1` is the operational pick: it has the
+highest mean judged pass rate (86.5%), the best deal-amount and objection-handling
+scores, 7.4-second mean latency, and a measured cost of $0.0034 per call. It still misses
+the predeclared 75% per-check gate on next step (69%) and objection handling (54%); the
+gate was not lowered after seeing the result. `openai/gpt-5.4-mini` is the accuracy-first
+alternative for contact and promise fields, but its cost was not captured and therefore
+cannot be honestly compared. Production remains provider-configurable and the public VPS
+is keyless, so this evaluation does not imply a currently active production model.
 
-**Grounding held at 100 percent on every call for every model.** No model needed a repair and nothing was dropped on the OpenAI runs: with the call date and the schema in front of them, the models quote verbatim. The pass is still load-bearing as a guarantee rather than as a correction, and the earlier probe without the call date showed both gpt-5.4-mini and DeepSeek inventing a year for "11 September".
+**Grounding changed real outputs.** Llama needed ten quote repairs and one drop,
+DeepSeek three repairs and two drops, and Mistral one repair. Every span retained after
+the deterministic pass is verbatim. DeepSeek's 92% grounding score represents one failed
+call, not an ungrounded span escaping validation.
 
-**What the misses say about the prompt and the labels, not just the models.**
-
-- **Deal amount (54 to 69 percent).** The labelled `value_aud` is the annual contract value from the script metadata and is spoken in one call only (the demo). Where it is not spoken the honest answer is null, and every miss on all three models is a spoken number reported as the deal amount: the per-seat monthly price (126 to 145) on the won calls, or the onboarding project figure (3,500 to 8,000) on the others. The schema says `amount` with no unit. Next prompt revision: "amount is the total contract value in AUD; never a per-seat or monthly price".
-- **Next step (62 to 77 percent).** Every miss but one is a lost or no-show call (03, 05, 10, 12) where the label has no next step and the model records the courtesy follow-up or reschedule that was actually agreed. Those are real commitments in the transcript, so this is a labelling convention: the labels only record next steps that advance a live deal. The remaining miss is gpt-5.4 dating call-02's proposal review one day early. Decide the convention, then either relabel or tell the prompt to omit courtesy follow-ups on dead deals.
-- **Objection handling (15 to 46 percent).** The models find three to nine objections per call where the labels name one or two, and the handling verdict on the matched objection disagrees about half the time on `partial` versus `handled`, the same boundary the scorecard bake-off found weakest. The rubric-style definitions with examples that the scorecard write-up proposes should go into the extraction prompt too.
-- **Deal outcome** is reported and not judged: the labels carry the eventual CRM outcome (won, stalled) and the prompt is deliberately conservative, reporting `open` when the buyer agreed to review a proposal rather than sign. The models agree with the labels on every lost call and disagree on every won and stalled call for that reason.
-
-**Not run tonight.** The shared OpenRouter key sits on a five-dollar credit account with about a dollar and a half left; four models in flight returned 402 and the run was stopped. The open-weight and Claude models were restarted one at a time (`--concurrency 1`, stamp `20260912-1845or`); if their reports are not in `results/`, that run did not finish before the session closed and needs re-running after a top-up, and the full nine-model comparison with billed cost waits on the same top-up.
+**Known weaknesses.** Deal-amount misses mostly confuse monthly/per-seat or onboarding
+figures with annual contract value. Next-step misses are dominated by a label convention:
+lost/no-show labels omit courtesy follow-ups that models correctly observe in the call.
+Objection-handling misses cluster around the ambiguous `partial` versus `handled` boundary.
+Claude Haiku failed five parses and DeepSeek one because those outputs omitted evidence
+sequence numbers; the grounding pass can locate quotes, but the schema rejects them first.
+These are documented follow-ups, not hidden failures. Claude Sonnet, Claude Opus and repeat
+runs were not completed because the shared OpenRouter credit was exhausted.
