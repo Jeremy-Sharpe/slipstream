@@ -4,6 +4,7 @@ const DEFAULT_API_URL = "https://slipstream-api.3-104-149-193.sslip.io";
 const CAMPAIGN_ID = "83b2a7b2-1ace-4dc5-b90a-d0dba9d2ed4c";
 const SCHEDULED_FOR = "2099-01-01T00:00:00Z";
 const TIMEOUT_MS = 20_000;
+const MODEL_TIMEOUT_MS = 600_000;
 const MAX_RESPONSE_BYTES = 1_048_576;
 
 function assert(condition, message) {
@@ -50,7 +51,7 @@ async function readBounded(response) {
   return body + decoder.decode();
 }
 
-async function requestJson(fetchImpl, url, { payload, token } = {}) {
+async function requestJson(fetchImpl, url, { payload, token, timeoutMs = TIMEOUT_MS } = {}) {
   const headers = { accept: "application/json" };
   if (payload !== undefined) headers["content-type"] = "application/json";
   if (token !== undefined) headers["x-slipstream-ingest-token"] = token;
@@ -59,7 +60,7 @@ async function requestJson(fetchImpl, url, { payload, token } = {}) {
     headers,
     body: payload === undefined ? undefined : JSON.stringify(payload),
     redirect: "error",
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   const body = await readBounded(response);
   assert(response.ok, `API request failed with HTTP ${response.status}`);
@@ -84,9 +85,24 @@ export async function seedDemoCampaign({
 
   const call = await requestJson(fetchImpl, `${base}/api/v1/calls/fixtures/call-13-marlowe-finch-demo/ingest`, { payload: {} });
   assert(typeof call?.id === "string", "fixture ingest did not return a call ID");
-  await requestJson(fetchImpl, `${base}/api/v1/calls/${call.id}/extract`, { payload: {} });
-  const draft = await requestJson(fetchImpl, `${base}/api/v1/drafts/from-call/${call.id}`, { payload: {} });
+  const modelTimeout = ready?.reasoning_configured === true ? MODEL_TIMEOUT_MS : TIMEOUT_MS;
+  const extraction = await requestJson(fetchImpl, `${base}/api/v1/calls/${call.id}/extract`, {
+    payload: {},
+    timeoutMs: modelTimeout,
+  });
+  if (ready?.reasoning_configured === true) {
+    assert(extraction?.source === "model", "demo extraction did not use the configured model");
+    assert(extraction?.model === ready?.reasoning_model, "demo extraction used the wrong model");
+  }
+  const draft = await requestJson(fetchImpl, `${base}/api/v1/drafts/from-call/${call.id}`, {
+    payload: {},
+    timeoutMs: modelTimeout,
+  });
   assert(typeof draft?.id === "string", "draft creation did not return a draft ID");
+  if (ready?.reasoning_configured === true) {
+    assert(draft?.source === "model", "demo draft did not use the configured model");
+    assert(draft?.model === ready?.reasoning_model, "demo draft used the wrong model");
+  }
   const approved = await requestJson(fetchImpl, `${base}/api/v1/drafts/${draft.id}/approve`, {
     payload: { approved_by: "Hackathon demo" },
   });

@@ -7,14 +7,21 @@ function json(value, status = 200) {
   return new Response(JSON.stringify(value), { status, headers: { "content-type": "application/json" } });
 }
 
-function fixtureFetch({ storage = "memory", emailDelivery = false } = {}) {
+function fixtureFetch({ storage = "memory", emailDelivery = false, reasoning = false } = {}) {
   const calls = [];
   const fetchImpl = async (url, init) => {
     calls.push({ url, init });
-    if (url.endsWith("/ready")) return json({ status: "ok", environment: "production", storage, integrations: { email_delivery: emailDelivery } });
+    if (url.endsWith("/ready")) return json({
+      status: "ok",
+      environment: "production",
+      storage,
+      integrations: { email_delivery: emailDelivery },
+      reasoning_configured: reasoning,
+      reasoning_model: reasoning ? "local-qwen" : "gpt-5.4",
+    });
     if (url.includes("/calls/fixtures/")) return json({ id: "11111111-1111-4111-8111-111111111111" });
-    if (url.endsWith("/extract")) return json({ conversation_id: "11111111-1111-4111-8111-111111111111" });
-    if (url.includes("/drafts/from-call/")) return json({ id: "22222222-2222-4222-8222-222222222222" });
+    if (url.endsWith("/extract")) return json({ conversation_id: "11111111-1111-4111-8111-111111111111", source: reasoning ? "model" : "fixture_labels", model: reasoning ? "local-qwen" : "labelled-fixture-v1" });
+    if (url.includes("/drafts/from-call/")) return json({ id: "22222222-2222-4222-8222-222222222222", source: reasoning ? "model" : "deterministic", model: reasoning ? "local-qwen" : "grounded-template-v1" });
     if (url.endsWith("/approve")) return json({ id: "22222222-2222-4222-8222-222222222222", status: "approved", sent_at: null });
     if (url.endsWith("/campaigns")) return json({ id: "83b2a7b2-1ace-4dc5-b90a-d0dba9d2ed4c" }, 201);
     if (url.endsWith("/pause")) return json({ id: "83b2a7b2-1ace-4dc5-b90a-d0dba9d2ed4c", status: "paused", scheduled_for: "2099-01-01T00:00:00Z", counts: { queued: 1, sent: 0 } });
@@ -41,6 +48,19 @@ test("creates and pauses an unsent synthetic campaign", async () => {
   assert.equal(fixture.calls[5].init.headers["x-slipstream-ingest-token"], "a-secure-demo-token");
   assert.equal(fixture.calls[6].init.headers["x-slipstream-ingest-token"], "a-secure-demo-token");
   assert.equal(fixture.calls.slice(0, 5).some(({ init }) => "x-slipstream-ingest-token" in init.headers), false);
+});
+
+test("requires exact configured-model provenance before creating a campaign", async () => {
+  const fixture = fixtureFetch({ reasoning: true });
+  const result = await seedDemoCampaign({
+    apiUrl: "https://api.example",
+    token: "a-secure-demo-token",
+    fetchImpl: fixture.fetchImpl,
+  });
+
+  assert.equal(result.status, "paused");
+  assert.equal(fixture.calls[2].init.signal.aborted, false);
+  assert.equal(fixture.calls[3].init.signal.aborted, false);
 });
 
 test("refuses durable storage before performing a mutation", async () => {
