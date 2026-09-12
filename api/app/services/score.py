@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol, TypeVar
+
+import httpx
+from pydantic import BaseModel, ValidationError
 
 from app.schemas.scorecard import (
     Evidence,
@@ -24,14 +28,19 @@ from app.schemas.scorecard import (
 )
 
 RUBRIC_VERSION = "v1"
-DEFAULT_JUDGE_MODEL = "claude-sonnet-5"
+DEFAULT_JUDGE_MODEL = "anthropic/claude-sonnet-5"
 PRICES_PER_MTOK = {
     "claude-sonnet-5": (2.0, 10.0),
     "claude-haiku-4-5": (1.0, 5.0),
     "claude-opus-5": (5.0, 25.0),
+    "anthropic/claude-sonnet-5": (2.0, 10.0),
+    "anthropic/claude-haiku-4.5": (1.0, 5.0),
+    "anthropic/claude-opus-5": (5.0, 25.0),
 }
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 PRICING_RE = re.compile(r"(\$|AUD|\bper seat\b|\bper user\b|\bmonthly fee\b)", re.IGNORECASE)
 WORD_RE = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?")
+TRANSCRIPT_LINE_RE = re.compile(r"^\[(\d+)\] (.+?) \((rep|prospect)\): (.*)$", re.MULTILINE)
 WEEKDAY_RE = re.compile(
     r"\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b",
     re.IGNORECASE,
@@ -49,6 +58,7 @@ REFUSAL_RE = re.compile(
 T = TypeVar("T")
 APP_ROOT = Path(__file__).resolve().parents[1]
 API_ROOT = Path(__file__).resolve().parents[2]
+LOGGER = logging.getLogger(__name__)
 
 
 class JudgeError(RuntimeError):
@@ -62,6 +72,8 @@ class JudgeResult[T]:
     output_tokens: int
     latency_ms: int
     model: str
+    parse_retries: int = 0
+    cost_usd: float = 0.0
 
 
 class Judge(Protocol):
@@ -75,6 +87,24 @@ def load_prompt(name: str) -> str:
 
 def load_rubric() -> str:
     return (API_ROOT / "evals" / "rubric.md").read_text(encoding="utf-8")
+
+
+def load_openrouter_prices() -> dict[str, tuple[float, float]]:
+    path = API_ROOT / "evals" / "openrouter-prices.json"
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        item["id"]: (float(item["prompt_per_mtok"]), float(item["completion_per_mtok"]))
+        for item in data
+        if not str(item["id"]).endswith(":batch")
+    }
+
+
+def strict_schema(model: type[BaseModel]) -> dict[str, Any]:
+    schema = model.model_json_schema()
+    _make_schema_strict(schema)
+    return schema
 
 
 def _word_count(text: str) -> int:
@@ -151,6 +181,68 @@ def render_transcript(transcript: Transcript) -> str:
     )
 
 
+def _make_schema_strict(node: Any) -> None:
+    if isinstance(node, dict):
+        properties = node.get("properties")
+        if isinstance(properties, dict):
+            node["additionalProperties"] = False
+            node["required"] = list(properties)
+        for value in node.values():
+            _make_schema_strict(value)
+    elif isinstance(node, list):
+        for item in node:
+            _make_schema_strict(item)
+
+
+def _post_openrouter(
+    client: httpx.Client,
+    api_key: str,
+    model: str,
+    messages: list[dict[str, str]],
+    schema: type[BaseModel],
+) -> dict[str, Any]:
+    body = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": 4000,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": _snake_name(schema.__name__),
+                "strict": True,
+                "schema": strict_schema(schema),
+            },
+        },
+        "provider": {"require_parameters": True},
+    }
+    response = client.post(
+        OPENROUTER_URL,
+        headers={"Authorization": f"Bearer {api_key}"},
+        json=body,
+    )
+    if response.status_code >= 400:
+        message = response.text.replace(api_key, "[redacted]")
+        raise JudgeError(f"OpenRouter API returned {response.status_code}: {message}")
+    return response.json()
+
+
+def _json_content(content: str) -> str:
+    stripped = content.strip()
+    if not stripped.startswith("```"):
+        return stripped
+    lines = stripped.splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].strip() == "```":
+        lines = lines[:-1]
+    return "\n".join(lines).strip()
+
+
+def _snake_name(name: str) -> str:
+    value = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value).lower()
+
+
 def anthropic_judge(api_key: str, model: str) -> Judge:
     import anthropic
 
@@ -176,7 +268,74 @@ def anthropic_judge(api_key: str, model: str) -> Judge:
             output_tokens=response.usage.output_tokens,
             latency_ms=latency_ms,
             model=model,
+            cost_usd=cost_usd(model, response.usage.input_tokens, response.usage.output_tokens),
         )
+
+    return judge
+
+
+def openrouter_judge(
+    api_key: str,
+    model: str,
+    *,
+    prices: Mapping[str, tuple[float, float]] | None = None,
+    transport: httpx.BaseTransport | None = None,
+    timeout: float = 120.0,
+) -> Judge:
+    price_table = dict(prices or {})
+    client = httpx.Client(transport=transport, timeout=timeout)
+
+    def judge(*, system: str, user: str, schema: type[T]) -> JudgeResult[T]:
+        started_at = datetime.now(UTC)
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ]
+        parse_retries = 0
+        input_tokens = 0
+        output_tokens = 0
+        billed_usd: float | None = None
+        served_model = model
+        last_error: Exception | None = None
+        for attempt in range(2):
+            response = _post_openrouter(client, api_key, model, messages, schema)
+            served_model = str(response.get("model") or model)
+            usage = response.get("usage", {})
+            input_tokens += int(usage.get("prompt_tokens") or 0)
+            output_tokens += int(usage.get("completion_tokens") or 0)
+            if usage.get("cost") is not None:
+                billed_usd = (billed_usd or 0.0) + float(usage["cost"])
+            content = str(response["choices"][0]["message"].get("content") or "")
+            try:
+                output = schema.model_validate_json(_json_content(content))
+            except (KeyError, json.JSONDecodeError, ValidationError) as error:
+                last_error = error
+                if attempt == 1:
+                    break
+                parse_retries = 1
+                messages.append(
+                    {"role": "user", "content": "Return only the JSON object for the schema."}
+                )
+                continue
+            latency_ms = int((datetime.now(UTC) - started_at).total_seconds() * 1000)
+            return JudgeResult(
+                output=output,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                latency_ms=latency_ms,
+                model=served_model,
+                parse_retries=parse_retries,
+                cost_usd=round(billed_usd, 6)
+                if billed_usd is not None
+                else _openrouter_cost(
+                    served_model,
+                    model,
+                    input_tokens,
+                    output_tokens,
+                    price_table,
+                ),
+            )
+        raise JudgeError(f"OpenRouter response did not match schema: {last_error}") from last_error
 
     return judge
 
@@ -202,6 +361,18 @@ def heuristic_judge() -> Judge:
     return judge
 
 
+def build_judge(settings: Any) -> Judge:
+    model = str(settings.scorecard_judge_model)
+    if settings.openrouter_api_key is not None:
+        return openrouter_judge(settings.openrouter_api_key.get_secret_value(), model)
+    if settings.anthropic_api_key is not None:
+        return anthropic_judge(
+            settings.anthropic_api_key.get_secret_value(),
+            _anthropic_model_id(model),
+        )
+    raise RuntimeError("No scorecard judge is configured")
+
+
 def _payload_after_marker(user: str, marker: str) -> Any:
     _, _, payload = user.partition(marker)
     if not payload:
@@ -209,17 +380,32 @@ def _payload_after_marker(user: str, marker: str) -> Any:
     return json.loads(payload.strip())
 
 
+def _parse_rendered_transcript(user: str) -> list[TranscriptTurn]:
+    turns: list[TranscriptTurn] = []
+    for match in TRANSCRIPT_LINE_RE.finditer(user):
+        turns.append(
+            TranscriptTurn(
+                speaker=match.group(3),  # type: ignore[arg-type]
+                name=match.group(2),
+                text=match.group(4),
+            )
+        )
+    if not turns:
+        raise JudgeError("Heuristic input is missing rendered transcript lines")
+    return turns
+
+
 def _heuristic_scorecard(user: str) -> JudgedScorecard:
-    transcript = Transcript.model_validate(_payload_after_marker(user, "Transcript JSON:\n"))
+    turns = _parse_rendered_transcript(user)
     discovery: list[Evidence] = []
-    for index, turn in enumerate(transcript.turns, start=1):
+    for index, turn in enumerate(turns, start=1):
         if PRICING_RE.search(turn.text):
             break
         if turn.speaker == "rep" and turn.text.rstrip().endswith("?"):
             discovery.append(Evidence(turn_index=index, quote=turn.text))
-    next_step_evidence = _heuristic_next_step_evidence(transcript.turns)
+    next_step_evidence = _heuristic_next_step_evidence(turns)
     summary_parts = [
-        f"{transcript.rep} asked {len(discovery)} discovery questions before pricing.",
+        f"The rep asked {len(discovery)} discovery questions before pricing.",
         "The offline heuristic does not assess objections.",
     ]
     if next_step_evidence is not None:
@@ -296,9 +482,7 @@ def score_call(
     system = load_prompt("scorecard-v1").replace("{{rubric}}", load_rubric())
     user = (
         "Transcript:\n"
-        f"{render_transcript(transcript)}\n\n"
-        "Transcript JSON:\n"
-        f"{transcript.model_dump_json()}"
+        f"{render_transcript(transcript)}"
     )
     result = judge(system=system, user=user, schema=JudgedScorecard)
     judged = result.output
@@ -387,13 +571,39 @@ def derive_playbook(
 
 
 def cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
-    prices = PRICES_PER_MTOK.get(model)
+    prices = PRICES_PER_MTOK.get(model) or load_openrouter_prices().get(model)
     if prices is None:
         return 0.0
     input_price, output_price = prices
     input_cost = input_tokens / 1_000_000 * input_price
     output_cost = output_tokens / 1_000_000 * output_price
     return round(input_cost + output_cost, 6)
+
+
+def _openrouter_cost(
+    served_model: str,
+    requested_model: str,
+    input_tokens: int,
+    output_tokens: int,
+    prices: Mapping[str, tuple[float, float]],
+) -> float:
+    price_table = dict(prices) or load_openrouter_prices()
+    price = price_table.get(served_model) or price_table.get(requested_model)
+    if price is None:
+        LOGGER.warning("No OpenRouter price found for %s", served_model)
+        return 0.0
+    input_price, output_price = price
+    return round(
+        (input_tokens / 1_000_000 * input_price)
+        + (output_tokens / 1_000_000 * output_price),
+        6,
+    )
+
+
+def _anthropic_model_id(model: str) -> str:
+    if model.startswith("anthropic/"):
+        model = model.removeprefix("anthropic/")
+    return model.split(":", maxsplit=1)[0].replace(".", "-")
 
 
 def _valid_evidence(items: list[Evidence], transcript: Transcript) -> list[Evidence]:

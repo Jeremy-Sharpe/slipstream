@@ -19,7 +19,7 @@ def _judge(request: Request):
     except RuntimeError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Anthropic integration is not configured",
+            detail="No scorecard judge is configured",
         ) from error
 
 

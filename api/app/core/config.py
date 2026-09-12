@@ -78,6 +78,8 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_service_role_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
+    openrouter_api_key: SecretStr | None = None
+    scorecard_judge_model: str = "anthropic/claude-sonnet-5"
     elevenlabs_api_key: SecretStr | None = None
     origami_api_key: SecretStr | None = None
 
@@ -90,6 +92,7 @@ class Settings(BaseSettings):
         "supabase_url",
         "supabase_service_role_key",
         "anthropic_api_key",
+        "openrouter_api_key",
         "elevenlabs_api_key",
         "origami_api_key",
         mode="before",

@@ -5,8 +5,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import httpx
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 
+from app.core.config import Settings
 from app.schemas.scorecard import (
     Evidence,
     JudgedPlaybook,
@@ -17,16 +20,21 @@ from app.schemas.scorecard import (
     WinningPattern,
 )
 from app.services.score import (
+    JudgeError,
     JudgeResult,
+    build_judge,
     derive_playbook,
     heuristic_discovery_count,
+    openrouter_judge,
     outcome_stats,
     rep_profiles,
     rep_talk_ratio,
     score_call,
+    strict_schema,
     transcript_from_fixture,
     transcript_from_segments,
 )
+from evals.run_scorecard_eval import compare_models
 from evals.run_scorecard_eval import main as eval_main
 
 FIXTURES_ROOT = Path(__file__).resolve().parents[2] / "fixtures" / "calls"
@@ -62,6 +70,16 @@ def test_deterministic_metrics_agree_with_fixture_labels() -> None:
             abs(heuristic_discovery_count(transcript.turns) - expected["discovery_questions"])
             <= 1
         )
+
+
+def test_strict_schema_forbids_extra_properties_recursively() -> None:
+    schema = strict_schema(JudgedScorecard)
+
+    assert schema["additionalProperties"] is False
+    assert set(schema["required"]) == set(schema["properties"])
+    evidence = schema["$defs"]["Evidence"]
+    assert evidence["additionalProperties"] is False
+    assert set(evidence["required"]) == set(evidence["properties"])
 
 
 def test_score_call_fills_deterministic_fields_and_drops_invalid_evidence() -> None:
@@ -102,6 +120,183 @@ def test_score_call_fills_deterministic_fields_and_drops_invalid_evidence() -> N
     assert scorecard.objection_evidence == []
     assert scorecard.rep_talk_ratio == 0.31
     assert scorecard.talk_ratio_band == "healthy"
+
+
+def test_openrouter_judge_sends_strict_schema_and_computes_cost() -> None:
+    requests: list[httpx.Request] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        body = json.loads(request.content)
+        assert str(request.url) == "https://openrouter.ai/api/v1/chat/completions"
+        assert request.headers["authorization"] == "Bearer test-key"
+        assert body["response_format"]["type"] == "json_schema"
+        assert body["response_format"]["json_schema"]["strict"] is True
+        assert body["provider"]["require_parameters"] is True
+        assert "temperature" not in body
+        return _openrouter_response(_judged_scorecard().model_dump_json())
+
+    judge = openrouter_judge(
+        "test-key",
+        "test/model",
+        prices={"test/model": (2.0, 10.0)},
+        transport=httpx.MockTransport(respond),
+    )
+
+    result = judge(system="system", user="user", schema=JudgedScorecard)
+
+    assert isinstance(result.output, JudgedScorecard)
+    assert result.input_tokens == 1000
+    assert result.output_tokens == 500
+    assert result.cost_usd == 0.007
+    assert len(requests) == 1
+
+
+def test_openrouter_judge_prefers_billed_cost_from_usage() -> None:
+    def respond(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "model": "test/model",
+                "choices": [{"message": {"content": _judged_scorecard().model_dump_json()}}],
+                "usage": {"prompt_tokens": 1000, "completion_tokens": 500, "cost": 0.00123},
+            },
+        )
+
+    judge = openrouter_judge(
+        "test-key",
+        "test/model",
+        prices={"test/model": (2.0, 10.0)},
+        transport=httpx.MockTransport(respond),
+    )
+
+    result = judge(system="system", user="user", schema=JudgedScorecard)
+
+    assert result.cost_usd == 0.00123
+
+
+def test_openrouter_judge_accepts_fenced_json() -> None:
+    judge = openrouter_judge(
+        "test-key",
+        "test/model",
+        prices={"test/model": (1.0, 1.0)},
+        transport=httpx.MockTransport(
+            lambda _: _openrouter_response(f"```json\n{_judged_scorecard().model_dump_json()}\n```")
+        ),
+    )
+
+    result = judge(system="system", user="user", schema=JudgedScorecard)
+
+    assert result.output.summary == "The rep asked about the change and secured Thursday."
+
+
+def test_openrouter_judge_retries_once_after_parse_failure() -> None:
+    attempts = 0
+
+    def respond(_: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            return _openrouter_response("Here is some prose.")
+        return _openrouter_response(_judged_scorecard().model_dump_json())
+
+    judge = openrouter_judge(
+        "test-key",
+        "test/model",
+        prices={"test/model": (1.0, 1.0)},
+        transport=httpx.MockTransport(respond),
+    )
+
+    result = judge(system="system", user="user", schema=JudgedScorecard)
+
+    assert result.parse_retries == 1
+    assert attempts == 2
+
+
+def test_openrouter_judge_raises_after_two_bad_parse_attempts() -> None:
+    judge = openrouter_judge(
+        "test-key",
+        "test/model",
+        prices={"test/model": (1.0, 1.0)},
+        transport=httpx.MockTransport(lambda _: _openrouter_response("not json")),
+    )
+
+    try:
+        judge(system="system", user="user", schema=JudgedScorecard)
+    except JudgeError as error:
+        assert "did not match schema" in str(error)
+    else:
+        raise AssertionError("expected JudgeError")
+
+
+def test_openrouter_status_error_sanitises_key() -> None:
+    judge = openrouter_judge(
+        "secret-key",
+        "test/model",
+        prices={"test/model": (1.0, 1.0)},
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(429, text="slow down secret-key")
+        ),
+    )
+
+    try:
+        judge(system="system", user="user", schema=JudgedScorecard)
+    except JudgeError as error:
+        message = str(error)
+        assert "429" in message
+        assert "secret-key" not in message
+    else:
+        raise AssertionError("expected JudgeError")
+
+
+def test_build_judge_prefers_openrouter_then_anthropic(monkeypatch) -> None:
+    chosen: list[tuple[str, str]] = []
+
+    def fake_openrouter(api_key: str, model: str):
+        chosen.append(("openrouter", f"{api_key}:{model}"))
+        return FakeJudge()
+
+    def fake_anthropic(api_key: str, model: str):
+        chosen.append(("anthropic", f"{api_key}:{model}"))
+        return FakeJudge()
+
+    monkeypatch.setattr("app.services.score.openrouter_judge", fake_openrouter)
+    monkeypatch.setattr("app.services.score.anthropic_judge", fake_anthropic)
+
+    build_judge(
+        Settings(
+            _env_file=None,
+            openrouter_api_key=SecretStr("or-key"),
+            anthropic_api_key=SecretStr("anthropic-key"),
+            scorecard_judge_model="anthropic/claude-sonnet-5",
+        )
+    )
+    build_judge(
+        Settings(
+            _env_file=None,
+            anthropic_api_key=SecretStr("anthropic-key"),
+            scorecard_judge_model="anthropic/claude-sonnet-5:beta",
+        )
+    )
+    build_judge(
+        Settings(
+            _env_file=None,
+            anthropic_api_key=SecretStr("anthropic-key"),
+            scorecard_judge_model="anthropic/claude-haiku-4.5",
+        )
+    )
+
+    assert chosen == [
+        ("openrouter", "or-key:anthropic/claude-sonnet-5"),
+        ("anthropic", "anthropic-key:claude-sonnet-5"),
+        ("anthropic", "anthropic-key:claude-haiku-4-5"),
+    ]
+    try:
+        build_judge(Settings(_env_file=None))
+    except RuntimeError as error:
+        assert str(error) == "No scorecard judge is configured"
+    else:
+        raise AssertionError("expected RuntimeError")
 
 
 def test_transcript_from_segments_maps_speakers_and_orders_rows() -> None:
@@ -182,7 +377,7 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     response = client.post("/scorecards", json=transcript)
 
     assert response.status_code == 503
-    assert response.json() == {"detail": "Anthropic integration is not configured"}
+    assert response.json() == {"detail": "No scorecard judge is configured"}
 
     client.app.state.judge_factory = lambda: FakeJudge()
     response = client.post("/scorecards", json=transcript)
@@ -202,18 +397,34 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     assert client.post("/scorecards", json={"call_id": "broken"}).status_code == 422
 
 
-def test_eval_script_writes_markdown_and_json(tmp_path: Path, capsys) -> None:
-    exit_code = eval_main(["--judge", "heuristic", "--out", str(tmp_path), "--limit", "3"])
+def test_comparison_summariser_picks_cheapest_model_within_spread() -> None:
+    decision = compare_models(
+        [
+            _model_summary("cheap-accurate", 10, 10, 10, 0.01),
+            _model_summary("dear-accurate", 10, 10, 10, 0.50),
+            _model_summary("cheap-off", 8, 10, 10, 0.001),
+        ]
+    )
+
+    assert decision["pick"] == "cheap-accurate"
+    assert decision["rule_outs"] == {"cheap-off": ["discovery_tolerance"]}
+
+
+def test_eval_script_writes_per_model_and_comparison_reports(tmp_path: Path, capsys) -> None:
+    exit_code = eval_main(
+        ["--judge", "heuristic", "--models", "a,b", "--out", str(tmp_path), "--limit", "3"]
+    )
     output = capsys.readouterr().out
 
     assert exit_code in {0, 1}
-    assert "cases=3" in output
+    assert "Scorecard Comparison" in output
     markdown_files = list(tmp_path.glob("*.md"))
     json_files = list(tmp_path.glob("*.json"))
-    assert len(markdown_files) == 1
-    assert len(json_files) == 1
-    report = json.loads(json_files[0].read_text(encoding="utf-8"))
-    assert report["summary"]["cases"] == 3
+    assert len(markdown_files) == 3
+    assert len(json_files) == 3
+    comparison = next(path for path in json_files if "comparison" in path.name)
+    report = json.loads(comparison.read_text(encoding="utf-8"))
+    assert [model["model"] for model in report["models"]] == ["a", "b"]
 
 
 def _judged_scorecard() -> JudgedScorecard:
@@ -290,6 +501,50 @@ def _transcript_payload() -> dict[str, Any]:
                 "text": "Thursday works for the review.",
             },
         ],
+    }
+
+
+def _openrouter_response(content: str) -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "model": "test/model",
+            "choices": [{"message": {"content": content}}],
+            "usage": {"prompt_tokens": 1000, "completion_tokens": 500},
+        },
+    )
+
+
+def _model_summary(
+    model: str,
+    discovery: int,
+    next_step: int,
+    objection: int,
+    cost: float,
+) -> dict[str, Any]:
+    checks = {}
+    for dimension, passed in {
+        "discovery_tolerance": discovery,
+        "discovery_exact": discovery,
+        "next_step": next_step,
+        "objection": objection,
+        "talk_ratio": 10,
+    }.items():
+        checks[dimension] = {
+            "mean_pct": passed * 10,
+            "min_pct": passed * 10,
+            "max_pct": passed * 10,
+            "mean_passed": passed,
+            "max_passed": passed,
+        }
+    return {
+        "model": model,
+        "skipped": None,
+        "checks": checks,
+        "parse_failures": 0,
+        "mean_latency_ms": 10,
+        "total_cost_usd": cost,
+        "cost_per_call_usd": cost / 10,
     }
 
 
