@@ -96,20 +96,20 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
     : "Nothing matches.";
 
   return (
-    <section className="mt-14 flex flex-col">
-      <div className="flex items-center justify-between px-9">
+    <section className="mt-[70px] flex flex-col">
+      <div className="flex items-center justify-between px-11">
         <div className="flex items-center gap-4">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-foreground"><Clock className="size-5" strokeWidth={1.75} /></span>
-          <h2 className="text-[22px] font-bold tracking-tight text-foreground">Recent</h2>
+          <span className="flex size-[46px] items-center justify-center rounded-lg bg-icon-well text-foreground"><Clock className="size-[22px]" strokeWidth={1.75} /></span>
+          <h2 className="text-[26px] leading-none font-bold tracking-[-0.02em] text-foreground">Recent</h2>
         </div>
         <div className="flex items-center gap-2.5">
-          <label className="flex h-9 w-[240px] items-center gap-2 rounded-lg border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
+          <label className="flex h-10 w-[273px] items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
             <Search className="size-4" strokeWidth={1.75} />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search recent" className="w-full bg-transparent text-sm text-foreground outline-none" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search recent" className="w-full bg-transparent text-[16px] text-foreground outline-none" />
           </label>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none" />}>
-              <Plus className="size-4" strokeWidth={2.25} /> New
+            <DropdownMenuTrigger render={<button type="button" className="flex h-10 items-center gap-1.5 rounded-md bg-primary px-3.5 text-[16px] font-medium text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none" />}>
+              <Plus className="size-[18px]" strokeWidth={2.25} /> New
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => router.push("/leads")}>New lead search</DropdownMenuItem>
@@ -120,10 +120,10 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
         </div>
       </div>
 
-      <div className="mt-8 px-9 pb-4">
-        <div className="inline-flex h-9 items-center rounded-lg border border-border bg-muted/70 p-0.5">
+      <div className="mt-[42px] px-11 pb-[14px]">
+        <div className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
           {tabs.map((t) => (
-            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full items-center rounded-[5px] px-3.5 text-sm text-muted-foreground transition-colors hover:text-foreground", tab === t.key && "border border-border bg-card font-medium text-foreground shadow-xs")}>
+            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full items-center rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors hover:text-foreground", tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]")}>
               {t.label}
             </button>
           ))}
@@ -131,18 +131,18 @@ export function RecentSection({ onAddCall, loading = false }: { onAddCall: () =>
       </div>
 
       <div className="border-t border-border">
-        <div className="flex h-14 items-center gap-2 px-9">
+        <div className="flex h-[57px] items-center gap-5 px-11">
           <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" className="flex h-8 items-center rounded-md border border-border text-sm text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
-              <span className="border-r border-border px-2.5 font-medium">Owner</span>
+            <DropdownMenuTrigger render={<button type="button" className="flex h-8 items-center rounded-md border border-border text-[14px] text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+              <span className="border-r border-border px-2.5">Owner</span>
               <span className="flex items-center gap-1 px-2.5">{OWNERS.find((o) => o.key === owner)?.label}<ChevronDown className="size-3.5 text-muted-foreground" strokeWidth={2} /></span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-36">
               {OWNERS.map((o) => <DropdownMenuItem key={o.key} onClick={() => setOwner(o.key)} className={cn(owner === o.key && "font-medium")}>{o.label}</DropdownMenuItem>)}
             </DropdownMenuContent>
           </DropdownMenu>
-          <button type="button" onClick={() => setShowTypes((v) => !v)} aria-pressed={showTypes} className={cn("flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", showTypes && "bg-muted")}>
-            <ListFilter className="size-4 text-muted-foreground" strokeWidth={1.75} /> Filters
+          <button type="button" onClick={() => setShowTypes((v) => !v)} aria-pressed={showTypes} className={cn("flex h-8 items-center gap-1.5 rounded-md px-1 text-[15px] text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none", showTypes && "bg-muted")}>
+            <ListFilter className="size-4 text-foreground" strokeWidth={1.75} /> Filters
           </button>
           {showTypes && (
             <div className="ml-2 flex items-center gap-1.5" role="radiogroup" aria-label="Type">

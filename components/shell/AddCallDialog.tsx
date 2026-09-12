@@ -30,8 +30,8 @@ export function AddCallDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button className="h-8 rounded-md px-3 text-sm font-medium" />}>
-        <Plus className="size-4" strokeWidth={2.25} /> Add a call
+      <DialogTrigger render={<Button className="h-9 rounded-md px-3.5 text-[16px] font-medium" />}>
+        <Plus className="size-[18px]" strokeWidth={2.25} /> Add a call
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

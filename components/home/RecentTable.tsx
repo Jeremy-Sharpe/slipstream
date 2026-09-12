@@ -19,8 +19,9 @@ function ago(minutes: number | null): string {
   return `${d} day${d === 1 ? "" : "s"} ago`;
 }
 
-const COLS = "grid-cols-[minmax(0,1fr)_100px_170px_140px_170px_130px_80px_56px]";
-const head = "text-[15px] font-semibold text-foreground";
+// Clay's column ratios at 1934px content width; Name, Tags and Owner flex.
+const COLS = "grid-cols-[minmax(0,1fr)_131px_minmax(0,0.45fr)_158px_197px_minmax(96px,0.31fr)_86px_64px]";
+const head = "text-[14.5px] font-semibold text-foreground";
 
 export function RecentTable({ rows, loading, favourites, emptyLabel, onToggleFavourite, onRename, onDuplicate, onDelete }: {
   rows: HomeItem[];
@@ -44,12 +45,12 @@ export function RecentTable({ rows, loading, favourites, emptyLabel, onToggleFav
 
   return (
     <div className="border-t border-border">
-      <div className={cn("grid h-12 items-center border-b border-border px-9", COLS, head)}>
+      <div className={cn("grid h-12 items-center border-b border-border px-11", COLS, head)}>
         <span>Name</span><span>Favourite</span><span>Tags</span><span>Created at</span><span>Last opened by me</span><span>Owner</span><span>Access</span><span />
       </div>
 
       {loading && Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className={cn("grid h-[62px] items-center border-b border-border px-9", COLS)} aria-busy="true">
+        <div key={i} className={cn("grid h-[61px] items-center border-b border-border px-11", COLS)} aria-busy="true">
           <span className="h-3.5 w-48 rounded bg-muted" /><span className="size-4 rounded bg-muted" /><span /><span className="h-3.5 w-20 rounded bg-muted" /><span className="h-3.5 w-20 rounded bg-muted" /><span className="h-3.5 w-16 rounded bg-muted" /><span className="h-3.5 w-8 rounded bg-muted" /><span />
         </div>
       ))}
@@ -68,10 +69,10 @@ export function RecentTable({ rows, loading, favourites, emptyLabel, onToggleFav
             tabIndex={0}
             onClick={() => editing !== item.id && router.push(item.href)}
             onKeyDown={(e) => onRowKey(e, item)}
-            className={cn("grid h-[62px] cursor-pointer items-center border-b border-border px-9 text-[15px] text-foreground transition-colors hover:bg-page focus-visible:bg-page focus-visible:outline-none", COLS)}
+            className={cn("grid h-[61px] cursor-pointer items-center border-b border-border px-11 text-[16px] text-foreground transition-colors hover:bg-page focus-visible:bg-page focus-visible:outline-none", COLS)}
           >
-            <span className="flex min-w-0 items-center gap-3">
-              <Icon className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
+            <span className="flex min-w-0 items-center gap-2.5">
+              <Icon className="size-4 shrink-0 text-foreground/60" strokeWidth={1.75} />
               {editing === item.id ? (
                 <input
                   ref={input}
@@ -81,7 +82,7 @@ export function RecentTable({ rows, loading, favourites, emptyLabel, onToggleFav
                   onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter") commit(item.id); if (e.key === "Escape") setEditing(null); }}
                   onBlur={() => commit(item.id)}
                   aria-label="Rename"
-                  className="h-8 w-80 rounded-md border border-border px-2 text-[15px] outline-none focus:ring-2 focus:ring-primary"
+                  className="h-8 w-80 rounded-md border border-border px-2 text-[16px] outline-none focus:ring-2 focus:ring-primary"
                 />
               ) : (
                 <span className="truncate">{item.name}</span>
@@ -89,19 +90,19 @@ export function RecentTable({ rows, loading, favourites, emptyLabel, onToggleFav
             </span>
             <span>
               <button type="button" onClick={(e) => { e.stopPropagation(); onToggleFavourite(item.id); }} aria-pressed={fav} aria-label={fav ? "Remove from favourites" : "Add to favourites"} className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
-                <Star className={cn("size-4", fav && "fill-primary text-primary")} strokeWidth={1.75} />
+                <Star className={cn("size-[18px] text-foreground/70", fav && "fill-primary text-primary")} strokeWidth={1.75} />
               </button>
             </span>
             <span className="flex gap-1.5">
               {item.tags.map((t) => <span key={t} className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">{t}</span>)}
             </span>
-            <span className="text-foreground/80">{ago(item.createdMinutesAgo)}</span>
-            <span className="text-foreground/80">{ago(item.lastOpenedMinutesAgo)}</span>
-            <span className="flex items-center gap-2"><span className="size-3.5 rounded-full bg-foreground" />{item.owner}</span>
-            <span className="text-foreground/80">{item.access}</span>
+            <span className="text-foreground">{ago(item.createdMinutesAgo)}</span>
+            <span className="text-foreground">{ago(item.lastOpenedMinutesAgo)}</span>
+            <span className="flex items-center gap-2"><span className="size-4 rounded-full bg-foreground" />{item.owner}</span>
+            <span className="text-foreground">{item.access}</span>
             <span className="flex justify-end" onClick={(e) => e.stopPropagation()}>
               <DropdownMenu>
-                <DropdownMenuTrigger render={<button type="button" aria-label={`Actions for ${item.name}`} className="flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+                <DropdownMenuTrigger render={<button type="button" aria-label={`Actions for ${item.name}`} className="flex size-8 items-center justify-center rounded-md border border-border text-foreground/70 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
                   <MoreHorizontal className="size-4" strokeWidth={1.75} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">

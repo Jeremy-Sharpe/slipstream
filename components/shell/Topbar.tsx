@@ -2,14 +2,17 @@ import { AddCallDialog } from "./AddCallDialog";
 import { NotificationsMenu } from "./NotificationsMenu";
 import { UserMenu } from "./UserMenu";
 
-// Shared across every surface, actions right-aligned.
+// Shared across every surface, actions right-aligned like Clay's top bar:
+// primary action, a wide gap, icon buttons on a 44px pitch, then the avatar.
 export function Topbar() {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-border bg-card px-6">
+    <header className="flex h-16 shrink-0 items-center justify-end border-b border-border bg-card pr-4">
       <AddCallDialog />
-      <span className="mx-1 h-6 w-px bg-border" aria-hidden />
-      <NotificationsMenu />
-      <UserMenu />
+      <div className="ml-10 flex items-center gap-3">
+        <NotificationsMenu />
+        <span className="w-1" aria-hidden />
+        <UserMenu />
+      </div>
     </header>
   );
 }
