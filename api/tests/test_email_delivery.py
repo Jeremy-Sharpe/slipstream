@@ -321,7 +321,11 @@ def test_delivery_has_fail_fast_admission_and_overall_deadline(
 
 
 def test_delivery_reports_missing_configuration_before_lookup(client: TestClient) -> None:
-    response = client.post("/api/v1/drafts/00000000-0000-0000-0000-000000000000/deliver")
+    client.app.state.settings.ingest_token = SecretStr("ingest-secret")
+    response = client.post(
+        "/api/v1/drafts/00000000-0000-0000-0000-000000000000/deliver",
+        headers={"X-Slipstream-Ingest-Token": "ingest-secret"},
+    )
 
     assert response.status_code == 503
     assert response.json() == {"detail": "Email delivery integration is not configured"}
