@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { icp } from "@/lib/icp";
 import { leads } from "@/lib/leads";
@@ -11,6 +11,8 @@ import { TRACE, type StepId, type StepState } from "@/lib/useRun";
 import { CompanyTile } from "./Avatar";
 import { TraceStep } from "./run/TraceStep";
 import { WorkingLine } from "./run/WorkingLine";
+import { StreamingText, words } from "./run/StreamingText";
+import { shorterDraft } from "@/lib/summary";
 import { Button, Score, cn, mmss } from "./ui";
 
 const LABELS: Record<StepId, { working: string; done: string }> = {
@@ -26,17 +28,27 @@ const LABELS: Record<StepId, { working: string; done: string }> = {
 const fmtAud = (n: number | null | undefined) => (n == null ? "—" : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 
-export function RunTimeline({ call, steps, open, toggle, onHighlight }: {
+export function RunTimeline({ call, steps, open, toggle, runId, onHighlight }: {
   call: CallRecord;
   steps: StepState[];
   open: StepId | null;
   toggle: (id: StepId) => void;
+  runId: number;
   onHighlight: (i: number | null) => void;
 }) {
   const store = useStore();
   const synced = !!store.synced[call.id];
   const approved = !!store.approved[call.id];
   const [body, setBody] = useState(call.draft.body);
+  // The draft body streams in the first time the step completes, then edits.
+  const [draftStreamed, setDraftStreamed] = useState(false);
+  const [draftGen, setDraftGen] = useState(0);
+  useEffect(() => { setDraftStreamed(false); setBody(call.draft.body); setDraftGen((g) => g + 1); }, [runId, call.draft.body]);
+  useEffect(() => {
+    const onShorter = () => { setBody(shorterDraft(call.draft.body)); setDraftStreamed(false); setDraftGen((g) => g + 1); };
+    window.addEventListener("slipstream:shorter-draft", onShorter);
+    return () => window.removeEventListener("slipstream:shorter-draft", onShorter);
+  }, [call.draft.body]);
   const top = leads.slice(0, 5);
   const skippedNote = steps.find((s) => s.status === "skipped" && s.note)?.note;
 
@@ -116,13 +128,20 @@ export function RunTimeline({ call, steps, open, toggle, onHighlight }: {
         return (
           <div>
             <p className="text-[15px] font-medium text-ink">{call.draft.subject}</p>
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              readOnly={approved}
-              className="mt-2 w-full resize-none rounded-lg bg-white px-3 py-2 text-[15px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
-              rows={Math.min(12, body.split("\n").length + 1)}
-            />
+            {draftStreamed ? (
+              <textarea
+                autoFocus={false}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                readOnly={approved}
+                className="mt-2 w-full resize-none rounded-lg bg-white px-3 py-2 text-[15px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
+                rows={Math.min(12, body.split("\n").length + 1)}
+              />
+            ) : (
+              <div className="mt-2 rounded-lg bg-white px-3 py-2 whitespace-pre-line">
+                <StreamingText key={draftGen} size="lg" tokens={words(body.replace(/\n/g, " ⏎ ")).map((t) => ({ text: t.text === "⏎" ? "\n" : t.text }))} onDone={() => setDraftStreamed(true)} />
+              </div>
+            )}
             <div className="mt-4">
               {approved ? <span className="text-[14px] text-soft">Approved · nothing is sent</span> : <Button variant="primary" onClick={() => actions.approveDraft(call.id)}>Approve</Button>}
             </div>

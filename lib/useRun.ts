@@ -36,6 +36,7 @@ export function useRun(call: CallRecord) {
   const [steps, setSteps] = useState<StepState[]>(() => ORDER.map((id) => ({ id, status: "pending" })));
   const [open, setOpen] = useState<StepId | null>(null);
   const [finished, setFinished] = useState(false);
+  const [runId, setRunId] = useState(0);
   const timers = useRef<number[]>([]);
 
   const set = useCallback((id: StepId, patch: Partial<StepState> | ((s: StepState) => Partial<StepState>)) => {
@@ -48,6 +49,7 @@ export function useRun(call: CallRecord) {
     setSteps(ORDER.map((id) => ({ id, status: "pending" })));
     setFinished(false);
     setOpen(null);
+    setRunId((n) => n + 1);
     actions.setRun(call.id, "running");
     const { stop } = plan(call);
     const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
@@ -83,5 +85,5 @@ export function useRun(call: CallRecord) {
   }, [start]);
 
   const toggle = (id: StepId) => setOpen((o) => (o === id ? null : id));
-  return { steps, open, toggle, finished, rerun: start };
+  return { steps, open, toggle, finished, runId, rerun: start };
 }

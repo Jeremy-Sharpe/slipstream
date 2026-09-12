@@ -2,16 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload } from "lucide-react";
 import { actions } from "@/lib/store";
+import { FileTiles } from "./home/FileTiles";
+import { Recorder } from "./home/Recorder";
 import { Button, cn, mmss } from "./ui";
 
-type Phase = { kind: "idle" } | { kind: "paste" } | { kind: "transcribing"; name: string; at: number; total: number };
+type Mode = "upload" | "record" | "paste";
+type Phase = { kind: "idle" } | { kind: "transcribing"; name: string; at: number; total: number };
 
 const DEMO_DURATION = 425; // the demo recording's length, so the counter is honest
+const MODES: { key: Mode; label: string }[] = [
+  { key: "upload", label: "Upload file" },
+  { key: "record", label: "Record" },
+  { key: "paste", label: "Paste transcript" },
+];
+
+// One card, one size: 300px tall in every state so switching never moves the page.
+const CARD = "relative mx-auto flex h-[220px] w-full max-w-[560px] flex-col items-center justify-center rounded-2xl bg-surface";
 
 export function DropZone() {
   const router = useRouter();
+  const [mode, setMode] = useState<Mode>("upload");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [over, setOver] = useState(false);
   const [text, setText] = useState("");
@@ -20,8 +31,8 @@ export function DropZone() {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  // Transcription is simulated: the counter runs over ~3s, then the run
-  // opens with step 1 already done. The API will stream the same progress.
+  // Transcription is simulated: the counter runs over ~3s, then the run opens
+  // with step 1 already done. The API will stream the same progress.
   const transcribe = (name: string) => {
     setPhase({ kind: "transcribing", name, at: 0, total: DEMO_DURATION });
     const ticks = 30;
@@ -39,77 +50,94 @@ export function DropZone() {
     if (f) transcribe(f.name);
   };
 
+  const useRecording = () => {
+    const d = new Date();
+    transcribe(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
+  };
+
   const run = () => {
     if (!text.trim()) return;
     const c = actions.addTranscript(text);
     router.push(`/calls/${c.id}`);
   };
 
-  if (phase.kind === "transcribing") {
-    const pct = Math.min(100, Math.round((phase.at / phase.total) * 100));
-    return (
-      <div className="rounded-2xl bg-surface-2 p-6">
-        <p className="truncate text-[15px] font-semibold text-ink">{phase.name}</p>
-        <p className="mt-1 text-[13px] text-soft">
-          Transcribing… <span className="tabular-nums text-ink">{mmss(phase.at)} / {mmss(phase.total)}</span>
-        </p>
-        <div className="mt-4 h-1 overflow-hidden rounded-full bg-line">
-          <div className="h-full rounded-full bg-ink transition-[width] duration-100 ease-linear" style={{ width: `${pct}%` }} />
-        </div>
+  return (
+    <div className="text-center">
+      <div role="tablist" className="mb-5 inline-flex h-9 items-center rounded-full bg-surface p-1">
+        {MODES.map((m) => (
+          <button
+            key={m.key}
+            role="tab"
+            type="button"
+            aria-selected={mode === m.key}
+            onClick={() => setMode(m.key)}
+            className={cn(
+              "h-7 rounded-full px-3.5 text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+              mode === m.key ? "bg-white text-ink shadow-[var(--shadow-card)]" : "text-soft hover:text-ink",
+            )}
+          >
+            {m.label}
+          </button>
+        ))}
       </div>
-    );
-  }
 
-  if (phase.kind === "paste") {
-    return (
-      <div>
-        <div className="rounded-2xl bg-surface-2 p-5">
+      {phase.kind === "transcribing" ? (
+        <div className={cn(CARD, "px-8 text-left")}>
+          <div className="w-full max-w-[400px]">
+            <p className="truncate text-[15px] font-semibold text-ink">{phase.name}</p>
+            <p className="mt-1 text-[13px] text-soft">
+              Transcribing… <span className="tabular-nums text-ink">{mmss(phase.at)} / {mmss(phase.total)}</span>
+            </p>
+            <div className="mt-4 h-1 overflow-hidden rounded-full bg-line">
+              <div className="h-full rounded-full bg-ink transition-[width] duration-100 ease-linear" style={{ width: `${Math.min(100, Math.round((phase.at / phase.total) * 100))}%` }} />
+            </div>
+          </div>
+        </div>
+      ) : mode === "upload" ? (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Drop a call recording or choose a file"
+          onClick={() => input.current?.click()}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.current?.click(); } }}
+          onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+          onDragLeave={() => setOver(false)}
+          onDrop={(e) => { e.preventDefault(); setOver(false); onFiles(e.dataTransfer.files); }}
+          className={cn(CARD, "cursor-pointer border border-dashed transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40", over ? "border-solid border-ink" : "border-line hover:border-[#d4d4d4]")}
+        >
+          <FileTiles lifted={over} />
+          <p className="mt-4 text-[15px] font-semibold text-ink">Drop a call recording</p>
+          <Button className="mt-3 h-8 bg-white px-3.5 text-[13px] shadow-[inset_0_0_0_1px_#e8e8e8] hover:bg-surface-2" onClick={(e) => { e.stopPropagation(); input.current?.click(); }}>
+            Choose file
+          </Button>
+          <input ref={input} type="file" accept="audio/*,video/*" className="sr-only" tabIndex={-1} onChange={(e) => onFiles(e.target.files)} />
+        </div>
+      ) : mode === "record" ? (
+        <div className={cn(CARD, "px-8")}>
+          <Recorder key={mode} onUse={useRecording} />
+        </div>
+      ) : (
+        <div className={cn(CARD, "items-stretch justify-start p-5 text-left")}>
           <textarea
             autoFocus
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Paste the transcript…"
-            rows={8}
-            className="w-full resize-none bg-transparent text-[15px] leading-6 text-ink outline-none placeholder:text-faint"
+            className="min-h-0 w-full flex-1 resize-none bg-transparent pb-10 text-[15px] leading-6 text-ink outline-none placeholder:text-faint"
           />
-          <div className="mt-3 flex justify-end">
-            <Button variant="primary" onClick={run} disabled={!text.trim()}>Run</Button>
-          </div>
+          <button
+            type="button"
+            onClick={run}
+            disabled={!text.trim()}
+            className={cn(
+              "absolute right-4 bottom-4 inline-flex h-7 items-center rounded-full px-3.5 text-[12.5px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+              text.trim() ? "bg-accent text-accent-ink hover:bg-[#ff7d61]" : "cursor-default bg-line text-faint",
+            )}
+          >
+            Run
+          </button>
         </div>
-        <button type="button" onClick={() => setPhase({ kind: "idle" })} className="mt-3 text-[13px] text-soft underline-offset-2 transition-colors duration-150 hover:text-ink hover:underline">
-          or drop a recording instead
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="Drop a call recording or choose a file"
-        onClick={() => input.current?.click()}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.current?.click(); } }}
-        onDragOver={(e) => { e.preventDefault(); setOver(true); }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => { e.preventDefault(); setOver(false); onFiles(e.dataTransfer.files); }}
-        className={cn(
-          "flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed bg-surface-2 px-6 py-12 text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
-          over ? "border-ink border-solid" : "border-line hover:border-[#d4d4d4]",
-        )}
-      >
-        <Upload className="size-6 text-ink" strokeWidth={1.5} />
-        <p className="mt-3 text-[15px] font-semibold text-ink">Drop a call recording</p>
-        <p className="mt-1 text-[13px] text-soft">Audio or video · MP3, M4A, WAV, MP4</p>
-        <Button className="mt-5 bg-white shadow-[inset_0_0_0_1px_#e8e8e8] hover:bg-surface-2" onClick={(e) => { e.stopPropagation(); input.current?.click(); }}>
-          Choose file
-        </Button>
-        <input ref={input} type="file" accept="audio/*,video/*" className="sr-only" tabIndex={-1} onChange={(e) => onFiles(e.target.files)} />
-      </div>
-      <button type="button" onClick={() => setPhase({ kind: "paste" })} className="mt-3 text-[13px] text-soft underline-offset-2 transition-colors duration-150 hover:text-ink hover:underline">
-        or paste a transcript
-      </button>
+      )}
     </div>
   );
 }

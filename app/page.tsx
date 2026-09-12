@@ -7,10 +7,10 @@ export default function HomePage() {
       <section className="w-full max-w-[720px] pb-16 text-center">
         <h1 className="text-[22px] font-semibold text-ink">What happened on the call?</h1>
         <p className="mx-auto mt-2 max-w-[520px] text-[13.5px] text-soft">Drop the recording. Slipstream writes it into HubSpot, drafts the follow-up and finds the next leads.</p>
-        <div className="mt-8 text-left">
+        <div className="mt-7">
           <DropZone />
         </div>
-        <p className="mt-10">
+        <p className="mt-5">
           <Link href="/calls" className="text-[13px] text-faint underline-offset-2 transition-colors duration-150 hover:text-ink hover:underline">See recent calls →</Link>
         </p>
       </section>

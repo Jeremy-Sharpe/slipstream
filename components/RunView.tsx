@@ -7,6 +7,7 @@ import type { CallRecord } from "@/lib/types";
 import { useRun } from "@/lib/useRun";
 import { Avatar, CompanyTile } from "./Avatar";
 import { RunTimeline } from "./RunTimeline";
+import { Summary } from "./run/Summary";
 import { Transcript } from "./Transcript";
 import { Button, OutcomePill, fmtDate, fmtTime, mmss } from "./ui";
 
@@ -44,8 +45,9 @@ export function RunView({ call }: { call: CallRecord }) {
           <Transcript turns={call.turns} highlight={highlight} />
         </section>
         <section className="sticky top-8 max-h-[calc(100vh-4rem)] self-start overflow-y-auto pr-1">
+          <Summary call={call} runId={run.runId} ready={run.steps.find((s) => s.id === "score")?.status === "done"} onHighlight={setHighlight} />
           <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What Slipstream did</h2>
-          <RunTimeline call={call} steps={run.steps} open={run.open} toggle={run.toggle} onHighlight={setHighlight} />
+          <RunTimeline call={call} steps={run.steps} open={run.open} toggle={run.toggle} runId={run.runId} onHighlight={setHighlight} />
         </section>
       </div>
     </div>
