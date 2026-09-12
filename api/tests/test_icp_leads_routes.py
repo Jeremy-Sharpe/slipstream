@@ -274,3 +274,85 @@ def test_icp_derive_gets_past_integration_check_with_openrouter_only(
     assert response.status_code == 200
     assert response.json()["model"] == "openai/gpt-5.4"
     assert response.json()["embedding_model"] == "text-embedding-3-small"
+
+
+def test_icp_derive_gets_past_integration_check_with_local_models(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        local_model_base_url="http://127.0.0.1:8081/v1",
+        local_embedding_base_url="http://127.0.0.1:8082/v1",
+    )
+    app = create_app(settings)
+
+    def fake_derive_icp(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        return {
+            "id": "profile-local",
+            "version": 1,
+            "status": "ready",
+            "profile": {
+                "summary": "Fit",
+                "industries": ["Professional services"],
+                "headcount_band": "25-80",
+                "roles": ["Practice Manager"],
+                "triggers": ["Compliance"],
+                "disqualifiers": [],
+                "evidence": [],
+                "confidence": 0.8,
+                "origami_brief": "Find fit.",
+            },
+            "evidence": [],
+            "origami_brief": "Find fit.",
+            "model": settings.local_model_name,
+            "embedding_model": settings.local_embedding_name,
+            "created_at": None,
+        }
+
+    monkeypatch.setattr("app.routers.icp.get_embedding_client", lambda _: object())
+    monkeypatch.setattr("app.routers.icp.derive_icp", fake_derive_icp)
+
+    with TestClient(app) as configured_client:
+        response = configured_client.post("/icp/derive", json={"include_demo": False})
+
+    assert response.status_code == 200
+    assert response.json()["model"] == settings.local_model_name
+    assert response.json()["embedding_model"] == settings.local_embedding_name
+
+
+def test_lead_outreach_gets_past_integration_check_with_local_reasoning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="test",
+        local_model_base_url="http://127.0.0.1:8081/v1",
+    )
+    app = create_app(settings)
+    store = app.state.icp_leads_store
+    lead = store.upsert_lead(LeadIn(company_name="Northstar", origami_row_id="row-local"))
+    reached_drafting = False
+
+    def fake_draft_outreach(*args: Any, **kwargs: Any) -> Any:
+        nonlocal reached_drafting
+        reached_drafting = True
+        return store.insert_draft({
+            "lead_id": str(lead.id),
+            "kind": "outreach",
+            "subject": "Local follow-up",
+            "body": "Thanks for the conversation.",
+            "status": "draft",
+        })
+
+    monkeypatch.setattr("app.routers.leads.draft_outreach", fake_draft_outreach)
+
+    with TestClient(app) as configured_client:
+        response = configured_client.post(
+            f"/leads/{lead.id}/outreach",
+            json={"rep_name": "Jordan"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["subject"] == "Local follow-up"
+    assert reached_drafting is True

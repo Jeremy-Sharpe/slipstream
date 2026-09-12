@@ -35,7 +35,7 @@ def derive(
     store: StoreDep,
 ) -> StoredIcpProfile:
     _require(settings, "embeddings")
-    _require(settings, settings.reasoning_provider)
+    _require_reasoning(settings)
     try:
         return derive_icp(
             store,
@@ -74,4 +74,12 @@ def _require(settings: Settings, integration: str) -> None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"{integration} integration is not configured",
+        )
+
+
+def _require_reasoning(settings: Settings) -> None:
+    if not settings.reasoning_configured:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"{settings.reasoning_provider} reasoning provider is not configured",
         )
