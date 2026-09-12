@@ -40,7 +40,7 @@ function NavItem({ item, active }: { item: Item; active: boolean }) {
 export function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-background">
+    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex h-14 items-center justify-between border-b border-border pr-2.5 pl-4">
         <Link href="/" className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
           <Zap className="size-4" strokeWidth={2.25} />

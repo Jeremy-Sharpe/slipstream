@@ -5,6 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    --color-avatar: var(--avatar);
+    --color-icon-well: var(--icon-well);
+    --color-positive: var(--positive);
+    --color-live: var(--live);
+    --color-inactive: var(--inactive);
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
     --color-sidebar-ring: var(--sidebar-ring);
@@ -48,38 +53,45 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+    /* Slipstream palette. Roles in docs; keep every colour on a token. */
+    --background: #EEF4F2;            /* mist: page */
+    --foreground: #13302C;            /* forest ink: headings, primary text */
+    --card: #FBFDFC;                  /* near-white: cards, nav, table surfaces */
+    --card-foreground: #13302C;
+    --popover: #FBFDFC;
+    --popover-foreground: #13302C;
+    --primary: #FF6847;               /* tangerine: primary action */
+    --primary-foreground: #182521;
+    --secondary: #0E6257;             /* deep teal: supporting brand */
+    --secondary-foreground: #FBFDFC;
+    --muted: #E3ECE9;                 /* nav hover / active */
+    --muted-foreground: #617B76;      /* muted teal: secondary text */
+    --accent: #E3ECE9;
+    --accent-foreground: #13302C;
+    --destructive: #B54129;
+    --border: #CDDBD7;                /* sage line */
+    --input: #CDDBD7;
+    --ring: #0E6257;
+    --chart-1: #B9D7CF;
+    --chart-2: #0E6257;
+    --chart-3: #FF6847;
+    --chart-4: #617B76;
+    --chart-5: #CDDBD7;
     --radius: 0.5rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar: #FBFDFC;
+    --sidebar-foreground: #13302C;
+    --sidebar-primary: #FF6847;
+    --sidebar-primary-foreground: #182521;
+    --sidebar-accent: #E3ECE9;
+    --sidebar-accent-foreground: #13302C;
+    --sidebar-border: #CDDBD7;
+    --sidebar-ring: #0E6257;
+    /* extra roles */
+    --avatar: #D6E9E3;
+    --icon-well: #E0EEEA;             /* queue icon background */
+    --positive: #18855C;
+    --live: #32A56F;
+    --inactive: #A4A4A0;
 }
 
 .dark {

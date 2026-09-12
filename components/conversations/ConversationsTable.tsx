@@ -53,14 +53,14 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
   return (
     <div className="mt-5 flex flex-col">
       <div className="px-8 pb-4">
-        <div className="inline-flex h-9 items-center rounded-md border border-border bg-muted/60 p-0.5">
+        <div className="inline-flex h-9 items-center rounded-md border border-border bg-muted/70 p-0.5">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
                 "flex h-full items-center gap-2 rounded-[5px] px-3.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
-                tab === t.key && "border border-border bg-background font-medium text-foreground shadow-xs",
+                tab === t.key && "border border-border bg-card font-medium text-foreground shadow-xs",
               )}
             >
               {t.label}
@@ -70,7 +70,7 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
         </div>
       </div>
 
-      <div className="border-t border-border">
+      <div className="border-t border-border bg-card">
         <Table className="table-fixed text-sm">
           <TableHeader>
             <TableRow className="h-10 hover:bg-transparent">
@@ -92,11 +92,11 @@ export function ConversationsTable({ rows, query }: { rows: Conversation[]; quer
               </TableRow>
             )}
             {visible.map((r) => (
-              <TableRow key={r.id} data-state={checked.has(r.id) ? "selected" : undefined} className="h-[52px] cursor-pointer hover:bg-muted/50">
+              <TableRow key={r.id} data-state={checked.has(r.id) ? "selected" : undefined} className="h-[52px] cursor-pointer hover:bg-muted/50 data-[state=selected]:bg-muted/70">
                 <TableCell className="pl-8" onClick={(e) => e.stopPropagation()}><Checkbox checked={checked.has(r.id)} onCheckedChange={() => toggle(r.id)} aria-label={`Select ${r.contact}`} /></TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <Avatar className="size-7"><AvatarFallback className="text-[11px]">{initials(r.contact)}</AvatarFallback></Avatar>
+                    <Avatar className="size-7"><AvatarFallback className="bg-avatar text-[11px] font-medium text-foreground">{initials(r.contact)}</AvatarFallback></Avatar>
                     <span className="font-medium">{r.contact}</span>
                   </div>
                 </TableCell>
