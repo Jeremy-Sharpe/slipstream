@@ -1,7 +1,8 @@
 # Submission handoff
 
-Use this as the final pre-submit runbook. Everything that can be checked without the
-finished video or unavailable deployment credentials was verified on 13 September 2026.
+Use this as the final pre-submit runbook. Everything that can be checked without
+unavailable deployment credentials or submitting the external form was verified on
+13 September 2026.
 
 ## Verified now
 
@@ -11,7 +12,7 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
-- API Ruff checks and all 289 tests pass, including scorecard/playbook revision, coach lifecycle,
+- API Ruff checks and all 292 tests pass, including scorecard/playbook revision, coach lifecycle,
   email concurrency, campaign leasing/controls and provider-environment isolation coverage.
 - All six fixture tests pass.
 - All nine Supabase migrations and seven pgTAP suites pass from an empty ephemeral
@@ -23,8 +24,10 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 - The production API exposes campaign create/list/detail/run/pause/resume routes and
   rejects unauthenticated scheduler/control calls. It still reports memory storage and
   `email_delivery: false`, so no live send is claimed.
-- The deterministic rubric-sync eval passes. Every deterministic submission check
-  except the required demo-video URL passes.
+- The deterministic rubric-sync eval and every deterministic submission check pass.
+- The public fallback video is 4:30, 1440×900 H.264 with AAC narration. Its public
+  ranged download, sampled frames, stream metadata, loudness and silence profile were
+  verified; exact source and checksum are in `docs/video/`.
 - `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` performs a
   credential-free, non-mutating check of the live Campaigns surface, API revision,
   public campaign reads, OpenAPI contract and unauthenticated control rejection.
@@ -40,20 +43,18 @@ finished video or unavailable deployment credentials was verified on 13 Septembe
 
 ## Human-only finish line
 
-1. Record the 3-to-5-minute walkthrough using `docs/demo-script.md`. Show the live
-   app working end to end; do not submit slides or narration over static screens.
-2. Watch the exported video once with sound. Confirm it shows the production URL,
-   stays within 3:00-5:00, and contains no notifications, secrets, or unrelated tabs.
-3. Upload it somewhere judges can open without signing in.
-4. Replace `Demo video: (added at submission)` in `README.md` with the public URL.
-5. Pull `main`, then run `npm run evals:dry`. It must report `PASSED`; do not waive a
+1. Optionally replace the published automated fallback with a human-presented 3-to-5-minute
+   walkthrough using `docs/demo-script.md`. If replacing it, watch the export once with
+   sound and confirm it contains no notifications, secrets or unrelated tabs before
+   updating the README URL.
+2. Pull `main`, then run `npm run evals:dry`. It must report `PASSED`; do not waive a
    failing check.
-6. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` to confirm both
+3. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)"` to confirm both
    deployments and the protected campaign boundary immediately before submitting.
-7. If a VPS restart cleared the memory-backed campaign, recreate it on the VPS with
+4. If a VPS restart cleared the memory-backed campaign, recreate it on the VPS with
    `sudo bash -lc 'set -a; source /etc/slipstream/api.env; export SLIPSTREAM_INGEST_TOKEN="$INGEST_TOKEN"; cd /opt/slipstream/current; npm run seed:demo-campaign'`.
    The command refuses durable storage or configured email delivery.
-8. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
+5. Submit before **Monday 14 September 2026, 12:00 PM Melbourne time**. Name
    **Track 1: Improve an Existing Business Capability** and also enter the
    **Built With ElevenLabs** special track.
 
