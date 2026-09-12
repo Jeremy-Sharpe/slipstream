@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections import deque
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -12,6 +13,7 @@ from app.core.database import create_supabase
 from app.core.readiness import StorageReadinessProbe
 from app.routers import calls, drafts, extractions, health, icp, leads
 from app.services.icp_leads_store import create_icp_leads_store
+from app.ws import coach
 
 
 @asynccontextmanager
@@ -47,6 +49,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.transcription_slots = asyncio.Semaphore(2)
     app.state.ingest_locks = [asyncio.Lock() for _ in range(32)]
     app.state.extraction_locks = [asyncio.Lock() for _ in range(32)]
+    app.state.coach_slots = asyncio.Semaphore(4)
+    app.state.coach_handshake_slots = asyncio.Semaphore(16)
+    app.state.coach_reasoning_slots = asyncio.Semaphore(2)
+    app.state.coach_checkpoints = {}
+    app.state.coach_source_locks = {}
+    app.state.coach_source_locks_guard = asyncio.Lock()
+    app.state.coach_token_issued_at = deque()
+    app.state.coach_token_lock = asyncio.Lock()
+    app.state.coach_suggestion_started_at = deque()
+    app.state.coach_suggestion_lock = asyncio.Lock()
     app.add_middleware(calls.UploadSizeLimitMiddleware)
     app.add_middleware(
         CORSMiddleware,
@@ -69,4 +81,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(icp.router, prefix="/api/v1")
     app.include_router(leads.router)
     app.include_router(leads.router, prefix="/api/v1")
+    app.include_router(coach.router, prefix="/api/v1")
     return app
