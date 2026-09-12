@@ -10,7 +10,8 @@
     "evals": "node scripts/run-evals.mjs",
     "evals:dry": "node scripts/run-evals.mjs --dry",
     "smoke:production": "node scripts/smoke-production.mjs",
-    "test:smoke": "node --test scripts/smoke-production.test.mjs"
+    "seed:demo-campaign": "node scripts/seed-demo-campaign.mjs",
+    "test:smoke": "node --test scripts/*.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

@@ -40,9 +40,9 @@ Action: Click Approve. Show status change from Draft to Approved and the approva
 
 Say: “Approval and delivery are separate, so this screen never claims an email went out when it did not. The production Resend adapter sends only this exact approved copy, behind a server token and a content-bound idempotency key. We deliberately left the public demo keyless, so no judge gets a surprise email.”
 
-Action: If the production Campaigns tab has the live “Delivery execution” card, switch to it and point to the `Live API` badge, the honest empty state, and the labelled evaluation sequence below. Do not try to create or send a campaign on stage.
+Action: If the production Campaigns tab has the live “Delivery execution” card, switch to it and point to the `Live API` badge, the paused “Hackathon demo — intentionally unsent” record, its zero sent count, and the labelled evaluation sequence below. Do not resume or send the campaign on stage.
 
-Say: “For a real team, approved drafts are enrolled by exact ID. A Railway worker claims eight at a time, and this live view separates confirmed sends, safe retries, failures and anything needing reconciliation. Pause and resume are authenticated server actions. Today the API returns no enrolled campaigns because this public deployment has no database or email-provider credential—that empty state is deliberate, not a fake success.”
+Say: “This is a real campaign record built from our synthetic demo call, not a hard-coded card. The approved draft was enrolled by exact ID, scheduled for 2099, then paused through the authenticated server action. It shows one queued, zero sent and zero attempts. With Resend configured, a Railway worker would claim eight at a time and separate confirmed sends, safe retries, failures and anything needing reconciliation. We deliberately left delivery keyless rather than fake a success.”
 
 Fallback: Use the API commands below, then show the returned `status: approved`, approver, approval timestamp, and empty `sent_at`.
 
@@ -96,4 +96,4 @@ If the VPS is unreachable, use the production UI’s already-loaded deterministi
 - “Is this really a CRM integration?” The demo writes to Postgres tables shaped like HubSpot company, contact, deal, engagement and task objects. A production connector swaps those writes for HubSpot APIs; the extraction contract does not change.
 - “What happens without keys?” Fixture ingestion, extraction and drafting remain deterministic and tested. Paid transcription fails closed, and cannot be enabled in production without an ingest token.
 - “Can scheduled outreach duplicate a send?” Campaign and per-draft leases prevent concurrent ownership, and the provider request reuses an exact content-bound idempotency key. Ambiguous results are retried or surfaced for reconciliation; they are never relabelled as successful.
-- “Why is the live campaign list empty?” The public VPS truthfully reports memory storage and no Resend integration. The durable Postgres migrations, scheduler container and delivery adapter are merged and tested, but we did not put an email-sending credential in a public hackathon deployment.
+- “Why is the demo campaign paused?” It proves exact enrollment and live orchestration state without allowing a public hackathon deployment to email anyone. It is synthetic, scheduled for 2099, has zero attempts and zero sends. The durable Postgres migrations, scheduler container and delivery adapter are merged and tested.
