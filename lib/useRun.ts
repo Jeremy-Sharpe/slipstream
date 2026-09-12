@@ -52,6 +52,11 @@ export function useRun(call: CallRecord) {
         t += 400;
         return;
       }
+      if (id === "transcribe" && (call.fileName || call.pasted)) {
+        at(t, () => set(id, { status: "done" }));
+        t += 150;
+        return;
+      }
       at(t, () => { set(id, { status: "running" }); setOpen(id); });
       const len = id === "transcribe" ? 500 : id === "outreach" ? 900 : 800;
       at(t + len, () => set(id, { status: "done" }));

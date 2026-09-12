@@ -44,6 +44,31 @@ export const actions = {
     commit();
     return c;
   },
+  /** A recording dropped on Home: the demo fixture stands in for the file's content. */
+  addUpload(fileName: string): CallRecord {
+    const source = seed.find((c) => c.id === "call-13-marlowe-finch-demo") ?? seed[0];
+    const id = `call-new-${Date.now().toString(36)}`;
+    const c: CallRecord = { ...source, id, at: new Date().toISOString(), fileName };
+    state.calls = [c, ...state.calls];
+    state.runs[id] = "running";
+    commit();
+    return c;
+  },
+  /** A pasted transcript: "Name: text" lines become turns; otherwise one prospect turn. */
+  addTranscript(text: string): CallRecord {
+    const source = seed.find((c) => c.id === "call-13-marlowe-finch-demo") ?? seed[0];
+    const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    const parsed = lines.map((l) => l.match(/^([A-Z][\w .'-]{1,40}):\s*(.+)$/)).filter(Boolean) as RegExpMatchArray[];
+    const turns = parsed.length >= 2
+      ? parsed.map((m, i) => ({ i, speaker: (i % 2 === 0 ? "rep" : "prospect") as "rep" | "prospect", name: m[1], text: m[2], t: i * 20 }))
+      : [{ i: 0, speaker: "prospect" as const, name: "Prospect", text: text.trim(), t: 0 }];
+    const id = `call-new-${Date.now().toString(36)}`;
+    const c: CallRecord = { ...source, id, at: new Date().toISOString(), turns, duration: Math.max(60, turns.length * 20), contact: parsed.length >= 2 ? parsed.find((_, i) => i % 2 === 1)?.[1] ?? "Prospect" : "Prospect", company: "Pasted transcript", pasted: true };
+    state.calls = [c, ...state.calls];
+    state.runs[id] = "running";
+    commit();
+    return c;
+  },
   setRun(id: string, s: RunState) { state.runs[id] = s; commit(); },
   sync(id: string) { state.synced[id] = true; commit(); },
   approveDraft(id: string) { state.approved[id] = true; commit(); },

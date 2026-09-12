@@ -6,7 +6,7 @@ import { Avatar } from "./Avatar";
 import { cn } from "./ui";
 
 const NAV = [
-  { href: "/", label: "Calls" },
+  { href: "/", label: "Home" },
   { href: "/leads", label: "Leads" },
 ];
 
