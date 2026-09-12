@@ -6,6 +6,9 @@ const SCHEDULED_FOR = "2099-01-01T00:00:00Z";
 const TIMEOUT_MS = 20_000;
 const MODEL_TIMEOUT_MS = 600_000;
 const MAX_RESPONSE_BYTES = 1_048_576;
+const DEMO_PROVIDER = "slipstream-demo";
+const DEMO_MAILBOX = "hackathon";
+const DEMO_THREAD = "marlowe-finch-campaign";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -107,17 +110,51 @@ export async function seedDemoCampaign({
     assert(draft?.source === "model", "demo draft did not use the configured model");
     assert(draft?.model === ready?.reasoning_model, "demo draft used the wrong model");
   }
-  const approved = await requestJson(fetchImpl, `${base}/api/v1/drafts/${draft.id}/approve`, {
-    payload: { approved_by: "Hackathon demo" },
+  const approvedCallDraft = draft.status === "approved"
+    ? draft
+    : await requestJson(fetchImpl, `${base}/api/v1/drafts/${draft.id}/approve`, {
+      payload: { approved_by: "Hackathon demo" },
+    });
+  assert(approvedCallDraft?.status === "approved" && approvedCallDraft?.sent_at == null, "demo call draft is not safely approved and unsent");
+
+  await requestJson(fetchImpl, `${base}/api/v1/emails`, {
+    token: ingestToken,
+    payload: {
+      provider: DEMO_PROVIDER,
+      mailbox_external_id: DEMO_MAILBOX,
+      mailbox: { name: "Jordan Belfort", email: "jordan@harbourline.example" },
+      source_external_id: "marlowe-finch-email-1",
+      thread_external_id: DEMO_THREAD,
+      direction: "inbound",
+      sender: { name: "Donnie Azoff", email: "donnie@marlowefinch.example" },
+      recipients: [{ name: "Jordan Belfort", email: "jordan@harbourline.example", kind: "to" }],
+      subject: "Marlowe & Finch cyber renewal",
+      body: "Jordan, please send the proposal and 30-seat agreement for our review.",
+      occurred_at: "2026-09-11T06:00:00Z",
+    },
   });
-  assert(approved?.status === "approved" && approved?.sent_at == null, "demo draft is not safely approved and unsent");
+  const emailDraft = await requestJson(
+    fetchImpl,
+    `${base}/api/v1/emails/${DEMO_PROVIDER}/mailboxes/${DEMO_MAILBOX}/threads/${DEMO_THREAD}/draft-reply`,
+    { token: ingestToken, payload: {} },
+  );
+  assert(typeof emailDraft?.id === "string", "email reply drafting did not return a draft ID");
+  assert(emailDraft?.recipient_email === "donnie@marlowefinch.example", "email reply has the wrong recipient");
+  assert(emailDraft?.source === "deterministic", "email reply has unexpected provenance");
+  assert(emailDraft?.model === "thread-grounded-template-v2", "email reply used the wrong template");
+  const approvedEmailDraft = emailDraft.status === "approved"
+    ? emailDraft
+    : await requestJson(fetchImpl, `${base}/api/v1/drafts/${emailDraft.id}/approve`, {
+      payload: { approved_by: "Hackathon demo" },
+    });
+  assert(approvedEmailDraft?.status === "approved" && approvedEmailDraft?.sent_at == null, "demo email draft is not safely approved and unsent");
 
   const campaign = await requestJson(fetchImpl, `${base}/api/v1/campaigns`, {
     token: ingestToken,
     payload: {
       campaign_id: CAMPAIGN_ID,
       name: "Hackathon demo — intentionally unsent",
-      draft_ids: [approved.id],
+      draft_ids: [approvedEmailDraft.id],
       scheduled_for: SCHEDULED_FOR,
       created_by: "Slipstream fixture",
     },
