@@ -10,7 +10,7 @@ import { Card } from "./Transcript";
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 export function Intelligence({ call }: { call: CallRecord }) {
-  const sentiment = { won: "Positive", stalled: "Cautious", lost: "Flat", no_show: "n/a" }[call.outcome];
+  const sentiment = { open: "Open", won: "Positive", stalled: "Cautious", lost: "Flat", no_show: "n/a" }[call.outcome];
   const next = call.extraction.nextStep?.value ?? (call.outcome === "no_show" ? "Reschedule" : "None agreed");
   const risk = call.extraction.objections[0]?.text ?? (call.riskFlags[0] ? `Coach: ${call.riskFlags[0].kind}` : "None raised");
   return (

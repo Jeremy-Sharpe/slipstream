@@ -70,14 +70,20 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
     log("CRM fields approved", "Live Slipstream staging record", "check");
   };
   const approveDraft = async () => {
+    if (rerunning) return;
     try {
-      const liveDraftId = draftId ?? (await runPipeline());
-      await approveLiveDraft(liveDraftId);
+      if (!draftId) {
+        await runPipeline();
+        return;
+      }
+      await approveLiveDraft(draftId);
       setApproved(true);
       if (!synced) patchConversation(call.id, { status: "action_ready" });
       log("Follow-up approved", "Live API activity · delivery simulated", "mail");
-    } catch {
-      // runPipeline exposes the provider-safe error in the status strip.
+    } catch (error) {
+      setPipelineError(
+        error instanceof Error ? error.message : "The approval could not be recorded",
+      );
     }
   };
   const markDone = () => { setSynced(true); patchConversation(call.id, { status: "synced" }); log("Marked done", "Maxim", "check"); };
@@ -86,13 +92,13 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
     <div className="flex min-h-[calc(100vh-64px)] flex-col bg-page">
       <DetailHeader call={activeCall} others={others} status={synced ? "synced" : status} onMarkDone={markDone} onRerun={() => void runPipeline()} rerunning={rerunning} />
       <div className="mx-6 mt-5 flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3 shadow-[0_1px_2px_rgba(17,24,39,0.04)]">
-        {rerunning ? <Loader2 className="size-4 animate-spin text-primary" /> : pipelineStatus === "live" ? <CheckCircle2 className="size-4 text-primary" /> : pipelineStatus === "error" ? <AlertCircle className="size-4 text-destructive" /> : <Server className="size-4 text-muted-foreground" />}
+        {rerunning ? <Loader2 className="size-4 animate-spin text-primary" /> : pipelineError ? <AlertCircle className="size-4 text-destructive" /> : pipelineStatus === "live" ? <CheckCircle2 className="size-4 text-primary" /> : <Server className="size-4 text-muted-foreground" />}
         <div className="min-w-0 flex-1">
           <p className="text-[14px] font-medium text-ink">
-            {rerunning ? "Running the live sales pipeline…" : pipelineStatus === "live" ? "Live API result" : pipelineStatus === "error" ? "Live API unavailable — showing labelled demo data" : "Labelled demo data ready"}
+            {rerunning ? "Running the live sales pipeline…" : pipelineError ? (pipelineStatus === "live" ? "Live API action needs attention" : "Live API unavailable — showing labelled demo data") : pipelineStatus === "live" ? "Live API result" : "Labelled demo data ready"}
           </p>
           <p className="truncate text-[12px] text-muted-foreground">
-            {pipelineError ?? (pipelineStatus === "live" ? "Ingested, extracted and drafted by the deployed backend." : API_BASE_URL)}
+            {pipelineError ?? (pipelineStatus === "live" ? "Live transcript, CRM extraction and draft. Scorecard remains labelled fixture data." : API_BASE_URL)}
           </p>
         </div>
         <Button variant="outline" className="h-9 rounded-md px-3 text-[13px]" onClick={() => void runPipeline()} disabled={rerunning}>

@@ -56,7 +56,7 @@ export type CallRecord = {
   domain: string;
   at: string;
   durationSeconds: number;
-  outcome: "won" | "stalled" | "lost" | "no_show";
+  outcome: "open" | "won" | "stalled" | "lost" | "no_show";
   trigger: string | null;
   /** Two-line intelligence summary shown above the transcript. */
   summary: string;

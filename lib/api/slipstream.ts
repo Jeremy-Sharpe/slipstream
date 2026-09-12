@@ -117,9 +117,9 @@ function evidenceSpan(field: { evidence: Evidence[] }): number | null {
   return field.evidence.find((item) => item.sequence != null)?.sequence ?? null;
 }
 
-function extracted<T>(field: ApiField<T>, fallback: T): Extracted<T> {
+function extracted<T>(field: ApiField<T>, emptyValue: T): Extracted<T> {
   return {
-    value: field.value ?? fallback,
+    value: field.value ?? emptyValue,
     confidence: field.confidence,
     span: evidenceSpan(field),
   };
@@ -127,8 +127,8 @@ function extracted<T>(field: ApiField<T>, fallback: T): Extracted<T> {
 
 export function mergeLivePipeline(fallback: CallRecord, live: LivePipeline): CallRecord {
   const { call, extraction: value, draft } = live;
-  const prospect = value.contact.name.value ?? fallback.prospect;
-  const rep = call.rep ?? fallback.rep;
+  const prospect = value.contact.name.value ?? "Unknown contact";
+  const rep = call.rep ?? "Unknown rep";
   const turns = call.segments.map((segment) => ({
     index: segment.sequence,
     speaker: segment.speaker === rep ? ("rep" as const) : ("prospect" as const),
@@ -136,23 +136,28 @@ export function mergeLivePipeline(fallback: CallRecord, live: LivePipeline): Cal
     text: segment.body,
     at: segment.start_ms / 1000,
   }));
+  const liveOutcome = value.deal.outcome.value;
+  const outcome =
+    liveOutcome === "won" || liveOutcome === "lost" || liveOutcome === "stalled"
+      ? liveOutcome
+      : "open";
   const extraction: Extraction = {
     contact: {
       name: extracted(value.contact.name, prospect),
-      role: extracted(value.contact.title, fallback.extraction.contact.role.value),
-      email: extracted(value.contact.email, fallback.extraction.contact.email.value),
-      phone: extracted(value.contact.phone, fallback.extraction.contact.phone.value),
+      role: extracted(value.contact.title, "Not found"),
+      email: extracted(value.contact.email, "Not found"),
+      phone: extracted(value.contact.phone, "Not found"),
     },
     company: {
-      name: extracted(value.company.name, fallback.company),
-      industry: extracted(value.company.industry, fallback.extraction.company.industry.value),
-      headcount: extracted(value.company.employee_count, fallback.extraction.company.headcount.value),
-      location: extracted(value.company.location, fallback.extraction.company.location.value),
+      name: extracted(value.company.name, "Unknown company"),
+      industry: extracted(value.company.industry, "Not found"),
+      headcount: extracted(value.company.employee_count, 0),
+      location: extracted(value.company.location, "Not found"),
     },
     deal: {
-      stage: extracted(value.deal.stage, fallback.extraction.deal.stage.value),
-      valueAud: extracted(value.deal.amount, fallback.extraction.deal.valueAud.value),
-      outcome: extracted(value.deal.outcome, fallback.extraction.deal.outcome.value),
+      stage: extracted(value.deal.stage, "Not found"),
+      valueAud: extracted(value.deal.amount, 0),
+      outcome: extracted(value.deal.outcome, "open"),
     },
     promises: value.promises
       .filter((item): item is ApiField<string> & { value: string } => item.value != null)
@@ -177,12 +182,13 @@ export function mergeLivePipeline(fallback: CallRecord, live: LivePipeline): Cal
     id: call.source_external_id,
     rep,
     prospect,
-    company: value.company.name.value ?? fallback.company,
-    domain: value.company.domain.value ?? fallback.domain,
+    company: value.company.name.value ?? "Unknown company",
+    domain: value.company.domain.value ?? "",
     at: call.occurred_at,
-    durationSeconds: call.duration_seconds ?? fallback.durationSeconds,
+    durationSeconds: call.duration_seconds ?? 0,
+    outcome,
     summary: value.summary,
-    turns: turns.length ? turns : fallback.turns,
+    turns,
     extraction,
     draft: { subject: draft.subject, body: draft.body },
   };

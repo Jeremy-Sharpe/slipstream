@@ -61,7 +61,7 @@ export function CrmPanel({ call, synced, onSync, onHover, timeline }: { call: Ca
           <div className="truncate text-[16px] font-medium text-ink">{call.prospect}</div>
           <div className="truncate text-[14px] text-muted-foreground">{x.contact.role.value} · {call.company}</div>
         </div>
-        <a href={`https://${call.domain}`} target="_blank" rel="noreferrer" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Open website"><ExternalLink className="size-4" strokeWidth={1.75} /></a>
+        {call.domain ? <a href={`https://${call.domain}`} target="_blank" rel="noreferrer" className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Open website"><ExternalLink className="size-4" strokeWidth={1.75} /></a> : <span />}
       </div>
 
       <div className="grid gap-4">
