@@ -4,7 +4,7 @@ Target: 3 minutes 30 seconds. One presenter talks; one teammate keeps the API fa
 
 ## Before walking on stage
 
-1. Open the production UI on Conversations with Maya Chen at Northstar Labs selected, then open Intelligence in a second tab.
+1. Open the production UI on Conversations with Maya Chen at Northstar Labs selected, then open Intelligence and Campaigns in two more tabs. Use Campaigns only if its “Delivery execution” card is visible on the production URL; otherwise skip that ten-second beat rather than switching to a preview deployment on stage.
 2. In a terminal, run `curl -fsS https://slipstream-api.3-104-149-193.sslip.io/ready | jq`. Confirm `status` is `ok` and keep the terminal open.
 3. Confirm the Maya Chen conversation detail, CRM write-back card and follow-up draft are visible without scrolling.
 4. Use browser zoom that makes the main card and evidence visible from the back of the room. Close notifications and unrelated tabs.
@@ -30,7 +30,7 @@ Action: Click the evidence behind Maya’s security-questionnaire next step and 
 
 Fallback: If the action fails, use the terminal fallback below. It runs the newest voiced fixture and should return Donnie Azoff, Marlowe & Finch, outcome `won`, amount `48600`, two promises and two objections. Explain that the fallback fixture differs from Maya but exercises the same production path.
 
-## 1:20–2:05 — CRM and follow-up write themselves
+## 1:20–2:10 — CRM and follow-up write themselves safely
 
 Action: Show the CRM preview beside Maya’s transcript. Point to company, contact and deal as three separate records, then open the email draft.
 
@@ -40,9 +40,13 @@ Action: Click Approve. Show status change from Draft to Approved and the approva
 
 Say: “Approval and delivery are separate, so this screen never claims an email went out when it did not. The production Resend adapter sends only this exact approved copy, behind a server token and a content-bound idempotency key. We deliberately left the public demo keyless, so no judge gets a surprise email.”
 
+Action: If the production Campaigns tab has the live “Delivery execution” card, switch to it and point to the `Live API` badge, the honest empty state, and the labelled evaluation sequence below. Do not try to create or send a campaign on stage.
+
+Say: “For a real team, approved drafts are enrolled by exact ID. A Railway worker claims eight at a time, and this live view separates confirmed sends, safe retries, failures and anything needing reconciliation. Pause and resume are authenticated server actions. Today the API returns no enrolled campaigns because this public deployment has no database or email-provider credential—that empty state is deliberate, not a fake success.”
+
 Fallback: Use the API commands below, then show the returned `status: approved`, approver, approval timestamp, and empty `sent_at`.
 
-## 2:05–2:50 — The team learns who to call next
+## 2:10–2:55 — The team learns who to call next
 
 Action: Open the call scorecard, point to its `Labelled evaluation` badge, then switch to the pre-opened Intelligence view. Point to the same provenance label, the derived ICP, one won-deal evidence item, and one lead with its fit reason. Do not click either paid generation action on the current keyless deployment and do not start an Origami search on stage.
 
@@ -54,7 +58,7 @@ Configured-key option: If `/ready` reports a scorecard integration before the de
 
 Fallback: Use the labelled scorecard already rendered in Conversations, then show the preloaded Intelligence tab. If Intelligence is unavailable, say, “The paid sourcing key is not part of the fallback; the terminal path proved the upstream call record that feeds it,” and move on without waiting.
 
-## 2:50–3:20 — Close on value and proof
+## 2:55–3:25 — Close on value and proof
 
 Action: Return to the lead list, leaving the closed-loop diagram or strongest lead visible.
 
@@ -80,6 +84,8 @@ DRAFT_ID=$(echo "$DRAFT" | jq -r .id)
 curl -fsS -X POST -H 'Content-Type: application/json' \
   -d '{"approved_by":"Demo presenter"}' "$API/drafts/$DRAFT_ID/approve" \
   | jq '{status,approved_by,approved_at,sent_at}'
+
+curl -fsS "$API/campaigns?limit=2" | jq
 ```
 
 If the VPS is unreachable, use the production UI’s already-loaded deterministic fixture and say so immediately. If the UI is unreachable, use the API fallback. If both are unreachable, show the locally running app only after stating that it is the same main-branch revision; do not disguise a fallback as production.
@@ -89,3 +95,5 @@ If the VPS is unreachable, use the production UI’s already-loaded deterministi
 - “What is mocked?” The businesses and calls are synthetic, and the default screen is explicitly labelled evaluation data. The ingestion, transcript, structured extraction, draft, approval, scorecard, ICP, Origami and email-delivery paths are executable through real adapters when configured; the current production readiness response says which integrations are actually installed. The public deployment has no email-provider key, and unavailable paid actions fail closed instead of presenting fixture output as live.
 - “Is this really a CRM integration?” The demo writes to Postgres tables shaped like HubSpot company, contact, deal, engagement and task objects. A production connector swaps those writes for HubSpot APIs; the extraction contract does not change.
 - “What happens without keys?” Fixture ingestion, extraction and drafting remain deterministic and tested. Paid transcription fails closed, and cannot be enabled in production without an ingest token.
+- “Can scheduled outreach duplicate a send?” Campaign and per-draft leases prevent concurrent ownership, and the provider request reuses an exact content-bound idempotency key. Ambiguous results are retried or surfaced for reconciliation; they are never relabelled as successful.
+- “Why is the live campaign list empty?” The public VPS truthfully reports memory storage and no Resend integration. The durable Postgres migrations, scheduler container and delivery adapter are merged and tested, but we did not put an email-sending credential in a public hackathon deployment.
