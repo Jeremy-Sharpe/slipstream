@@ -9,7 +9,7 @@ User=slipstream
 Group=slipstream
 WorkingDirectory=/opt/slipstream/current/api
 EnvironmentFile=-/etc/slipstream/api.env
-EnvironmentFile=-/opt/slipstream/current/api/deploy/release.env
+EnvironmentFile=/opt/slipstream/current/.release.env
 Environment=ENVIRONMENT=production
 ExecStart=/opt/slipstream/current/api/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1
 Restart=always

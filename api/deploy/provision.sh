@@ -27,8 +27,11 @@ if ! id slipstream-deploy >/dev/null 2>&1; then
 fi
 
 install -d -m 0755 -o root -g root "$APP_ROOT" "$APP_ROOT/releases"
-install -d -m 0755 -o slipstream-deploy -g slipstream-deploy \
-  "$APP_ROOT/staging" "$APP_ROOT/python"
+install -d -m 0755 -o slipstream-deploy -g slipstream-deploy "$APP_ROOT/staging"
+install -d -m 0755 -o root -g root "$APP_ROOT/python"
+env UV_PYTHON_INSTALL_DIR="$APP_ROOT/python" uv python install 3.12.3
+chown -R root:root "$APP_ROOT/python"
+chmod -R go-w "$APP_ROOT/python"
 install -d -m 0700 -o root -g root /etc/slipstream
 if [[ ! -e /etc/slipstream/api.env ]]; then
   install -m 0600 -o root -g root /dev/null /etc/slipstream/api.env

@@ -34,12 +34,16 @@ fi
 RELEASE_DIR="$RELEASES_DIR/$REVISION"
 PREVIOUS_RELEASE="$(readlink -f "$CURRENT_LINK" 2>/dev/null || true)"
 STAGE_DIR="$STAGING_ROOT/$REVISION.$$"
+FINALIZE_DIR="$RELEASES_DIR/.prepare-$REVISION.$$"
 TEMP_LINK="$APP_ROOT/.current.$$.${RANDOM}"
 
 cleanup() {
   unlink "$TEMP_LINK" 2>/dev/null || true
   if [[ -d "$STAGE_DIR" ]]; then
     find "$STAGE_DIR" -depth -delete 2>/dev/null || true
+  fi
+  if [[ -d "$FINALIZE_DIR" ]]; then
+    find "$FINALIZE_DIR" -depth -delete 2>/dev/null || true
   fi
 }
 trap cleanup EXIT INT TERM HUP
@@ -49,16 +53,19 @@ if [[ ! -f "$RELEASE_DIR/.prepared" ]]; then
   runuser -u slipstream-deploy -- sh -c \
     'git -C "$1" archive "$2" | tar -x -C "$3"' sh "$SOURCE_DIR" "$REVISION" "$STAGE_DIR"
   runuser -u slipstream-deploy -- env UV_PYTHON_INSTALL_DIR="$UV_PYTHON_INSTALL_DIR" \
-    uv sync --directory "$STAGE_DIR/api" --python 3.12.3 --frozen --no-dev
+    UV_PYTHON_DOWNLOADS=never uv sync --directory "$STAGE_DIR/api" \
+    --python 3.12.3 --frozen --no-dev
+  install -d -m 0755 -o root -g root "$FINALIZE_DIR"
+  cp -a --no-preserve=ownership "$STAGE_DIR/." "$FINALIZE_DIR/"
+  chown -R root:root "$FINALIZE_DIR"
   printf 'ENVIRONMENT=production\nRELEASE_SHA=%s\n' "$REVISION" \
-    > "$STAGE_DIR/api/deploy/release.env"
-  chmod 0644 "$STAGE_DIR/api/deploy/release.env"
+    > "$FINALIZE_DIR/.release.env"
+  chmod 0644 "$FINALIZE_DIR/.release.env"
   runuser -u slipstream -- env -i PATH=/usr/bin:/bin ENVIRONMENT=production \
-    "$STAGE_DIR/api/.venv/bin/python" -c \
-    "import sys; sys.path.insert(0, '$STAGE_DIR/api'); from app.main import app; assert app.title == 'Slipstream API'"
-  touch "$STAGE_DIR/.prepared"
-  chown -R root:root "$STAGE_DIR"
-  mv "$STAGE_DIR" "$RELEASE_DIR"
+    "$FINALIZE_DIR/api/.venv/bin/python" -c \
+    "import sys; sys.path.insert(0, '$FINALIZE_DIR/api'); from app.main import app; assert app.title == 'Slipstream API'"
+  touch "$FINALIZE_DIR/.prepared"
+  mv "$FINALIZE_DIR" "$RELEASE_DIR"
 fi
 
 switch_release() {

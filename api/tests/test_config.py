@@ -34,6 +34,12 @@ def test_production_supabase_requires_https() -> None:
         )
 
 
+def test_log_level_is_case_insensitive() -> None:
+    settings = Settings(_env_file=None, log_level="debug")
+
+    assert settings.log_level == "DEBUG"
+
+
 def test_validation_error_does_not_expose_secret() -> None:
     with pytest.raises(ValidationError) as error:
         Settings(_env_file=None, supabase_service_role_key="sentinel-secret")

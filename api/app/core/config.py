@@ -81,6 +81,11 @@ class Settings(BaseSettings):
     elevenlabs_api_key: SecretStr | None = None
     origami_api_key: SecretStr | None = None
 
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def normalise_log_level(cls, value: object) -> object:
+        return value.upper() if isinstance(value, str) else value
+
     @field_validator(
         "supabase_url",
         "supabase_service_role_key",
