@@ -200,6 +200,8 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
     }
     switch (st.id) {
       case "transcribe":
+        // The result waits for the step, like every other card.
+        if (st.status !== "done") return null;
         if (email) return <p className="text-[14px] text-soft">Read {plural(messages.length, "message")}, {inbound} from {call.contact.split(" ")[0]} and {messages.length - inbound} from {call.rep.split(" ")[0]}.{call.responseTime ? ` ${call.rep.split(" ")[0]} replied in ${call.responseTime}.` : ""}</p>;
         return <p className="text-[14px] text-soft">Diarised into {plural(call.turns.length, "turn")}. {call.rep} spoke {pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))} of the time.</p>;
       case "extract": {
