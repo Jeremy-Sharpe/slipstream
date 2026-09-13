@@ -54,6 +54,8 @@ test("ICP presentation claims require a substantive cohort, citations, and brief
   assert.equal(icpClaimSafety({ ...profile, evidence: [{ attribute: "industry", deal_ids: [], why: "Won deals support it" }] }).citedProfile, false);
   assert.equal(icpClaimSafety({ ...profile, evidence: evidence.filter((item) => item.attribute !== "headcount_band") }).citedProfile, false);
   assert.equal(icpClaimSafety({ ...profile, evidence: evidence.filter((item) => item.attribute !== "trigger") }).brief, false);
+  assert.equal(icpClaimSafety({ ...profile, profile: { ...profile.profile, roles: [] } }).brief, false);
+  assert.equal(icpClaimSafety({ ...profile, profile: { ...profile.profile, triggers: ["  "] } }).brief, false);
   assert.equal(icpClaimSafety({ ...profile, profile: { ...profile.profile, origami_brief: "   " } }).brief, false);
 });
 
@@ -91,6 +93,8 @@ test("provider labels and partial failures stay truthful", () => {
   assert.equal(modelLabel("local", "qwen2.5:7b"), "Local · qwen2.5:7b");
   assert.equal(modelLabel("openrouter", "qwen2.5:7b"), "OpenRouter · qwen2.5:7b");
   assert.equal(modelLabel(undefined, "qwen2.5:7b"), "Proof unavailable");
+  assert.equal(modelLabel("  ", "qwen2.5:7b"), "Proof unavailable");
+  assert.equal(modelLabel("local", "  "), "Proof unavailable");
   const footer = proofFooter({ runtime: { status: "failed" }, icp: { status: "missing" }, campaign: { status: "failed" } });
   assert.equal(footer, "runtime unavailable · ICP unavailable · campaign unavailable");
   assert.doesNotMatch(footer, /verified|status checked|13 CRM/);

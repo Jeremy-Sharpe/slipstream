@@ -42,7 +42,12 @@ export function icpClaimSafety(profile: ApiIcpProfile): { cohort: boolean; cited
     && profile.profile.industries.some((industry) => industry.trim().length > 0)
     && supported.has("industry")
     && supported.has("headcount_band");
-  const brief = citedProfile && supported.has("contact_role") && supported.has("trigger") && profile.profile.origami_brief.trim().length > 0;
+  const brief = citedProfile
+    && profile.profile.roles.some((role) => role.trim().length > 0)
+    && profile.profile.triggers.some((trigger) => trigger.trim().length > 0)
+    && supported.has("contact_role")
+    && supported.has("trigger")
+    && profile.profile.origami_brief.trim().length > 0;
   return { cohort, citedProfile, brief };
 }
 
@@ -90,9 +95,11 @@ export function playbackLabel(reducedMotion: boolean, playing: boolean, active: 
 }
 
 export function modelLabel(provider?: string, model?: string): string {
-  if (!provider || !model) return "Proof unavailable";
-  const providerLabel = ({ local: "Local", openrouter: "OpenRouter", openai: "OpenAI", anthropic: "Anthropic" } as Record<string, string>)[provider] ?? provider;
-  return `${providerLabel} · ${model}`;
+  const cleanProvider = provider?.trim();
+  const cleanModel = model?.trim();
+  if (!cleanProvider || !cleanModel) return "Proof unavailable";
+  const providerLabel = ({ local: "Local", openrouter: "OpenRouter", openai: "OpenAI", anthropic: "Anthropic" } as Record<string, string>)[cleanProvider] ?? cleanProvider;
+  return `${providerLabel} · ${cleanModel}`;
 }
 
 export function proofFooter(proof: DemoProof): string {

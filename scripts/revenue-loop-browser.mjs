@@ -54,14 +54,20 @@ try {
 
     const verticalBeforeReveal = await page.evaluate(() => window.scrollY);
     await page.getByRole("button", { name: "Show complete loop" }).click();
-    const revealed = await page.locator('[aria-current="step"]').evaluate((step) => {
+    await page.waitForTimeout(100);
+    const revealBounds = await page.locator('[aria-current="step"]').evaluate((step) => {
       const viewport = step.parentElement?.parentElement;
-      if (!viewport) return false;
+      if (!viewport) return null;
       const item = step.getBoundingClientRect(); const bounds = viewport.getBoundingClientRect();
-      return item.left >= bounds.left - 1 && item.right <= bounds.right + 1;
+      return { itemLeft: item.left, itemRight: item.right, viewportLeft: bounds.left, viewportRight: bounds.right, scrollLeft: viewport.scrollLeft };
     });
-    assert.equal(revealed, true, "the active horizontal step is revealed");
+    assert.ok(revealBounds && revealBounds.itemLeft >= revealBounds.viewportLeft - 1 && revealBounds.itemRight <= revealBounds.viewportRight + 1, `the active horizontal step is revealed: ${JSON.stringify(revealBounds)}`);
     assert.equal(await page.evaluate(() => window.scrollY), verticalBeforeReveal, "horizontal reveal preserves the page's vertical position");
+    await page.getByRole("button", { name: /One sales call/ }).click();
+    await page.waitForTimeout(100);
+    const firstRevealed = await page.locator('[aria-current="step"]').evaluate((step) => { const viewport = step.parentElement?.parentElement; if (!viewport) return false; const item = step.getBoundingClientRect(); const bounds = viewport.getBoundingClientRect(); return item.left >= bounds.left - 1 && item.right <= bounds.right + 1; });
+    assert.equal(firstRevealed, true, "backward navigation reveals the first step without clipping");
+    assert.equal(await page.evaluate(() => window.scrollY), verticalBeforeReveal, "backward horizontal reveal preserves vertical position");
 
     const links = [
       [/One sales call/, "Open transcript", "#transcript"], [/CRM writes itself/, "Inspect CRM evidence", "#crm-writeback"], [/Safe follow-up/, "Review exact draft", "#follow-up-draft"], [/The team compounds/, "See win patterns", "#patterns"], [/ICP emerges/, "Open cited ICP", "#icp"], [/Next search writes itself/, "Open search brief", "#brief"], [/Outreach stays controlled/, "Inspect exact execution", "#delivery-execution"],

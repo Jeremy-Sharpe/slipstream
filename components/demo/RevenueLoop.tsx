@@ -34,7 +34,7 @@ export function RevenueLoop() {
       : step.offsetLeft + step.offsetWidth > viewport.scrollLeft + viewport.clientWidth
         ? step.offsetLeft + step.offsetWidth - viewport.clientWidth
         : viewport.scrollLeft;
-    if (left !== viewport.scrollLeft) viewport.scrollTo({ left, behavior: reducedMotion ? "auto" : "smooth" });
+    if (left !== viewport.scrollLeft) viewport.scrollLeft = Math.max(0, left);
   }, [active, reducedMotion]);
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export function RevenueLoop() {
 
       <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_3px_rgba(17,24,39,0.05)]">
         <div className="h-1 bg-muted"><div className="h-full bg-primary transition-[width] duration-700 ease-out motion-reduce:transition-none" style={{ width: `${progress}%` }} /></div>
-        <div ref={stepsViewportRef} className="overflow-x-auto"><div className="grid min-w-[980px] grid-cols-7 gap-px bg-border">
+        <div ref={stepsViewportRef} className="relative overflow-x-auto"><div className="grid min-w-[980px] grid-cols-7 gap-px bg-border">
           {steps.map((step, index) => {
             const Icon = step.icon; const reached = index <= active; const current = index === active;
             return <button ref={(element) => { stepRefs.current[index] = element; }} key={step.eyebrow} type="button" onClick={() => selectStep(index)} aria-current={current ? "step" : undefined} className={cn("relative min-h-40 bg-card px-4 py-5 text-left transition-all focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none motion-reduce:transition-none", reached ? "bg-primary-soft" : "hover:bg-page", current && "z-10 shadow-[inset_0_0_0_2px_var(--primary)]")}>

@@ -292,7 +292,7 @@ function parseReadiness(value: unknown): ApiReadiness {
     revision: value.revision,
     storage: value.storage,
     integrations,
-    ...Object.fromEntries(optionalStrings.flatMap((key) => typeof value[key] === "string" ? [[key, value[key]]] : [])),
+    ...Object.fromEntries(optionalStrings.flatMap((key) => typeof value[key] === "string" && value[key].trim() ? [[key, value[key].trim()]] : [])),
   } as ApiReadiness;
 }
 
