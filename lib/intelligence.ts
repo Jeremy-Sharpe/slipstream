@@ -122,6 +122,8 @@ export const coaching: { rep: string; line: string }[] = [
   { rep: byNextStep, line: "Book the date on the call. Every stalled deal left with a promise to send something and no meeting." },
   { rep: byDiscovery, line: "Ask before quoting. The three lost calls opened on price and asked nothing about the setup." },
 ];
+/** The rep with the lower numbers overall (next-step rate, then discovery). */
+export const coachRep = [...reps].sort((a, b) => a.next_step_rate - b.next_step_rate || a.mean_discovery - b.mean_discovery)[0]?.rep ?? reps[0].rep;
 export const coachingFocus: string[] = coaching.map((c) => c.line);
 
 /* Triggers */
@@ -142,26 +144,37 @@ export const triggers: { label: string; count: number }[] = TRIGGERS.map((t) => 
 
 /* Derived ICP */
 
-export type IcpRow = { attribute: string; label: string; value: string; calls: { id: string; company: string; contact: string }[] };
+export type IcpRow = { attribute: string; label: string; value: string; why: string; calls: { id: string; company: string; contact: string; detail: string }[] };
 
-const ATTRIBUTES: { attribute: string; label: string; value: string; why: string; test: (c: CallRecord) => boolean }[] = [
-  { attribute: "industry", label: "Industry", value: "Professional services, allied health", why: "Every won deal is a firm that bills for expertise or treats patients.", test: (c) => /health|physio|legal|law|account|architect|consult/i.test(c.industry) },
-  { attribute: "headcount", label: "Company size", value: "25 to 80 staff", why: "Won deals sit between 37 and 76 staff; the lost calls were all under 15.", test: (c) => c.headcount >= 25 && c.headcount <= 80 },
-  { attribute: "role", label: "Champion title", value: "Practice, operations or general manager", why: "The person who owns the day-to-day pain was on the call.", test: (c) => /manager/i.test(c.title) },
-  { attribute: "trigger", label: "Buying trigger", value: "Insurance renewal, office move, M365 migration, IT person leaving", why: "Every won deal had a dated reason to move; no lost call did.", test: (c) => Boolean(c.trigger) },
+const ATTRIBUTES: { attribute: string; label: string; value: string; clause: string; detail: (c: CallRecord) => string; test: (c: CallRecord) => boolean }[] = [
+  { attribute: "industry", label: "Industry", value: "Professional services, allied health", clause: "were professional services or allied health", detail: (c) => c.industry, test: (c) => /health|physio|legal|law|account|architect|consult/i.test(c.industry) },
+  { attribute: "headcount", label: "Company size", value: "25 to 80 staff", clause: "sat between 25 and 80 staff", detail: (c) => `${c.headcount} staff`, test: (c) => c.headcount >= 25 && c.headcount <= 80 },
+  { attribute: "role", label: "Champion title", value: "Practice, operations or general manager", clause: "had a manager on the call", detail: (c) => c.title, test: (c) => /manager/i.test(c.title) },
+  { attribute: "trigger", label: "Buying trigger", value: "Insurance renewal, office move, M365 migration, IT person leaving", clause: "named a dated trigger", detail: (c) => shortTrigger(c.trigger), test: (c) => Boolean(c.trigger) },
 ];
+
+/** The trigger as its short label ("IT person leaving"), or the first few words. */
+const shortTrigger = (t: string | null | undefined) => (t ? TRIGGERS.find((x) => x.re.test(t))?.label ?? t.split(" ").slice(0, 4).join(" ") : "");
+
+/** "All 5 wins were …; 2 of 7 others were." Counted, not written. */
+const why = (a: (typeof ATTRIBUTES)[number]) => {
+  const w = won.filter(a.test).length, o = other.filter(a.test).length;
+  const wins = w === won.length ? `All ${won.length} wins` : `${w} of ${won.length} wins`;
+  return `${wins} ${a.clause}; ${o} of ${other.length} others ${a.clause.startsWith("were") ? "were" : "did"}.`;
+};
 
 export const icpRows: IcpRow[] = ATTRIBUTES.map((a) => ({
   attribute: a.attribute,
   label: a.label,
   value: a.value,
-  calls: won.filter(a.test).map((c) => ({ id: c.id, company: c.company, contact: c.contact })),
+  why: why(a),
+  calls: won.filter(a.test).slice(0, 3).map((c) => ({ id: c.id, company: c.company, contact: c.contact, detail: a.detail(c) })),
 }));
 
 export const icpProfile: ApiIcpProfile = {
   id: "icp-harbourline-v3",
   version: icp.version,
-  evidence: ATTRIBUTES.map((a) => ({ attribute: a.attribute, deal_ids: won.filter(a.test).map((c) => c.id), why: a.why })),
+  evidence: ATTRIBUTES.map((a) => ({ attribute: a.attribute, deal_ids: won.filter(a.test).map((c) => c.id), why: why(a) })),
   source_deals: won.map((c) => ({ deal_id: c.id, company_name: c.company, call_ids: [c.id] })),
   profile: {
     summary: "Professional services and allied health firms in Victoria with 25 to 80 staff, a concrete trigger, and a practice or operations manager on the call.",
