@@ -4,14 +4,15 @@ import Link from "next/link";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/components/ui";
 import type { Beat as BeatRecord } from "@/lib/loop";
+import { Preview } from "./Preview";
 
 /* One beat of the loop: the static twin of TraceStep. Ink check, hairline
-   connector, "01 Listen · One sales call", and a flat card that expands with
-   the same grid-template-rows motion. Nothing streams. */
+   connector, "01 Listen" with what happened as the summary, and a flat card
+   that expands to the artefact itself. Nothing streams. */
 
 export function Beat({ beat, expanded, onToggle, last }: { beat: BeatRecord; expanded: boolean; onToggle: () => void; last?: boolean }) {
   return (
-    <li className="relative flex gap-4">
+    <li id={`beat-${beat.n}`} className="relative flex gap-4">
       <div className="flex flex-col items-center">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-ink text-white">
           <Check className="size-3.5" strokeWidth={2.5} />
@@ -24,13 +25,13 @@ export function Beat({ beat, expanded, onToggle, last }: { beat: BeatRecord; exp
           type="button"
           aria-expanded={expanded}
           onClick={onToggle}
-          className="-mx-1.5 flex h-7 w-[calc(100%+12px)] items-center gap-2 rounded-lg px-1.5 text-left transition-colors duration-100 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          className="-mx-1.5 flex h-8 w-[calc(100%+12px)] items-center gap-2 rounded-lg px-1.5 text-left transition-colors duration-100 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           <span className="shrink-0 text-[15px] font-medium whitespace-nowrap text-ink">
             <span className="mr-2 tabular-nums text-faint">{beat.n}</span>
             {beat.verb}
           </span>
-          <span className="min-w-0 flex-1 truncate text-[14px] text-soft">{beat.title}</span>
+          <span className="min-w-0 flex-1 truncate text-[14px] text-soft">{beat.what}</span>
           <ChevronDown className="size-3.5 shrink-0 text-faint transition-transform duration-300" strokeWidth={2.2} style={{ transform: expanded ? "rotate(180deg)" : "rotate(0)" }} />
         </button>
 
@@ -40,8 +41,7 @@ export function Beat({ beat, expanded, onToggle, last }: { beat: BeatRecord; exp
         >
           <div className="overflow-hidden">
             <div className="mt-1.5 rounded-xl bg-surface p-4">
-              <p className="text-[15px] text-ink">{beat.what}</p>
-              <p className="mt-1 text-[13.5px] text-soft">{beat.impact}</p>
+              <Preview preview={beat.preview} />
               <div className="mt-3 flex items-center gap-2">
                 <span className="inline-flex h-6 items-center rounded-full border border-line px-2.5 text-[12px] font-medium leading-none text-soft">{beat.provenance}</span>
                 <Link

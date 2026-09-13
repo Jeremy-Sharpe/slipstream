@@ -58,7 +58,7 @@ export function TypedPlaceholder({ active, variant = "transcript" }: { active: b
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-0 p-5 pb-10 text-[15px] leading-6 whitespace-pre-wrap transition-opacity"
+      className="pointer-events-none absolute inset-0 overflow-hidden p-5 pb-10 text-[15px] leading-6 whitespace-pre-wrap transition-opacity"
       style={{ color: "#c4c4c4", opacity: active ? (fading ? 0 : 1) : 0, transitionDuration: active ? `${FADE_MS}ms` : "150ms", willChange: "opacity", minHeight: 72 }}
     >
       {shown.map((t, i) => (

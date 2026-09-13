@@ -8,8 +8,9 @@ export const TRANSCRIPT_SAMPLES: [string, string, string][][] = [
   [["00:00:15", "Sam Whitfield", "Felix, what happens to a loan file between credit approval and the documents going out?"], ["00:00:24", "Felix Morgan", "It sits with two analysts who rebuild the facility letter by hand, and broker season starts in six weeks."], ["00:00:41", "Sam Whitfield", "Who checks it before it leaves?"]],
 ];
 
-/* Forwarded emails: header lines, a blank line, then the body. */
+/* Forwarded emails: two header lines, a blank line, a greeting and two short
+   body lines, so a sample never runs past the 220px card. */
 export const EMAIL_SAMPLES: string[][] = [
-  ["From: Olivia Hart <olivia@fairfieldwealth.example>", "To: Sam Whitfield <sam@eleno.example>", "Subject: Source logging and next steps", "Date: Sat 12 Sept 2026 10:12", "", "Hi Sam,", "", "Our compliance manager wants to see how the drafting assistant records every source it relies on before we roll it out to the advisers. Could you send the recommended first phase, timing, and who you need from our side?"],
-  ["From: Felix Morgan <felix@kestrellending.example>", "To: Sam Whitfield <sam@eleno.example>", "Subject: Facility letter drafting before broker season", "Date: Tue 8 Sept 2026 08:31", "", "Hi Sam,", "", "Our head of risk wants the redrafted facility letter side by side with the original before we commit. We are 64 people and the season starts in six weeks. What does the discovery phase involve, and roughly what should a lender our size expect?"],
+  ["From: Olivia Hart <olivia@fairfieldwealth.example>", "Subject: Source logging and next steps", "", "Hi Sam,", "Compliance wants to see how the assistant logs its sources.", "Could you send the first phase, timing and who you need?"],
+  ["From: Felix Morgan <felix@kestrellending.example>", "Subject: Facility letter drafting before broker season", "", "Hi Sam,", "Our head of risk wants the redraft beside the original.", "What does discovery involve for a lender of 64 people?"],
 ];

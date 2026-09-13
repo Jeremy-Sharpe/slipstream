@@ -18,8 +18,8 @@ export default function ConversationsPage() {
     <div>
       <div className="flex items-end justify-between gap-6">
         <div>
-          <h1 className="text-[22px] font-semibold text-ink">Conversations</h1>
-          <p className="mt-1 text-[13.5px] text-soft">Every call and email, and what Slipstream did with it.</p>
+          <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">Conversations</h1>
+          <p className="mt-2 text-[14px] text-soft">Every call and email, and what Slipstream did with it.</p>
         </div>
         <div className="flex items-center gap-2">
           <Segmented value={filter} options={FILTERS} onChange={setFilter} />

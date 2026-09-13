@@ -38,7 +38,7 @@ export function LeadsView() {
     if (sort) {
       const key = SORT_KEYS[sort.col];
       out.sort((a, b) => {
-        const pick = (r: Row) => (key === "draft" ? Number(r.drafted) : key === "linkedin" ? r.contact : r[key]);
+        const pick = (r: Row) => (key === "draft" ? Number(r.drafted) : key === "n" ? 0 : r[key]);
         const av = pick(a), bv = pick(b);
         const c = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
         return sort.dir === "asc" ? c : -c;
@@ -67,47 +67,63 @@ export function LeadsView() {
           : "No leads found yet. Find leads to start a search.";
 
   return (
-    <div className="grid h-[calc(100vh-32px)] grid-cols-[380px_minmax(0,1fr)] gap-8">
-      <SearchPane
-        searches={searches}
-        leads={leads}
-        profile={profile}
-        wonDeals={wonDeals}
-        selectedId={selectedId}
-        onSelect={onSelect}
-        onFind={onFind}
-        busy={busySearch || status !== "ready" || !profile}
-      />
+    <div className="flex h-[calc(100vh-72px)] flex-col">
+      <div className="shrink-0">
+        <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">Leads</h1>
+        <p className="mt-2 text-[14px] text-soft">Companies like the ones you closed, found from your won calls.</p>
+      </div>
 
-      <section className="flex min-h-0 min-w-0 flex-col">
-        <div className="flex h-10 shrink-0 items-center justify-end gap-2">
-          <button
-            type="button"
-            aria-label="Search the sheet"
-            onClick={() => setShowSearch((s) => !s)}
-            className={cn("flex h-8 items-center gap-2 rounded-full px-3 text-[13px] text-soft transition-colors duration-150 hover:bg-surface hover:text-ink", showSearch && "bg-surface text-ink")}
-          >
-            <Search className="size-3.5" strokeWidth={1.75} /> Search
-          </button>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="primary"
-              size="sm"
-              disabled={pending.length === 0 || approving}
-              onClick={() => void actions.approveAll(pending.map((r) => r.id))}
-            >
-              {approving ? "Approving" : pending.length > 0 ? `Approve all drafts · ${pending.length}` : rows.length > 0 ? "All drafts approved" : "Approve all drafts"}
-            </Button>
+      <div className="mt-8 grid min-h-0 flex-1 grid-cols-[380px_1px_minmax(0,1fr)]">
+        <div className="flex min-h-0 flex-col pr-8">
+          <header className="flex h-12 shrink-0 items-center border-b border-line text-[13.5px] font-medium text-ink">Brief</header>
+          <div className="min-h-0 flex-1 pt-3">
+            <SearchPane
+              searches={searches}
+              leads={leads}
+              profile={profile}
+              wonDeals={wonDeals}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              onFind={onFind}
+              busy={busySearch || status !== "ready" || !profile}
+            />
           </div>
         </div>
-        <div className="relative mt-2 min-h-0 flex-1">
-          {rows.length === 0 ? (
-            <p className="flex h-full items-center justify-center px-8 text-center text-[14px] text-faint">{empty}</p>
-          ) : (
-            <LeadsGrid rows={rows} sort={sort} onSort={setSort} onOpen={onOpen} showSearch={showSearch} onSearchClose={() => setShowSearch(false)} />
-          )}
-        </div>
-      </section>
+
+        <div aria-hidden className="bg-line" />
+
+        <section className="flex min-h-0 min-w-0 flex-col pl-8">
+          <header className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-line">
+            <p className="text-[13.5px] font-medium text-ink">Preview · {rows.length} {rows.length === 1 ? "lead" : "leads"}</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Search the sheet"
+                onClick={() => setShowSearch((s) => !s)}
+                className={cn("flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[13.5px] text-soft shadow-[inset_0_0_0_1px_#e8e8e8] transition-colors duration-150 hover:text-ink", showSearch && "bg-surface text-ink")}
+              >
+                <Search className="size-4" strokeWidth={1.75} /> Search
+              </button>
+              <Button
+                variant="primary"
+                className="h-9 gap-2 px-4 text-[13.5px]"
+                disabled={pending.length === 0 || approving}
+                onClick={() => void actions.approveAll(pending.map((r) => r.id))}
+              >
+                {approving ? "Approving" : pending.length > 0 || search?.status === "running" || rows.length === 0 ? "Approve all drafts" : "All drafts approved"}
+                {pending.length > 0 && !approving && <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1.5 text-[12px] tabular-nums">{pending.length}</span>}
+              </Button>
+            </div>
+          </header>
+          <div className="relative min-h-0 flex-1 pt-3">
+            {rows.length === 0 ? (
+              <p className="flex h-full items-center justify-center px-8 text-center text-[14px] text-faint">{empty}</p>
+            ) : (
+              <LeadsGrid rows={rows} sort={sort} onSort={setSort} onOpen={onOpen} showSearch={showSearch} onSearchClose={() => setShowSearch(false)} selectedId={openId} />
+            )}
+          </div>
+        </section>
+      </div>
 
       <LeadPanel lead={open} drafting={!!(open && busy[open.id])} onClose={onClose} />
     </div>
