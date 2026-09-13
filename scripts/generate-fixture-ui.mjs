@@ -249,7 +249,7 @@ function buildTimeline(script) {
   const analysed = shiftIso(transcribed, 60);
   return [
     { title: "Call transcribed", meta: "Scribe · diarised", at: transcribed, icon: "call" },
-    { title: "Fields extracted", meta: "Claude · awaiting approval", at: analysed, icon: "sparkles" },
+    { title: "Fields extracted", meta: "Reasoning model · awaiting approval", at: analysed, icon: "sparkles" },
     { title: "Scorecard computed", meta: "4 dimensions", at: analysed, icon: "gauge" },
     { title: "Follow-up drafted", meta: "Ready to review", at: shiftIso(analysed, 60), icon: "mail" },
   ];

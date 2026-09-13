@@ -54,7 +54,7 @@ export const lists: List[] = [
 
 export const runs: ListRun[] = [
   { id: "run-3", tool: "Score against won deals", at: "2026-09-12T16:40:00+10:00", rows: 12 },
-  { id: "run-2", tool: "Draft with Claude", at: "2026-09-12T16:12:00+10:00", rows: 7 },
+  { id: "run-2", tool: "Draft follow-ups", at: "2026-09-12T16:12:00+10:00", rows: 7 },
   { id: "run-1", tool: "Enrich with Origami", at: "2026-09-12T15:58:00+10:00", rows: 12 },
 ];
 

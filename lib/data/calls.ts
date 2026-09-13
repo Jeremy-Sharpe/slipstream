@@ -337,7 +337,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-08-31T09:25:00+10:00",
     "icon": "sparkles"
    },
@@ -688,7 +688,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-01T10:40:20+10:00",
     "icon": "sparkles"
    },
@@ -1035,7 +1035,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-01T14:09:30+10:00",
     "icon": "sparkles"
    },
@@ -1386,7 +1386,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-02T11:10:10+10:00",
     "icon": "sparkles"
    },
@@ -1742,7 +1742,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-02T15:40:00+10:00",
     "icon": "sparkles"
    },
@@ -2093,7 +2093,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-03T10:09:45+10:00",
     "icon": "sparkles"
    },
@@ -2458,7 +2458,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-04T09:40:10+10:00",
     "icon": "sparkles"
    },
@@ -2823,7 +2823,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-04T14:24:55+10:00",
     "icon": "sparkles"
    },
@@ -3188,7 +3188,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-07T10:10:30+10:00",
     "icon": "sparkles"
    },
@@ -3544,7 +3544,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-08T13:39:00+10:00",
     "icon": "sparkles"
    },
@@ -3904,7 +3904,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-09T09:55:10+10:00",
     "icon": "sparkles"
    },
@@ -4072,7 +4072,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-10T15:03:55+10:00",
     "icon": "sparkles"
    },
@@ -4468,7 +4468,7 @@ export const calls: CallRecord[] = [
    },
    {
     "title": "Fields extracted",
-    "meta": "Claude · awaiting approval",
+    "meta": "Reasoning model · awaiting approval",
     "at": "2026-09-11T09:08:34+10:00",
     "icon": "sparkles"
    },
