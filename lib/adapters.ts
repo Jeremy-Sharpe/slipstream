@@ -133,6 +133,9 @@ function scorecardFrom(scorecard: ApiScorecard, turns: Turn[], kind: "call" | "e
     nextStepSecured: scorecard.next_step_secured,
     objection: scorecard.objection_handling,
     talkRatio: scorecard.rep_talk_ratio,
+    summary: scorecard.summary,
+    wentWell: scorecard.went_well,
+    toImprove: scorecard.to_improve,
     ...(kind === "email" ? { askedRightQuestions: scorecard.discovery_questions > 0 } : {}),
     spans: {
       discovery: spanFromTurnIndex(scorecard.discovery_evidence[0]?.turn_index, turns),

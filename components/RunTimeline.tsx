@@ -31,6 +31,8 @@ const EMAIL_LABELS: Partial<Record<StepId, { working: string; done: string }>> =
 const fmtAud = (n: number | null | undefined, none = "None") => (n == null ? none : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+const narrativeSections = (s: NonNullable<CallRecord["scorecard"]>): [string, string[]][] =>
+  ([["Went well", s.wentWell], ["To improve", s.toImprove]] as [string, string[]][]).filter(([, lines]) => lines.length > 0);
 
 export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody, setDraftBody, onHighlight, onJump, onReveal, onExpandClick, onRetry, onSynced, onDraftApproved }: {
   call: CallRecord;
@@ -221,6 +223,19 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
             {row("Next step secured", s.nextStepSecured ? "Yes, dated" : "No", s.spans.nextStep)}
             {row("Objection handling", s.objection.replace("_", " "), s.spans.objection)}
             {row("Rep talk ratio", pct(s.talkRatio), null)}
+            {s.summary && <p className="mt-3 px-2 text-[14px] leading-6 text-ink">{s.summary}</p>}
+            {(s.wentWell.length > 0 || s.toImprove.length > 0) && (
+              <div className="mt-2 grid gap-3 px-2 sm:grid-cols-2">
+                {narrativeSections(s).map(([label, lines]) => (
+                  <div key={label}>
+                    <p className="text-[12px] font-medium uppercase tracking-wide text-soft">{label}</p>
+                    <ul className="mt-1 flex flex-col gap-1 text-[14px] leading-5 text-ink">
+                      {lines.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       }
