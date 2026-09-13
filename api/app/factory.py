@@ -16,6 +16,7 @@ from app.core.llm import create_embedding_client
 from app.core.readiness import (
     LocalEmbeddingReadinessProbe,
     LocalModelReadinessProbe,
+    ProviderReadinessProbe,
     StorageReadinessProbe,
 )
 from app.routers import (
@@ -23,6 +24,7 @@ from app.routers import (
     campaigns,
     crm,
     deliveries,
+    demo,
     drafts,
     emails,
     extractions,
@@ -65,6 +67,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await app.state.readiness.close()
         await app.state.reasoning_readiness.close()
         await app.state.embedding_readiness.close()
+        await app.state.provider_readiness.close()
         embedding_client = getattr(app.state, "embedding_client", None)
         close_embedding_client = getattr(embedding_client, "close", None)
         if callable(close_embedding_client):
@@ -86,6 +89,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.readiness = StorageReadinessProbe(runtime_settings)
     app.state.reasoning_readiness = LocalModelReadinessProbe(runtime_settings)
     app.state.embedding_readiness = LocalEmbeddingReadinessProbe(runtime_settings)
+    app.state.provider_readiness = ProviderReadinessProbe(runtime_settings)
     app.state.embedding_client = (
         create_embedding_client(runtime_settings)
         if runtime_settings.integration_flags["embeddings"]
@@ -135,6 +139,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.scorecard_slots = asyncio.Semaphore(2)
     app.state.scorecard_admission_slots = asyncio.Semaphore(8)
     app.state.outreach_locks = [threading.Lock() for _ in range(64)]
+    app.state.demo_bootstrap_lock = asyncio.Lock()
+    app.state.demo_source_jobs = {}
     try:
         app.state.scorecard_judge = build_judge(runtime_settings)
     except RuntimeError:
@@ -170,6 +176,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(deliveries.router, prefix="/api/v1")
     app.include_router(campaigns.router, prefix="/api/v1")
     app.include_router(drafts.router, prefix="/api/v1")
+    app.include_router(demo.router)
+    app.include_router(demo.router, prefix="/api/v1")
     app.include_router(emails.router, prefix="/api/v1")
     app.include_router(icp.router)
     app.include_router(icp.router, prefix="/api/v1")

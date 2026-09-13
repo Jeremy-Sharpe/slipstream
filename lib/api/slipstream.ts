@@ -159,6 +159,7 @@ export type ApiLead = {
   origami_relevance_score: number | null;
   similarity_score: number | null;
   status: "new" | "reviewed" | "approved" | "contacted" | "rejected";
+  metadata?: { source?: string; synthetic?: boolean };
 };
 
 export type ApiOutreachDraft = {
@@ -178,6 +179,15 @@ export type ApiLeadSource = {
 export type ApiLeadSourceStatus = {
   status: string;
   phase: string | null;
+};
+
+export type ApiDemoBootstrap = {
+  status: string;
+  icp: ApiIcpProfile;
+  reused_icp: boolean;
+  lead_source: ApiLeadSource | null;
+  lead_provider: string;
+  spend_guardrail: string;
 };
 
 export type ApiCampaignItemState = "queued" | "running" | "sent" | "retryable" | "failed" | "reconcile";
@@ -604,6 +614,34 @@ export async function sourceLeads(count = 10, signal?: AbortSignal): Promise<Api
     typeof payload.status !== "string"
   ) throw new ApiError("Slipstream API returned malformed lead-search data", 502);
   return payload as ApiLeadSource;
+}
+
+export async function bootstrapDemo(signal?: AbortSignal): Promise<ApiDemoBootstrap> {
+  const payload = await request<unknown>("/demo/bootstrap", {
+    method: "POST",
+    body: JSON.stringify({ source_leads: true }),
+    signal,
+  });
+  if (
+    !isRecord(payload) ||
+    typeof payload.status !== "string" ||
+    typeof payload.reused_icp !== "boolean" ||
+    typeof payload.spend_guardrail !== "string" ||
+    typeof payload.lead_provider !== "string" ||
+    payload.lead_source === null ||
+    !isRecord(payload.lead_source) ||
+    typeof payload.lead_source.origami_job_id !== "string" ||
+    typeof payload.lead_source.icp_profile_id !== "string" ||
+    typeof payload.lead_source.status !== "string"
+  ) throw new ApiError("Slipstream API returned malformed demo-bootstrap data", 502);
+  return {
+    status: payload.status,
+    icp: parseIcpProfile(payload.icp),
+    reused_icp: payload.reused_icp,
+    lead_source: payload.lead_source as ApiLeadSource,
+    lead_provider: payload.lead_provider,
+    spend_guardrail: payload.spend_guardrail,
+  };
 }
 
 export async function getLeadSourceStatus(jobId: string, signal?: AbortSignal): Promise<ApiLeadSourceStatus> {

@@ -8,6 +8,8 @@ from app.core.readiness import (
     EmbeddingUnavailableError,
     LocalEmbeddingReadinessProbe,
     LocalModelReadinessProbe,
+    ProviderReadinessProbe,
+    ProviderUnavailableError,
     ReasoningUnavailableError,
     StorageReadinessProbe,
     StorageUnavailableError,
@@ -22,7 +24,7 @@ def test_health_runs_without_credentials(client: TestClient) -> None:
     assert response.json()["status"] == "ok"
     assert response.json()["storage"] == "memory"
     assert response.json()["reasoning_provider"] == "openai"
-    assert response.json()["reasoning_model"] == "gpt-5.4"
+    assert response.json()["reasoning_model"] == "gpt-5.4-mini"
     assert response.json()["reasoning_configured"] is False
     assert response.json()["embedding_provider"] is None
     assert response.json()["embedding_configured"] is False
@@ -52,6 +54,27 @@ def test_readiness_works_in_local_mode(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json()["storage"] == "memory"
+
+
+def test_integration_verification_truthfully_reports_missing_keys(client: TestClient) -> None:
+    response = client.get("/api/v1/integrations/verify")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "incomplete"
+    assert response.json()["demo_ready"] is False
+    assert response.json()["two_key_ready"] is False
+    assert response.json()["providers"] == {
+        "openrouter": {
+            "configured": False,
+            "verified": False,
+            "check": "add API key",
+        },
+        "origami": {
+            "configured": False,
+            "verified": False,
+            "check": "add API key",
+        },
+    }
 
 
 def test_cors_allows_configured_web_origin(client: TestClient) -> None:
@@ -104,7 +127,9 @@ def test_readiness_fails_closed_when_configured_local_model_is_missing() -> None
     assert response.json() == {"detail": "Configured reasoning model is unavailable"}
 
 
-def test_readiness_ignores_an_unused_local_fallback() -> None:
+def test_readiness_ignores_an_unused_local_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     settings = Settings(
         _env_file=None,
         environment="test",
@@ -112,12 +137,65 @@ def test_readiness_ignores_an_unused_local_fallback() -> None:
         local_model_base_url="http://127.0.0.1:1/v1",
     )
 
+    async def pass_hosted(_: ProviderReadinessProbe) -> None:
+        return None
+
+    monkeypatch.setattr(ProviderReadinessProbe, "check", pass_hosted)
     with TestClient(create_app(settings)) as configured_client:
         response = configured_client.get("/ready")
 
     assert response.status_code == 200
     assert response.json()["reasoning_provider"] == "openrouter"
     assert response.json()["reasoning_configured"] is True
+
+
+@pytest.mark.asyncio
+async def test_hosted_provider_probe_verifies_both_keys_without_spend() -> None:
+    requests: list[httpx.Request] = []
+
+    def verify(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.host == "openrouter.test":
+            return httpx.Response(200, json={"data": {"label": "demo"}})
+        return httpx.Response(200, json={"object": "account"})
+
+    settings = Settings(
+        _env_file=None,
+        openrouter_api_key="openrouter-secret",
+        origami_api_key="origami-secret",
+        openrouter_base_url="https://openrouter.test/api/v1",
+        origami_base_url="https://origami.test/api/v3",
+    )
+    probe = ProviderReadinessProbe(settings, transport=httpx.MockTransport(verify))
+
+    assert await probe.verify() == {"openrouter": True, "origami": True}
+    assert await probe.verify() == {"openrouter": True, "origami": True}
+    assert [request.url.path for request in requests] == ["/api/v1/key", "/api/v3/account"]
+    assert requests[0].headers["Authorization"] == "Bearer openrouter-secret"
+    assert requests[0].headers["HTTP-Referer"] == settings.openrouter_site_url
+    assert requests[0].headers["X-OpenRouter-Title"] == "Slipstream"
+    assert requests[1].headers["Authorization"] == "Bearer origami-secret"
+    assert all(request.method == "GET" for request in requests)
+    await probe.close()
+
+
+@pytest.mark.asyncio
+async def test_hosted_provider_probe_fails_closed_without_leaking_keys() -> None:
+    def reject(_: httpx.Request) -> httpx.Response:
+        return httpx.Response(401, json={"error": "rejected"})
+
+    settings = Settings(
+        _env_file=None,
+        openrouter_api_key="openrouter-sentinel",
+        origami_api_key="origami-sentinel",
+    )
+    probe = ProviderReadinessProbe(settings, transport=httpx.MockTransport(reject))
+
+    assert await probe.verify() == {"openrouter": False, "origami": False}
+    with pytest.raises(ProviderUnavailableError) as error:
+        await probe.check()
+    assert "sentinel" not in str(error.value)
+    await probe.close()
 
 
 @pytest.mark.asyncio

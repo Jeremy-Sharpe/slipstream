@@ -19,6 +19,103 @@ class EmbeddingUnavailableError(RuntimeError):
     pass
 
 
+class ProviderUnavailableError(RuntimeError):
+    pass
+
+
+class ProviderReadinessProbe:
+    """Verify hosted credentials without generating tokens or spending lead credits."""
+
+    def __init__(
+        self, settings: Settings, transport: httpx.AsyncBaseTransport | None = None
+    ) -> None:
+        self._lock = asyncio.Lock()
+        self._last_checked = 0.0
+        self._last_results: dict[str, bool | None] | None = None
+        common = {
+            "timeout": httpx.Timeout(5.0, connect=2.0),
+            "transport": transport,
+            "trust_env": False,
+            "follow_redirects": False,
+        }
+        self._openrouter = (
+            httpx.AsyncClient(
+                base_url=settings.openrouter_base_url.rstrip("/") + "/",
+                headers={
+                    "Authorization": (
+                        f"Bearer {settings.openrouter_api_key.get_secret_value()}"
+                    ),
+                    **settings.openrouter_headers,
+                },
+                **common,
+            )
+            if settings.openrouter_api_key is not None
+            else None
+        )
+        self._origami = (
+            httpx.AsyncClient(
+                base_url=settings.origami_base_url.rstrip("/") + "/",
+                headers={
+                    "Authorization": f"Bearer {settings.origami_api_key.get_secret_value()}"
+                },
+                **common,
+            )
+            if settings.origami_api_key is not None
+            else None
+        )
+
+    async def verify(self) -> dict[str, bool | None]:
+        if self._cached_result_applies():
+            return dict(self._last_results or {})
+        async with self._lock:
+            if self._cached_result_applies():
+                return dict(self._last_results or {})
+            openrouter, origami = await asyncio.gather(
+                self._probe_openrouter(), self._probe_origami()
+            )
+            self._last_results = {"openrouter": openrouter, "origami": origami}
+            self._last_checked = monotonic()
+            return dict(self._last_results)
+
+    async def check(self) -> None:
+        results = await self.verify()
+        if any(result is False for result in results.values()):
+            raise ProviderUnavailableError("A configured hosted provider is unavailable")
+
+    async def _probe_openrouter(self) -> bool | None:
+        if self._openrouter is None:
+            return None
+        try:
+            response = await self._openrouter.get("key")
+            response.raise_for_status()
+            payload = response.json()
+            if not isinstance(payload, dict) or not isinstance(payload.get("data"), dict):
+                raise ValueError("OpenRouter returned an unexpected key response")
+            return True
+        except (httpx.HTTPError, ValueError):
+            return False
+
+    async def _probe_origami(self) -> bool | None:
+        if self._origami is None:
+            return None
+        try:
+            response = await self._origami.get("account")
+            response.raise_for_status()
+            if not isinstance(response.json(), dict):
+                raise ValueError("Origami returned an unexpected account response")
+            return True
+        except (httpx.HTTPError, ValueError):
+            return False
+
+    def _cached_result_applies(self) -> bool:
+        return self._last_results is not None and monotonic() - self._last_checked < 30
+
+    async def close(self) -> None:
+        for client in (self._openrouter, self._origami):
+            if client is not None:
+                await client.aclose()
+
+
 class LocalModelReadinessProbe:
     def __init__(
         self, settings: Settings, transport: httpx.AsyncBaseTransport | None = None

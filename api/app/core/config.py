@@ -157,9 +157,11 @@ class Settings(BaseSettings):
     crm_webhook_secret: SecretStr | None = None
     resend_api_key: SecretStr | None = None
     resend_from: str | None = None
-    reasoning_model: str = "gpt-5.4"
+    reasoning_model: str = "gpt-5.4-mini"
     embedding_model: str = "text-embedding-3-small"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_site_url: str = "https://slipstream-hackathon.vercel.app"
+    openrouter_app_name: str = "Slipstream"
     local_model_base_url: str | None = None
     local_model_name: str = "slipstream-qwen2.5-1.5b-instruct-q4-k-m"
     local_model_context_tokens: int = Field(default=16_384, ge=8_192, le=131_072)
@@ -243,7 +245,20 @@ class Settings(BaseSettings):
             if not self.local_embedding_name.strip() or len(self.local_embedding_name) > 160:
                 raise ValueError("LOCAL_EMBEDDING_NAME must be between 1 and 160 characters")
             self.local_embedding_name = self.local_embedding_name.strip()
+        self.openrouter_site_url = _canonical_http_origin(
+            self.openrouter_site_url, production=self.environment == "production"
+        )
+        self.openrouter_app_name = self.openrouter_app_name.strip()
+        if not self.openrouter_app_name or len(self.openrouter_app_name) > 80:
+            raise ValueError("OPENROUTER_APP_NAME must be between 1 and 80 characters")
         return self
+
+    @property
+    def openrouter_headers(self) -> dict[str, str]:
+        return {
+            "HTTP-Referer": self.openrouter_site_url,
+            "X-OpenRouter-Title": self.openrouter_app_name,
+        }
 
     @property
     def storage_mode(self) -> Literal["supabase", "memory"]:

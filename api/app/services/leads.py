@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import NAMESPACE_URL, uuid5
 
 from app.core.config import Settings
 from app.schemas.leads import Lead, LeadIn
@@ -26,7 +27,18 @@ async def start_search(
     if profile is None:
         raise ValueError("No ready ICP profile found")
     _require_matching_embedding_model(profile.embedding_model, settings)
-    job = await origami.create_search(profile.origami_brief, count, quality)
+    idempotency_key = str(
+        uuid5(
+            NAMESPACE_URL,
+            f"slipstream:{profile.id}:{profile.origami_brief}:{count}:{quality}",
+        )
+    )
+    job = await origami.create_search(
+        profile.origami_brief,
+        count,
+        quality,
+        idempotency_key=idempotency_key,
+    )
     return job, str(profile.id)
 
 

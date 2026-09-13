@@ -8,7 +8,7 @@ uv run uvicorn app.main:app --reload
 uv run pytest
 ```
 
-The liveness endpoint is available at `/health` and `/api/v1/health`. `/ready` additionally probes Supabase when configured and returns 503 if storage is unavailable. Both report optional integration configuration without exposing secret values.
+The liveness endpoint is available at `/health` and `/api/v1/health`. `/ready` probes configured storage, local models and hosted providers, returning 503 if one is unavailable. `/api/v1/integrations/verify` verifies OpenRouter through its current-key read and optional Origami through its account read without generating tokens or spending lead credits. Responses never expose secret values.
 
 ## Scorecard judge
 
@@ -54,13 +54,15 @@ and records the provider receipt before returning `status=sent`. See
 
 Every row written by this lane carries `metadata.source = "fixtures"` where the table has metadata, and ICP derivation reads only deals with that marker. The demo call is loaded with `metadata.demo = true` and is excluded from ICP derivation by default.
 
-Embeddings use `EMBEDDING_MODEL`, defaulting to OpenAI `text-embedding-3-small`, matching the schema's 1536-dimensional vectors. Reasoning uses `REASONING_MODEL`, defaulting to `gpt-5.4`, and selects the provider from the model name.
+Embeddings use `EMBEDDING_MODEL`, defaulting to OpenAI `text-embedding-3-small`, matching the schema's 1536-dimensional vectors. Reasoning uses the cost-conscious `gpt-5.4-mini` default and selects the provider from the model name.
 
 Use a Claude model such as `claude-opus-5` with `ANTHROPIC_API_KEY`, an OpenAI model such as `gpt-5.4` or `o4-mini` with `OPENAI_API_KEY`, or an OpenRouter model such as `meta-llama/llama-4-maverick` with `OPENROUTER_API_KEY`. When the native key is absent and `OPENROUTER_API_KEY` is set, the same model is routed through OpenRouter under its vendor-prefixed id (`gpt-5.4` becomes `openai/gpt-5.4`, reported in the `model` field of the stored profile), and embeddings go through OpenRouter as `openai/text-embedding-3-small` while the stored `embedding_model` stays unprefixed. The `embeddings` flag on `/health` is true when either key is present. Origami calls use `ORIGAMI_BASE_URL`, defaulting to `https://origami.chat/api/v3`.
 
 Endpoints are registered both bare and under `/api/v1`: `POST /icp/history/load`, `POST /icp/derive`, `GET /icp/latest`, `POST /leads/source`, `GET /leads/source/{job_id}`, `GET /leads`, `POST /leads/{lead_id}/outreach`, and `POST /leads/{lead_id}/outreach/approve`.
 
-Run the local demo sequence after starting the API with configured Anthropic, OpenAI and Origami keys:
+For the turnkey proof path, copy `demo.env.example` to `.env`, add `OPENROUTER_API_KEY`, start the API, and press **Run search** on the Leads page. The first click bootstraps fixture history, derives the ICP, and generates ten clearly fictional `.example` prospects through OpenRouter before scoring them against the won-deal centroid. A real Origami key remains optional behind the production `/leads/source` seam. See [`../docs/two-key-demo.md`](../docs/two-key-demo.md).
+
+The individual API operations remain available for debugging:
 
 ```bash
 curl -s -X POST http://localhost:8000/icp/history/load -H 'Content-Type: application/json' -d '{}'

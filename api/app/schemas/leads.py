@@ -38,7 +38,7 @@ class Lead(LeadIn):
 
 class LeadSourceRequest(BaseModel):
     icp_profile_id: UUID | str | None = None
-    count: int = Field(default=10, ge=1, le=100)
+    count: int = Field(default=10, ge=1, le=10)
     quality: Literal["fast", "accurate"] = "fast"
 
 

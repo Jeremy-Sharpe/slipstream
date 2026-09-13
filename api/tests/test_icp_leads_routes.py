@@ -341,10 +341,17 @@ def test_lead_source_returns_202_when_integrations_present(monkeypatch: pytest.M
     }
 
     class FakeOrigami:
-        async def create_search(self, brief: str, count: int, quality: str) -> Job:
+        async def create_search(
+            self,
+            brief: str,
+            count: int,
+            quality: str,
+            idempotency_key: str | None = None,
+        ) -> Job:
             assert brief == "Find fit."
             assert count == 10
             assert quality == "fast"
+            assert idempotency_key is not None
             return Job(id="job-1", status="running")
 
         async def aclose(self) -> None:
