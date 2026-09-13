@@ -1,7 +1,7 @@
 slipstream.3-104-149-193.sslip.io {
 	encode zstd gzip
 
-	@api path /ready /api/*
+	@api path /ready /openapi.json /api/*
 	handle @api {
 		reverse_proxy 127.0.0.1:8000
 	}
