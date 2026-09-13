@@ -65,7 +65,18 @@ export type CallRecord = {
   pasted?: boolean;
 };
 
-export type Evidence = { attribute: string; value: string; quote: string; call: string; t: string };
+export type Evidence = {
+  /** ICP attribute the lead was matched on, e.g. "Industry". */
+  attribute: string;
+  /** This lead's value for that attribute. */
+  value: string;
+  /** Why the attribute is in the ICP, from the derived profile's evidence. */
+  why: string;
+  /** Won-deal companies the attribute was derived from. */
+  deals: string[];
+};
+
+export type LeadStatus = "new" | "drafted" | "approved";
 
 export type Lead = {
   id: string;
@@ -74,24 +85,26 @@ export type Lead = {
   title: string;
   location: string;
   industry: string;
-  headcount: number;
+  headcount: number | null;
+  /** Cosine similarity to the won-deal centroid, 0 to 100. */
   similarity: number;
-  status: "drafted" | "approved";
-  /** Short phrase from the evidence, e.g. "Cyber-insurance renewal". */
+  status: LeadStatus;
+  /** Why the provider put this row forward. */
   trigger: string;
-  /** Mock profile URL. */
-  linkedinUrl: string;
-  /** The search that found this lead. */
+  linkedinUrl: string | null;
+  email: string | null;
+  /** The search that put this lead on the sheet; "" for rows already on the profile. */
   searchId: string;
   /** When the row landed in a running search (drives the arrival highlight). */
   landedAt?: number;
   evidence: Evidence[];
-  draft: { subject: string; body: string };
+  draft: { id: string; subject: string; body: string } | null;
 };
 
-export type SearchStatus = "running" | "done";
+export type SearchStatus = "running" | "done" | "error";
 export type SearchStep = "read" | "search" | "score" | "draft";
 export type Search = {
+  /** The sourcing job id from the API. */
   id: string;
   /** 1-based, "Search 3". */
   n: number;
@@ -105,4 +118,8 @@ export type Search = {
   drafted: number;
   startedAt: number;
   elapsedMs?: number;
+  /** Leads this search put on the sheet. */
+  leadIds: string[];
+  /** What the job is doing, or why it stopped. */
+  note?: string;
 };
