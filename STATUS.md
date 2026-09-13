@@ -51,6 +51,7 @@ Derived from the fixtures on 12 September, not estimated. The 13 call scripts av
 | One extraction on `openai/gpt-5.4` through OpenRouter, billed 13 September over 13 calls | $0.030 |
 | One extraction on `mistralai/mistral-medium-3.1` through OpenRouter, billed 12 September over 13 calls | $0.0034 |
 | The 13 September model rerun: Haiku 4.5, Sonnet 5 twice, Opus 5, gpt-5.4, 65 calls | $3.53 |
+| The 13 September Eleno-cohort run: Mistral Medium 3.1 and gpt-5.4, 26 calls | $0.44 |
 | One ICP derivation | $0.02 |
 | Embeddings for the 19 ICP-eligible deals and 10 leads | under $0.001 |
 | One bake-off run across the three OpenAI tiers | $0.60 |
@@ -60,9 +61,10 @@ Embeddings are noise at this volume. The public proof caps generation at ten fic
 
 ## Needs a person
 
-1. Apply the eight unapplied migrations to the hosted Supabase project with `supabase db push`. Until then durable email, scorecard, playbook, ICP and campaign storage is unavailable.
-2. Submit the external form before the deadline. The public 3:48 Revenue DNA-first fallback video is already linked; optionally replace it with a rehearsed human-presented cut first.
-3. Re-record the demo video on the new UI; the linked v2 video shows the earlier screens.
+1. Decide the call coach. It shares `REASONING_MODEL`, and on Mistral its structured analysis returned truncated JSON on both runs of the ten-case spot check (`api/evals/run_coach_eval.py`) on 13 September, so card completion does not work in production. Anna's call on 13 September is to scrap the feature; until it is removed or given its own model setting, keep it out of the demo and the video.
+2. Apply the eight unapplied migrations to the hosted Supabase project with `supabase db push`. Until then durable email, scorecard, playbook, ICP and campaign storage is unavailable.
+3. Submit the external form before the deadline. The public 3:48 Revenue DNA-first fallback video is already linked; optionally replace it with a rehearsed human-presented cut first.
+4. Re-record the demo video on the new UI; the linked v2 video shows the earlier screens.
 
 ## Operational notes
 
