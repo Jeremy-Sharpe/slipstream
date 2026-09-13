@@ -138,6 +138,20 @@ export function parseVerdict(text, criterion) {
         gaps: ["Judge omitted the requested JSON footer; consult the full judge transcript for evidence and gaps."],
       };
     }
+    const reaffirmedScore = new RegExp(
+      `\\bscore\\s+(?:still\\s+)?stands\\s+at\\s+(\\d{1,2})\\s*\\/\\s*${criterion.points}\\b`,
+      "gi",
+    );
+    const reaffirmedMatches = [...text.matchAll(reaffirmedScore)];
+    if (reaffirmedMatches.length) {
+      return {
+        criterion: criterion.id,
+        score: Number(reaffirmedMatches.at(-1)[1]),
+        band: "Judge-reaffirmed score (prose fallback)",
+        evidence: [],
+        gaps: ["A late judge notification replaced the requested JSON footer; consult the full judge transcript for evidence and gaps."],
+      };
+    }
   }
   return null;
 }
