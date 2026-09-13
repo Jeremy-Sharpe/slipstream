@@ -5,7 +5,7 @@
 /fixtures/
 /supabase/
 /docs/
-/.hg-evals-reports/
+/.eval-reports/
 /.claude/
 **/.venv/
 **/.pytest_cache/
