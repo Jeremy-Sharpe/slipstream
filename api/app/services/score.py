@@ -296,6 +296,27 @@ def _json_content(content: str) -> str:
     return "\n".join(lines).strip()
 
 
+def _blank_quote(item: object) -> bool:
+    if not isinstance(item, dict):
+        return False
+    quote = item.get("quote")
+    return not isinstance(quote, str) or len(quote.strip()) < 3
+
+
+def _drop_blank_evidence(payload: object) -> object:
+    if not isinstance(payload, dict):
+        return payload
+    cleaned: dict[str, object] = {}
+    for key, value in payload.items():
+        if isinstance(value, list):
+            cleaned[key] = [item for item in value if not _blank_quote(item)]
+        elif _blank_quote(value):
+            cleaned[key] = None
+        else:
+            cleaned[key] = value
+    return cleaned
+
+
 def _snake_name(name: str) -> str:
     value = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value).lower()
@@ -445,7 +466,9 @@ def openrouter_judge(
                     parse_retries=parse_retries,
                 ) from error
             try:
-                output = schema.model_validate_json(_json_content(content))
+                output = schema.model_validate(
+                    _drop_blank_evidence(json.loads(_json_content(content)))
+                )
             except (json.JSONDecodeError, ValidationError) as error:
                 last_error = error
                 if attempt == 1:
