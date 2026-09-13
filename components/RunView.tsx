@@ -186,7 +186,10 @@ export function RunView({ source }: { source: RunSource }) {
     if (!host || pointerInside.current || Date.now() - userScrolledAt.current < 3000) return;
     const h = host.getBoundingClientRect(), r = el.getBoundingClientRect();
     if (r.top >= h.top && r.bottom <= h.bottom) return;
-    const target = r.top < h.top ? host.scrollTop + (r.top - h.top) - 16 : host.scrollTop + (r.bottom - h.bottom) + 16;
+    // A step taller than the column shows its head, not its tail: the card's
+    // rows matter more than the gate button under them.
+    const alignTop = r.top < h.top || r.height > h.height - 56;
+    const target = alignTop ? host.scrollTop + (r.top - h.top) - 16 : host.scrollTop + (r.bottom - h.bottom) + 16;
     programmatic.current = true;
     pageScrolling.current = true;
     host.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
