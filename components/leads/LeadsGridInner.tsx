@@ -78,7 +78,7 @@ const svg = (body: string, stroke = FAINT) =>
 const HEADER_ICONS = Object.fromEntries(Object.entries(PATHS).map(([k, v]) => [k, () => svg(v)]));
 
 const COLUMNS: (GridColumn & { id: string; width: number })[] = [
-  { id: "company", title: "Company", width: 220, icon: "company" },
+  { id: "company", title: "Company", width: 300, icon: "company" },
   { id: "contact", title: "Contact", width: 200, icon: "contact" },
   { id: "similarity", title: "Similarity", width: 120, icon: "similarity" },
   { id: "status", title: "Status", width: 100, icon: "status" },

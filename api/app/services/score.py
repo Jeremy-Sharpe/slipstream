@@ -653,30 +653,28 @@ def score_call(
         len(discovery_evidence), next_step_secured, objection_handling, ratio
     )
     scorecard = Scorecard(
-            call_id=transcript.call_id,
-            request_id=transcript.request_id,
-            source_external_id=transcript.call_id,
-            source_revision=hashlib.sha256(
-                transcript.model_dump_json().encode("utf-8")
-            ).hexdigest(),
-            source_turns=transcript.turns,
-            rep=transcript.rep,
-            outcome=transcript.outcome,
-            discovery_questions=len(discovery_evidence),
-            discovery_evidence=discovery_evidence,
-            next_step_secured=next_step_secured,
-            next_step_evidence=next_step_evidence,
-            objection_handling=objection_handling,
-            objection_evidence=objection_evidence if objection_handling != "none_raised" else [],
-            rep_talk_ratio=ratio,
-            talk_ratio_band=talk_ratio_band(ratio),
-            went_well=went_well,
-            to_improve=to_improve,
-            summary=summary,
-            model=result.model,
-            rubric_version=RUBRIC_VERSION,
-            scored_at=scoring_started_at or datetime.now(UTC),
-        )
+        call_id=transcript.call_id,
+        request_id=transcript.request_id,
+        source_external_id=transcript.call_id,
+        source_revision=hashlib.sha256(transcript.model_dump_json().encode("utf-8")).hexdigest(),
+        source_turns=transcript.turns,
+        rep=transcript.rep,
+        outcome=transcript.outcome,
+        discovery_questions=len(discovery_evidence),
+        discovery_evidence=discovery_evidence,
+        next_step_secured=next_step_secured,
+        next_step_evidence=next_step_evidence,
+        objection_handling=objection_handling,
+        objection_evidence=objection_evidence if objection_handling != "none_raised" else [],
+        rep_talk_ratio=ratio,
+        talk_ratio_band=talk_ratio_band(ratio),
+        went_well=went_well,
+        to_improve=to_improve,
+        summary=summary,
+        model=result.model,
+        rubric_version=RUBRIC_VERSION,
+        scored_at=scoring_started_at or datetime.now(UTC),
+    )
     return (
         stamp_scorecard_revision(scorecard),
         result,
@@ -954,39 +952,48 @@ def _valid_patterns(
     for pattern in patterns:
         if len(pattern.call_ids) != len(pattern.quotes):
             continue
-        if all(
-            call_id in by_call_id and _quote_is_supported(quote, by_call_id[call_id])
-            for call_id, quote in zip(pattern.call_ids, pattern.quotes, strict=True)
-        ):
-            valid.append(pattern)
+        canonical: list[str] = []
+        for call_id, quote in zip(pattern.call_ids, pattern.quotes, strict=True):
+            scorecard = by_call_id.get(call_id)
+            supported = _supported_quote(quote, scorecard) if scorecard else None
+            if supported is None:
+                break
+            canonical.append(supported)
+        else:
+            valid.append(pattern.model_copy(update={"quotes": canonical}))
     return valid
 
 
-def _quote_is_supported(
+def _quote_is_supported(quote: str, scorecard: Scorecard) -> bool:
+    return _supported_quote(quote, scorecard) is not None
+
+
+def _supported_quote(
     quote: str,
     scorecard: Scorecard,
-) -> bool:
-    """Is the judge's quote the same span of transcript as one of ours?
+) -> str | None:
+    """The evidence quote the judge's quote stands for, or None.
 
     The judge re-types a quote rather than copying it byte for byte: curly
     quotes become straight ones, a run of whitespace collapses, a full stop or
-    an ellipsis is added or dropped. So both sides are normalised before
-    comparison, and a judge quote that wraps a substantial evidence quote
-    counts as well as one contained by it. A quote matching no evidence span
-    is still dropped.
+    an ellipsis is added or dropped, a call id is prefixed. So both sides are
+    normalised before comparison, and a judge quote that wraps a substantial
+    evidence quote counts as well as one contained by it. The stored quote is
+    always our own evidence text, so nothing the judge added around it is
+    shown. A quote matching no evidence span is dropped.
     """
     needle = _normalise_quote(quote)
     if not needle:
-        return False
+        return None
     for _, evidence in _evidence_items(scorecard):
         haystack = _normalise_quote(evidence.quote)
         if not haystack:
             continue
         if needle in haystack:
-            return True
+            return evidence.quote
         if len(haystack) >= MIN_CONTAINED_QUOTE_CHARS and haystack in needle:
-            return True
-    return False
+            return evidence.quote
+    return None
 
 
 def _normalise_quote(quote: str) -> str:
