@@ -27,7 +27,7 @@ export function Patterns({ patterns, error }: { patterns: Pattern[]; error: stri
                       <p className="text-[16px] leading-6 text-ink">“{q.text}”</p>
                       <Link href={q.href} className="mt-1.5 inline-flex items-center gap-2 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
                         <Avatar name={q.speaker} size={20} />
-                        <span>{q.speaker} · {q.company} · <span className="tabular-nums">turn {q.turn}</span></span>
+                        <span>{q.speaker} · {q.company} · <span className="tabular-nums">Turn {q.turn}</span></span>
                       </Link>
                     </div>
                   )}
@@ -90,7 +90,7 @@ export function Coaching({ lines, rep }: { lines: string[]; rep: string | null }
       ) : (
         <div className="mt-3 flex items-start gap-3">
           {rep && <Avatar name={rep} size={24} className="mt-px" />}
-          <ul className="flex flex-col gap-1.5">
+          <ul className="flex max-w-[760px] flex-col gap-1.5">
             {lines.map((line) => (
               <li key={line} className="text-[14px] leading-6 text-ink">{line}</li>
             ))}

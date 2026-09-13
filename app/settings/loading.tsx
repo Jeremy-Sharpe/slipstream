@@ -1,10 +1,15 @@
+/* Mirrors SettingsView: title, subtitle, then the four cards. */
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-[1040px] px-8 py-8">
-      <div className="h-7 w-32 rounded-full bg-surface" />
-      <div className="mt-2 h-4 w-72 rounded-full bg-surface" />
-      <div className="mt-8 h-56 rounded-2xl bg-surface-2" />
-      <div className="mt-4 h-40 rounded-2xl bg-surface-2" />
+    <div aria-busy className="max-w-[760px]">
+      <div className="h-9 w-32 rounded-md bg-surface" />
+      <div className="mt-2 h-5 w-96 rounded bg-surface-2" />
+      <div className="mt-8 flex flex-col gap-4">
+        <div className="h-[204px] rounded-2xl bg-surface-2" />
+        <div className="h-[148px] rounded-2xl bg-surface-2" />
+        <div className="h-[148px] rounded-2xl bg-surface-2" />
+        <div className="h-[132px] rounded-2xl bg-surface-2" />
+      </div>
     </div>
   );
 }
