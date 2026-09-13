@@ -38,9 +38,9 @@ export type LeadStatus = "new" | "drafted" | "approved" | "rejected";
 
 export type MatchEvidence = {
   attribute: string; // "Buying trigger"
-  value: string; // "Cyber-insurance renewal needing Essential Eight"
+  value: string; // "Statement of advice drafting backlog"
   quote: string; // verbatim from the source call
-  call_label: string; // "Wattle Street Legal — discovery"
+  call_label: string; // "Fairfield Wealth Partners — discovery"
   timestamp_ms: number;
 };
 

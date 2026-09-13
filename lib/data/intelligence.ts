@@ -7,14 +7,14 @@ import type { Intelligence } from "@/lib/types/intelligence";
 const c = (id: string, company: string) => ({ id, company });
 
 const northstar = c("call-01-northstar-labs", "Northstar Labs");
-const arcwell = c("call-02-arcwell-health", "Arcwell Health");
+const kestrel = c("call-02-kestrel-lending", "Kestrel Lending");
 const afterglow = c("call-03-afterglow-studio", "Afterglow Studio");
 const kite = c("call-04-kite-and-co", "Kite & Co");
 const craftwork = c("call-05-craftwork", "Craftwork");
-const meridian = c("call-06-meridian-ai", "Meridian AI");
-const wattle = c("call-07-wattle-street-legal", "Wattle Street Legal");
-const elm = c("call-08-elm-and-ledger-accounting", "Elm & Ledger Accounting");
-const portPhillip = c("call-09-port-phillip-physio-group", "Port Phillip Physio Group");
+const meridian = c("call-06-meridian-mutual", "Meridian Mutual");
+const fairfield = c("call-07-fairfield-wealth", "Fairfield Wealth Partners");
+const ridgeline = c("call-08-ridgeline-commercial", "Ridgeline Commercial");
+const bellbird = c("call-09-bellbird-auctions", "Bellbird Auctions");
 const lumen = c("call-10-lumen-lane-retail", "Lumen Lane Retail");
 const banksia = c("call-11-banksia-architects", "Banksia Architects");
 const dockside = c("call-12-dockside-dental", "Dockside Dental");
@@ -41,89 +41,89 @@ export const intelligence: Intelligence = {
     },
     {
       label: "Discovery questions before pricing",
-      wins: { value: "5.6 avg", share: 5.6 / 6 },
-      others: { value: "2.1 avg", share: 2.1 / 6 },
-      takeaway: "The three lost calls asked zero questions before quoting a price.",
+      wins: { value: "6.0 avg", share: 1 },
+      others: { value: "2.4 avg", share: 2.4 / 6 },
+      takeaway: "The three lost calls asked zero questions before quoting a build price.",
     },
     {
       label: "Objection handled",
       wins: { value: "5 / 5 handled", share: 1 },
-      others: { value: "3 / 7 partial, 3 ignored", share: 3 / 14 },
+      others: { value: "3 / 7 partial, 4 ignored", share: 3 / 14 },
       takeaway: "Handling means naming the risk and offering a plan, not moving on.",
     },
     {
       label: "Rep talk ratio",
-      wins: { value: "47%", share: 0.47 },
-      others: { value: "56%", share: 0.56 },
-      takeaway: "Wins sit under half. The lost calls were 61% rep talk.",
+      wins: { value: "45%", share: 0.45 },
+      others: { value: "57%", share: 0.57 },
+      takeaway: "Wins sit under half. The lost calls were 67% rep talk.",
     },
   ],
 
   icp: {
-    summary: "Professional services and allied health firms in Victoria with 25–80 staff, a concrete trigger, and a practice or operations manager on the call.",
+    summary: "Investment research, lending, advice, commercial property and auction businesses in Victoria with 25–80 staff, a document or reporting workflow buckling under volume, and the workflow owner on the call.",
     attributes: [
       {
         label: "Industry",
-        value: "Professional services & allied health",
-        evidence: [northstar, arcwell, wattle, elm, portPhillip],
+        value: "Investment research, lending, wealth advice, commercial property and auctions",
+        evidence: [northstar, kestrel, fairfield, ridgeline, bellbird],
       },
       {
         label: "Company size",
         value: "25–80 staff",
-        evidence: [northstar, arcwell, wattle, elm, portPhillip],
+        evidence: [northstar, kestrel, fairfield, ridgeline, bellbird],
       },
       {
         label: "Champion title",
-        value: "Practice, operations or general manager; a director or partner",
-        evidence: [wattle, arcwell, portPhillip, elm, northstar],
+        value: "Managing partner, head of credit operations, practice manager, director or general manager",
+        evidence: [fairfield, kestrel, bellbird, ridgeline, northstar],
       },
       {
         label: "Buying trigger",
-        value: "Cyber-insurance renewal, a phishing incident, an office move or an IT person leaving",
-        evidence: [northstar, portPhillip, arcwell, elm, wattle],
+        value: "A drafting, reporting or intake backlog created by a fund launch, an acquisition, a season or a volume step-up",
+        evidence: [northstar, bellbird, kestrel, ridgeline, fairfield],
       },
     ],
   },
 
   objections: [
-    { call: northstar, outcome: "won", handling: "handled", text: "Our insurer is asking for Essential Eight evidence, and I am worried we will pay for a managed service but still fail the questionnaire" },
-    { call: arcwell, outcome: "won", handling: "handled", text: "Data sovereignty is the thing our clinical director will ask about" },
-    { call: wattle, outcome: "won", handling: "handled", text: "I am nervous about changing provider while our internal IT coordinator is leaving" },
-    { call: elm, outcome: "won", handling: "handled", text: "We cannot have a messy migration in the middle of tax planning work" },
-    { call: portPhillip, outcome: "won", handling: "handled", text: "Our current provider says they already do security, so I need to understand why this is different" },
-    { call: kite, outcome: "stalled", handling: "partial", text: "Procurement will not let us progress without the full questionnaire and insurance certificates" },
-    { call: meridian, outcome: "stalled", handling: "partial", text: "Budget sits with finance next financial year, not with me this month" },
-    { call: banksia, outcome: "stalled", handling: "partial", text: "The directors will not approve anything until the new financial year budget is clearer" },
-    { call: afterglow, outcome: "lost", handling: "ignored", text: "We are probably too small for a monthly managed service" },
-    { call: afterglow, outcome: "lost", handling: "ignored", text: "That is more than double what we pay now" },
-    { call: craftwork, outcome: "lost", handling: "ignored", text: "My cousin helps us for cheap when the till or Wi-Fi plays up" },
-    { call: lumen, outcome: "lost", handling: "ignored", text: "We are comparing you to a break-fix provider who charges by the hour" },
+    { call: northstar, outcome: "won", handling: "handled", text: "we don't want another subscription sitting on the books" },
+    { call: kestrel, outcome: "won", handling: "handled", text: "we'd be buying a tool we then depend on you to run for the next five years" },
+    { call: fairfield, outcome: "won", handling: "handled", text: "Our compliance manager will want to see how it logs its sources before any adviser is allowed to use it" },
+    { call: ridgeline, outcome: "won", handling: "handled", text: "If it quietly guesses a rent review mechanism and gets it wrong, that is worse than the analyst typing it" },
+    { call: bellbird, outcome: "won", handling: "handled", text: "We do not want another subscription that we can never switch off" },
+    { call: kite, outcome: "stalled", handling: "partial", text: "That number has to go to the partnership, and they will not approve it before they have seen the pilot work on our own leases" },
+    { call: meridian, outcome: "stalled", handling: "partial", text: "Budget sits with the board in the new financial year, not with me this month" },
+    { call: banksia, outcome: "stalled", handling: "partial", text: "The directors will not sign anything until the fit-out budget is settled" },
+    { call: afterglow, outcome: "lost", handling: "ignored", text: "We do not have the volume to justify a build like that" },
+    { call: afterglow, outcome: "lost", handling: "ignored", text: "That is more than we spent on our entire software stack last year" },
+    { call: craftwork, outcome: "lost", handling: "ignored", text: "My daughter built us a booking spreadsheet that does most of this" },
+    { call: lumen, outcome: "lost", handling: "ignored", text: "We are comparing you to a freelancer who set up our stock alerts for a few hundred dollars" },
   ],
 
   talkRatios: [
-    { call: kite, outcome: "stalled", rep: "Sam Whitfield", ratio: 0.43 },
+    { call: kestrel, outcome: "won", rep: "Sam Whitfield", ratio: 0.43 },
     { call: northstar, outcome: "won", rep: "Sam Whitfield", ratio: 0.44 },
-    { call: arcwell, outcome: "won", rep: "Sam Whitfield", ratio: 0.46 },
-    { call: elm, outcome: "won", rep: "Sam Whitfield", ratio: 0.47 },
-    { call: banksia, outcome: "stalled", rep: "Sam Whitfield", ratio: 0.47 },
-    { call: wattle, outcome: "won", rep: "Sam Whitfield", ratio: 0.48 },
-    { call: portPhillip, outcome: "won", rep: "Jordan Lee", ratio: 0.5 },
-    { call: meridian, outcome: "stalled", rep: "Jordan Lee", ratio: 0.51 },
-    { call: afterglow, outcome: "lost", rep: "Jordan Lee", ratio: 0.61 },
-    { call: craftwork, outcome: "lost", rep: "Jordan Lee", ratio: 0.61 },
-    { call: lumen, outcome: "lost", rep: "Jordan Lee", ratio: 0.61 },
-    { call: dockside, outcome: "no_show", rep: "Jordan Lee", ratio: 0.65 },
+    { call: kite, outcome: "stalled", rep: "Sam Whitfield", ratio: 0.44 },
+    { call: bellbird, outcome: "won", rep: "Jordan Lee", ratio: 0.44 },
+    { call: banksia, outcome: "stalled", rep: "Sam Whitfield", ratio: 0.44 },
+    { call: meridian, outcome: "stalled", rep: "Jordan Lee", ratio: 0.45 },
+    { call: ridgeline, outcome: "won", rep: "Sam Whitfield", ratio: 0.47 },
+    { call: fairfield, outcome: "won", rep: "Sam Whitfield", ratio: 0.48 },
+    { call: dockside, outcome: "no_show", rep: "Jordan Lee", ratio: 0.63 },
+    { call: lumen, outcome: "lost", rep: "Jordan Lee", ratio: 0.65 },
+    { call: afterglow, outcome: "lost", rep: "Jordan Lee", ratio: 0.66 },
+    { call: craftwork, outcome: "lost", rep: "Jordan Lee", ratio: 0.69 },
   ],
 
   nextSteps: [
-    { call: northstar, outcome: "won", description: "Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.", due: "2026-09-03" },
-    { call: arcwell, outcome: "won", description: "Sam to send proposal and meet Felix plus clinical director for rollout approval.", due: "2026-09-04" },
-    { call: wattle, outcome: "won", description: "Sam to send transition plan and meet Olivia plus principal solicitor for sign-off.", due: "2026-09-08" },
-    { call: elm, outcome: "won", description: "Sam to send migration proposal and run site walk-through with Ben and office manager.", due: "2026-09-09" },
-    { call: portPhillip, outcome: "won", description: "Jordan to send proposal and meet Aisha plus clinic director for decision.", due: "2026-09-10" },
-    { call: kite, outcome: "stalled", description: "Sam to send security pack and sample service schedule for Daniel to circulate.", due: null },
-    { call: meridian, outcome: "stalled", description: "Jordan to send capability deck and rough migration outline for Tom to share internally.", due: null },
-    { call: banksia, outcome: "stalled", description: "Sam to send findings note and risk checklist for Grace to discuss with directors.", due: null },
+    { call: northstar, outcome: "won", description: "Sam to send the discovery phase scope, measurement plan and two redrafted research notes, then walk Maya and her co-founder through the research note drafting pilot scope.", due: "2026-09-03" },
+    { call: kestrel, outcome: "won", description: "Sam to send the discovery phase scope, a redrafted facility letter and the measurement plan, then review them with Felix and the head of risk.", due: "2026-09-10" },
+    { call: fairfield, outcome: "won", description: "Sam to send scope, source logging design and fixed price, then walk both principals and the compliance manager through it.", due: "2026-09-10" },
+    { call: ridgeline, outcome: "won", description: "Sam to send the discovery scope and fixed build price, then review the sample extraction with Ben and the head of property management.", due: "2026-09-11" },
+    { call: bellbird, outcome: "won", description: "Jordan to send the discovery scope and build proposal, then meet Aisha and the managing director to walk it through.", due: "2026-09-10" },
+    { call: kite, outcome: "stalled", description: "Sam to send a one-page discovery phase scope and a sample lease summary for Daniel to put in front of the managing partner, with no date agreed.", due: null },
+    { call: meridian, outcome: "stalled", description: "Jordan to send a decision brief and staging plan for Tom to circulate to the chief operating officer and the board.", due: null },
+    { call: banksia, outcome: "stalled", description: "Sam to send the findings note and fee proposal workflow map for Grace to raise with the directors once the fit-out budget is settled.", due: null },
     { call: afterglow, outcome: "lost", description: "No next step agreed.", due: null },
     { call: craftwork, outcome: "lost", description: "No next step agreed.", due: null },
     { call: lumen, outcome: "lost", description: "No next step agreed.", due: null },
@@ -131,12 +131,11 @@ export const intelligence: Intelligence = {
   ],
 
   triggers: [
-    { label: "Cyber-insurance renewal or evidence gap", count: 4, calls: [northstar, arcwell, portPhillip, banksia] },
-    { label: "Office move", count: 2, calls: [elm, banksia] },
-    { label: "Microsoft 365 migration", count: 2, calls: [meridian, elm] },
-    { label: "Procurement security questionnaire", count: 1, calls: [kite] },
-    { label: "Internal IT person leaving", count: 1, calls: [wattle] },
-    { label: "Phishing incident", count: 1, calls: [arcwell] },
+    { label: "Drafting backlog blowing out", count: 3, calls: [kestrel, fairfield, banksia] },
+    { label: "Reporting or note production volume spike", count: 2, calls: [northstar, ridgeline] },
+    { label: "Intake and cataloguing bottleneck before a season", count: 1, calls: [bellbird] },
+    { label: "Complaints volume after a system migration", count: 1, calls: [meridian] },
+    { label: "Contract review pilot before the financial year", count: 1, calls: [kite] },
     { label: "No trigger", count: 4, calls: [afterglow, craftwork, lumen, dockside] },
   ],
 };

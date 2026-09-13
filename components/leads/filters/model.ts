@@ -29,7 +29,7 @@ export const CRITERIA: { key: FilterKey; label: string; icon: LucideIcon; placeh
   { key: "industry", label: "Industry", icon: Building2, placeholder: "Law firm, accounting practice, etc." },
   { key: "size", label: "Company size", icon: Users, placeholder: "25–80 staff, etc." },
   { key: "buyer_title", label: "Buyer title", icon: Type, placeholder: "Practice manager, etc." },
-  { key: "trigger", label: "Trigger", icon: Zap, placeholder: "Cyber-insurance renewal, etc." },
+  { key: "trigger", label: "Trigger", icon: Zap, placeholder: "Statement of advice backlog, etc." },
   { key: "region", label: "Region", icon: MapPin, placeholder: "Melbourne, etc." },
   { key: "target", label: "Target companies", icon: Link2, placeholder: "Paste domains or names" },
 ];

@@ -1,12 +1,12 @@
 "use client";
 
-import { Check, Copy, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Check, Copy, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { hubspot, integrations, team as seedTeam, workspace as seedWorkspace } from "@/lib/data/settings";
+import { getReadiness } from "@/lib/api/slipstream";
+import { crmIntegrations, crmObjects, integrations, team as seedTeam, workspace as seedWorkspace } from "@/lib/data/settings";
 import type { ApiKey, Integration, TeamMember, TeamRole } from "@/lib/types/settings";
-import { cn } from "@/lib/utils";
 import { Card, fieldLabel, outlineBtn, primaryBtn, StatusDot, Switch } from "./primitives";
 
 const ROLES: TeamRole[] = ["Admin", "Senior AE", "AE", "Viewer"];
@@ -56,48 +56,43 @@ export function WorkspacePanel() {
 // ---------------------------------------------------------------------- CRM
 
 export function CrmPanel() {
-  const [connected, setConnected] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [syncedJustNow, setSyncedJustNow] = useState(false);
-  const [confirm, setConfirm] = useState(false);
+  const [state, setState] = useState<{ status: "checking" } | { status: "error" } | { status: "ready"; integrations: Record<string, boolean> }>({ status: "checking" });
 
-  const sync = () => { setSyncing(true); window.setTimeout(() => { setSyncing(false); setSyncedJustNow(true); }, 1500); };
+  useEffect(() => {
+    const controller = new AbortController();
+    getReadiness(controller.signal)
+      .then((readiness) => setState({ status: "ready", integrations: readiness.integrations }))
+      .catch((error: unknown) => { if (!(error instanceof DOMException && error.name === "AbortError")) setState({ status: "error" }); });
+    return () => controller.abort();
+  }, []);
+
+  const label = (id: string) => {
+    if (state.status === "checking") return "Checking…";
+    if (state.status === "error") return "Status unavailable";
+    return state.integrations[id] ? "Connected" : "Not configured";
+  };
+  const on = (id: string) => state.status === "ready" && state.integrations[id] === true;
 
   return (
     <Card title="CRM" description="Slipstream writes calls, notes, tasks and drafts into your CRM. Nothing changes without an approval.">
-      <div className="flex items-start justify-between gap-6 rounded-lg border border-border p-4">
-        <div className="flex items-start gap-3">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-[13px] font-semibold text-foreground">Hs</span>
-          <div>
-            <p className="flex items-center gap-2 text-[17px] font-semibold text-foreground">HubSpot <span className="flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 text-xs font-normal text-foreground/80"><StatusDot on={connected} />{connected ? "Connected · mock" : "Disconnected"}</span></p>
-            {connected ? (
-              <p className="mt-1 text-[15px] text-muted-foreground">Portal {hubspot.portalId} · {syncedJustNow ? "Synced just now" : `Synced ${hubspot.lastSyncMinutesAgo} min ago`} · {hubspot.objects.join(", ")}</p>
-            ) : (
-              <p className="mt-1 text-[15px] text-muted-foreground">Connect a portal to write calls and drafts back to your records.</p>
-            )}
-          </div>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {connected ? (
-            <>
-              <button type="button" onClick={sync} disabled={syncing} className={outlineBtn}><RefreshCw className={cn("size-4", syncing && "animate-spin")} strokeWidth={1.75} />{syncing ? "Syncing…" : "Sync now"}</button>
-              <Dialog open={confirm} onOpenChange={setConfirm}>
-                <DialogTrigger render={<button type="button" className={outlineBtn} />}>Disconnect</DialogTrigger>
-                <DialogContent className="sm:max-w-sm">
-                  <DialogHeader><DialogTitle>Disconnect HubSpot?</DialogTitle><DialogDescription>Calls keep processing, but nothing is written back until you reconnect.</DialogDescription></DialogHeader>
-                  <DialogFooter>
-                    <button type="button" onClick={() => setConfirm(false)} className={outlineBtn}>Cancel</button>
-                    <button type="button" onClick={() => { setConnected(false); setConfirm(false); }} className={primaryBtn}>Disconnect</button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            <button type="button" onClick={() => { setConnected(true); setSyncedJustNow(true); }} className={primaryBtn}>Connect</button>
-          )}
-        </div>
-      </div>
-      <p className="mt-3 text-[14px] text-muted-foreground">Object mapping: contacts, companies, deals, calls, notes, tasks and emails mirror the HubSpot objects, so a real integration is a field mapping rather than a redesign.</p>
+      <ul className="flex flex-col gap-3">
+        {crmIntegrations.map((i) => (
+          <li key={i.id} className="flex items-start justify-between gap-6 rounded-lg border border-border p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 items-center justify-center rounded-lg bg-icon-well text-[13px] font-semibold text-foreground">{i.initials}</span>
+              <div>
+                <p className="flex items-center gap-2 text-[17px] font-semibold text-foreground">{i.name} <span className="flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 text-xs font-normal text-foreground/80"><StatusDot on={on(i.id)} />{label(i.id)}</span></p>
+                <p className="mt-1 text-[15px] text-muted-foreground">{i.purpose}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-[14px] text-muted-foreground">
+        {state.status === "error"
+          ? "The API health check could not be reached, so no connection state is claimed here. The screens keep working on labelled evaluation data."
+          : `Object mapping: ${crmObjects.join(", ").toLowerCase()} mirror the objects a HubSpot or Salesforce connector expects, so a real integration is a field mapping rather than a redesign.`}
+      </p>
     </Card>
   );
 }
@@ -143,9 +138,9 @@ export function TeamPanel() {
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<button type="button" className={primaryBtn} />}><Plus className="size-4" strokeWidth={2.25} />Invite</DialogTrigger>
           <DialogContent className="sm:max-w-sm">
-            <DialogHeader><DialogTitle>Invite a teammate</DialogTitle><DialogDescription>They get an email with a link to join Harbourline IT.</DialogDescription></DialogHeader>
+            <DialogHeader><DialogTitle>Invite a teammate</DialogTitle><DialogDescription>They get an email with a link to join Eleno.</DialogDescription></DialogHeader>
             <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); invite(); }}>
-              <label className="flex flex-col gap-1.5"><span className={fieldLabel}>Email</span><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@harbourline.example" autoFocus /></label>
+              <label className="flex flex-col gap-1.5"><span className={fieldLabel}>Email</span><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@eleno.example" autoFocus /></label>
               <label className="flex flex-col gap-1.5"><span className={fieldLabel}>Role</span>
                 <select value={role} onChange={(e) => setRole(e.target.value as TeamRole)} className="h-10 rounded-md border border-border bg-card px-3 text-[16px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary">{ROLES.map((r) => <option key={r}>{r}</option>)}</select>
               </label>

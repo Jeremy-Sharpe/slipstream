@@ -15,7 +15,7 @@ export function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-col gap-0.5">
             <span className="text-sm font-medium text-foreground">Maxim Durand</span>
-            <span className="font-normal">maxim@harbourline.example</span>
+            <span className="font-normal">maxim@eleno.example</span>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
