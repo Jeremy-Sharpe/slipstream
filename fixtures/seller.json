@@ -1,6 +1,6 @@
 {
-  "name": "Harbourline IT",
-  "description": "A 12-person managed IT and cybersecurity provider in Melbourne, selling managed services agreements and onboarding projects to Australian firms with 15 to 120 staff.",
+  "name": "Eleno",
+  "description": "A Melbourne team of specialist AI and automation engineers that discovers, builds, deploys and manages custom AI agents and workflow automation for growing Australian businesses, mainly non-bank lenders, financial services firms, real estate agencies and auction houses, and transfers the IP to the client rather than selling a subscription.",
   "location": "Melbourne, VIC",
   "team_size": 12,
   "reps": [
@@ -29,12 +29,14 @@
   ],
   "pricing": {
     "currency": "AUD",
-    "managed_services_per_seat_monthly_low": 90,
-    "managed_services_per_seat_monthly_high": 160,
-    "onboarding_project_aud_low": 3500,
-    "onboarding_project_aud_high": 18000
+    "discovery_phase_aud_low": 4000,
+    "discovery_phase_aud_high": 9000,
+    "build_project_aud_low": 25000,
+    "build_project_aud_high": 120000,
+    "managed_optimisation_monthly_aud_low": 1500,
+    "managed_optimisation_monthly_aud_high": 6000
   },
-  "voice_config_notes": "Placeholder voice ids. Run generate_audio.py --list-voices after adding ELEVENLABS_API_KEY, then replace these values before generating audio.",
+  "voice_config_notes": "Voice ids used for the existing demo audio. Run generate_audio.py --list-voices to choose others.",
   "voices": {
     "rep": {
       "Sam Whitfield": "nPczCjzI2devNBz1zQrb",

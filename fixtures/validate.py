@@ -15,7 +15,11 @@ from schema import CallScript, Expected
 
 ROOT = Path(__file__).parent
 CALLS_DIR = ROOT / "calls"
+CLIENTS_PATH = ROOT / "crm" / "clients.json"
+SELLER_NAME = "Eleno"
 FORBIDDEN_BRAND = "Hour" + "glass"
+# Real people at the seller. The reps are fictional personas; the seller's staff must never be depicted.
+FORBIDDEN_NAMES = ("Liam Albrecht", "Charlie Bessell", "Angus Roberts", "Nathan Luo")
 PRICING_RE = re.compile(r"(\$|AUD|\bper seat\b|\bper user\b|\bmonthly fee\b)", re.IGNORECASE)
 WORD_RE = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?")
 
@@ -74,6 +78,28 @@ def iter_text_files(root: Path) -> Iterable[Path]:
             yield path
 
 
+def _client_names(errors: list[str]) -> list[str]:
+    if not CLIENTS_PATH.exists():
+        errors.append("crm/clients.json is missing")
+        return []
+    try:
+        rows = json.loads(CLIENTS_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        errors.append(f"crm/clients.json is not valid JSON: {exc}")
+        return []
+    names = [str(row.get("name", "")).strip() for row in rows if isinstance(row, dict)]
+    for row in rows:
+        domain = str(row.get("domain", "")) if isinstance(row, dict) else ""
+        if not domain.endswith(".example"):
+            errors.append(f"crm/clients.json: {row.get('name', '?')} domain must end in .example")
+        if isinstance(row, dict) and (row.get("outcome") != "won" or row.get("stage") != "closed_won"):
+            errors.append(f"crm/clients.json: {row.get('name', '?')} must be a won, closed_won deal")
+        for key in ("employee_count", "amount", "contact", "contact_name"):
+            if isinstance(row, dict) and key in row:
+                errors.append(f"crm/clients.json: {row.get('name', '?')} must not carry {key}")
+    return [name for name in names if name]
+
+
 def _normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().lower()
 
@@ -115,10 +141,21 @@ def validate_all() -> tuple[list[CallBundle], list[str]]:
     if not CALLS_DIR.exists():
         return [], ["calls directory is missing"]
 
+    client_names = _client_names(errors)
     for path in iter_text_files(ROOT):
+        if path.resolve() == Path(__file__).resolve():
+            continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         if FORBIDDEN_BRAND in text:
             errors.append(f"forbidden string appears in {path.relative_to(ROOT)}")
+        for name in FORBIDDEN_NAMES:
+            if name in text:
+                errors.append(f"seller staff name appears in {path.relative_to(ROOT)}")
+        # Real clients are CRM rows only. No call may quote, name or invent anything about them.
+        if CALLS_DIR in path.parents:
+            for name in client_names:
+                if name.lower() in text.lower():
+                    errors.append(f"real client {name} appears in {path.relative_to(ROOT)}")
 
     call_folders = sorted(path for path in CALLS_DIR.iterdir() if path.is_dir())
     for folder in call_folders:
@@ -144,8 +181,8 @@ def validate_all() -> tuple[list[CallBundle], list[str]]:
 
         if script.call_id != call_id or expected.call_id != call_id:
             errors.append(f"{call_id}: ids must match folder name")
-        if script.seller != "Harbourline IT":
-            errors.append(f"{call_id}: seller must be Harbourline IT")
+        if script.seller != SELLER_NAME:
+            errors.append(f"{call_id}: seller must be {SELLER_NAME}")
         if script.outcome == "no_show":
             if not 60 <= bundle.words <= 120:
                 errors.append(f"{call_id}: no-show word count {bundle.words} outside 60 to 120")
