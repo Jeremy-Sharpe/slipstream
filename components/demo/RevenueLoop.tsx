@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, BarChart3, Check, DatabaseZap, MailCheck, Pause, Play, Radar, Sparkles, Target, Volume2, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Calculator, Check, DatabaseZap, MailCheck, Pause, Play, Radar, Sparkles, Target, Volume2, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getCampaigns, getLatestIcp, getReadiness } from "@/lib/api/slipstream";
-import { EMPTY_DEMO_PROOF, campaignSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
+import { EMPTY_DEMO_PROOF, campaignSafety, icpClaimSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
 import { cn } from "@/lib/utils";
 
 type LoopStep = { eyebrow: string; title: string; result: string; detail: string; impact: string; provenance: string; verified: boolean; href: string; cta: string; icon: LucideIcon };
@@ -64,14 +64,15 @@ export function RevenueLoop() {
   const steps = useMemo<LoopStep[]>(() => {
     const liveIcp = proof.icp.status === "verified" ? proof.icp.value : null;
     const source = liveIcp?.profile.source_summary;
+    const icpSafety = liveIcp ? icpClaimSafety(liveIcp) : null;
     const campaign = proof.campaign.status === "verified" ? campaignSafety(proof.campaign.value) : null;
     return [
       { eyebrow: "01 · Listen", title: "One sales call", result: "Maya names the deadline", detail: "The recorded buyer example explains that her cyber-insurance renewal now requires Essential Eight evidence.", impact: "The conversation becomes structured input instead of disappearing into a recorder.", provenance: "Recorded Maya example", verified: false, href: `${MAYA_CALL}#transcript`, cta: "Open transcript", icon: Volume2 },
       { eyebrow: "02 · Remember", title: "CRM writes itself", result: "Contact · company · deal", detail: "Slipstream extracts CRM-shaped fields with confidence and exact source evidence for review.", impact: "The pipeline reflects what the buyer actually said, without ten minutes of rep admin.", provenance: "Recorded Maya example", verified: false, href: `${MAYA_CALL}#crm-writeback`, cta: "Inspect CRM evidence", icon: DatabaseZap },
       { eyebrow: "03 · Respond", title: "Safe follow-up", result: "Risky guarantee removed", detail: "The recorded draft keeps the agreed next step but refuses to repeat an unsupported insurance promise.", impact: "The rep gets speed without turning model fluency into commercial risk.", provenance: "Recorded Maya example", verified: false, href: `${MAYA_CALL}#follow-up-draft`, cta: "Review exact draft", icon: MailCheck },
-      { eyebrow: "04 · Learn", title: "The team compounds", result: source ? `${source.calls} calls + ${source.emails} email${source.emails === 1 ? "" : "s"}` : "Aggregate proof unavailable", detail: source ? `${source.deals} CRM deals connect calls, emails and ${source.outcome_labelled} outcome labels into one evidence set.` : "The deployed ICP cohort could not be verified. Open Intelligence to inspect the current source state.", impact: "Every conversation improves the playbook instead of living as an isolated note.", provenance: source ? `Live ICP v${liveIcp?.version}` : "Live proof unavailable", verified: Boolean(source), href: "/intelligence#patterns", cta: "See win patterns", icon: BarChart3 },
-      { eyebrow: "05 · Focus", title: "ICP emerges", result: liveIcp ? `${liveIcp.profile.headcount_band} · ${liveIcp.profile.industries.slice(0, 2).join(" + ")}` : "ICP proof unavailable", detail: liveIcp ? `${source?.deals ?? "The live"} CRM deals support a cited profile with ${liveIcp.evidence.length} evidence dimensions.` : "No demographic claim is substituted when the deployed ICP endpoint is unavailable.", impact: "The target customer comes from actual wins, not a persona workshop.", provenance: liveIcp ? `Live ICP v${liveIcp.version}` : "Live proof unavailable", verified: Boolean(liveIcp), href: "/intelligence#icp", cta: "Open cited ICP", icon: Target },
-      { eyebrow: "06 · Find", title: "Next search writes itself", result: liveIcp?.profile.origami_brief ? `Search brief from ICP v${liveIcp.version}` : "Search brief unavailable", detail: liveIcp?.profile.origami_brief ? "The won-deal profile is already translated into a precise sourcing brief, ready for Origami when its paid key is connected." : "The handoff is shown only when the deployed API returns the stored Origami brief.", impact: "The last customer directly changes who the team goes after next.", provenance: liveIcp?.profile.origami_brief ? "Live generated brief" : "Live proof unavailable", verified: Boolean(liveIcp?.profile.origami_brief), href: "/intelligence#brief", cta: "Open search brief", icon: Radar },
+      { eyebrow: "04 · Learn", title: "The team compounds", result: icpSafety?.cohort && source ? `${source.calls} calls + ${source.emails} email${source.emails === 1 ? "" : "s"}` : "Aggregate proof unavailable", detail: icpSafety?.cohort && source ? `${source.deals} CRM deals connect calls, emails and ${source.outcome_labelled} outcome labels into one evidence set.` : "The deployed ICP cohort could not be verified. Open Intelligence to inspect the current source state.", impact: "Every conversation improves the playbook instead of living as an isolated note.", provenance: icpSafety?.cohort ? `Live ICP v${liveIcp?.version}` : "Live proof unavailable", verified: Boolean(icpSafety?.cohort), href: "/intelligence#patterns", cta: "See win patterns", icon: BarChart3 },
+      { eyebrow: "05 · Focus", title: "ICP emerges", result: icpSafety?.citedProfile && liveIcp ? `${liveIcp.profile.headcount_band} · ${liveIcp.profile.industries.filter((value) => value.trim()).slice(0, 2).join(" + ")}` : "ICP proof unavailable", detail: icpSafety?.citedProfile && liveIcp && source ? `${source.deals} CRM deals support a cited profile with ${liveIcp.evidence.length} evidence dimensions.` : "No demographic claim is substituted when the deployed ICP evidence is unavailable or empty.", impact: "The target customer comes from actual wins, not a persona workshop.", provenance: icpSafety?.citedProfile ? `Live ICP v${liveIcp?.version}` : "Live proof unavailable", verified: Boolean(icpSafety?.citedProfile), href: "/intelligence#icp", cta: "Open cited ICP", icon: Target },
+      { eyebrow: "06 · Find", title: "Next search writes itself", result: icpSafety?.brief && liveIcp ? `Search brief from ICP v${liveIcp.version}` : "Search brief unavailable", detail: icpSafety?.brief ? "The won-deal profile is already translated into a precise sourcing brief, ready for Origami when its paid key is connected." : "The handoff is shown only when the deployed API returns a substantive, evidence-backed Origami brief.", impact: "The last customer directly changes who the team goes after next.", provenance: icpSafety?.brief ? "Live generated brief" : "Live proof unavailable", verified: Boolean(icpSafety?.brief), href: "/intelligence#brief", cta: "Open search brief", icon: Radar },
       { eyebrow: "07 · Execute", title: "Outreach stays controlled", result: campaign?.summary ?? "Campaign proof unavailable", detail: campaign?.detail ?? "The exact seeded campaign was not returned, so Slipstream makes no delivery-state claim.", impact: "Automation moves quickly without inventing a send or surprising a real person.", provenance: campaign?.verified ? "Live guardrail verified" : campaign ? "Live state changed" : "Live proof unavailable", verified: campaign?.verified ?? false, href: "/campaigns#delivery-execution", cta: "Inspect exact execution", icon: Pause },
     ];
   }, [proof]);
@@ -120,6 +121,17 @@ export function RevenueLoop() {
         </div>
       </section>
 
+      <aside className="mt-4 grid overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_3px_rgba(17,24,39,0.04)] sm:grid-cols-[auto_repeat(4,1fr)]" aria-label="Illustrative rep capacity estimate">
+        <div className="flex items-center gap-3 border-b border-border bg-primary-soft px-5 py-3 sm:border-r sm:border-b-0">
+          <Calculator className="size-5 text-primary" />
+          <div><p className="text-[12px] font-semibold tracking-wide text-foreground uppercase">Rep capacity</p><p className="text-[11px] text-muted-foreground">Illustrative, not measured</p></div>
+        </div>
+        <ImpactNumber value="10 min" label="admin per call" />
+        <ImpactNumber value="× 8" label="calls per day" />
+        <ImpactNumber value="= 6.7 hrs" label="returned per week" />
+        <ImpactNumber value="≈ $500" label="weekly capacity at $75/hr" accent />
+      </aside>
+
       <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_3px_rgba(17,24,39,0.05)]">
         <div className="h-1 bg-muted"><div className="h-full bg-primary transition-[width] duration-700 ease-out motion-reduce:transition-none" style={{ width: `${progress}%` }} /></div>
         <div className="overflow-x-auto"><div className="grid min-w-[980px] grid-cols-7 gap-px bg-border">
@@ -150,4 +162,8 @@ export function RevenueLoop() {
 
 function ProofPill({ label, value, live, mono = false }: { label: string; value: string; live: boolean; mono?: boolean }) {
   return <div className="flex min-w-0 items-center gap-3"><span className={cn("size-2 shrink-0 rounded-full", live ? "bg-primary shadow-[0_0_12px_var(--primary)]" : "bg-background/25")} aria-hidden /><span className="min-w-0"><span className="block text-[11px] tracking-wide text-background/45 uppercase">{label}</span><span className={cn("mt-0.5 block truncate text-[14px] font-medium text-background", mono && "font-mono")} title={value}>{value}</span></span></div>;
+}
+
+function ImpactNumber({ value, label, accent = false }: { value: string; label: string; accent?: boolean }) {
+  return <div className="border-b border-border px-5 py-3 last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0"><strong className={cn("block text-[18px] tracking-[-0.02em]", accent ? "text-primary" : "text-foreground")}>{value}</strong><span className="text-[11px] text-muted-foreground">{label}</span></div>;
 }

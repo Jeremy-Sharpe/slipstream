@@ -83,7 +83,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 
 ## Feasibility and value
 
-**Value.** A rep who spends about 10 minutes after each call on CRM entry and a follow-up email, at roughly 8 calls a day, spends over an hour a day on admin the call already contains. Slipstream removes it, and the demo shows the time saved per call directly. Larger still: the ICP is derived from the calls that closed, not from a persona deck, so every lead sourced is scored against what has actually converted and the outbound list improves each week the team sells. And the live coach means fewer deals lost to a rep freezing on a question.
+**Value.** Our clearly labelled demo assumption is 10 minutes of CRM and follow-up admin per call at 8 calls a day. That is 6.7 hours of rep capacity per five-day week—or about $500 per rep per week at an illustrative $75 loaded hourly cost. The Revenue Loop shows this formula directly; these are adjustable operating assumptions, not measured customer results. Larger still: the ICP is derived from the calls that closed, not from a persona deck, so every lead sourced is scored against what has actually converted and the outbound list improves each week the team sells. And the live coach means fewer deals lost to a rep freezing on a question.
 
 **From demo to product.**
 

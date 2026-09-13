@@ -16,6 +16,8 @@ Action: Start on Revenue Loop. Click `Play guided loop` as you deliver the first
 
 Say: “Most sales AI ends when the call summary appears. Ours starts there. One buyer conversation writes the CRM, creates the safe follow-up, teaches the team who wins, and changes who they call next. This is the entire revenue loop, connected.”
 
+Point to the labelled capacity strip and add: “On a deliberately conservative demo assumption—ten minutes of admin, eight calls a day—that returns 6.7 hours, or about five hundred dollars of rep capacity, every week. We label the assumptions because customer rollout is where we replace them with a measured baseline.”
+
 Action: On Maya's conversation, click one evidence/confidence marker, point to “Approve & sync changes,” then point to “Approve.” Do not approve yet.
 
 Fallback: If the page does not load, use the pre-opened tab. If both fail, begin with the terminal fallback and say, “I’ll show the same pipeline directly through our production API.”

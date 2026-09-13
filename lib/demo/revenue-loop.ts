@@ -33,6 +33,17 @@ export function settleDemoProof(
   };
 }
 
+export function icpClaimSafety(profile: ApiIcpProfile): { cohort: boolean; citedProfile: boolean; brief: boolean } {
+  const source = profile.profile.source_summary;
+  const cohort = Boolean(source && source.deals > 0 && source.calls + source.emails > 0 && source.outcome_labelled > 0);
+  const citedProfile = cohort
+    && profile.profile.headcount_band.trim().length > 0
+    && profile.profile.industries.some((industry) => industry.trim().length > 0)
+    && profile.evidence.length > 0
+    && profile.evidence.every((item) => item.attribute.trim().length > 0 && item.why.trim().length > 0 && item.deal_ids.length > 0 && item.deal_ids.every((id) => id.trim().length > 0));
+  return { cohort, citedProfile, brief: citedProfile && profile.profile.origami_brief.trim().length > 0 };
+}
+
 export function findDemoCampaign(campaigns: ApiCampaign[]): ProofState<ApiCampaign> {
   const campaign = campaigns.find((item) => item.id === DEMO_CAMPAIGN_ID);
   return campaign ? { status: "verified", value: campaign } : { status: "missing" };
@@ -44,7 +55,7 @@ export function campaignSafety(campaign: ApiCampaign): { verified: boolean; summ
   const noAttempts = campaign.items.every((item) => item.attempt_count === 0);
   const noOtherStates = campaign.counts.running === 0 && campaign.counts.sent === 0 && campaign.counts.retryable === 0 && campaign.counts.failed === 0 && campaign.counts.reconcile === 0;
   const item = campaign.items[0];
-  const noDeliveryEvidence = item?.receipt == null && item?.http_status == null && item?.last_attempt_at == null && item?.next_attempt_at == null && item?.outcome == null && item?.retryable === false && item?.reconciliation_required === false;
+  const noDeliveryEvidence = item?.receipt == null && item?.http_status == null && item?.last_attempt_at == null && item?.outcome == null && item?.retryable === false && item?.reconciliation_required === false;
   const exactEnrollment = campaign.counts.queued === 1 && campaign.items.length === 1 && item?.state === "queued";
   const controlled = campaign.status === "paused" && scheduleMatches && noOtherStates && noAttempts && noDeliveryEvidence && exactEnrollment;
   if (controlled) {

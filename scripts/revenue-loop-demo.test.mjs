@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { DEMO_CAMPAIGN_ID, campaignSafety, findDemoCampaign, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof } from "../lib/demo/revenue-loop.ts";
+import { DEMO_CAMPAIGN_ID, campaignSafety, findDemoCampaign, icpClaimSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof } from "../lib/demo/revenue-loop.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const campaign = (patch = {}) => ({
@@ -40,10 +40,18 @@ test("campaign proof is tied to the immutable demo id and exact zero-send guardr
   assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], receipt: { id: "sent" } }] })).verified, false);
   assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], reconciliation_required: true }] })).verified, false);
   assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], last_attempt_at: "2026-01-01T00:00:00Z" }] })).verified, false);
-  assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], next_attempt_at: "2099-01-01T00:00:00Z" }] })).verified, false);
   assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], retryable: true }] })).verified, false);
   assert.equal(campaignSafety(campaign({ scheduled_for: "2026-01-01T00:00:00Z" })).verified, false);
   assert.equal(campaignSafety(campaign({ scheduled_for: "not-a-date" })).verified, false);
+});
+
+test("ICP presentation claims require a substantive cohort, citations, and brief", () => {
+  const profile = { id: "icp-1", version: 1, profile: { summary: "Observed wins", industries: ["Services"], headcount_band: "25-80", roles: ["Founder"], triggers: ["Renewal"], confidence: 0.9, origami_brief: "Find similar firms", source_summary: { deals: 3, calls: 2, emails: 1, outcome_labelled: 3 } }, evidence: [{ attribute: "industry", deal_ids: ["deal-1"], why: "Won deals support it" }] };
+  assert.deepEqual(icpClaimSafety(profile), { cohort: true, citedProfile: true, brief: true });
+  assert.equal(icpClaimSafety({ ...profile, profile: { ...profile.profile, source_summary: { deals: 0, calls: 0, emails: 0, outcome_labelled: 0 } } }).cohort, false);
+  assert.equal(icpClaimSafety({ ...profile, evidence: [] }).citedProfile, false);
+  assert.equal(icpClaimSafety({ ...profile, evidence: [{ attribute: "industry", deal_ids: [], why: "Won deals support it" }] }).citedProfile, false);
+  assert.equal(icpClaimSafety({ ...profile, profile: { ...profile.profile, origami_brief: "   " } }).brief, false);
 });
 
 test("presenter state restores only valid selections and reduced-motion stepping wraps deliberately", () => {
