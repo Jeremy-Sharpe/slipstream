@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { pathToFileURL } from "node:url";
+
 const DEFAULT_API_URL = "https://slipstream-api.3-104-149-193.sslip.io";
 const CAMPAIGN_ID = "83b2a7b2-1ace-4dc5-b90a-d0dba9d2ed4c";
 const SCHEDULED_FOR = "2099-01-01T00:00:00Z";
@@ -243,6 +245,24 @@ export async function seedDemoCampaign({
     queued: paused.counts?.queued,
     sent: paused.counts?.sent,
   };
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    const result = await seedDemoCampaign({
+      apiUrl: process.env.SLIPSTREAM_API_URL || DEFAULT_API_URL,
+      token: process.env.SLIPSTREAM_INGEST_TOKEN,
+    });
+    console.log(
+      `demo campaign ready id=${result.campaignId} status=${result.status} ` +
+        `scheduled=${result.scheduledFor} queued=${result.queued} sent=${result.sent}`,
+    );
+  } catch (error) {
+    console.error(
+      `demo campaign seed failed: ${error instanceof Error ? error.message : "unknown error"}`,
+    );
+    process.exitCode = 1;
+  }
 }
 
 if (import.meta.url === new URL(process.argv[1], "file:").href) {
