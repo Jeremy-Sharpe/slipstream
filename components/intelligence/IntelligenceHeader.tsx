@@ -8,13 +8,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 // Page header: icon square + title, search and a primary "+ New analysis".
 export function IntelligenceHeader({ query, onQuery }: { query: string; onQuery: (q: string) => void }) {
   return (
-    <header className="flex items-center justify-between gap-6">
+    <header className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center sm:gap-6">
       <div className="flex items-center gap-4">
         <span className="flex size-[46px] items-center justify-center rounded-lg bg-icon-well text-foreground"><BarChart3 className="size-[22px]" strokeWidth={1.75} /></span>
         <h1 className="text-[26px] leading-none font-bold tracking-[-0.02em] text-foreground">Intelligence</h1>
       </div>
-      <div className="flex items-center gap-2.5">
-        <label className="flex h-10 w-[273px] items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <label className="flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary sm:w-[273px] sm:flex-none">
           <Search className="size-4" strokeWidth={1.75} />
           <input value={query} onChange={(e) => onQuery(e.target.value)} aria-label="Search analyses" className="min-w-0 flex-1 bg-transparent text-[16px] text-foreground outline-none placeholder:text-muted-foreground" />
         </label>
@@ -41,8 +41,8 @@ function NewAnalysis() {
 
   return (
     <Dialog open={open} onOpenChange={reset}>
-      <DialogTrigger render={<Button className="h-10 rounded-md px-3.5 text-[16px] font-medium" />}>
-        <Plus className="size-[18px]" strokeWidth={2.25} /> New analysis
+      <DialogTrigger render={<Button aria-label="New analysis" className="size-10 rounded-md p-0 text-[16px] font-medium sm:h-10 sm:w-auto sm:px-3.5" />}>
+        <Plus className="size-[18px]" strokeWidth={2.25} /> <span className="hidden sm:inline">New analysis</span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
