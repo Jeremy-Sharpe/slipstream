@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { parseEmail } from "@/lib/email";
 import { actions } from "@/lib/store";
 import { FileTiles } from "./home/FileTiles";
 import { Recorder } from "./home/Recorder";
@@ -11,7 +12,7 @@ import { TypedPlaceholder } from "./home/TypedPlaceholder";
 import { Submitting, type Source } from "./home/Submitting";
 import { Button, cn } from "./ui";
 
-type Mode = "upload" | "record" | "paste";
+type Mode = "upload" | "record" | "paste" | "email";
 type Phase = { kind: "idle" } | { kind: "submitting"; source: Source; error?: string; text?: string };
 
 const MEDIA = /\.(mp3|m4a|wav|mp4|mov|webm|ogg|aac|flac|m4v)$/i;
@@ -19,6 +20,7 @@ const MODES: { key: Mode; label: string }[] = [
   { key: "upload", label: "Upload file" },
   { key: "record", label: "Record" },
   { key: "paste", label: "Paste transcript" },
+  { key: "email", label: "Paste an email" },
 ];
 
 // One card, one size: 300px tall in every state so switching never moves the page.
@@ -30,7 +32,9 @@ export function DropZone() {
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [over, setOver] = useState(false);
   const [text, setText] = useState("");
+  const [emailText, setEmailText] = useState("");
   const [pasteFocused, setPasteFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const attach = useRef<HTMLInputElement>(null);
@@ -69,6 +73,7 @@ export function DropZone() {
     const p = phase;
     handoff(() => {
       if (p.source.kind === "paste") return actions.addTranscript(p.text ?? "");
+      if (p.source.kind === "email") return actions.addEmail(p.text ?? "");
       if (p.source.kind === "file") return actions.addUpload(p.source.name);
       const d = new Date();
       return actions.addUpload(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
@@ -87,6 +92,26 @@ export function DropZone() {
     if (!text.trim()) return;
     setPhase({ kind: "submitting", source: { kind: "paste", lines: text.split(/\n/).filter((l) => l.trim()).length }, text });
   };
+
+  // A forwarded email: headers and quoted replies become the thread.
+  const runEmail = () => {
+    if (!emailText.trim()) return;
+    setPhase({ kind: "submitting", source: { kind: "email", messages: parseEmail(emailText).length }, text: emailText });
+  };
+
+  const runPill = (enabled: boolean, onClick: () => void) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!enabled}
+      className={cn(
+        "absolute right-3 bottom-3 inline-flex h-7 items-center rounded-full px-3.5 text-[12.5px] font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
+        enabled ? "bg-accent text-accent-ink hover:bg-[#ff7d61]" : "cursor-default bg-line text-faint",
+      )}
+    >
+      Run
+    </button>
+  );
 
   return (
     <div className="text-center motion-safe:transition-[opacity,transform] motion-safe:duration-250" style={{ opacity: leaving ? 0 : 1, transform: leaving ? "translateY(-8px)" : "none", transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
@@ -122,6 +147,19 @@ export function DropZone() {
         <div key="record" className={cn(CARD, "px-8")}>
           <Recorder key={mode} onUse={useRecording} submitting={phase.kind === "submitting" && phase.source.kind === "recording" ? <Submitting source={{ kind: "recording" }} onDone={onSubmitted} variant="bar" /> : null} />
         </div>
+      ) : mode === "email" ? (
+        <div key="email" className={cn(CARD, "items-stretch justify-start p-5 text-left")}>
+          <TypedPlaceholder variant="email" active={!emailFocused && emailText.length === 0} />
+          <textarea
+            value={emailText}
+            onChange={(e) => setEmailText(e.target.value)}
+            onFocus={() => setEmailFocused(true)}
+            onBlur={() => setEmailFocused(false)}
+            aria-label="Paste the email"
+            className="relative min-h-0 w-full flex-1 resize-none bg-transparent pb-10 text-[15px] leading-6 text-ink outline-none"
+          />
+          {runPill(!!emailText.trim(), runEmail)}
+        </div>
       ) : (
         <div key="paste" className={cn(CARD, "items-stretch justify-start p-5 text-left")}>
           <TypedPlaceholder active={!pasteFocused && text.length === 0} />
@@ -142,17 +180,7 @@ export function DropZone() {
             <Plus className="size-3.5" strokeWidth={2} />
           </button>
           <input ref={attach} type="file" accept="audio/*,video/*,.txt,.vtt,.srt" className="sr-only" tabIndex={-1} onChange={(e) => onAttach(e.target.files)} />
-          <button
-            type="button"
-            onClick={run}
-            disabled={!text.trim()}
-            className={cn(
-              "absolute right-3 bottom-3 inline-flex h-7 items-center rounded-full px-3.5 text-[12.5px] font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
-              text.trim() ? "bg-accent text-accent-ink hover:bg-[#ff7d61]" : "cursor-default bg-line text-faint",
-            )}
-          >
-            Run
-          </button>
+          {runPill(!!text.trim(), run)}
         </div>
       )}
     </div>

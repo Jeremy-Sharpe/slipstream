@@ -5,24 +5,26 @@ import { Check, X } from "lucide-react";
 import { cn, mmss } from "@/components/ui";
 import { fmtElapsed, useElapsed } from "@/components/run/WorkingLine";
 
-/* The handoff after submit, shared by file, recording and paste: pixel-grid
-   loader + shimmering label + elapsed timer, one line of meta, then the
-   label settles ("Transcribed · 30 turns · 7:05") and hands over. */
+/* The handoff after submit, shared by file, recording, paste and email:
+   shimmering label + elapsed timer, one line of meta, then the label settles
+   ("Transcribed · 30 turns · 7:05", "Read the thread · 2 messages") and
+   hands over. */
 
-export type Source = { kind: "file"; name: string; bytes: number } | { kind: "recording" } | { kind: "paste"; lines: number };
+export type Source = { kind: "file"; name: string; bytes: number } | { kind: "recording" } | { kind: "paste"; lines: number } | { kind: "email"; messages: number };
 
 const DURATION = 425; // demo recording length, so the counter is honest
 const TURNS = 30;
 const MEDIA_MS = 2400, PASTE_MS = 800, HOLD_MS = 450, ERROR_MS = 1600;
 
-const label = (s: Source) => (s.kind === "file" ? `Transcribing ${s.name}` : s.kind === "recording" ? "Transcribing your recording" : "Reading the transcript");
+const label = (s: Source) => (s.kind === "file" ? `Transcribing ${s.name}` : s.kind === "recording" ? "Transcribing your recording" : s.kind === "email" ? "Reading the thread" : "Reading the transcript");
+const settledLabel = (s: Source) => (s.kind === "email" ? `Read the thread · ${s.messages} message${s.messages === 1 ? "" : "s"}` : `Transcribed · ${TURNS} turns · ${mmss(DURATION)}`);
 const mb = (b: number) => `${Math.max(0.1, b / 1048576).toFixed(1)} MB`;
 
 export function Submitting({ source, error, onDone, onReset, variant = "card" }: { source: Source; error?: string; onDone: () => void; onReset?: () => void; variant?: "card" | "bar" }) {
   const [settled, setSettled] = useState(false);
   const [started] = useState(() => Date.now());
   const ms = useElapsed(started, !settled);
-  const total = source.kind === "paste" ? PASTE_MS : MEDIA_MS;
+  const total = source.kind === "paste" || source.kind === "email" ? PASTE_MS : MEDIA_MS;
 
   useEffect(() => {
     if (error) { const t = setTimeout(() => onReset?.(), ERROR_MS); return () => clearTimeout(t); }
@@ -32,7 +34,7 @@ export function Submitting({ source, error, onDone, onReset, variant = "card" }:
   }, [error, total, onDone, onReset]);
 
   const at = Math.min(DURATION, Math.round((ms / total) * DURATION));
-  const meta = source.kind === "paste" ? `${source.lines} lines` : `${mmss(at)} / ${mmss(DURATION)}${source.kind === "file" ? ` · ${mb(source.bytes)}` : ""}`;
+  const meta = source.kind === "paste" ? `${source.lines} lines` : source.kind === "email" ? `${source.messages} message${source.messages === 1 ? "" : "s"}` : `${mmss(at)} / ${mmss(DURATION)}${source.kind === "file" ? ` · ${mb(source.bytes)}` : ""}`;
 
   return (
     <div className={cn("flex flex-col items-center", variant === "bar" && "h-5 justify-center")} style={{ animation: "fade-in 200ms ease-out both" }}>
@@ -45,7 +47,7 @@ export function Submitting({ source, error, onDone, onReset, variant = "card" }:
         {error ? (
           <span className="text-[14px] font-medium text-soft" style={{ animation: "fade-in 300ms ease-out both" }}>{error}</span>
         ) : settled ? (
-          <span className="text-[14px] font-medium text-ink" style={{ animation: "fade-in 300ms ease-out both" }}>Transcribed · {TURNS} turns · {mmss(DURATION)}</span>
+          <span className="text-[14px] font-medium text-ink" style={{ animation: "fade-in 300ms ease-out both" }}>{settledLabel(source)}</span>
         ) : (
           <span className="shimmer-text max-w-[300px] truncate text-[14px] font-medium">{label(source)}</span>
         )}

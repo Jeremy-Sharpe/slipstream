@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/components/ui";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
-/* Sample transcripts that type themselves into the empty Paste box, cycling
-   through four short excerpts from the fixture calls. Hidden the moment the
-   box is focused or has text. */
+/* Sample transcripts (or forwarded emails) that type themselves into the
+   empty Paste box, cycling through short excerpts from the fixture calls.
+   Hidden the moment the box is focused or has text. */
 
 const SAMPLES: [string, string, string][][] = [
   [["00:00:12", "Sam Whitfield", "Thanks for making time, Grace. You mentioned the office move next quarter?"], ["00:00:21", "Grace Kim", "Yes. It has forced us to look at who actually owns our IT."], ["00:00:34", "Sam Whitfield", "And the cyber insurance renewal, is that on your desk too?"]],
@@ -15,14 +15,29 @@ const SAMPLES: [string, string, string][][] = [
   [["00:00:11", "Jordan Lee", "Aisha, what is driving the timing?"], ["00:00:17", "Aisha Rahman", "The immediate issue is our cyber insurance renewal, which has become much stricter."], ["00:00:30", "Jordan Lee", "Insurance work first, then the helpdesk."]],
 ];
 
+/* Forwarded emails: header lines, a blank line, then the body. */
+const EMAIL_SAMPLES: string[][] = [
+  ["From: Hannah Lee <hannah@brunswickdental.example>", "To: Sam Whitfield <sam@harbourlineit.example>", "Subject: Essential Eight evidence for our insurer", "Date: Sat 12 Sept 2026 08:52", "", "Hi Sam,", "", "Our broker has asked for evidence of Essential Eight controls before they will quote the renewal. We are three practices, about 41 staff. What is involved, and roughly what should a group our size expect to pay?"],
+  ["From: Olivia Hart <olivia@wattlestreetlegal.example>", "To: Sam Whitfield <sam@harbourlineit.example>", "Subject: Handover timing", "Date: Tue 8 Sept 2026 08:31", "", "Hi Sam,", "", "Our IT coordinator's last day is now the 26th. The principal has signed off on the transition plan, so can we start the shadow handover next week?"],
+];
+
 type Tok = { text: string; speaker?: boolean; stamp?: boolean; br?: boolean };
 const toTokens = (sample: [string, string, string][]): Tok[] =>
   sample.flatMap(([stamp, name, line], i) => [...(i > 0 ? [{ text: "", br: true }] : []), { text: `[${stamp}]`, stamp: true }, { text: `${name}:`, speaker: true }, ...line.split(" ").map((w) => ({ text: w }))]);
+const toEmailTokens = (lines: string[]): Tok[] =>
+  lines.flatMap((line, i) => {
+    const br: Tok[] = i > 0 ? [{ text: "", br: true }] : [];
+    if (!line) return br;
+    const header = line.match(/^(From|To|Subject|Date):\s*(.*)$/);
+    return header ? [...br, { text: `${header[1]}:`, speaker: true }, ...header[2].split(" ").map((w) => ({ text: w }))] : [...br, ...line.split(" ").map((w) => ({ text: w }))];
+  });
 const TOKS = SAMPLES.map(toTokens);
+const EMAIL_TOKS = EMAIL_SAMPLES.map(toEmailTokens);
 
 const WORD_MS = 45, JITTER = 15, LINE_PAUSE = 220, HOLD_MS = 3400, FADE_MS = 300;
 
-export function TypedPlaceholder({ active }: { active: boolean }) {
+export function TypedPlaceholder({ active, variant = "transcript" }: { active: boolean; variant?: "transcript" | "email" }) {
+  const all = variant === "email" ? EMAIL_TOKS : TOKS;
   const [sample, setSample] = useState(0);
   const [count, setCount] = useState(0);
   const [fading, setFading] = useState(false);
@@ -36,7 +51,7 @@ export function TypedPlaceholder({ active }: { active: boolean }) {
     timers.current.forEach(clearTimeout);
     timers.current = [];
     if (!active || reduced) return;
-    const toks = TOKS[sample];
+    const toks = all[sample];
     if (count < toks.length) {
       const prev = toks[count - 1];
       const delay = (prev?.br ? LINE_PAUSE : 0) + WORD_MS + (Math.random() * 2 - 1) * JITTER;
@@ -44,11 +59,11 @@ export function TypedPlaceholder({ active }: { active: boolean }) {
       return;
     }
     timers.current.push(window.setTimeout(() => setFading(true), HOLD_MS));
-    timers.current.push(window.setTimeout(() => { setSample((s) => (s + 1) % TOKS.length); setCount(0); setFading(false); }, HOLD_MS + FADE_MS));
-  }, [active, count, sample, reduced]);
+    timers.current.push(window.setTimeout(() => { setSample((s) => (s + 1) % all.length); setCount(0); setFading(false); }, HOLD_MS + FADE_MS));
+  }, [active, count, sample, reduced, all]);
 
-  const toks = TOKS[sample];
-  const shown = reduced ? TOKS[0] : toks.slice(0, count);
+  const toks = all[sample];
+  const shown = reduced ? all[0] : toks.slice(0, count);
   const done = count >= toks.length;
 
   return (
