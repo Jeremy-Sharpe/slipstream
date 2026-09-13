@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { actions } from "@/lib/store/leads";
 import type { Lead } from "@/lib/types";
@@ -14,6 +14,15 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
   const [body, setBody] = useState(lead?.draft?.body ?? "");
   const [bodyFor, setBodyFor] = useState(lead?.draft?.id);
   if (lead?.draft && lead.draft.id !== bodyFor) { setBodyFor(lead.draft.id); setBody(lead.draft.body); }
+
+  // The draft box grows to fit its text, so nothing is ever cut off.
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    el.style.height = "0px";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [body, lead]);
 
   useEffect(() => {
     if (!lead) return;
@@ -58,9 +67,8 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
                   <li key={i} className="grid grid-cols-[96px_minmax(0,1fr)] gap-x-3">
                     <p className="pt-px text-[13.5px] text-soft">{e.attribute}</p>
                     <div className="min-w-0">
-                      <p className="text-[14px] font-medium text-ink">{e.value}</p>
-                      <p className="mt-1 text-[13.5px] leading-5 text-text">{e.why}</p>
-                      {e.deals.length > 0 && <p className="mt-0.5 text-[13.5px] text-soft">{e.deals.join(", ")}</p>}
+                      <p className="text-[14px] leading-5 text-ink">{e.value}</p>
+                      {e.deals.length > 0 && <p className="mt-0.5 truncate text-[13.5px] text-soft">{e.deals.join(", ")}</p>}
                     </div>
                   </li>
                 ))}
@@ -72,11 +80,12 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
               <>
                 <p className="mt-3 text-[14px] font-medium text-ink">{l.draft.subject}</p>
                 <textarea
+                  ref={bodyRef}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   readOnly={l.status === "approved"}
-                  rows={body.split("\n").length + 1}
-                  className="mt-2 w-full resize-none rounded-lg bg-surface-2 px-3 py-2 text-[14px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
+                  rows={1}
+                  className="mt-2 w-full resize-none overflow-hidden rounded-xl bg-surface-2 px-3 py-2 text-[14px] leading-6 text-text outline-none transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-accent/40"
                 />
               </>
             ) : (
