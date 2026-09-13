@@ -3,6 +3,22 @@ import type { ApiCampaign, ApiIcpProfile, ApiReadiness } from "@/lib/api/slipstr
 export const DEMO_CAMPAIGN_ID = "83b2a7b2-1ace-4dc5-b90a-d0dba9d2ed4c";
 export const DEMO_CAMPAIGN_SCHEDULE = "2099-01-01T00:00:00.000Z";
 
+export type RateScenario = {
+  volume: number;
+  baselineRate: number;
+  scenarioRate: number;
+};
+
+export function rateScenario({ volume, baselineRate, scenarioRate }: RateScenario): {
+  baselineOutcomes: number;
+  scenarioOutcomes: number;
+  additionalOutcomes: number;
+} {
+  const baselineOutcomes = volume * baselineRate;
+  const scenarioOutcomes = volume * scenarioRate;
+  return { baselineOutcomes, scenarioOutcomes, additionalOutcomes: scenarioOutcomes - baselineOutcomes };
+}
+
 export type ProofState<T> =
   | { status: "loading" }
   | { status: "verified"; value: T }

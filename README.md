@@ -18,7 +18,7 @@ Demo video: https://github.com/Jeremy-Sharpe/slipstream/releases/download/demo-v
 
 **Who:** the head of sales, or the founder who still sells, at a 5 to 30 person B2B services firm (agencies, consultancies, professional services). They sell by phone and video call, they have a CRM, and they have no RevOps function, no sales enablement, and no time.
 
-**What goes wrong, from our own sales interviews:**
+**What goes wrong:** the repository contains two anonymised qualitative inputs from the team's hackathon research—one sales-team conversation and one team debrief. They are directional, not a statistically representative sample. The broader capacity problem is independently consistent with Salesforce's 2026 State of Sales finding that reps spend [60% of an average week on non-selling work, including 13% manually entering data](https://www.salesforce.com/en-us/wp-content/uploads/sites/4/documents/reports/sales/salesforce-state-of-sales-report-2026.pdf).
 
 - The CRM exists but nobody updates it after a call. Notes live in heads and notebooks, so the pipeline view is fiction and follow-ups slip.
 - Nobody reviews calls. Reps get no feedback on what worked and what lost the deal, so the same mistakes repeat.
@@ -84,7 +84,7 @@ Slipstream is the closed loop. Its Revenue DNA gate is the key difference: call 
 
 ## Feasibility and value
 
-**Value.** Our clearly labelled demo assumption is 10 minutes of CRM and follow-up admin per call at 8 calls a day. That is 6.7 hours of rep capacity per five-day week—or about $500 per rep per week at an illustrative $75 loaded hourly cost. The Revenue Loop shows this formula directly; these are adjustable operating assumptions, not measured customer results. Larger still: the ICP is derived from the calls that closed, not from a persona deck, so every lead sourced is scored against what has actually converted and the outbound list improves each week the team sells. And the live coach means fewer deals lost to a rep freezing on a question.
+**Value.** Our clearly labelled demo assumption is 10 minutes of CRM and follow-up admin per call at 8 calls a day. That is 6.7 hours of rep capacity per five-day week—or about $500 per rep per week at an illustrative $75 loaded hourly cost. The Revenue Loop shows this formula directly; these are adjustable operating assumptions, not measured customer results. It also makes the two larger upside claims falsifiable with scenario math: at 40 qualified opportunities per month, moving a 20% win rate to 22.5% means one additional win; at 200 outbound prospects, moving positive replies from 5% to 6% means two additional buyer conversations. Those are transparent what-if scenarios—not forecasts or claimed pilot results—and a real pilot would replace the inputs with the customer's baseline. The mechanism behind them is that coaching addresses missed questions while Revenue DNA scores sourcing against customers who actually converted.
 
 **From demo to product.**
 

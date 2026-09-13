@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { DEMO_CAMPAIGN_ID, campaignSafety, findDemoCampaign, icpClaimSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof } from "../lib/demo/revenue-loop.ts";
+import { DEMO_CAMPAIGN_ID, campaignSafety, findDemoCampaign, icpClaimSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, rateScenario, settleDemoProof } from "../lib/demo/revenue-loop.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const campaign = (patch = {}) => ({
@@ -19,11 +19,18 @@ test("stage demo tells the connected loop and deep-links every proof surface", a
   ]);
   assert.match(page, /RevenueLoop/);
   assert.match(sidebar, /href: "\/demo", label: "Revenue loop"/);
+  assert.match(sidebar, /max-width: 767px/); assert.match(sidebar, /w-14/);
   for (const call of ["getReadiness", "getLatestIcp", "getCampaigns"]) assert.ok(component.includes(`${call}(`));
   for (const href of ["#transcript", "#crm-writeback", "#follow-up-draft", "/intelligence#patterns", "/intelligence#icp", "/intelligence#brief", "/campaigns#delivery-execution"]) assert.ok(component.includes(href), `demo links to ${href}`);
   assert.match(transcript, /id="transcript"/); assert.match(detail, /id="crm-writeback"/); assert.match(detail, /id="follow-up-draft"/); assert.match(campaigns, /id="delivery-execution"/);
   for (const fragment of ["patterns", "icp", "brief"]) assert.ok(intelligence.includes(`id="${fragment}"`), `Intelligence renders #${fragment}`);
   assert.match(component, /Presenter-controlled/); assert.match(component, /prefers-reduced-motion/); assert.match(component, /min-w-\[980px\]/); assert.match(component, /it does not simulate provider calls or send email/);
+  assert.match(component, /Coaching scenario/); assert.match(component, /Targeting scenario/); assert.match(component, /illustrative, not a forecast/); assert.match(component, /illustrative, not measured/);
+});
+
+test("illustrative rate scenarios calculate their visible deltas rather than hardcoding outcomes", () => {
+  assert.deepEqual(rateScenario({ volume: 40, baselineRate: 0.2, scenarioRate: 0.225 }), { baselineOutcomes: 8, scenarioOutcomes: 9, additionalOutcomes: 1 });
+  assert.deepEqual(rateScenario({ volume: 200, baselineRate: 0.05, scenarioRate: 0.06 }), { baselineOutcomes: 10, scenarioOutcomes: 12, additionalOutcomes: 2 });
 });
 
 test("campaign proof is tied to the immutable demo id and exact zero-send guardrail", () => {

@@ -62,9 +62,9 @@ Fallback: Use the labelled scorecard already rendered in Conversations, then sho
 
 ## 2:55–3:25 — Close on value and proof
 
-Action: Return to Revenue Loop and leave all seven beats completed.
+Action: Return to Revenue Loop and leave all seven beats completed. Point to the two pipeline scenarios below the rep-capacity strip.
 
-Say: “A small sales team currently buys a recorder, CRM automation, call coaching and lead sourcing separately—and still has to keep them in sync. Slipstream makes the call the source of truth. One conversation updates the CRM, creates the safe follow-up, teaches the team who converts, and finds the next person to call. The production API you just saw is running on the exact Git revision in GitHub, and all external-key paths have deterministic fallbacks. That is the sales layer we would install beside the CRM a team already has.”
+Say: “A small sales team currently buys a recorder, CRM automation, call coaching and lead sourcing separately—and still has to keep them in sync. Slipstream makes the call the source of truth. One conversation updates the CRM, creates the safe follow-up, teaches the team who converts, and finds the next person to call. These scenarios are not forecasts: they show exactly what one prevented miss or one point of better replies would mean, and a pilot replaces our inputs with the customer's baseline. The production API you just saw is running on the exact Git revision in GitHub. That is the sales layer we would install beside the CRM a team already has.”
 
 Stop. Do not fill spare time. Invite questions.
 
