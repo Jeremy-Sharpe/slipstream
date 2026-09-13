@@ -1,6 +1,6 @@
 {
   "call_id": "call-03-afterglow-studio",
-  "seller": "Harbourline IT",
+  "seller": "Eleno",
   "rep": "Jordan Lee",
   "prospect": {
     "name": "Priya Shah",
@@ -16,7 +16,7 @@
     "domain": "afterglowstudio.example"
   },
   "channel": "phone",
-  "scheduled_at": "2026-09-02T10:00:00+10:00",
+  "scheduled_at": "2026-09-01T14:00:00+10:00",
   "duration_target_seconds": 390,
   "outcome": "lost",
   "deal_value_aud": 15400,
@@ -25,152 +25,142 @@
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "Hi Priya Shah, Jordan from Harbourline IT. Great to speak with Afterglow Studio. We help Melbourne firms move from ad hoc IT to a proper managed service, and our standard package is $120 per seat per month."
+      "text": "Priya Shah, Jordan Lee from Eleno. Good to finally speak with Afterglow Studio. We build custom AI agents for Melbourne businesses, and for a studio your size a first automation build usually lands between $15,000 and $18,000, with a short discovery phase on top of that."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "Hi Jordan. We're only twelve people, so I was mostly curious. Our computers are fine most weeks, and we use a local break-fix person when something annoying happens."
+      "text": "Hi Jordan. We are twelve people in Collingwood and I was mostly curious. Most of what we do is creative work that changes shape on every job."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "That's exactly where managed services helps, because waiting for things to break costs time. With us you get helpdesk, Microsoft 365 admin, patching, endpoint security, backup checks and quarterly reviews, all wrapped into one predictable monthly number."
+      "text": "That is exactly where the value is. Every studio thinks their work is bespoke, and then you look at the proposals, the scopes of work and the monthly status reports, and eighty per cent of it is the same nine paragraphs with different client names in them."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "We are probably too small for a monthly managed service. The designers are on Macs, the account team uses Google Workspace, and there is not much infrastructure."
+      "text": "Some of it is, but we do about four proposals a month. It is not a factory."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "Small teams actually need it more because there's no internal IT person. Harbourline IT can bring the same structure bigger firms have, and it means you're not relying on whoever is least busy to fix a printer or password issue."
+      "text": "Four a month is still forty-eight a year, and if each one takes your team three hours you are looking at a working fortnight gone. An agent can draft the scope, pull your rate card and have it sitting in your inbox in under a minute."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "The printer bit's real, but it's not painful enough to spend a lot. We might have two support issues a month, maybe three when freelancers are in."
+      "text": "We do not have the volume to justify a build like that. The proposals are also where we win the work, so I want a human writing them."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "The bigger risk isn't the ticket count, it's the security baseline. Cyber insurance and client questionnaires are getting stricter, so having managed endpoint protection and patch records makes you look professional when a client asks."
+      "text": "A human still signs them. The agent does the assembly, and your people spend their time on the pitch rather than the formatting. Every client we deploy for says the same thing in the first week."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "Most of our clients are hospitality and lifestyle brands. They care about creative work. Nobody has sent us a security questionnaire, and if they did, I'd probably just answer it myself."
+      "text": "Maybe. But the cost is the part I keep coming back to, and you have quoted me a number before you know what we actually do."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "We also include onboarding, so we'd clean up user accounts, make sure everyone has MFA, standardise devices and document your apps. For a team like Afterglow Studio, that project could be $4,000 to $6,000 depending on what we find."
+      "text": "Think about the cost the other way. If a proposal goes out two days late and you lose one retainer a year at thirty thousand, the build has paid for itself before the first invoice."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "That is more than double what we pay now. Our current guy charges when we need him, and some months we pay nothing at all."
+      "text": "That is more than we spent on our entire software stack last year, and we actually use that software every single day."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "Right, but the monthly fee buys peace of mind. If a laptop is stolen or someone clicks a bad link, you've a team ready. Break-fix is cheaper until the one day it's not."
+      "text": "Software is a subscription, though. This is different. We build it, deploy it and transfer the IP to you, so it is an asset on your books instead of a bill that renews forever."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "I understand the argument, but there's not a burning problem. We're watching costs this quarter, and I don't want another subscription unless it removes a daily headache."
+      "text": "An asset we would still have to maintain. There are twelve of us and not one of us is technical."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "The daily headache can be hidden, though. Designers losing twenty minutes here and there adds up, and with a managed agreement you can send everything through one channel instead of interrupting each other."
+      "text": "That is what the managed optimisation option covers. It is there if you want it and it is not compulsory, but most studios take it for the first year because it removes the worry."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "Maybe, but I'd need to see a very small plan. I'm not going to take a twelve-seat studio into a corporate IT package because it sounds responsible."
+      "text": "So there is an ongoing cost after all, which is the thing I said at the start I did not want."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "Our minimum managed plan is still designed around the full stack, because partial coverage creates gaps. We can start with the baseline and then add anything specific later."
+      "text": "Only if you choose it. The pattern I see with creative studios is that admin creeps up until someone burns out, and then you are hiring a coordinator at eighty thousand a year to do work an agent could have done."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "That's probably not for us then. I was hoping there might be a light-touch option or an annual check-up."
+      "text": "We already have a studio coordinator and she is excellent. She would tell you the proposals are the easy part of her week."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "I will send some info this afternoon. It will explain the service inclusions, the onboarding project and why proactive support tends to be better value over a year."
+      "text": "Then she is spending her week on the wrong work. I have sat with agencies where the coordinator was a copy-and-paste machine three days a week, and once we automated the proposal packs she moved onto client care."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "You can send it, but I don't want to waste your time. Unless the price is much closer to what we pay casually, I can't see us moving."
+      "text": "I hear you, but you still have not asked me what she actually does."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "The reason I'm pushing the managed option is that creative studios often underestimate the cost of interruption. If a designer loses files before a client presentation, the impact isn't just an IT invoice, it's reputation and rework."
+      "text": "Fair, and I will get to that. The reason I lead with the build is that studios your size tend to wait too long, and then the work arrives all at once and there is no time to put anything in properly."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "I hear that, but our files are backed up in the design tools and we've not had that kind of incident."
+      "text": "That still sounds like buying ahead of a problem we do not have."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "You would also get a proper onboarding audit. We'd review admin accounts, device health, domains, password sharing, MFA and whether freelancers still have access after a project finishes."
+      "text": "Or buying ahead of growth. You said four proposals a month now. If that goes to eight you are not adding half a person, you are adding a bottleneck that shows up in how fast you answer new business."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "Those are real things, but they aren't things I'm ready to put a monthly contract around."
+      "text": "Our response time is fine. We usually turn a proposal around in two days."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "If budget is the blocker, I can still show the cost over twelve months compared with reactive work and staff downtime. Sometimes the managed plan comes out closer than it first appears."
+      "text": "Two days is slower than it sounds when three studios are pitching the same job. The one that answers in four hours reads as the one that wants it more. That is a revenue argument, not an efficiency one."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "Maybe for another studio. For us, the cash cost is obvious and the downtime cost is still theoretical."
+      "text": "Jordan, I do not think we are the right fit for this, and I have said so three times now."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "The overview will also show the security baseline we recommend for even a small studio: MFA, device encryption, admin account separation, backup confirmation and a simple incident contact path. That gives you a benchmark, even if you choose not to move now."
+      "text": "I will send the scope and the numbers through this afternoon anyway. It will show the proposal drafting build, the onboarding pack automation and what the discovery phase covers, so you have something to look at when the volume does arrive."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "A benchmark is fine. I just don't want the benchmark to turn into pressure to buy something we've already said is too heavy."
+      "text": "You can send it. I do not want to waste your time though, because the answer today is no."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "The thing I'd be careful of is waiting until the first serious client requirement appears. By then you're trying to write policies, clean accounts, find device records and reassure a client at the same time. The managed plan keeps all of that ready before anyone asks, and it gives you a professional answer rather than a scramble."
+      "text": "Understood. Have a read and come back to me when the proposal load picks up, because it always does, and the studios that move early are the ones not scrambling in their busiest quarter."
     },
     {
       "speaker": "prospect",
       "name": "Priya Shah",
-      "text": "I understand, but that still feels like buying ahead of a problem."
-    },
-    {
-      "speaker": "rep",
-      "name": "Jordan Lee",
-      "text": "Understood. I will send the overview and you can come back if anything changes or if a client asks for security evidence."
-    },
-    {
-      "speaker": "prospect",
-      "name": "Priya Shah",
-      "text": "Thanks Jordan. I appreciate the call, but it's a no for now."
+      "text": "Thanks Jordan. It is a no for now, and I would rather be straight with you about it."
     }
   ]
 }

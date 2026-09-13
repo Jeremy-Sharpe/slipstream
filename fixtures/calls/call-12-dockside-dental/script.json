@@ -1,6 +1,6 @@
 {
   "call_id": "call-12-dockside-dental",
-  "seller": "Harbourline IT",
+  "seller": "Eleno",
   "rep": "Jordan Lee",
   "prospect": {
     "name": "Ethan Clarke",
@@ -16,7 +16,7 @@
     "domain": "docksidedental.example"
   },
   "channel": "phone",
-  "scheduled_at": "2026-09-11T09:00:00+10:00",
+  "scheduled_at": "2026-09-10T15:00:00+10:00",
   "duration_target_seconds": 55,
   "outcome": "no_show",
   "deal_value_aud": null,
@@ -25,22 +25,22 @@
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "Hi, Jordan Lee from Harbourline IT calling for Ethan Clarke at Dockside Dental. We had a 9am phone appointment about managed IT and cyber insurance questions."
+      "text": "Hi, Jordan Lee from Eleno calling for Ethan Clarke at Dockside Dental. We had a three o'clock phone appointment to talk through automating the recall and treatment plan paperwork."
     },
     {
       "speaker": "prospect",
       "name": "Reception",
-      "text": "Ethan has been pulled into a patient issue and won't make the call. Sorry, the morning has gone sideways."
+      "text": "Ethan has been pulled into a patient issue and won't make the call. Sorry, the afternoon has gone sideways on us."
     },
     {
       "speaker": "rep",
       "name": "Jordan Lee",
-      "text": "No worries. I will send a quick email with a couple of times to reschedule, and he can pick whatever works. Please let him know Jordan called."
+      "text": "No worries at all. I will send a short email with two times to reschedule, and he can pick whichever suits. Please let him know Jordan called."
     },
     {
       "speaker": "prospect",
       "name": "Reception",
-      "text": "Will do. Email is best today. Thanks for understanding."
+      "text": "Will do. Email is best today. Thanks for being understanding about it."
     }
   ]
 }

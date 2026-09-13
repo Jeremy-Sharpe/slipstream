@@ -28,7 +28,7 @@ Action: Stay on Maya Chen. Open the transcript and scroll once so speaker turns 
 
 Say: “The input is the conversation, not a form. Scribe separates the speakers. Slipstream extracts the contact, company, deal, promises, objections and next step. Every confidence value opens back to either an exact transcript span or, for pre-labelled fixture metadata such as caller ID, an explicitly marked fixture source.”
 
-Action: Click the evidence behind Maya’s security-questionnaire next step and show that it jumps to its source. Point briefly to the objection or review panel.
+Action: Click the evidence behind Maya’s next step, the research note drafting pilot walkthrough on Thursday 3 September, and show that it jumps to its source. Point briefly to the objection or review panel.
 
 Fallback: If the action fails, use the terminal fallback below. It runs the newest voiced fixture and should return Donnie Azoff, Marlowe & Finch, outcome `won`, amount `48600`, two promises and two objections. Explain that the fallback fixture differs from Maya but exercises the same production path.
 
@@ -36,7 +36,7 @@ Fallback: If the action fails, use the terminal fallback below. It runs the newe
 
 Action: Show the CRM preview beside Maya’s transcript. Point to company, contact and deal as three separate records, then open the email draft.
 
-Say: “Those are HubSpot-shaped records, not a blob of notes. With Supabase connected, the same action idempotently upserts the company, contact and deal without erasing stronger fields already in the CRM. Now the follow-up drafts itself from grounded facts. Notice what is missing: Jordan claimed the insurer would halve the premium, but that risky claim is not repeated here. The draft includes only the agreed proposal, commercial terms and next step.”
+Say: “Those are HubSpot-shaped records, not a blob of notes. With Supabase connected, the same action idempotently upserts the company, contact and deal without erasing stronger fields already in the CRM. Now the follow-up drafts itself from grounded facts. Notice what is missing: Jordan claimed the agents would halve your back-office headcount, but that risky claim is not repeated here. The draft includes only the agreed proposal, commercial terms and next step.”
 
 Action: Click Approve. Show status change from Draft to Approved and the approval timestamp.
 
@@ -94,7 +94,7 @@ If the VPS is unreachable, use the production UI’s already-loaded deterministi
 
 ## Likely judge interruptions
 
-- “What is mocked?” The businesses, calls and generated prospects are synthetic and explicitly labelled. The OpenRouter extraction, drafting, mixed-channel ICP, embedding and lead-scoring path runs live; generated prospects use `.example` domains and cannot be delivered to. Origami and email delivery have real adapters but are not configured, and readiness says so plainly.
+- “What is mocked?” The prospects, calls and generated leads are synthetic and explicitly labelled. The seller, Eleno, is a real company and a sponsor of this hackathon: its description comes from its public website and its seven publicly listed clients are loaded as won CRM deals with no invented contact, headcount, value or dialogue, while every other seller fact is a labelled demo assumption. The OpenRouter extraction, drafting, mixed-channel ICP, embedding and lead-scoring path runs live; generated prospects use `.example` domains and cannot be delivered to. Origami and email delivery have real adapters but are not configured, and readiness says so plainly.
 - “Is this really a CRM integration?” The demo writes to Postgres tables shaped like HubSpot company, contact, deal, engagement and task objects. A production connector swaps those writes for HubSpot APIs; the extraction contract does not change.
 - “What happens without keys?” Fixture ingestion, extraction and drafting remain deterministic and tested. Paid transcription fails closed, and cannot be enabled in production without an ingest token.
 - “Can scheduled outreach duplicate a send?” Campaign and per-draft leases prevent concurrent ownership, and the provider request reuses an exact content-bound idempotency key. Ambiguous results are retried or surfaced for reconciliation; they are never relabelled as successful.

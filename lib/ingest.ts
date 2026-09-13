@@ -19,8 +19,8 @@ import { displayName, isRep, parseEmail } from "@/lib/email";
 import type { ConversationEntry } from "@/lib/store/conversations";
 
 export const REP_NAME = "Sam Whitfield";
-const MAILBOX = { name: REP_NAME, email: "sam@harbourlineit.example" };
-const MAILBOX_ID = "harbourline-sales";
+const MAILBOX = { name: REP_NAME, email: "sam@eleno.example" };
+const MAILBOX_ID = "eleno-sales";
 const WORDS_PER_MINUTE = 150;
 
 const stamp = () => Date.now().toString(36);

@@ -1,4 +1,6 @@
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from fastapi import HTTPException
@@ -9,6 +11,15 @@ from app.factory import create_app
 from app.routers import calls
 from app.services.transcribe import Transcript, TranscriptSegment
 
+DEMO_CALL_ID = "call-13-marlowe-finch-demo"
+DEMO_SCRIPT = json.loads(
+    (Path(__file__).resolve().parents[2] / "fixtures" / "calls" / DEMO_CALL_ID / "script.json")
+    .read_text(encoding="utf-8")
+)
+DEMO_DURATION_SECONDS = round(
+    DEMO_SCRIPT.get("audio_seconds") or DEMO_SCRIPT["duration_target_seconds"]
+)
+
 
 def test_fixture_catalog_lists_all_labelled_calls(client: TestClient) -> None:
     response = client.get("/api/v1/calls/fixtures")
@@ -17,13 +28,13 @@ def test_fixture_catalog_lists_all_labelled_calls(client: TestClient) -> None:
     fixtures = response.json()
     assert len(fixtures) == 13
     demo = next(item for item in fixtures if item["demo"])
-    assert demo["call_id"] == "call-13-marlowe-finch-demo"
-    assert demo["company"] == "Marlowe & Finch Accounting"
+    assert demo["call_id"] == DEMO_CALL_ID
+    assert demo["company"] == DEMO_SCRIPT["company"]["name"]
 
 
 def test_fixture_ingest_is_immediately_retrievable(client: TestClient) -> None:
-    first = client.post("/api/v1/calls/fixtures/call-13-marlowe-finch-demo/ingest")
-    second = client.post("/api/v1/calls/fixtures/call-13-marlowe-finch-demo/ingest")
+    first = client.post(f"/api/v1/calls/fixtures/{DEMO_CALL_ID}/ingest")
+    second = client.post(f"/api/v1/calls/fixtures/{DEMO_CALL_ID}/ingest")
 
     assert first.status_code == 200
     assert second.status_code == 200
@@ -31,10 +42,10 @@ def test_fixture_ingest_is_immediately_retrievable(client: TestClient) -> None:
     assert second.json()["id"] == record["id"]
     assert record["provider"] == "fixture"
     assert record["fixture"] is True
-    assert record["duration_seconds"] == 420
-    assert len(record["segments"]) == 30
-    assert record["segments"][0]["speaker"] == "Jordan Belfort"
-    assert "Donnie Azoff:" in record["transcript"]
+    assert record["duration_seconds"] == DEMO_DURATION_SECONDS
+    assert len(record["segments"]) == len(DEMO_SCRIPT["turns"])
+    assert record["segments"][0]["speaker"] == DEMO_SCRIPT["turns"][0]["name"]
+    assert f"{DEMO_SCRIPT['prospect']['name']}:" in record["transcript"]
 
     fetched = client.get(f"/api/v1/calls/{record['id']}")
     assert fetched.status_code == 200

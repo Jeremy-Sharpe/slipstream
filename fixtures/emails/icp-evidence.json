@@ -1,11 +1,11 @@
 [
   {
-    "deal_external_id": "fixture:call-07-wattle-street-legal",
-    "source_external_id": "wattle-001",
+    "deal_external_id": "fixture:call-07-fairfield-wealth",
+    "source_external_id": "fairfield-001",
     "channel": "email",
     "direction": "inbound",
     "occurred_at": "2026-09-12T00:12:00Z",
-    "subject": "Security review and next steps",
-    "content": "Our cyber insurer has asked for evidence of MFA and a documented response plan before renewal. Could you send the recommended first phase, timing, and who you need from our side?"
+    "subject": "Source logging and next steps",
+    "content": "Our compliance manager wants to see how the drafting assistant records every source it relies on before we roll it out to the advisers. Could you send the recommended first phase, timing, and who you need from our side?"
   }
 ]

@@ -1,0 +1,176 @@
+{
+  "call_id": "call-08-ridgeline-commercial",
+  "seller": "Eleno",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Ben Wallace",
+    "role": "Director",
+    "email": "ben@ridgelinecommercial.example",
+    "phone": "+61 3 7010 1108"
+  },
+  "company": {
+    "name": "Ridgeline Commercial",
+    "industry": "Commercial real estate agency",
+    "headcount": 52,
+    "location": "Cremorne, VIC",
+    "domain": "ridgelinecommercial.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-04T14:15:00+10:00",
+  "duration_target_seconds": 415,
+  "outcome": "won",
+  "deal_value_aud": 78200,
+  "trigger": "Lease abstraction and tenant reporting taking a week every month",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Ben Wallace, Sam from Eleno. Before I get into anything, are you still the director running the commercial management side at Ridgeline Commercial?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "That's me. Fifty-two people in Cremorne, and about two thirds of that is property management rather than sales. The thing I booked this call about is lease abstraction. It eats a week every month."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Tell me what that week actually looks like, hour by hour if you can?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Two property analysts sit with a pile of lease documents and pull out the key terms. Commencement, expiry, rent review dates and mechanisms, outgoings recovery, make good, option periods. They type those into our management system and then build the tenant reports off the back of it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How many leases are moving through that in a month?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "New and varied, about forty. But the reporting covers the whole portfolio, which is around eleven hundred tenancies across three hundred assets. So it is not just the new ones, it is every review date and every outgoings reconciliation."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Where do the lease documents live and what state are they in?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Mostly PDFs in our document management system, some scanned, some native. Quality varies a lot, especially anything inherited when we took over a portfolio. There are deeds of variation sitting as separate files that nobody has linked back to the head lease."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What breaks when someone gets an abstraction wrong?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "A missed rent review is the expensive one. We had one last year where an option date passed and the tenant held over at the old rent for eighteen months. The owner was not delighted, and we wore part of it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "And what would a good outcome look like to you, in a way your owners would notice?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Reporting that goes out in a day instead of a week, no missed critical dates, and the two analysts spending their time on arrears and owner relationships rather than typing. If owners get their reports on the third of the month every month, that is something we can sell on a new mandate."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "So what we would build is a lease abstraction pipeline. It reads the lease and any variations, extracts the terms against a schema you define, flags anything it is not confident about for a human to check, and writes the confirmed terms into your management system. The tenant reports then generate from that."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "The flagging part is what I would want to press on. If it quietly guesses a rent review mechanism and gets it wrong, that is worse than the analyst typing it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Agreed, and that is the design principle rather than a feature we added later. Every extracted term carries a confidence and a pointer to the clause it came from. Anything below threshold goes to a review queue instead of into the system. Your analysts become checkers on the hard ten per cent rather than typists on all of it."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "That I can sell internally. The analysts will not fight something that removes the boring eighty per cent."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "On numbers, a fixed-scope build for Ridgeline Commercial lands at $78,200, with a discovery phase of about three weeks first, where we run a sample of your real leases through and measure the extraction quality."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Measuring on our own leases before we commit is the right way round. What does the discovery phase cost on its own?"
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Six thousand for this scope, and it comes off the build if you proceed. I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Thursday is fine. Send it to me and I will bring in our head of property management, because she owns the reporting calendar."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Can we book Friday 11 September at 9am with you and your head of property management to go through it?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Friday 11 September at 9am works. She is in the office on Fridays anyway."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Good. I will also run twenty of your real leases through the extraction before that meeting, so we are looking at your numbers rather than a generic accuracy claim."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Twenty is enough to show me whether it handles the messy inherited ones. Pick some from the portfolio we took on in Ballarat, they are the worst of it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will ask for those specifically. If it struggles on scanned deeds of variation, better that we both know in September than in March."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "That is an honest answer. The last provider we looked at demonstrated on a clean template lease and would not touch ours."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "The other thing worth saying is that we deploy into your environment and transfer the intellectual property at handover. You are not renting this back from us forever."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "That matters on the owners' side as well. They ask who holds the data whenever we pitch for a new mandate."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Then we will cover data residency and ownership in the scope document, so you have an answer in writing rather than a verbal assurance."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Ben Wallace",
+      "text": "Thanks Sam. Thursday for the document, Friday for the meeting."
+    }
+  ]
+}

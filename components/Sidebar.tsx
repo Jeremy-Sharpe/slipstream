@@ -45,7 +45,7 @@ export function Sidebar() {
         <Avatar name="Maxim Durand" size={28} />
         <div className="min-w-0">
           <p className="truncate text-[12.5px] font-semibold leading-tight text-ink">Maxim Durand</p>
-          <p className="truncate text-[11px] text-faint">Harbourline IT</p>
+          <p className="truncate text-[11px] text-faint">Eleno</p>
         </div>
       </div>
     </aside>

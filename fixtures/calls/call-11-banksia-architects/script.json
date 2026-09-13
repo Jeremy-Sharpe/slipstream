@@ -1,6 +1,6 @@
 {
   "call_id": "call-11-banksia-architects",
-  "seller": "Harbourline IT",
+  "seller": "Eleno",
   "rep": "Sam Whitfield",
   "prospect": {
     "name": "Grace Kim",
@@ -16,171 +16,161 @@
     "domain": "banksiaarchitects.example"
   },
   "channel": "phone",
-  "scheduled_at": "2026-09-10T14:00:00+10:00",
-  "duration_target_seconds": 425,
+  "scheduled_at": "2026-09-09T09:45:00+10:00",
+  "duration_target_seconds": 430,
   "outcome": "stalled",
   "deal_value_aud": 66400,
-  "trigger": "Office move planning and cyber insurance evidence gap",
+  "trigger": "Fee proposal drafting and consultant coordination ahead of an office move",
   "turns": [
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "Grace Kim, thanks for speaking with me. I have Banksia Architects as a forty-four person studio in Fitzroy, and you manage studio operations, yes?"
+      "text": "Grace Kim, thanks for speaking with me. I have Banksia Architects as a forty-four person studio in Fitzroy, and you manage studio operations, is that right?"
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Yes. We're looking at an office move next quarter, and it has exposed how dependent we're on an IT setup nobody really owns. I'm gathering options before the directors decide what to fund."
+      "text": "Yes. We're moving office next quarter, and pulling the studio apart has shown how much of our process lives in people's heads. I'm gathering options before the directors decide what to fund for the new financial year."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "What has the office move made visible that was easier to ignore before?"
+      "text": "What is taking the most time across the studio right now?"
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Shared project files, printing, site laptops and a pile of old accounts. We've grown from twenty-eight to forty-four people, but the IT habits are from the smaller studio."
+      "text": "Fee proposals. Every new project starts with one, and each takes a director and me two or three days. We pull scope from the client brief, stages from a template nobody fully trusts, rates from a spreadsheet, and consultant allowances from the last similar job."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "How do staff currently get help when something breaks during a deadline?"
+      "text": "How many of those go out in a year, and who writes them?"
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "They message me, our BIM lead, or the external technician we use casually. Everyone is helpful, but nobody has an overall picture. During tender weeks that means lots of interruptions."
+      "text": "Somewhere near ninety. Three directors write them, I chase the pieces, and our practice accountant checks the numbers at the end. About a third are for repeat clients where most of the content already exists in a proposal we then cannot find."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "Who would need to be in the room for a decision on managed services?"
+      "text": "Where do the finished proposals and the consultant information actually sit?"
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Two directors and me. I can recommend, but I can't sign. One director cares about project continuity, the other is watching cash because the move is expensive."
+      "text": "Proposals are in project folders on the shared drive, named however the director felt that week. Consultant quotes arrive by email and stay there. The fee spreadsheet lives on somebody's desktop. There is no single place you could ask what we charged for a similar school project."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "What would make the directors feel this is a must-do rather than a nice-to-have?"
+      "text": "And what does the consultant coordination side look like once a project is running?"
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Evidence that the move is risky without it. Also cyber insurance. We answered a questionnaire last year, but I couldn't prove half the answers without chasing three people."
+      "text": "Chasing, mostly. We coordinate structural, services, planning and landscape consultants, each with their own deadlines and drawing sets. A large part of my week is working out who owes what. When a date slips, nobody finds out until the coordination meeting."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "Where are your biggest security gaps today?"
+      "text": "If the directors funded one thing, what would you want fixed first, and who makes that call?"
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Old admin accounts, inconsistent MFA, and no formal backup test. I'm not saying everything is broken, but it's too much dependent knowledge."
+      "text": "Fee proposals, without question, because they gate every new job. The two senior directors decide together. One is focused on winning work, the other has been watching every dollar since we signed the new lease."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "For a studio your size, Harbourline IT would usually sit around $134 per seat per month, with an onboarding project to document systems before the move."
+      "text": "That is a clean first build. A short paid discovery phase to map how a proposal is actually assembled, then a fixed-scope build of a drafting agent that pulls scope, stages, rates and consultant allowances out of your own past projects. For a studio your size that lands near $66,400, and the agents and prompts are handed over to you at the end."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "The directors will not approve anything until the new financial year budget is clearer. They have already committed to lease costs, furniture and a fit-out consultant."
+      "text": "That is the right problem, but I should be honest with you. The directors will not sign anything until the fit-out budget is settled. We have already committed to the lease, the joinery and a fit-out consultant, and there is not much appetite for anything else this side of the move."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "That's understandable. The useful first step may be a low-commitment risk note that shows what needs funding and what can wait. I don't want you trying to sell a full proposal without director context."
+      "text": "That is fair, and I am not going to push a proposal at directors who have not seen the problem framed yet. I will send a short findings note and a fee proposal workflow map so you have something concrete to put in front of them when the budget conversation opens."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "A risk note would help me frame it. I can't promise they will prioritise it, but they will listen if it ties directly to the move and insurance."
+      "text": "That would help. I can get a page read. I cannot get a meeting in the diary for something they have not yet agreed is worth funding."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "Would you like me to join a director meeting once they have read it?"
+      "text": "Understood. The note will separate what a build would change from what you could tighten yourselves for nothing, so it does not read as a pitch."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Maybe. I don't have the meeting date yet, and I'd rather not lock something in until I know whether they want to engage."
+      "text": "Please keep that split honest. If every line points at hiring someone, the director watching cash will stop reading at the second paragraph and the whole thing dies there."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "Fair. I will send a short findings note and an office move risk checklist. You can use it internally, and if the directors want detail we can book a proper workshop."
+      "text": "Would it be worth putting a date in now for a session with both directors once the note has landed?"
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Yes, send that. Keep it practical and not too salesy, please."
+      "text": "I would rather not. I do not know when the fit-out budget gets signed off, and booking something they have not asked for tends to backfire here."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "In the note, I will separate must-fix items from decisions that can safely wait. That should help the directors avoid treating every IT issue as equal."
+      "text": "Then I will leave the timing with you entirely. Send me a line when the budget lands and we can pick it up from wherever it sits then."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "That would be useful. At the moment it all feels like one tangled problem, which makes it easier for them to defer the whole thing."
+      "text": "That works. Realistically it is after the move, so October at the earliest."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "I will also give you a small evidence checklist for cyber insurance, so even if managed services waits, you know what documents to collect before renewal."
+      "text": "That is fine by me. The findings note does not go stale, and the workflow map is useful to you even if you never engage us to build anything."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "That's valuable. I don't want another renewal where I'm asking three different people whether we test backups and getting three different answers."
+      "text": "That is the part I actually want. Nobody has ever written down how a proposal gets made, so every director does it differently and I am the one reconciling three versions of the truth."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "If the directors push it to next year, the checklist can become the basis for a budget request rather than disappearing after this call."
+      "text": "That is usually where most of the saving sits. Before any agent exists, getting three directors to agree on one assembly order takes a real chunk out of the two or three days you described."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "Exactly. I need something I can attach to a budget conversation, not just my feeling that the current setup is fragile."
+      "text": "You will not get three directors to agree on anything by email, but a map they can argue over in a room might get there."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "I will make the risk note specific to architecture workflows: large files, consultant deadlines, site laptops, printing, SharePoint structure and access for contractors."
+      "text": "I will keep it to one page for exactly that reason, with the consultant coordination piece noted separately as a possible second phase rather than folded into the same number."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "That specificity matters. The directors tune out when IT sounds generic, but they pay attention when it connects to project delivery."
+      "text": "Good. If you bundle coordination into the same figure, the director watching cash will treat the whole thing as scope creep before he has worked out what it does."
     },
     {
       "speaker": "rep",
       "name": "Sam Whitfield",
-      "text": "I will include a small section on what to ask any provider, including us, so the directors can compare options without needing to be technical."
+      "text": "Noted. One problem, one number, and everything else listed as a later option they can ignore."
     },
     {
       "speaker": "prospect",
       "name": "Grace Kim",
-      "text": "That would be genuinely helpful. They will want to feel in control of the decision, not steered into a package."
-    },
-    {
-      "speaker": "rep",
-      "name": "Sam Whitfield",
-      "text": "Absolutely. I will keep it to the move, cyber insurance evidence and the support model choices."
-    },
-    {
-      "speaker": "prospect",
-      "name": "Grace Kim",
-      "text": "Thanks Sam. I'm interested, but I need the internal timing to catch up."
+      "text": "Thanks Sam. I am genuinely interested, I just need the internal timing to catch up with it."
     }
   ]
 }

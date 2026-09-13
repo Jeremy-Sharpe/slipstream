@@ -19,16 +19,17 @@
       "outcome": "stalled"
     },
     "promises": [
-      "I will send the security pack and a sample service schedule"
+      "I will send a one-page discovery phase scope by Friday",
+      "I will send a redacted sample summary from a lease you provide"
     ],
     "objections": [
       {
-        "text": "Procurement will not let us progress without the full questionnaire and insurance certificates",
+        "text": "That number has to go to the partnership, and they will not approve it before they have seen the pilot work on our own leases",
         "handling": "partial"
       }
     ],
     "next_step": {
-      "description": "Sam to send security pack and sample service schedule for Daniel to circulate.",
+      "description": "Sam to send a one-page discovery phase scope and a sample lease summary for Daniel to put in front of the managing partner, with no date agreed.",
       "due": null
     }
   },
@@ -36,14 +37,14 @@
     "discovery_questions": 6,
     "next_step_secured": false,
     "objection_handling": "partial",
-    "rep_talk_ratio": 0.43,
-    "notes": "The firm had a real procurement trigger, but the managing partner was absent and the next step stayed vague."
+    "rep_talk_ratio": 0.44,
+    "notes": "Strong discovery on the lease review workflow, but the partnership holds the decision, the managing partner was unavailable and the next step carries no date."
   },
   "icp_signals": {
     "industry": "Commercial law firm",
     "headcount_band": "81-120",
     "role": "Operations Lead",
-    "trigger": "Procurement security questionnaire before panel appointment"
+    "trigger": "Partners want a contract review pilot before the next financial year"
   },
   "risk_flags": []
 }

@@ -20,7 +20,7 @@
     },
     "promises": [
       "I will get a proposal in your inbox today",
-      "I will send the proposal and 30-seat agreement by 5pm today"
+      "I will send the proposal and statement of work by 5pm today"
     ],
     "objections": [
       {
@@ -28,12 +28,12 @@
         "handling": "ignored"
       },
       {
-        "text": "our current provider knows the practice and the partners trust them",
+        "text": "the partners will want to know who signs off when the agent gets something wrong",
         "handling": "partial"
       }
     ],
     "next_step": {
-      "description": "Jordan to send the proposal and 30-seat agreement by 5pm for Donnie and the managing partner to review and sign.",
+      "description": "Jordan Belfort to send the proposal and statement of work by 5pm for Donnie and the managing partner to review and sign.",
       "due": "2026-09-11"
     }
   },
@@ -41,39 +41,39 @@
     "discovery_questions": 1,
     "next_step_secured": true,
     "objection_handling": "partial",
-    "rep_talk_ratio": 0.64,
-    "notes": "Jordan won the demo call by rushing Donnie into a proposal and agreement, but the call is full of pressure, weak discovery and risky claims."
+    "rep_talk_ratio": 0.65,
+    "notes": "Jordan won the demo call by rushing Donnie towards a proposal and statement of work, but the call is full of pressure, almost no discovery and five risky claims about the agents, the headcount saving and the incumbent."
   },
   "icp_signals": {
     "industry": "Accounting practice",
     "headcount_band": "25-80",
     "role": "CFO",
-    "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+    "trigger": "Month-end client reporting and engagement letter drafting overwhelming the team"
   },
   "risk_flags": [
     {
       "turn_index": 3,
-      "text": "three firms on your street have already moved, and the onboarding price is gone Friday",
+      "text": "three practices on your street have already signed, and the pilot price is gone Friday",
       "kind": "pressure"
     },
     {
       "turn_index": 5,
-      "text": "I can guarantee Essential Eight compliance inside a week",
+      "text": "I can guarantee the agents never hallucinate",
       "kind": "overclaim"
     },
     {
       "turn_index": 9,
-      "text": "Your insurer will halve the premium once they see our report",
+      "text": "You'll halve your back-office headcount by Christmas",
       "kind": "overclaim"
     },
     {
       "turn_index": 13,
-      "text": "None of our clients has ever been breached",
+      "text": "None of our clients has ever had a compliance finding",
       "kind": "unverifiable"
     },
     {
       "turn_index": 15,
-      "text": "Your incumbent is about to lose their certification",
+      "text": "Your incumbent is about to lose their ISO certification",
       "kind": "unverifiable"
     }
   ]

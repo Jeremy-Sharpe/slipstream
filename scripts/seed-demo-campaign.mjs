@@ -195,14 +195,14 @@ export async function seedDemoCampaign({
     payload: {
       provider: DEMO_PROVIDER,
       mailbox_external_id: DEMO_MAILBOX,
-      mailbox: { name: "Jordan Belfort", email: "jordan@harbourline.example" },
+      mailbox: { name: "Jordan Belfort", email: "jordan@eleno.example" },
       source_external_id: "marlowe-finch-email-1",
       thread_external_id: DEMO_THREAD,
       direction: "inbound",
       sender: { name: "Donnie Azoff", email: "donnie@marlowefinch.example" },
-      recipients: [{ name: "Jordan Belfort", email: "jordan@harbourline.example", kind: "to" }],
-      subject: "Marlowe & Finch cyber renewal",
-      body: "Jordan, please send the proposal and 30-seat agreement for our review.",
+      recipients: [{ name: "Jordan Belfort", email: "jordan@eleno.example", kind: "to" }],
+      subject: "Marlowe & Finch month-end reporting build",
+      body: "Jordan, please send the proposal and statement of work so I can take the scope to the managing partner.",
       occurred_at: "2026-09-11T06:00:00Z",
     },
   });

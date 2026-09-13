@@ -1,0 +1,176 @@
+{
+  "call_id": "call-07-fairfield-wealth",
+  "seller": "Eleno",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Olivia Hart",
+    "role": "Practice Manager",
+    "email": "olivia@fairfieldwealth.example",
+    "phone": "+61 3 7010 1107"
+  },
+  "company": {
+    "name": "Fairfield Wealth Partners",
+    "industry": "Financial planning and wealth advice firm",
+    "headcount": 37,
+    "location": "Kew, VIC",
+    "domain": "fairfieldwealth.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-04T09:30:00+10:00",
+  "duration_target_seconds": 430,
+  "outcome": "won",
+  "deal_value_aud": 59600,
+  "trigger": "Statement of advice drafting backlog after acquiring a smaller practice",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Olivia Hart, Sam from Eleno. Before I talk about what we would build, can you confirm you are still the practice manager at Fairfield Wealth Partners in Kew?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Yes, still me. We're thirty-seven people now, which is most of the problem. We acquired a smaller practice in Brighton in June and inherited eleven advisers' worth of clients without inheriting anyone who writes advice documents."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How many statements of advice are you producing in a month now, and how many were you doing before?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Before the acquisition, about thirty a month. Now it's closer to fifty-five and the paraplanning team is still four people. The backlog is sitting at about six weeks, which is embarrassing when the client has already had the meeting and agreed to everything."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Walk me through who touches one of those documents from the adviser meeting to the client signing it?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "The adviser records the meeting and files a note. A paraplanner pulls the fact find, the risk profile and the product research, drafts the statement in our template, then it goes to our compliance manager for review before it goes back to the adviser and out to the client."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Which of those steps takes the longest, and which one do people complain about most?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Drafting takes the longest, easily three to four hours a document. But the complaints are about the queue, not the drafting. Advisers hate telling a client they will have it in six weeks after a good meeting."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Where do the fact finds, meeting notes and research reports actually live?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "All in Xplan, with the meeting recordings on our practice drive and the research reports coming out of two different platforms. Nothing is joined up, so the paraplanner is effectively the integration layer between four systems."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "And if this worked, what would you be able to say to the advisers in three months?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "That a straightforward statement of advice comes back in five working days, not six weeks, and that the compliance manager is not rewriting half of it. If we hit that, the Brighton advisers stop asking whether the merger was a mistake."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Here is what I would build. A drafting assistant that pulls the fact find, the risk profile and the research out of Xplan, drafts the statement against your own template and your own wording standards, and hands the paraplanner a document to review rather than a blank page. It runs in your environment and the intellectual property comes to you at handover."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Our compliance manager will want to see how it logs its sources before any adviser is allowed to use it. Every sentence in a statement of advice has to be traceable back to something in the client file."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That is the right gate, and it is built in rather than bolted on. Every generated paragraph carries a reference to the meeting note, the fact find field or the research document it came from, and she gets that source log next to the draft. Nothing is asserted without a source behind it."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "If she can see that log, she will be the one pushing for this. She has been asking the advisers for cleaner file notes for two years."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "On scale, a fixed-scope build for Fairfield Wealth Partners lands at $59,600, after a discovery phase of about three weeks where we sit with the paraplanners and map the real template variations."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "That's more than I expected and less than I feared. What I can't do is sign it myself. Both principals are in client meetings until Thursday."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That's fine. I will send the scope, the source logging design and the fixed price by Wednesday so the principals have it before they are in a room together."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Wednesday works. Put the source logging section first, because that is what our compliance manager will actually read."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Can we lock in Thursday 10 September at 2pm with you, both principals and the compliance manager to walk through it?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Thursday 10 September at 2pm works. I will get all four of us in the room, which is harder than it sounds."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Good. I will also include two worked examples built from your own template, one simple and one with a superannuation recommendation, so it is not an abstract conversation."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Worked examples will do more than any slide. Both principals came up through paraplanning, so they will pick them apart line by line."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I want them to. If the draft quality is not good enough for a senior paraplanner, the backlog does not move and we have built the wrong thing."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Agreed. The other thing they will ask is what happens when the template changes. We update it every time the licensee changes its requirements, which is at least twice a year."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "The template stays yours and the assistant reads it rather than hard-coding it, so a licensee change is a template edit, not a rebuild. That is part of why we transfer the intellectual property at handover."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "That is the answer they will want. We were burnt by a provider who owned the configuration and charged us to change a heading."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Understood. Managed optimisation afterwards is optional and month to month, so if you want to run it yourselves once the team is comfortable, that is genuinely fine."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Olivia Hart",
+      "text": "Thanks Sam. Send it Wednesday and we will see you Thursday."
+    }
+  ]
+}

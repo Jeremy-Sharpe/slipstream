@@ -275,7 +275,7 @@ export function toEmailRecord(
   };
 }
 
-/** "olivia@wattlestreet.example" → "Wattlestreet". */
+/** "olivia@fairfieldwealth.example" → "Fairfieldwealth". */
 export function domainName(email: string): string {
   const host = email.split("@")[1] ?? "";
   const label = host.split(".")[0] ?? "";
