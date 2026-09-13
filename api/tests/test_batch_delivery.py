@@ -12,8 +12,8 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
-from app.routers import deliveries
 from app.schemas.leads import LeadIn
+from app.services import deliveries
 from app.services.email_delivery import EmailDeliveryReceipt
 from app.services.outreach import approve_outreach
 
