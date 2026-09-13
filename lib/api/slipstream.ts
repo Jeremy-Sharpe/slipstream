@@ -11,6 +11,10 @@ export type Handling = "handled" | "partial" | "ignored" | "none_raised";
 export type ApiCall = {
   id: string;
   source_external_id: string;
+  subject?: string;
+  transcript?: string;
+  fixture?: boolean;
+  provider?: string;
   occurred_at: string;
   duration_seconds: number | null;
   processing_status: "pending" | "processing" | "ready" | "failed";
@@ -57,6 +61,30 @@ export type ApiExtraction = {
     evidence: Evidence[];
   };
   summary: string;
+  conversation_id?: string;
+  source?: "fixture_labels" | "model";
+  model?: string;
+};
+
+export type ApiEvidence = Evidence;
+export type { ApiField };
+
+export type ApiFixture = {
+  call_id: string;
+  company: string;
+  prospect: string;
+  rep: string;
+  outcome: string;
+  scheduled_at: string;
+  demo: boolean;
+  has_audio: boolean;
+};
+
+export type ApiCrmReceipt = {
+  conversation_id: string;
+  status: string;
+  target_host: string;
+  idempotency_key: string;
 };
 
 export type ApiDraft = {
@@ -868,10 +896,17 @@ export async function getLatestPlaybook(signal?: AbortSignal): Promise<ApiPlaybo
   }
 }
 
+/* A deployment with INGEST_TOKEN set rejects every mutation without this header
+   (scorecards, emails, the coach socket). Unset here, the requests go out bare
+   and the API answers 401, which the step surfaces. */
+export const INGEST_TOKEN = process.env.NEXT_PUBLIC_INGEST_TOKEN ?? "";
+export const ingestHeaders = (): Record<string, string> =>
+  INGEST_TOKEN ? { "X-Slipstream-Ingest-Token": INGEST_TOKEN } : {};
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(apiUrl(path), {
     ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: { "Content-Type": "application/json", ...ingestHeaders(), ...init?.headers },
   });
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { detail?: string } | null;
@@ -885,4 +920,143 @@ export function approveDraft(draftId: string): Promise<ApiDraft> {
     method: "POST",
     body: JSON.stringify({ approved_by: "Hackathon demo" }),
   }).then(parseDraft);
+}
+
+function parseCall(value: unknown): ApiCall {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.source_external_id !== "string" ||
+    typeof value.occurred_at !== "string" ||
+    !Number.isFinite(Date.parse(value.occurred_at)) ||
+    !nullableNumber(value.duration_seconds) ||
+    !["pending", "processing", "ready", "failed"].includes(String(value.processing_status)) ||
+    !nullableString(value.rep) ||
+    !Array.isArray(value.segments)
+  ) {
+    throw new ApiError("Slipstream API returned malformed call data", 502);
+  }
+  const segments = value.segments.every((segment) =>
+    isRecord(segment) &&
+    Number.isSafeInteger(segment.sequence) && Number(segment.sequence) >= 0 &&
+    typeof segment.speaker === "string" &&
+    typeof segment.body === "string" &&
+    Number.isSafeInteger(segment.start_ms) && Number(segment.start_ms) >= 0 &&
+    (segment.end_ms === null || Number.isSafeInteger(segment.end_ms)),
+  );
+  if (!segments) throw new ApiError("Slipstream API returned malformed call segments", 502);
+  return value as ApiCall;
+}
+
+function parseApiField(value: unknown, label: string): void {
+  if (!isRecord(value) || typeof value.confidence !== "number" || !Array.isArray(value.evidence)) {
+    throw new ApiError(`Slipstream API returned a malformed ${label} field`, 502);
+  }
+  const grounded = value.evidence.every((item) =>
+    isRecord(item) && (item.sequence === null || Number.isSafeInteger(item.sequence)) && typeof item.quote === "string",
+  );
+  if (!grounded) throw new ApiError(`Slipstream API returned malformed ${label} evidence`, 502);
+}
+
+function parseExtraction(value: unknown): ApiExtraction {
+  if (
+    !isRecord(value) || !isRecord(value.contact) || !isRecord(value.company) || !isRecord(value.deal) ||
+    !Array.isArray(value.promises) || !Array.isArray(value.objections) || typeof value.summary !== "string"
+  ) {
+    throw new ApiError("Slipstream API returned malformed extraction data", 502);
+  }
+  for (const key of ["name", "email", "phone", "title"]) parseApiField(value.contact[key], `contact ${key}`);
+  for (const key of ["name", "domain", "industry", "employee_count", "location"]) parseApiField(value.company[key], `company ${key}`);
+  for (const key of ["stage", "outcome", "amount"]) parseApiField(value.deal[key], `deal ${key}`);
+  value.promises.forEach((promise) => parseApiField(promise, "promise"));
+  const objections = value.objections.every((item) =>
+    isRecord(item) && typeof item.text === "string" &&
+    ["handled", "partial", "ignored"].includes(String(item.handling)) &&
+    typeof item.confidence === "number" && Array.isArray(item.evidence),
+  );
+  if (!objections) throw new ApiError("Slipstream API returned malformed objections", 502);
+  const nextStep = value.next_step;
+  if (nextStep !== null && !(isRecord(nextStep) && typeof nextStep.description === "string" && Array.isArray(nextStep.evidence))) {
+    throw new ApiError("Slipstream API returned a malformed next step", 502);
+  }
+  return value as ApiExtraction;
+}
+
+export async function getFixtures(signal?: AbortSignal): Promise<ApiFixture[]> {
+  const payload = await request<unknown>("/calls/fixtures", { signal });
+  if (!Array.isArray(payload)) throw new ApiError("Slipstream API returned malformed fixture data", 502);
+  const valid = payload.every((item) =>
+    isRecord(item) && typeof item.call_id === "string" && typeof item.company === "string" &&
+    typeof item.prospect === "string" && typeof item.rep === "string" && typeof item.outcome === "string" &&
+    typeof item.scheduled_at === "string" && typeof item.demo === "boolean" && typeof item.has_audio === "boolean",
+  );
+  if (!valid) throw new ApiError("Slipstream API returned malformed fixture data", 502);
+  return payload as ApiFixture[];
+}
+
+export async function ingestFixtureCall(callId: string, signal?: AbortSignal): Promise<ApiCall> {
+  return parseCall(await request<unknown>(`/calls/fixtures/${encodeURIComponent(callId)}/ingest`, { method: "POST", signal }));
+}
+
+export async function getCall(conversationId: string, signal?: AbortSignal): Promise<ApiCall> {
+  return parseCall(await request<unknown>(`/calls/${encodeURIComponent(conversationId)}`, { signal }));
+}
+
+export async function transcribeCall(file: File, subject: string, repName: string, signal?: AbortSignal): Promise<ApiCall> {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("subject", subject);
+  body.append("rep_name", repName);
+  const response = await fetch(apiUrl("/calls/transcribe"), { method: "POST", body, headers: ingestHeaders(), signal });
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { detail?: string } | null;
+    throw new ApiError(payload?.detail ?? `Slipstream API returned ${response.status}`, response.status);
+  }
+  return parseCall(await response.json());
+}
+
+export async function extractCall(conversationId: string, signal?: AbortSignal): Promise<ApiExtraction> {
+  return parseExtraction(await request<unknown>(`/calls/${encodeURIComponent(conversationId)}/extract`, { method: "POST", signal }));
+}
+
+export async function getExtraction(conversationId: string, signal?: AbortSignal): Promise<ApiExtraction | null> {
+  try {
+    return parseExtraction(await request<unknown>(`/calls/${encodeURIComponent(conversationId)}/extraction`, { signal }));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+export async function syncCallToCrm(conversationId: string, signal?: AbortSignal): Promise<ApiCrmReceipt> {
+  const payload = await request<unknown>(`/calls/${encodeURIComponent(conversationId)}/crm-sync`, { method: "POST", signal });
+  if (!isRecord(payload) || typeof payload.conversation_id !== "string" || typeof payload.status !== "string") {
+    throw new ApiError("Slipstream API returned a malformed CRM receipt", 502);
+  }
+  return payload as ApiCrmReceipt;
+}
+
+export async function draftFromCall(conversationId: string, signal?: AbortSignal): Promise<ApiDraft> {
+  return parseDraft(await request<unknown>(`/drafts/from-call/${encodeURIComponent(conversationId)}`, { method: "POST", signal }));
+}
+
+export async function getDraft(draftId: string, signal?: AbortSignal): Promise<ApiDraft | null> {
+  try {
+    return parseDraft(await request<unknown>(`/drafts/${encodeURIComponent(draftId)}`, { signal }));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+export async function loadIcpHistory(signal?: AbortSignal): Promise<void> {
+  await request<unknown>("/icp/history/load", { method: "POST", signal });
+}
+
+export async function deriveIcp(signal?: AbortSignal): Promise<ApiIcpProfile> {
+  return parseIcpProfile(await request<unknown>("/icp/derive", {
+    method: "POST",
+    body: JSON.stringify({ include_demo: false }),
+    signal,
+  }));
 }

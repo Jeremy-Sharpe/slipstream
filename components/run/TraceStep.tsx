@@ -9,7 +9,7 @@ import { Spinner, fmtDone, fmtElapsed, useElapsed } from "./WorkingLine";
    with a fade to the done label; the body is an expandable trace with a
    measured left line, staggered rows, and a flat card for the step's output. */
 
-export type TraceStatus = "pending" | "running" | "waiting" | "done" | "skipped";
+export type TraceStatus = "pending" | "running" | "waiting" | "done" | "skipped" | "error";
 
 export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, shimmer = false, onReveal, onExpandClick, children }: {
   status: TraceStatus;
@@ -40,6 +40,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   }, [expanded, onReveal]);
   const working = status === "running";
   const waiting = status === "waiting";
+  const failed = status === "error";
   const muted = status === "pending" || status === "skipped";
   const live = useElapsed(startedAt, working);
   const ms = working ? live : elapsedMs;
@@ -63,13 +64,14 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
             "flex size-7 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
             status === "done" && "bg-ink text-white",
             working && "bg-surface",
-            waiting && "border-[1.5px] border-line",
+            (waiting || failed) && "border-[1.5px] border-line",
             muted && "border-[1.5px] border-line",
           )}
           style={status === "done" ? { animation: "pop-in 240ms cubic-bezier(0.23,1,0.32,1) both" } : undefined}
         >
           {status === "done" && <Check className="size-3.5" strokeWidth={2.5} />}
           {waiting && <span className="size-2 rounded-full bg-accent" style={{ animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both" }} />}
+          {failed && <span className="size-2 rounded-full bg-danger" style={{ animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both" }} />}
           {working && <Spinner className="size-3.5 border-t-ink" />}
         </span>
         {!last && <span aria-hidden className="mt-1.5 w-px flex-1 bg-line" />}

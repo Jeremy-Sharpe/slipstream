@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, RotateCcw } from "lucide-react";
-import type { CallRecord } from "@/lib/types";
-import { useRun } from "@/lib/useRun";
+import { useRun, type RunSource } from "@/lib/useRun";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Avatar } from "./Avatar";
 import { RunTimeline } from "./RunTimeline";
@@ -27,13 +26,13 @@ function bezier(x: number) {
   return ((cy * t + by) * t + ay) * t;
 }
 
-export function RunView({ call }: { call: CallRecord }) {
+export function RunView({ source }: { source: RunSource }) {
   const params = useSearchParams();
   const reduced = useReducedMotion();
   const instant = params.get("instant") === "1" || reduced;
   const staged = params.get("from") === "home" && !reduced;
-  const transcribed = params.get("transcribed") === "1";
-  const run = useRun(call, { instant, startDelay: staged ? 500 : 200, transcribed });
+  const run = useRun(source, { instant, startDelay: staged ? 500 : 200 });
+  const call = run.call;
   const email = call.kind === "email";
   const messages = call.messages ?? [];
   const enter = (delay: number) => (staged ? { animation: `fade-up 250ms cubic-bezier(0.23,1,0.32,1) ${delay}ms both` } : undefined);
@@ -73,10 +72,12 @@ export function RunView({ call }: { call: CallRecord }) {
   }, [reduced]);
   const highlight = clicked ?? hover;
 
-  // Editable draft body, reset when the run restarts (state adjusted during render).
-  const [draftBody, setDraftBody] = useState(call.draft.body);
-  const [seenRun, setSeenRun] = useState(run.runId);
-  if (seenRun !== run.runId) { setSeenRun(run.runId); setDraftBody(call.draft.body); }
+  // Editable draft body, reset when the run restarts or a new draft lands
+  // (state adjusted during render).
+  const body = call.draft?.body ?? "";
+  const [draftBody, setDraftBody] = useState(body);
+  const [seenDraft, setSeenDraft] = useState({ runId: run.runId, body });
+  if (seenDraft.runId !== run.runId || seenDraft.body !== body) { setSeenDraft({ runId: run.runId, body }); setDraftBody(body); }
 
 
   // The right column is sticky and scrolls internally: its height is the
@@ -236,6 +237,7 @@ export function RunView({ call }: { call: CallRecord }) {
           <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What Slipstream did</h2>
           <RunTimeline
             call={call}
+            data={run.data}
             steps={run.steps}
             open={run.open}
             toggle={run.toggle}
@@ -246,8 +248,9 @@ export function RunView({ call }: { call: CallRecord }) {
             onJump={jump}
             onReveal={reveal}
             onExpandClick={expandScroll}
-            onSynced={run.startPhase2}
-            onDraftApproved={run.startPhase3}
+            onRetry={run.retry}
+            onSynced={run.approveExtraction}
+            onDraftApproved={run.approveFollowUp}
           />
         </section>
       </div>
