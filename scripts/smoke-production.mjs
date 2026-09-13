@@ -2,7 +2,8 @@
 
 const DEFAULT_UI_URL = "https://slipstream-hackathon.vercel.app";
 const DEFAULT_API_URL = "https://slipstream-api.3-104-149-193.sslip.io";
-const REQUEST_TIMEOUT_MS = 10_000;
+// Hosted structured-output calls can legitimately cross ten seconds even when healthy.
+const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_BODY_BYTES = 1_048_576;
 const PRIMARY_FIXTURE_ID = "call-01-northstar-labs";
 
