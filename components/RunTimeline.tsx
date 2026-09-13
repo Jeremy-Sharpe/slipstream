@@ -7,7 +7,7 @@ import { icp } from "@/lib/icp";
 import { leads } from "@/lib/leads";
 import { actions, useStore } from "@/lib/store";
 import type { CallRecord } from "@/lib/types";
-import { TRACE, type StepId, type StepState } from "@/lib/useRun";
+import { traceFor, type StepId, type StepState } from "@/lib/useRun";
 import { TraceStep } from "./run/TraceStep";
 import { WorkingLine } from "./run/WorkingLine";
 import { StreamingText, words } from "./run/StreamingText";
@@ -23,7 +23,14 @@ const LABELS: Record<StepId, { working: string; done: string }> = {
   outreach: { working: "Drafting outreach", done: "Outreach drafted" },
 };
 
-const fmtAud = (n: number | null | undefined) => (n == null ? "None" : `$${n.toLocaleString("en-AU")}`);
+/** A thread reads the same steps differently: nothing is transcribed, and the follow-up is a reply. */
+const EMAIL_LABELS: Partial<Record<StepId, { working: string; done: string }>> = {
+  transcribe: { working: "Reading the thread", done: "Read the thread" },
+  score: { working: "Scoring the thread", done: "Scored the thread" },
+  draft: { working: "Drafting the reply", done: "Reply drafted" },
+};
+
+const fmtAud = (n: number | null | undefined, none = "None") => (n == null ? none : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 
 export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDraftBody, onHighlight, onJump, onReveal, onExpandClick, onSynced, onDraftApproved }: {
@@ -57,13 +64,20 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
   }
   const top = leads.slice(0, 5);
   const skippedNote = steps.find((s) => s.status === "skipped" && s.note)?.note;
+  const email = call.kind === "email";
+  const messages = call.messages ?? [];
+  const labels = (id: StepId) => (email && EMAIL_LABELS[id]) || LABELS[id];
+  const trace = traceFor(call);
+  const inbound = messages.filter((m) => m.direction === "inbound").length;
 
   const summary = (st: StepState): ReactNode => {
     switch (st.id) {
-      case "transcribe": return `${mmss(call.duration)} · ${call.turns.length} turns · Scribe`;
+      case "transcribe": return email ? `${messages.length} messages · ${inbound} inbound` : `${mmss(call.duration)} · ${call.turns.length} turns · Scribe`;
       case "extract": return synced ? "6 fields written to CRM" : "Waiting for your approval";
-      case "score": return `${call.scorecard.discovery} discovery questions · ${call.scorecard.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(call.scorecard.talkRatio)}`;
-      case "draft": return approved ? "Follow-up approved · nothing is sent" : st.status === "waiting" ? "Waiting for your approval" : call.draft.subject;
+      case "score": return email
+        ? `${call.scorecard.askedRightQuestions ? "asked the right questions" : "quoted before asking"} · ${call.scorecard.nextStepSecured ? "next step secured" : "no dated next step"}${call.scorecard.responseTime ? ` · replied in ${call.scorecard.responseTime}` : ""}`
+        : `${call.scorecard.discovery} discovery questions · ${call.scorecard.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(call.scorecard.talkRatio)}`;
+      case "draft": return approved ? `${email ? "Reply" : "Follow-up"} approved · nothing is sent` : st.status === "waiting" ? "Waiting for your approval" : call.draft.subject;
       case "icp": return `From ${icp.wonDeals} won deals`;
       case "search": return st.status === "done" ? "10 found · scored against the won deals" : "";
       case "outreach": return st.status === "done" ? "5 drafts ready" : "";
@@ -72,10 +86,12 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
 
   const doneLabel = (id: StepId) => {
     if (id === "extract" && synced) return "Extracted 6 fields · Synced";
-    return LABELS[id].done;
+    return labels(id).done;
   };
 
-  const field = (label: string, value: ReactNode, conf: number, span: number | null, ms?: number | null) => (
+  // The evidence column: a timestamp on a call, a message number on a thread.
+  const ref = (f: { evidence_ms?: number | null; evidence_ref?: number | null }) => (email ? (f.evidence_ref != null ? `Msg ${f.evidence_ref + 1}` : "") : f.evidence_ms != null ? mmss(Math.round(f.evidence_ms / 1000)) : "");
+  const field = (label: string, value: ReactNode, conf: number, span: number | null, evidence: string) => (
     <button
       type="button"
       className="grid w-full grid-cols-[92px_minmax(0,1fr)_44px_40px] items-start gap-x-3 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
@@ -85,7 +101,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
     >
       <span className="pt-px text-[14px] text-soft">{label}</span>
       <span className="min-w-0 text-[15px] text-ink">{value}</span>
-      <span className="pt-px text-right text-[13px] tabular-nums text-faint">{ms != null ? mmss(Math.round(ms / 1000)) : ""}</span>
+      <span className="pt-px text-right text-[13px] tabular-nums text-faint">{evidence}</span>
       <span className="pt-px text-right text-[14px] tabular-nums text-soft">{pct(conf)}</span>
     </button>
   );
@@ -94,19 +110,20 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
     const f = call.fields;
     switch (st.id) {
       case "transcribe":
+        if (email) return <p className="text-[14px] text-soft">Read {messages.length} messages, {inbound} from {call.contact.split(" ")[0]} and {messages.length - inbound} from {call.rep.split(" ")[0]}.{call.scorecard.responseTime ? ` ${call.rep.split(" ")[0]} replied in ${call.scorecard.responseTime}.` : ""}</p>;
         return <p className="text-[14px] text-soft">Diarised into {call.turns.length} turns. {call.rep} spoke {pct(call.scorecard.talkRatio)} of the time.</p>;
       case "extract":
         if (st.status !== "done" && st.status !== "waiting") return null;
         return (
           <div>
             <div className="-mx-2 flex flex-col">
-              {field("Contact", `${f.contact.value} · ${call.title}`, f.contact.confidence, f.contact.span, f.contact.evidence_ms)}
-              {field("Company", `${f.company.value} · ${call.headcount} staff · ${call.location}`, f.company.confidence, f.company.span, f.company.evidence_ms)}
-              {field("Deal stage", humanize(f.stage.value), f.stage.confidence, f.stage.span, f.stage.evidence_ms)}
-              {field("Value", fmtAud(f.value.value), f.value.confidence, f.value.span, f.value.evidence_ms)}
-              {field("Next step", f.next_step.value ?? "None", f.next_step.confidence, f.next_step.span, f.next_step.evidence_ms)}
-              {field("Promises", f.promises.value.length ? f.promises.value.join(" · ") : "None", f.promises.confidence, f.promises.span, f.promises.evidence_ms)}
-              {call.objections.length > 0 && field("Objection", `${call.objections[0].text} (${humanize(call.objections[0].handling)})`, 0.9, call.scorecard.spans.objection, call.scorecard.spans.objection != null ? call.turns[call.scorecard.spans.objection].t * 1000 : null)}
+              {field("Contact", `${f.contact.value} · ${call.title}`, f.contact.confidence, f.contact.span, ref(f.contact))}
+              {field("Company", `${f.company.value} · ${call.headcount} staff · ${call.location}`, f.company.confidence, f.company.span, ref(f.company))}
+              {field("Deal stage", humanize(f.stage.value), f.stage.confidence, f.stage.span, ref(f.stage))}
+              {field("Value", fmtAud(f.value.value, email ? "Not stated" : "None"), f.value.confidence, f.value.span, ref(f.value))}
+              {field("Next step", f.next_step.value ?? "None", f.next_step.confidence, f.next_step.span, ref(f.next_step))}
+              {field("Promises", f.promises.value.length ? f.promises.value.join(" · ") : "None", f.promises.confidence, f.promises.span, ref(f.promises))}
+              {call.objections.length > 0 && field("Objection", `${call.objections[0].text} (${humanize(call.objections[0].handling)})`, 0.9, call.scorecard.spans.objection, ref(email ? { evidence_ref: call.scorecard.spans.objection } : { evidence_ms: call.scorecard.spans.objection != null ? call.turns[call.scorecard.spans.objection].t * 1000 : null }))}
             </div>
             <div className="mt-4">
               {synced ? (
@@ -128,10 +145,10 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
         );
         return (
           <div className="-mx-2 flex flex-col">
-            {row("Discovery questions before pricing", String(s.discovery), s.spans.discovery)}
+            {email ? row("Asked the right questions", s.askedRightQuestions ? "Yes" : "No", s.spans.discovery) : row("Discovery questions before pricing", String(s.discovery), s.spans.discovery)}
             {row("Next step secured", s.nextStepSecured ? "Yes, dated" : "No", s.spans.nextStep)}
             {row("Objection handling", s.objection.replace("_", " "), s.spans.objection)}
-            {row("Rep talk ratio", pct(s.talkRatio), null)}
+            {email ? row("Response time", s.responseTime ?? "No reply yet", s.spans.nextStep) : row("Rep talk ratio", pct(s.talkRatio), null)}
           </div>
         );
       }
@@ -157,7 +174,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
               {approved ? (
                 <p className="flex items-center gap-2 text-[14px] text-soft" style={{ animation: "fade-in 200ms ease-out both" }}><Check className="size-3.5 text-ink" strokeWidth={2.5} /> Approved · nothing is sent from Slipstream</p>
               ) : (
-                <Button variant="primary" onClick={() => { actions.approveDraft(call.id); onDraftApproved(); }}>Approve follow-up</Button>
+                <Button variant="primary" onClick={() => { actions.approveDraft(call.id); onDraftApproved(); }}>{email ? "Approve reply" : "Approve follow-up"}</Button>
               )}
             </div>
           </div>
@@ -223,10 +240,10 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
           <TraceStep
             key={st.id}
             status={st.status}
-            workingLabel={LABELS[st.id].working}
+            workingLabel={labels(st.id).working}
             doneLabel={doneLabel(st.id)}
             summary={summary(st)}
-            rows={st.status === "running" ? TRACE[st.id] : []}
+            rows={st.status === "running" ? trace[st.id] : []}
             rowsDone={st.progress ?? 0}
             startedAt={st.startedAt}
             elapsedMs={st.elapsedMs}

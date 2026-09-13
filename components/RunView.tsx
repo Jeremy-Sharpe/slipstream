@@ -10,7 +10,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Avatar } from "./Avatar";
 import { RunTimeline } from "./RunTimeline";
 import { Summary } from "./run/Summary";
-import { Transcript } from "./Transcript";
+import { Thread, Transcript } from "./Transcript";
 import { Button, OutcomePill, cn, fmtDate, fmtTime, mmss } from "./ui";
 
 /* y(t) for cubic-bezier(0.23,1,0.32,1), the app's standard ease. */
@@ -34,6 +34,8 @@ export function RunView({ call }: { call: CallRecord }) {
   const staged = params.get("from") === "home" && !reduced;
   const transcribed = params.get("transcribed") === "1";
   const run = useRun(call, { instant, startDelay: staged ? 500 : 200, transcribed });
+  const email = call.kind === "email";
+  const messages = call.messages ?? [];
   const enter = (delay: number) => (staged ? { animation: `fade-up 250ms cubic-bezier(0.23,1,0.32,1) ${delay}ms both` } : undefined);
 
   // Transcript highlight: hover tints the turn in place (never scrolls); a
@@ -191,8 +193,8 @@ export function RunView({ call }: { call: CallRecord }) {
   return (
     <div>
       <div style={enter(0)}>
-      <Link href="/calls" className="inline-flex items-center gap-1.5 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
-        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Calls
+      <Link href="/conversations" className="inline-flex items-center gap-1.5 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
+        <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Conversations
       </Link>
       <div className="mt-4 flex items-center gap-3">
         <Avatar name={call.contact} size={36} />
@@ -206,7 +208,7 @@ export function RunView({ call }: { call: CallRecord }) {
             <OutcomePill outcome={call.outcome} />
             <span>{call.rep}</span>
             <span className="text-faint">·</span>
-            <span className="text-[13.5px] tabular-nums">{fmtDate(call.at)} · {fmtTime(call.at)} · {mmss(call.duration)}</span>
+            <span className="text-[13.5px] tabular-nums">{fmtDate(call.at)} · {fmtTime(call.at)} · {email ? `${messages.length} message${messages.length === 1 ? "" : "s"}` : mmss(call.duration)}</span>
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={run.rerun}><RotateCcw className="size-3.5" strokeWidth={1.75} /> Re-run</Button>
@@ -215,8 +217,8 @@ export function RunView({ call }: { call: CallRecord }) {
 
       <div ref={gridRef} className="mt-8 grid grid-cols-[minmax(0,1fr)_440px] gap-10">
         <section style={enter(120)}>
-          <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Transcript</h2>
-          <Transcript turns={call.turns} highlight={highlight} />
+          <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">{email ? "Thread" : "Transcript"}</h2>
+          {email ? <Thread messages={messages} highlight={highlight} /> : <Transcript turns={call.turns} highlight={highlight} />}
         </section>
         <section
           ref={columnRef}
