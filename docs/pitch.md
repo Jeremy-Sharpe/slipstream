@@ -8,23 +8,23 @@ After each call, a rep should update the CRM and write the follow-up. That is te
 
 We built Slipstream: an AI sales layer that sits beside the CRM a team already has. Its central idea is simple: your next customer should change when your last deal does.
 
-A call enters as audio. ElevenLabs separates the speakers, then Slipstream fills structured contact, company and deal fields—including promises, objections and the agreed next step. Every field carries evidence, so a rep can check the exact words before approving it.
+A call enters as audio. ElevenLabs separates the speakers. Slipstream fills the contact, company and deal, including objections and the agreed next step. Every field links to the exact words behind it.
 
-Then Slipstream drafts the follow-up. It uses what was actually agreed, not a generic template. In our demo call, the rep makes an unsupported claim that cyber insurance will be cut in half. Slipstream records the risk but does not repeat it in the email. One click approves the draft and records who approved it without pretending it was sent.
+Then Slipstream drafts the follow-up from what was agreed. In our demo, the rep claims cyber insurance will be cut in half. Slipstream records that risk but refuses to repeat it. One click approves the safe draft. Approval never pretends the email was sent.
 
 Approved drafts can enter a scheduled campaign. Sends are throttled, tracked and retried safely, and an operator can pause future work. The screen always shows the true delivery state.
 
 That already saves over an hour a day for a rep doing eight calls. But the real difference is what happens across the whole team.
 
-Slipstream scores each call for discovery, objection handling and next-step quality. Then it studies the deals that actually won and derives who that sales team should target. In our synthetic history, that means 25-to-80-person services firms with a compliance trigger and a decision-maker involved.
+Slipstream scores discovery, objection handling and next-step quality. Then it studies the deals that won and works out who this sales team should target. In our synthetic history, that means 25-to-80-person services firms with a compliance deadline and a decision-maker involved.
 
-We call this Revenue DNA. When a new deal wins or loses, Slipstream knows the target is stale, relearns it and flags leads that need a new score. This is not a persona report forgotten in a slide deck; it is a target that learns from outcomes.
+This is Revenue DNA. When a deal wins or loses, Slipstream detects that the old target is stale. It pauses new sourcing, relearns the profile and flags leads that need a new score. The target learns from outcomes instead of gathering dust in a slide deck.
 
-That profile becomes a prospect-search brief. In the live proof, OpenRouter creates ten clearly fictional, non-deliverable companies so judges can test the scoring and outreach loop without a paid data subscription. For customers, the same brief can plug into a paid company-data provider for real sourcing. The output of the last call improves who gets the next call.
+That profile becomes a prospect-search brief. OpenRouter creates ten fictional companies with addresses that cannot receive email. Judges can test the scoring and outreach loop without a paid data subscription. A customer can plug the same brief into a real company-data provider. The last call improves who gets the next call.
 
-This is one closed loop, not four disconnected AI features: conversation to CRM, CRM to coaching, outcomes to Revenue DNA, and Revenue DNA to pipeline.
+This is one loop: conversation becomes CRM truth, outcomes update Revenue DNA, and Revenue DNA builds the next pipeline.
 
-For the weekend build, thirteen labelled calls cover wins, losses, stalls and a no-show. OpenRouter powers the live extraction, follow-up, mixed-channel profile and fictional lead proof. Every result shows its source. Delivery is switched off, so the paused campaign proves the automation without claiming anything was sent.
+Thirteen labelled calls cover wins, losses, stalls and a no-show. OpenRouter powers the live reasoning and fictional lead proof. Every result shows its source. Delivery is off, so the paused campaign proves the control without sending anything.
 
 The path to a product is direct: connect Aircall or Twilio for recordings, HubSpot for CRM writes and Gmail for delivery. The intelligence does not change.
 
