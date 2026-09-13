@@ -31,12 +31,12 @@ Demo video: https://github.com/Jeremy-Sharpe/slipstream/releases/download/demo-v
 
 ## How it works
 
-The live URL exposes the complete product surface and an executable fixture loop. Call and email CRM writeback and drafting run against the deployed API; analysis and lead screens consume validated live responses when their integrations are available and otherwise show explicitly labelled evaluation data. No screen silently presents fallback data as live.
+The live URL is five screens on the deployed API: Home (pick a recorded call, upload or record audio, paste a transcript, paste an email), Conversations, the run page for one call or thread, Leads, Intelligence and Revenue loop. Every field, score, lead and number on them is an API response; the web app holds no fixture copies and no fallback data. Browser calls go through a same-origin gateway (`app/gateway`) that adds the deployment's ingest token on the server, so the token never reaches the client.
 
 1. **A sales call happens.** For the demo the call is synthesised with ElevenLabs text-to-dialogue (two voices, realistic objections) and played through speakers. Fixtures cover won, stalled, lost and no-show outcomes.
 2. **The coach listens.** An always-on-top desktop overlay can stream the consented rep microphone to ElevenLabs Scribe realtime and shows the rep the next question to ask, grounded in this deal's CRM history. Its credential-free manual mode demonstrates both sides; this build does not claim mixed call-audio capture.
 3. **The call writes itself into the CRM.** With ElevenLabs configured, a recording is transcribed with Scribe and diarised. The configured reasoning model extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves. The production API currently routes schema-constrained reasoning through OpenRouter to `openai/gpt-5.4`; private loopback Qwen remains a credential-free fallback.
-4. **The follow-up drafts and schedules itself safely.** A follow-up email is generated from the transcript and attached to the deal. Approval is a separate, audited state. Exact approved draft IDs can then join a resumable campaign: a trusted Railway worker claims bounded chunks, Resend receives a stable identity, and each result is confirmed, retried, failed or surfaced for reconciliation. Operators can pause future chunks, while the browser gets status without the delivery token. Campaigns also carry the live Revenue DNA spend gate forward, so an operator sees the exact targeting version or a sourcing block beside delivery state. The current deployment exposes one paused synthetic campaign and stops before delivery.
+4. **The follow-up drafts and schedules itself safely.** A follow-up email is generated from the transcript and attached to the deal. Approval is a separate, audited state. Exact approved draft IDs can then join a resumable campaign: a trusted Railway worker claims bounded chunks, Resend receives a stable identity, and each result is confirmed, retried, failed or surfaced for reconciliation. Operators can pause future chunks, while the browser gets status without the delivery token. Campaign execution is an API capability (`/api/v1/campaigns`) in this release rather than a screen; the current deployment exposes one paused synthetic campaign and stops before delivery.
 5. **The team learns from every conversation.** The analysis view scores calls against a written rubric, shows which moves correlate with won deals, and derives the ideal customer profile from outcome-labelled CRM deals enriched by both call and email history. The canonical fixture cohort loads 20 CRM deals (12 labelled history calls, the voiced demo call and Eleno's seven publicly listed clients as call-less won deals) and proves 12 calls plus one email across the 19 deals eligible for the profile; the current live profile also includes the paused campaign's provider-neutral email, for two emails total.
 6. **Revenue DNA catches every change.** Each ICP is bound to a deterministic fingerprint of the exact CRM evidence and outcomes that produced it. A new win, loss or conversation makes the target visibly stale and blocks the next paid search until the team relearns; existing leads are counted for re-scoring against the new version.
 7. **The ICP finds the next customer.** One click turns that profile into ten explicitly fictional `.example` prospects through OpenRouter, embeds and scores them against the won-deal centroid, and prepares grounded outreach. A real Origami v3 adapter remains available when a customer supplies that optional integration.
@@ -44,7 +44,7 @@ The live URL exposes the complete product surface and an executable fixture loop
 ## Architecture
 
 ```
-app/          Next.js 16 + React 19 UI (standalone VPS; Vercel backup). Conversations, analysis, leads. Calls the API for live data and actions.
+app/          Next.js 16 + React 19 UI (standalone VPS; Vercel backup). Home, Conversations, the run page, Leads, Intelligence, Revenue loop, plus the server-side gateway that carries the ingest token. Visual contract in DESIGN.md.
 api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts. REST plus one WebSocket.
 scheduler/    Dependency-free one-shot Railway cron worker. Claims one bounded campaign chunk, emits a PII-free result, then exits.
 coach/        Electron live-coach overlay, forked from Cheating Daddy (GPL-3.0). Talks only to the api WebSocket.
@@ -109,13 +109,17 @@ Slipstream is the closed loop. Its Revenue DNA gate is the key difference: call 
 - Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
 - Extraction is grounded but not perfect: a value whose quote cannot be found verbatim in the transcript is dropped rather than shown, so a rep can see a null where the model paraphrased. Deal outcome and stage are model judgement calls scored against hand labels in the eval, not ground truth.
 - Single tenant, no auth, no billing.
+- Campaigns, calendar, lists and settings screens from the earlier UI are not in this release; the API keeps campaigns and the Revenue DNA freshness gate, and Intelligence shows the freshness state.
+- Scoring, playbook derivation, pasted email threads and audio transcription need the web server to hold `SLIPSTREAM_INGEST_TOKEN` (the API's `INGEST_TOKEN`). Without it those actions show a locked message and the run continues past them; extraction, drafting, approval, ICP and leads never need it.
+- Pasted transcripts persist through the live-coach websocket relayed by the web server, because the API has no raw-transcript ingest endpoint.
+- The linked demo video was recorded on the earlier UI; the screens differ from the current production build.
 - The hosted API currently uses in-memory persistence and has no managed Supabase, Origami, Resend or Railway credentials. OpenRouter reasoning and embeddings are verified live; the UI identifies fictional lead generation, evaluation fixtures and every unavailable integration rather than implying third-party enrichment or delivery.
 
 ## Run locally
 
 ```bash
 # UI
-npm install && npm run dev            # http://localhost:3000
+npm install && npm run dev            # http://localhost:3000, browser calls proxy to NEXT_PUBLIC_API_BASE_URL through app/gateway
 
 # API
 cd api && uv sync && uv run uvicorn app.main:app --reload   # http://localhost:8000

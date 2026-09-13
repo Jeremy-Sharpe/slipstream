@@ -1,20 +1,27 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
+import { Frame } from "@/components/Frame";
+import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
-const sans = Inter({ variable: "--font-sans", subsets: ["latin"] });
-const mono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"] });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Slipstream",
-  description: "Your calls, emails and meetings, automatically analysed and turned into pipeline.",
+  description: "Drop the recording. Slipstream files it, drafts the follow-up, and finds companies like the one you just spoke to.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-background font-sans text-sm text-foreground antialiased">
-        {children}
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen">
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <main className="min-w-0 flex-1">
+            <Frame>{children}</Frame>
+          </main>
+        </div>
+        <div id="portal" />
       </body>
     </html>
   );

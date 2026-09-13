@@ -6,7 +6,7 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 
 ## State of play, 13 September
 
-- Anna's agent is working on `feat/eleno-fixtures`: the seller is rebranded to Eleno, a Melbourne team of AI and automation engineers who build and deploy custom agents, transfer the IP to the client and do not sell a subscription. All twelve history calls and the voiced demo call are rewritten for that offering, five call folders are renamed (`call-02-kestrel-lending`, `call-06-meridian-mutual`, `call-07-fairfield-wealth`, `call-08-ridgeline-commercial`, `call-09-bellbird-auctions`), `fixtures/crm/clients.json` adds Eleno's seven publicly listed clients as call-less won deals with no invented contact, headcount, value or dialogue, and the draft safety vocabulary now catches AI accuracy, headcount-saving and competitor-certification overclaims. The fixture load is now 20 CRM deals (12 history calls, the demo call and the seven public clients) carrying 12 calls and one email; the ICP cohort excludes the demo call, so it derives from 19 deals and 12 won ones, of which 5 disclose a headcount and fix the band at 25-80. Other people should regenerate the UI fixture mirror with `npm run generate:fixture-ui` rather than hand-editing `lib/data/`, and should not reuse the pre-rebrand company names.
+- Anna's agent is working on `feat/eleno-fixtures`: the seller is rebranded to Eleno, a Melbourne team of AI and automation engineers who build and deploy custom agents, transfer the IP to the client and do not sell a subscription. All twelve history calls and the voiced demo call are rewritten for that offering, five call folders are renamed (`call-02-kestrel-lending`, `call-06-meridian-mutual`, `call-07-fairfield-wealth`, `call-08-ridgeline-commercial`, `call-09-bellbird-auctions`), `fixtures/crm/clients.json` adds Eleno's seven publicly listed clients as call-less won deals with no invented contact, headcount, value or dialogue, and the draft safety vocabulary now catches AI accuracy, headcount-saving and competitor-certification overclaims. The fixture load is now 20 CRM deals (12 history calls, the demo call and the seven public clients) carrying 12 calls and one email; the ICP cohort excludes the demo call, so it derives from 19 deals and 12 won ones, of which 5 disclose a headcount and fix the band at 25-80.
 - Jeremy's agent is working on `refactor/delivery-service-boundary`: the delivery claim, lease, submission, rollback, completion and batch state machine has moved out of the 1,097-line HTTP router into `api/app/services/deliveries.py`; the router is now 33 lines and campaigns reuse the service directly. All 367 API tests pass and a new architecture contract prevents regression. Other people should keep endpoint-only concerns in the router and put new delivery lifecycle behaviour in the service.
 - Jeremy's agent completed the final full current-state rubric run on merged `main` after PR #71: all 15 deterministic and model-judged scenarios pass against the current public UI, API, pitch and demo script, with a clearly labelled internal score of 95/100. T1/T2/T3/T4 score 8/10, 8/8, 5/6 and 6/6; innovation scores 23/25, business 25/25 and finals 20/20. Other people should cite this as an internal rubric eval rather than an official judge result and should submit the external form.
 - Jeremy's agent completed `fix/eval-score-stands-parser`: the first full current-state rubric run passed 14 of 15 scenarios but marked T2 broken when a late background-review notification replaced its JSON footer with the explicit phrase “score stands at 8/8.” The bounded fallback accepts only that unambiguous reaffirmation form, rejects aspirational score prose, and the fresh targeted T2 judge passes at 8/8. Other people should use the newer 15/15 aggregate above when quoting the internal result.
@@ -71,7 +71,7 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 
 ## The demo loop
 
-The call and email writeback loops are executable from the production UI. Analysis and lead surfaces use validated API responses when integrations are available and visibly labelled evaluation fallbacks otherwise. The video must only claim a step is live after it has been exercised on the deployed UI.
+Every surface reads the production API; the web app carries no evaluation fallbacks. The video must only claim a step is live after it has been exercised on the deployed UI.
 
 1. **A sales call happens.** One demo call, synthesised with ElevenLabs text-to-dialogue and played through speakers. Twelve further scripted calls (won, stalled, lost, no-show) are seeded as text-only CRM history, alongside seven publicly listed Eleno clients recorded as call-less won deals, so the analysis and ICP steps have something real to work from.
 2. **The coach listens.** The Electron overlay can stream the consented rep microphone to Scribe realtime; the configured reasoning model returns the next questions to ask, grounded in the deal's CRM history. Its credential-free manual mode demonstrates both speakers without claiming mixed-audio capture.
@@ -82,15 +82,17 @@ The call and email writeback loops are executable from the production UI. Analys
 
 ## Surfaces
 
-### Conversations (`app/`)
+### Home (`app/page.tsx`)
 
-The unified feed of calls and emails. A call opens to the diarised transcript, participants, deal, outcome, extracted CRM fields, scorecard and follow-up draft. The provider-neutral email backend and production UI ingest inbound and outbound threads, read ordered history, draft grounded replies and approve the exact reviewed draft. Approval is an audited unsent state; the server-side Resend adapter is the only path that can record delivery.
+One input card: pick one of the thirteen recorded calls, upload or record audio (Scribe batch transcription when ElevenLabs is configured), paste a transcript (persisted through the live-coach websocket, relayed server-side), or paste a forwarded email thread. Every mode creates a real conversation on the API and opens its run.
 
-### Analysis (`app/analysis`)
+### Conversations and the run (`app/conversations`, `app/calls/[id]`)
 
-- **Sales training lens.** Per-call scorecards and the aggregate: which behaviours correlate with won deals and which with stalls.
-- **ICP discovery.** The profile of the buyer who actually converts (industry, size, role, trigger), derived from won deals, with the evidence behind each attribute.
-- **Outreach on that ICP.** The derived ICP as an editable Origami brief, the leads it returned, their similarity score, and the outreach draft per lead.
+The list is the thirteen fixture calls plus every conversation this browser created, with run state. The run page shows the transcript or thread on the left and, on the right, what Slipstream did as gated steps: transcribed, extracted (fields with confidence and evidence refs from `POST /calls/{id}/extract`), approve and sync to CRM, scored (`POST /scorecards`), follow-up drafted (`POST /drafts/from-call/{id}`), approve, ICP updated, leads found, outreach drafted. Refreshing reloads the same state from the API.
+
+### Intelligence and Revenue loop (`app/intelligence`, `app/loop`)
+
+Intelligence reads the latest ICP, its evidence inventory and freshness, the playbook and every stored scorecard, and computes tiles, the four behaviour patterns with quotes, triggers and provenance from them; a Derive button loads history, derives the ICP, scores unscored calls and derives the playbook when nothing exists yet. Revenue loop reads `/ready` and `/demo/evidence` and fills seven beats and three illustrative value tiles from them.
 
 ### Leads (`app/leads`)
 

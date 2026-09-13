@@ -9,12 +9,12 @@ const execFileAsync = promisify(execFile);
 export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 export const PRODUCTION_SURFACES = [
-  { label: "Revenue Loop: complete call-to-next-customer story", path: "/demo" },
-  { label: "Conversations", path: "/" },
-  { label: "Scripted opening: Maya Chen at Northstar Labs", path: "/conversations/call-01-northstar-labs" },
+  { label: "Revenue Loop: complete call-to-next-customer story", path: "/loop" },
+  { label: "Home: drop a call, paste a transcript or an email", path: "/" },
+  { label: "Conversations", path: "/conversations" },
+  { label: "Scripted opening: Maya Chen at Northstar Labs", path: "/calls/e9981868-623b-5b59-ab18-5e0c342f2c15" },
   { label: "Intelligence", path: "/intelligence" },
   { label: "Leads", path: "/leads" },
-  { label: "Campaigns", path: "/campaigns" },
 ];
 
 export const PRODUCTION_API_SURFACES = [

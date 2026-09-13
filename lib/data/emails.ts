@@ -1,5 +1,4 @@
 import type { EmailIngestInput } from "@/lib/api/slipstream";
-import type { Conversation } from "@/lib/types";
 
 export type DemoEmailThread = {
   id: string;
@@ -82,25 +81,5 @@ export const emailThreads: DemoEmailThread[] = [
     ],
   },
 ];
-
-export const emailConversations: Conversation[] = emailThreads.map((thread) => {
-  const latest = thread.messages.at(-1)!;
-  return {
-    id: thread.id,
-    kind: "email",
-    contact: thread.contact,
-    title: thread.title,
-    company: thread.company,
-    industry: thread.industry,
-    headcount: thread.headcount,
-    location: thread.location,
-    rep: "Sam Whitfield",
-    at: latest.occurred_at,
-    outcome: "open",
-    trigger: "Active email follow-up",
-    preview: latest.body.replaceAll("\n", " ").slice(0, 170),
-    status: "action_ready",
-  };
-});
 
 export const emailById = (id: string) => emailThreads.find((thread) => thread.id === id);
