@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 // The browser never holds the API ingest token. This proxy adds it on the server and forwards
 // only the routes the website needs; the desktop coach uses its own scoped session token.
+// It lives under /gateway because the production Caddy host sends every /api/* path to the API.
 const SESSION = /^sessions\/[0-9a-f-]{36}$/i;
 type Context = { params: Promise<{ path: string[] }> };
 
@@ -47,6 +48,8 @@ async function forward(request: NextRequest, context: Context) {
       return Response.json({ detail: "The coach request was not valid JSON" }, { status: 400 });
     }
   }
+  // API_BASE_URL may be an internal address (for example loopback on the VPS). The desktop coach
+  // runs on the rep's computer, so it gets COACH_PUBLIC_API_URL when that is set.
   const base = (process.env.API_BASE_URL || API_BASE_URL).replace(/\/$/, "");
   const token = process.env.INGEST_TOKEN;
   try {
@@ -61,7 +64,12 @@ async function forward(request: NextRequest, context: Context) {
       },
     });
     const data: unknown = await response.json();
-    return Response.json(data, { status: response.status, headers: { "Cache-Control": "no-store" } });
+    const headers = { "Cache-Control": "no-store" };
+    if (request.method === "POST" && response.ok && data && typeof data === "object") {
+      const apiUrl = new URL(process.env.COACH_PUBLIC_API_URL || base).origin;
+      return Response.json({ ...data, api_url: apiUrl }, { status: response.status, headers });
+    }
+    return Response.json(data, { status: response.status, headers });
   } catch (error) {
     const cause = error instanceof Error ? ((error.cause as { code?: string } | undefined)?.code ?? error.message) : String(error);
     console.error(`Coach proxy could not reach ${base}: ${cause}`);

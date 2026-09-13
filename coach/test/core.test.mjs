@@ -26,6 +26,19 @@ test("Handoff URL cannot select an arbitrary protocol", () => {
   assert.throws(() => origin("https://user:pass@example.com"));
   assert.equal(origin("http://localhost:8000"), "http://localhost:8000");
 });
+test("Launch link can name any HTTPS deployment, never an insecure remote one", () => {
+  const session = "0f8fad5b-d9cb-469f-a165-70867728950e";
+  const token = "a".repeat(43);
+  const base = `slipstream://coach?session=${session}&token=${token}`;
+  assert.deepEqual(parseLaunch(base), { id: session, handoff: token, api: null, web: null });
+  assert.deepEqual(
+    parseLaunch(`${base}&api=https://api.example.com&web=https://app.example.com/`),
+    { id: session, handoff: token, api: "https://api.example.com", web: "https://app.example.com" },
+  );
+  assert.equal(parseLaunch(`${base}&api=http://localhost:8000`).api, "http://localhost:8000");
+  assert.throws(() => parseLaunch(`${base}&api=http://api.example.com`));
+  assert.throws(() => parseLaunch(`${base}&api=https://api.example.com/steal`));
+});
 test("PCM clips rather than wrapping and WAV header is consistent", () => {
   const bytes = pcm16([-2, 0, 2]);
   const view = new DataView(bytes.buffer);

@@ -1,9 +1,11 @@
-// Browser calls go through the same-origin proxy in app/api/coach so the API ingest token
+import type { CoachLaunch } from "@/lib/coach/types";
+
+// Browser calls go through the same-origin proxy in app/gateway/coach so the API ingest token
 // stays on the server.
 export async function coachRequest<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`/api/coach/${path}`, {
+    response = await fetch(`/gateway/coach/${path}`, {
       ...init,
       headers: { "Content-Type": "application/json", ...init?.headers },
       cache: "no-store",
@@ -23,6 +25,14 @@ export async function coachRequest<T>(path: string, init?: RequestInit): Promise
   return data as T;
 }
 
-export function launchLink(sessionId: string, handoffToken: string): string {
-  return `slipstream://coach?${new URLSearchParams({ session: sessionId, token: handoffToken })}`;
+// The link names the servers that created the session, so a packaged desktop coach connects to
+// the right deployment (local, staging or production) without manual settings.
+export function launchLink(launch: CoachLaunch, webOrigin: string): string {
+  const query = new URLSearchParams({
+    session: launch.session.id,
+    token: launch.handoff_token,
+    api: launch.api_url,
+    web: webOrigin,
+  });
+  return `slipstream://coach?${query}`;
 }

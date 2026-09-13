@@ -60,6 +60,8 @@ function render() {
     row.context.customer.name +
     (row.context.customer.company ? " · " + row.context.customer.company : "");
   $("brief").textContent = row.context.brief;
+  // Shown before listening starts, so audio never goes to a server the rep did not expect.
+  $("server").textContent = settings?.api ? `Coaching server: ${new URL(settings.api).host}` : "";
   $("start").hidden = row.status === "ended" || captureActive;
   $("start").textContent = row.status === "ready" ? "Start listening" : "Resume listening";
   $("pause").hidden = !captureActive;

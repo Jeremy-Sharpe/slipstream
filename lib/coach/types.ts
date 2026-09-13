@@ -55,4 +55,9 @@ export type CoachSession = {
   last_analysis_ms: number | null;
 };
 
-export type CoachLaunch = { session: CoachSession; handoff_token: string };
+export type CoachLaunch = {
+  session: CoachSession;
+  handoff_token: string;
+  /** Public API origin for the desktop coach, added by the website proxy. */
+  api_url: string;
+};

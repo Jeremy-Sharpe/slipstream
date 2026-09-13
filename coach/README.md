@@ -15,6 +15,8 @@ INGEST_TOKEN=the-same-server-token-as-the-api
 
 Neither setting is exposed to browser JavaScript. Without `API_BASE_URL` the proxy uses the same API as the rest of the website (`NEXT_PUBLIC_API_BASE_URL`, then the production API). Run the Next.js app normally, then start the desktop coach:
 
+The same code runs on any deployment; only environment variables change. On a hosted web server set `INGEST_TOKEN` to the API's value, and set `API_BASE_URL` to where that server reaches the API. If that address only works inside the server (for example `http://127.0.0.1:8000` on the VPS), also set `COACH_PUBLIC_API_URL` to the API's public HTTPS origin, because the desktop coach connects from the rep's computer. The website proxy lives at `/gateway/coach` so a host that routes `/api/*` to the API still reaches it. Every launch link carries the public API and website origins, so a packaged coach follows whichever deployment created the session with no manual settings; it accepts only HTTPS origins or local development addresses, and shows the coaching server before listening starts.
+
 ```sh
 cd coach
 npm ci

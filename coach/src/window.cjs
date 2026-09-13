@@ -37,7 +37,11 @@ function parseLaunch(value) {
     !/^[A-Za-z0-9_-]{32,100}$/.test(token || "")
   )
     throw new Error("Invalid Slipstream launch link");
-  return { id, handoff: token };
+  // The website names its API and itself so the app follows whichever deployment created the
+  // session. origin() only accepts HTTPS origins or local development addresses.
+  const api = url.searchParams.get("api");
+  const web = url.searchParams.get("web");
+  return { id, handoff: token, api: api ? origin(api) : null, web: web ? origin(web) : null };
 }
 function origin(value) {
   const url = new URL(value);

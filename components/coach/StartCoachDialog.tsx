@@ -64,7 +64,7 @@ export function StartCoachDialog() {
           new_customer: { name: name.trim(), company: company.trim(), context: notes.trim() },
         }),
       });
-      setReady({ session: data.session, url: launchLink(data.session.id, data.handoff_token) });
+      setReady({ session: data.session, url: launchLink(data, window.location.origin) });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not prepare the coach. Please retry.");
     } finally {

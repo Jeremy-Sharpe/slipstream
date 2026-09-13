@@ -78,6 +78,9 @@ async function launch(value) {
   const next = parseLaunch(value);
   if (current && current.id !== next.id && current.status !== "ended")
     throw new Error("End the current call before opening another customer");
+  const previousSettings = settings;
+  if (next.api || next.web)
+    settings = { api: next.api || settings.api, web: next.web || settings.web };
   const candidate =
     current?.id === next.id
       ? current
@@ -95,10 +98,18 @@ async function launch(value) {
     write("pending.json", {
       encrypted: safeStorage.encryptString(JSON.stringify(candidate)).toString("base64"),
     });
-  const result = await request(`sessions/${candidate.id}/redeem`, {
-    method: "POST",
-    body: JSON.stringify({ token: candidate.handoff, access_token: candidate.access }),
-  });
+  let result;
+  try {
+    result = await request(`sessions/${candidate.id}/redeem`, {
+      method: "POST",
+      body: JSON.stringify({ token: candidate.handoff, access_token: candidate.access }),
+    });
+  } catch (error) {
+    settings = previousSettings;
+    throw error;
+  }
+  // Keep the servers from a link that actually worked, so a restart reconnects to them.
+  if (settings !== previousSettings) write("settings.json", settings);
   current = { ...candidate, status: result.status };
   pendingAttempt = null;
   persist();
