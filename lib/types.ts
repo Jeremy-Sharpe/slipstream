@@ -1,11 +1,26 @@
-export type Outcome = "won" | "stalled" | "lost" | "no_show";
+export type Outcome = "won" | "stalled" | "lost" | "no_show" | "open";
+
+export type EmailParty = { name: string | null; email: string };
+export type EmailRecipient = EmailParty & { kind: "to" | "cc" | "bcc" };
+/** One message of a thread, the shape of ApiEmailRecord (docs/api-shapes.ts). */
+export type EmailMessage = {
+  i: number;
+  direction: "inbound" | "outbound";
+  sender: EmailParty;
+  recipients: EmailRecipient[];
+  subject: string;
+  body: string;
+  occurred_at: string;
+};
 
 export type Turn = { i: number; speaker: "rep" | "prospect"; name: string; text: string; t: number };
 
-export type Field<T = string | number | string[] | null> = { value: T; confidence: number; span: number | null; evidence_ms?: number | null };
+/** `span` points at the source turn (or message). Calls cite a time (`evidence_ms`); threads cite a message index (`evidence_ref`). */
+export type Field<T = string | number | string[] | null> = { value: T; confidence: number; span: number | null; evidence_ms?: number | null; evidence_ref?: number | null };
 
 export type CallRecord = {
   id: string;
+  kind: "call" | "email";
   contact: string;
   title: string;
   email?: string | null;
@@ -19,7 +34,10 @@ export type CallRecord = {
   outcome: Outcome;
   valueAud?: number | null;
   trigger?: string | null;
+  /** Calls: diarised turns. Threads: one turn per message (body, in order), so citations work the same way. */
   turns: Turn[];
+  /** Threads only: the messages, oldest first. */
+  messages?: EmailMessage[];
   fields: {
     contact: Field<string>;
     company: Field<string>;
@@ -33,6 +51,9 @@ export type CallRecord = {
     nextStepSecured: boolean;
     objection: string;
     talkRatio: number;
+    /** Threads only: whether the reply asked what it needed to, and how fast it came. */
+    askedRightQuestions?: boolean;
+    responseTime?: string;
     spans: { discovery: number | null; nextStep: number | null; objection: number | null };
   };
   objections: { text: string; handling: string }[];

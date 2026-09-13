@@ -2,10 +2,12 @@
 // Harbourline IT calls. Timestamps are spread over the call by word count;
 // confidences are deterministic; spans point at the source turn.
 import type { CallRecord } from "./types";
+import { emails } from "./emails";
 
-export const calls: CallRecord[] = [
+const fixtures: CallRecord[] = [
  {
   "id": "call-01-northstar-labs",
+  "kind": "call",
   "contact": "Maya Chen",
   "title": "Managing Partner",
   "email": "maya@northstarlabs.example",
@@ -275,6 +277,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-02-arcwell-health",
+  "kind": "call",
   "contact": "Felix Morgan",
   "title": "Operations Manager",
   "email": "felix@arcwellhealth.example",
@@ -558,6 +561,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-03-afterglow-studio",
+  "kind": "call",
   "contact": "Priya Shah",
   "title": "Founder",
   "email": "priya@afterglowstudio.example",
@@ -858,6 +862,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-04-kite-and-co",
+  "kind": "call",
   "contact": "Daniel Ortiz",
   "title": "Operations Lead",
   "email": "daniel@kiteandco.example",
@@ -1154,6 +1159,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-05-craftwork",
+  "kind": "call",
   "contact": "Lucy Beck",
   "title": "Owner",
   "email": "lucy@craftwork.example",
@@ -1464,6 +1470,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-06-meridian-ai",
+  "kind": "call",
   "contact": "Tom Reid",
   "title": "Head of Engineering",
   "email": "tom@meridianai.example",
@@ -1746,6 +1753,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-07-wattle-street-legal",
+  "kind": "call",
   "contact": "Olivia Hart",
   "title": "Practice Manager",
   "email": "olivia@wattlestreetlegal.example",
@@ -2043,6 +2051,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-08-elm-and-ledger-accounting",
+  "kind": "call",
   "contact": "Ben Wallace",
   "title": "Director",
   "email": "ben@elmandledger.example",
@@ -2354,6 +2363,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-09-port-phillip-physio-group",
+  "kind": "call",
   "contact": "Aisha Rahman",
   "title": "General Manager",
   "email": "aisha@portphillipphysio.example",
@@ -2651,6 +2661,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-10-lumen-lane-retail",
+  "kind": "call",
   "contact": "Noah Spencer",
   "title": "Co-owner",
   "email": "noah@lumenlaneretail.example",
@@ -2947,6 +2958,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-11-banksia-architects",
+  "kind": "call",
   "contact": "Grace Kim",
   "title": "Studio Operations Manager",
   "email": "grace@banksiaarchitects.example",
@@ -3257,6 +3269,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-12-dockside-dental",
+  "kind": "call",
   "contact": "Ethan Clarke",
   "title": "Practice Owner",
   "email": "ethan@docksidedental.example",
@@ -3366,6 +3379,7 @@ export const calls: CallRecord[] = [
  },
  {
   "id": "call-13-marlowe-finch-demo",
+  "kind": "call",
   "contact": "Dev Patel",
   "title": "CFO",
   "email": "dev@marlowefinch.example",
@@ -3692,3 +3706,5 @@ export const calls: CallRecord[] = [
   }
  }
 ];
+
+export const calls: CallRecord[] = [...fixtures, ...emails];

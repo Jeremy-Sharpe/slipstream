@@ -28,6 +28,7 @@ const OUTCOME: Record<Outcome, { label: string; cls: string; dot: string }> = {
   stalled: { label: "Stalled", cls: "bg-warning-tint text-warning", dot: "bg-warning" },
   lost: { label: "Lost", cls: "bg-danger-tint text-danger", dot: "bg-danger" },
   no_show: { label: "No-show", cls: "bg-surface text-soft", dot: "bg-faint" },
+  open: { label: "Open", cls: "bg-surface text-soft", dot: "bg-faint" },
 };
 
 export function OutcomePill({ outcome }: { outcome: Outcome }) {

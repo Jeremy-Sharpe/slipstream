@@ -4,6 +4,8 @@ import { useSyncExternalStore } from "react";
 import { calls as seed } from "./calls";
 import { leads as leadSeed } from "./leads";
 import { icp } from "./icp";
+import { turnsOf } from "./emails";
+import { displayName, isRep, parseEmail, responseTime } from "./email";
 import type { CallRecord, Lead, Search } from "./types";
 
 // One in-memory store for the demo. Runs, approvals and added calls live here
@@ -70,6 +72,27 @@ export const actions = {
       : [{ i: 0, speaker: "prospect" as const, name: "Prospect", text: text.trim(), t: 0 }];
     const id = `call-new-${Date.now().toString(36)}`;
     const c: CallRecord = { ...source, id, at: new Date().toISOString(), turns, duration: Math.max(60, turns.length * 20), contact: speakers[1] ?? "Prospect", rep: speakers[0] ?? source.rep, company: "Pasted transcript", pasted: true };
+    state.calls = [c, ...state.calls];
+    state.runs[id] = "running";
+    commit();
+    return c;
+  },
+  /** A pasted or forwarded email: headers and quoted replies become a thread; the demo thread stands in for the rest. */
+  addEmail(text: string): CallRecord {
+    const source = seed.find((c) => c.id === "email-03-brunswick-dental-group") ?? seed[0];
+    const messages = parseEmail(text);
+    const inbound = messages.find((m) => m.direction === "inbound")?.sender;
+    const outbound = messages.find((m) => m.direction === "outbound")?.sender;
+    const contact = inbound ? displayName(inbound) : "Prospect";
+    const rep = outbound && isRep(outbound) ? displayName(outbound) : source.rep;
+    const id = `email-new-${Date.now().toString(36)}`;
+    const c: CallRecord = {
+      ...source, id, kind: "email", at: new Date().toISOString(), messages, turns: turnsOf(messages), duration: 0,
+      contact, rep, company: "Pasted email", email: inbound?.email ?? null, pasted: true,
+      fields: { ...source.fields, contact: { ...source.fields.contact, value: contact }, company: { ...source.fields.company, value: "Pasted email" } },
+      scorecard: { ...source.scorecard, responseTime: responseTime(messages) },
+      draft: { ...source.draft, subject: `Re: ${messages[0].subject.replace(/^Re:\s*/i, "")}` },
+    };
     state.calls = [c, ...state.calls];
     state.runs[id] = "running";
     commit();

@@ -10,7 +10,7 @@ import { cn, mmss } from "@/components/ui";
    stream again. */
 
 export type Token = { text: string; cite?: number };
-export type Source = { i: number; name: string; text: string; t: number };
+export type Source = { i: number; name: string; text: string; t: number; /** Chip text when the source is not a timestamp (a thread message). */ label?: string };
 
 const WORD_MS = 55;
 
@@ -48,7 +48,7 @@ export function StreamingText({ tokens, sources = [], followUps = [], onCite, on
         className="mr-1 inline-flex h-[18px] translate-y-[-1px] items-center rounded-[5px] bg-surface px-1.5 align-middle text-[11.5px] font-medium tabular-nums text-text shadow-[inset_0_0_0_1px_#e8e8e8] transition-colors duration-150 hover:bg-[#ececec] hover:text-ink"
         style={{ animation: "pop-in 250ms cubic-bezier(0.23,1,0.32,1) both" }}
       >
-        {mmss(src.t)}
+        {src.label ?? mmss(src.t)}
       </button>
     );
   };
@@ -76,7 +76,7 @@ export function StreamingText({ tokens, sources = [], followUps = [], onCite, on
                     <button type="button" onMouseEnter={() => onCite?.(s.i)} onMouseLeave={() => onCite?.(null)} onClick={() => (onJump ?? onCite)?.(s.i)} className="grid w-full grid-cols-[14px_minmax(0,1fr)_40px] items-center gap-x-2 rounded-md px-1.5 py-1 text-left transition-colors duration-150 hover:bg-surface-2">
                       <Avatar name={s.name} size={14} />
                       <span className="truncate text-[13px] text-text">{s.text}</span>
-                      <span className="text-right text-[12px] tabular-nums text-faint">{mmss(s.t)}</span>
+                      <span className="text-right text-[12px] tabular-nums text-faint">{s.label ?? mmss(s.t)}</span>
                     </button>
                   </li>
                 ))}

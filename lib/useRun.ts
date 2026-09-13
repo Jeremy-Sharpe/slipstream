@@ -27,6 +27,19 @@ export const TRACE: Record<StepId, string[]> = {
   outreach: ["Matching each lead to a won call", "Writing five drafts"],
 };
 
+/** The same steps read a thread instead of a recording. */
+export function traceFor(call: CallRecord): Record<StepId, string[]> {
+  if (call.kind !== "email") return TRACE;
+  const n = call.messages?.length ?? call.turns.length;
+  return {
+    ...TRACE,
+    transcribe: [`Reading ${n} message${n === 1 ? "" : "s"}`, "Working out who wrote what"],
+    extract: ["Reading the thread", "Finding contact and company", "Deal stage, value and next step"],
+    score: ["Checking the questions asked", "Checking for a dated next step", "Reading the objection", "Timing the reply"],
+    draft: ["Pulling what was promised", "Writing the reply"],
+  };
+}
+
 /** Minimum visible duration per step, even when the work is instant. */
 const DURATION: Record<StepId, number> = { transcribe: 3000, extract: 4000, score: 3000, draft: 3500, icp: 3000, search: 4500, outreach: 3000 };
 /** Each sub-item stays visible at least this long before its check. */
@@ -47,6 +60,7 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
   }, []);
 
   const at = useCallback((ms: number, fn: () => void) => { timers.current.push(window.setTimeout(fn, instant ? 0 : ms)); }, [instant]);
+  const trace = traceFor(call);
 
   /** Schedules a list of steps back to back; returns the total time. */
   const schedule = useCallback((ids: StepId[], t0: number, stopAfter?: { id: StepId; note?: string; wait?: boolean }, onEnd?: () => void) => {
@@ -57,7 +71,7 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
         at(t, () => set(id, { status: "skipped", note: i === stopIndex + 1 ? stopAfter?.note : undefined }));
         return;
       }
-      const subs = TRACE[id].length;
+      const subs = trace[id].length;
       const len = Math.max(DURATION[id], subs * SUB_MIN + SUB_MIN);
       const ticks = id === "search" ? 10 : subs;
       at(t, () => { set(id, { status: "running", progress: 0, startedAt: Date.now() }); setOpen(id); });
@@ -71,7 +85,7 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
     });
     at(t, () => onEnd?.());
     return t;
-  }, [at, set, instant]);
+  }, [at, set, instant, trace]);
 
   const start = useCallback(() => {
     timers.current.forEach(clearTimeout);
