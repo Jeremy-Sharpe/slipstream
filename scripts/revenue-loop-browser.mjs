@@ -11,7 +11,7 @@ const campaigns = [{ id: "83b2a7b2-1ace-4dc5-b90a-d0dba9d2ed4c", name: "Hackatho
 
 async function waitForServer() {
   for (let attempt = 0; attempt < 50; attempt += 1) {
-    try { if ((await fetch(`${base}/demo`)).ok) return; } catch { /* server is starting */ }
+    try { if ((await fetch(`${base}/legacy/demo`)).ok) return; } catch { /* server is starting */ }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
   throw new Error("Next production server did not start");
@@ -35,7 +35,7 @@ try {
     const page = await context.newPage();
     let failRefresh = false;
     await mockApi(page, () => failRefresh);
-    await page.goto(`${base}/demo`);
+    await page.goto(`${base}/legacy/demo`);
     await page.getByText("Connected", { exact: true }).waitFor();
 
     await page.getByRole("button", { name: "Play guided loop" }).click();
@@ -81,7 +81,7 @@ try {
       const intersectsViewport = await page.locator(hash).evaluate((element) => { const bounds = element.getBoundingClientRect(); return bounds.top < window.innerHeight && bounds.bottom > 0; });
       assert.equal(intersectsViewport, true, `${hash} intersects the viewport after following its evidence link`);
       await page.goBack();
-      await page.waitForURL(`${base}/demo`);
+      await page.waitForURL(`${base}/legacy/demo`);
       await page.locator('[aria-current="step"]').waitFor();
       assert.match(await page.locator('[aria-current="step"]').innerText(), stepName, "presenter selection restores after evidence navigation");
     }
@@ -95,7 +95,7 @@ try {
     await denied.addInitScript(() => { Storage.prototype.getItem = () => { throw new DOMException("denied"); }; Storage.prototype.setItem = () => { throw new DOMException("denied"); }; });
     const deniedPage = await denied.newPage();
     await mockApi(deniedPage, () => true);
-    await deniedPage.goto(`${base}/demo`);
+    await deniedPage.goto(`${base}/legacy/demo`);
     await deniedPage.getByRole("button", { name: "Play guided loop" }).click();
     assert.match(await deniedPage.locator('[aria-current="step"]').innerText(), /One sales call/);
     await denied.close();

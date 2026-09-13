@@ -11,7 +11,7 @@ async function readJson(relativePath) {
 }
 
 async function readUiCalls() {
-  const source = await readFile(path.join(root, "lib/data/calls.ts"), "utf8");
+  const source = await readFile(path.join(root, "lib/legacy/data/calls.ts"), "utf8");
   const declaration = source.indexOf("= [");
   const start = declaration < 0 ? -1 : declaration + 2;
   const end = source.lastIndexOf("];\n\nexport const callById");

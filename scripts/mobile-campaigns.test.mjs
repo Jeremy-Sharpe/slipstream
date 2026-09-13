@@ -6,9 +6,9 @@ const root = new URL("../", import.meta.url);
 
 test("campaign workspace contains its dense table on phones", async () => {
   const [list, dialog, live] = await Promise.all([
-    readFile(new URL("components/campaigns/CampaignsList.tsx", root), "utf8"),
-    readFile(new URL("components/campaigns/NewCampaignDialog.tsx", root), "utf8"),
-    readFile(new URL("components/campaigns/LiveCampaignRuns.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/campaigns/CampaignsList.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/campaigns/NewCampaignDialog.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/campaigns/LiveCampaignRuns.tsx", root), "utf8"),
   ]);
 
   assert.match(list, /flex flex-col items-stretch[^"\n]+sm:flex-row/);

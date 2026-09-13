@@ -6,9 +6,9 @@ const root = new URL("../", import.meta.url);
 
 test("campaigns carries the live Revenue DNA spending boundary into outreach", async () => {
   const [route, list, execution, demoScript] = await Promise.all([
-    readFile(new URL("app/(app)/campaigns/page.tsx", root), "utf8"),
-    readFile(new URL("components/campaigns/CampaignsList.tsx", root), "utf8"),
-    readFile(new URL("components/campaigns/LiveCampaignRuns.tsx", root), "utf8"),
+    readFile(new URL("app/legacy/(app)/campaigns/page.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/campaigns/CampaignsList.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/campaigns/LiveCampaignRuns.tsx", root), "utf8"),
     readFile(new URL("docs/demo-script.md", root), "utf8"),
   ]);
 
