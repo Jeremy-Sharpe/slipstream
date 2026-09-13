@@ -221,6 +221,41 @@ def test_structured_validates_openrouter_fenced_json() -> None:
     assert client.chat.completions.kwargs["extra_body"] == {"usage": {"include": True}}
 
 
+def test_structured_sends_configured_openrouter_reasoning_effort() -> None:
+    client = FakeOpenRouterClient()
+
+    structured(
+        ReasoningClient(
+            provider="openrouter",
+            model="anthropic/claude-fable-5.1",
+            client=client,
+            reasoning_effort="low",
+        ),
+        system="System",
+        user="User",
+        schema=MiniOutput,
+    )
+
+    assert client.chat.completions.kwargs["extra_body"] == {
+        "usage": {"include": True},
+        "reasoning": {"effort": "low"},
+    }
+
+
+def test_create_reasoning_client_carries_openrouter_reasoning_effort() -> None:
+    settings = Settings(
+        _env_file=None,
+        openrouter_api_key="test-key",
+        reasoning_model="anthropic/claude-fable-5.1",
+        openrouter_reasoning_effort="low",
+    )
+
+    client = create_reasoning_client(settings)
+
+    assert client.provider == "openrouter"
+    assert client.reasoning_effort == "low"
+
+
 def test_structured_validates_local_schema_constrained_json() -> None:
     client = FakeOpenRouterClient()
 

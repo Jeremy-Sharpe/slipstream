@@ -209,6 +209,27 @@ def test_openrouter_judge_sends_strict_schema_and_computes_cost() -> None:
     assert len(requests) == 1
 
 
+def test_openrouter_judge_sends_reasoning_effort_only_when_configured() -> None:
+    bodies: list[dict] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        bodies.append(json.loads(request.content))
+        return _openrouter_response(_judged_scorecard().model_dump_json())
+
+    for effort in (None, "low"):
+        judge = openrouter_judge(
+            "test-key",
+            "test/model",
+            prices={"test/model": (2.0, 10.0)},
+            transport=httpx.MockTransport(respond),
+            reasoning_effort=effort,
+        )
+        judge(system="system", user="user", schema=JudgedScorecard)
+
+    assert "reasoning" not in bodies[0]
+    assert bodies[1]["reasoning"] == {"effort": "low"}
+
+
 def test_openrouter_judge_prefers_billed_cost_from_usage() -> None:
     def respond(request: httpx.Request) -> httpx.Response:
         return httpx.Response(
@@ -461,7 +482,7 @@ def test_anthropic_empty_output_preserves_known_spend(monkeypatch) -> None:
 def test_build_judge_prefers_openrouter_then_anthropic(monkeypatch) -> None:
     chosen: list[tuple[str, str]] = []
 
-    def fake_openrouter(api_key: str, model: str):
+    def fake_openrouter(api_key: str, model: str, reasoning_effort: str | None = None):
         chosen.append(("openrouter", f"{api_key}:{model}"))
         return FakeJudge()
 

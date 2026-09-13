@@ -247,8 +247,9 @@ def _post_openrouter(
     model: str,
     messages: list[dict[str, str]],
     schema: type[BaseModel],
+    reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
-    body = {
+    body: dict[str, Any] = {
         "model": model,
         "messages": messages,
         "max_tokens": 4000,
@@ -262,6 +263,8 @@ def _post_openrouter(
         },
         "provider": {"require_parameters": True},
     }
+    if reasoning_effort is not None:
+        body["reasoning"] = {"effort": reasoning_effort}
     try:
         response = client.post(
             OPENROUTER_URL,
@@ -352,6 +355,7 @@ def openrouter_judge(
     prices: Mapping[str, tuple[float, float]] | None = None,
     transport: httpx.BaseTransport | None = None,
     timeout: float = 120.0,
+    reasoning_effort: str | None = None,
 ) -> Judge:
     price_table = dict(prices or {})
     client = httpx.Client(transport=transport, timeout=timeout)
@@ -370,7 +374,9 @@ def openrouter_judge(
         last_error: Exception | None = None
         for attempt in range(2):
             try:
-                response = _post_openrouter(client, api_key, model, messages, schema)
+                response = _post_openrouter(
+                    client, api_key, model, messages, schema, reasoning_effort
+                )
             except JudgeError as error:
                 attempt_costs.append(None)
                 error.input_tokens = input_tokens
@@ -504,7 +510,11 @@ def heuristic_judge() -> Judge:
 def build_judge(settings: Any) -> Judge:
     model = str(settings.scorecard_judge_model)
     if settings.openrouter_api_key is not None:
-        return openrouter_judge(settings.openrouter_api_key.get_secret_value(), model)
+        return openrouter_judge(
+            settings.openrouter_api_key.get_secret_value(),
+            model,
+            reasoning_effort=settings.openrouter_reasoning_effort,
+        )
     if settings.anthropic_api_key is not None:
         anthropic_model = (
             _anthropic_model_id(model)
