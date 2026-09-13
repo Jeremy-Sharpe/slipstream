@@ -11,6 +11,7 @@ from app.schemas.icp import (
     IcpEvidenceInventory,
     IcpEvidenceItem,
     IcpProfile,
+    IcpSourceDealRef,
     IcpSourceSummary,
     StoredIcpProfile,
 )
@@ -22,6 +23,10 @@ PROMPT = (Path(__file__).resolve().parents[1] / "prompts" / "icp-derive-v1.md").
 )
 MAX_MODEL_INPUT_CHARS = 120_000
 MAX_PROFILE_VALUES = 12
+MAX_SOURCE_DEAL_REFS = 100
+MAX_SOURCE_CALL_REFS = 20
+MAX_SOURCE_COMPANY_CHARS = 120
+MAX_SOURCE_ID_CHARS = 200
 _HEADCOUNT_RANGE = re.compile(r"^(\d{1,6})\s*-\s*(\d{1,6})$")
 _HEADCOUNT_BOUND = re.compile(r"^(under|over)\s*-?\s*(\d{1,6})$", re.IGNORECASE)
 
@@ -80,7 +85,68 @@ def derive_icp(
         "icp.derived",
         details={"profile_id": str(stored.id), "version": stored.version, "won_deals": len(won)},
     )
-    return stored
+    return _with_source_deals(stored, won)
+
+
+def with_source_deals(
+    store: IcpLeadsStore, profile: StoredIcpProfile
+) -> StoredIcpProfile:
+    cited_ids = _cited_deal_ids(profile)
+    if not cited_ids:
+        return profile.model_copy(update={"source_deals": []})
+    deals = store.source_deals_for_profile(
+        str(profile.id), deal_ids=set(cited_ids)
+    )
+    return _with_source_deals(profile, deals)
+
+
+def _cited_deal_ids(profile: StoredIcpProfile) -> list[str]:
+    return list(
+        dict.fromkeys(
+            str(deal_id)
+            for item in profile.evidence
+            for deal_id in item.deal_ids
+        )
+    )[:MAX_SOURCE_DEAL_REFS]
+
+
+def _with_source_deals(
+    profile: StoredIcpProfile, deals: list[DealRecord]
+) -> StoredIcpProfile:
+    cited_ids = _cited_deal_ids(profile)
+    source_by_id = {str(deal.id): deal for deal in deals}
+    refs = []
+    for deal_id in cited_ids:
+        if not deal_id or len(deal_id) > 128:
+            continue
+        deal = source_by_id.get(deal_id)
+        if deal is None:
+            continue
+        call_ids: list[str] = []
+        seen_call_ids: set[str] = set()
+        for item in deal.interactions:
+            call_id = item.source_external_id
+            if (
+                item.channel != "call"
+                or not 0 < len(call_id) <= MAX_SOURCE_ID_CHARS
+                or call_id in seen_call_ids
+            ):
+                continue
+            call_ids.append(call_id)
+            seen_call_ids.add(call_id)
+            if len(call_ids) == MAX_SOURCE_CALL_REFS:
+                break
+        refs.append(
+            IcpSourceDealRef(
+                deal_id=deal_id,
+                company_name=(
+                    _valid_signal_text(deal.company_name, MAX_SOURCE_COMPANY_CHARS)
+                    or "Won deal"
+                ),
+                call_ids=call_ids,
+            )
+        )
+    return profile.model_copy(update={"source_deals": refs})
 
 
 def evidence_inventory(

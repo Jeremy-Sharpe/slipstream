@@ -8,6 +8,7 @@ from pydantic import SecretStr
 
 from app.core.config import Settings
 from app.factory import create_app
+from app.schemas.icp import IcpProfile
 from app.schemas.leads import LeadIn
 from app.schemas.origami import Job
 
@@ -37,6 +38,142 @@ def test_icp_evidence_inventory_is_keyless_and_becomes_ready(client: TestClient)
         "active_deals": 1,
         "ready_to_derive": True,
     }
+
+
+def test_latest_icp_includes_bounded_source_call_refs(client: TestClient) -> None:
+    store = client.app.state.icp_leads_store
+    deal = store.upsert_deal(
+        {
+            "crm_external_id": "live:northstar",
+            "company_name": "Northstar Legal",
+            "name": "Northstar renewal",
+            "stage": "closed_won",
+            "outcome": "won",
+            "interactions": [
+                {
+                    "source_external_id": "call-01-northstar-labs",
+                    "channel": "call",
+                    "direction": "unknown",
+                    "occurred_at": "2026-09-12T10:00:00Z",
+                    "subject": "Discovery call",
+                    "content": "Private transcript content is not returned in the source ref.",
+                },
+                {
+                    "source_external_id": "call-02-arcwell-health",
+                    "channel": "call",
+                    "direction": "unknown",
+                    "occurred_at": "2026-09-12T10:30:00Z",
+                    "subject": "Follow-up call",
+                    "content": "A second canonical call is retained.",
+                },
+                {
+                    "source_external_id": "call-01-northstar-labs",
+                    "channel": "call",
+                    "direction": "unknown",
+                    "occurred_at": "2026-09-12T10:45:00Z",
+                    "subject": "Duplicate import",
+                    "content": "Duplicate source identifiers collapse.",
+                },
+                {
+                    "source_external_id": "x" * 201,
+                    "channel": "call",
+                    "direction": "unknown",
+                    "occurred_at": "2026-09-12T10:50:00Z",
+                    "subject": "Oversized identifier",
+                    "content": "Oversized identifiers are omitted.",
+                }
+            ],
+        }
+    )
+    private_title_deal = store.upsert_deal(
+        {
+            "crm_external_id": "live:private-title",
+            "name": "Renewal for Jane Citizen after acquisition",
+            "stage": "closed_won",
+            "outcome": "won",
+            "interactions": [
+                {
+                    "source_external_id": "crm-call-not-in-slipstream",
+                    "channel": "call",
+                    "direction": "unknown",
+                    "occurred_at": "2026-09-12T11:00:00Z",
+                    "subject": "Renewal",
+                    "content": "Private source",
+                }
+            ],
+        }
+    )
+    uncited_deal = store.upsert_deal(
+        {
+            "crm_external_id": "live:uncited",
+            "company_name": "Uncited Company",
+            "name": "Uncited deal",
+            "stage": "closed_won",
+            "outcome": "won",
+            "interactions": [],
+        }
+    )
+    profile = store.insert_icp_profile(
+        version=1,
+        profile=IcpProfile(
+            summary="Best-fit firms",
+            industries=["Legal"],
+            headcount_band="25-80",
+            roles=["Managing Partner"],
+            triggers=["Renewal"],
+            disqualifiers=[],
+            evidence=[
+                {
+                    "attribute": "industry",
+                    "deal_ids": [str(deal.id), str(private_title_deal.id)],
+                    "why": "Won legal deals",
+                }
+            ],
+            confidence=0.8,
+            origami_brief="Find similar firms.",
+        ),
+        model="test-model",
+        embedding_model="test-embedding",
+    )
+    store.insert_icp_source_deal(
+        profile_id=str(profile.id),
+        deal_id=str(deal.id),
+        evidence={"deal_snapshot": deal.model_dump(mode="json")},
+    )
+    for source in (private_title_deal, uncited_deal):
+        store.insert_icp_source_deal(
+            profile_id=str(profile.id),
+            deal_id=str(source.id),
+            evidence={"deal_snapshot": source.model_dump(mode="json")},
+        )
+    store.upsert_deal(
+        {
+            "crm_external_id": "live:northstar",
+            "company_name": "Changed after derivation",
+            "name": "Changed after derivation",
+            "stage": "discovery",
+            "outcome": "lost",
+        }
+    )
+
+    response = client.get("/api/v1/icp/latest")
+
+    assert response.status_code == 200
+    assert response.json()["source_deals"] == [
+        {
+            "deal_id": str(deal.id),
+            "company_name": "Northstar Legal",
+            "call_ids": ["call-01-northstar-labs", "call-02-arcwell-health"],
+        },
+        {
+            "deal_id": str(private_title_deal.id),
+            "company_name": "Won deal",
+            "call_ids": ["crm-call-not-in-slipstream"],
+        },
+    ]
+    assert "content" not in response.json()["source_deals"][0]
+    assert "Jane Citizen" not in str(response.json()["source_deals"])
+    assert str(uncited_deal.id) not in str(response.json()["source_deals"])
 
 
 def test_lead_source_returns_503_with_missing_integration(client: TestClient) -> None:

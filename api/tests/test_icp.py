@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from app.core.config import Settings
-from app.schemas.icp import DealRecord, IcpProfile, InteractionEvidence
+from app.schemas.icp import DealRecord, IcpProfile, InteractionEvidence, StoredIcpProfile
 from app.services.crm_mirror import mirror_interaction
 from app.services.fixture_history import load_fixture_history
 from app.services.icp import (
@@ -12,6 +12,7 @@ from app.services.icp import (
     _cohort_payload,
     _fit_model_budget,
     _ground_profile,
+    _with_source_deals,
     derive_icp,
     evidence_inventory,
     won_centroid,
@@ -94,6 +95,14 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
         for item in profile.profile.evidence
     )
     assert len(store.source_deals_for_profile(str(profile.id))) == 5
+    assert len(profile.source_deals) == 5
+    assert {source.deal_id for source in profile.source_deals} == won_ids
+    assert all(source.company_name and source.call_ids for source in profile.source_deals)
+    assert all(
+        call_id.startswith("call-")
+        for source in profile.source_deals
+        for call_id in source.call_ids
+    )
     assert all(
         not deal.metadata.get("demo") for deal in store.source_deals_for_profile(str(profile.id))
     )
@@ -111,6 +120,63 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     source_after = store.source_deals_for_profile(str(profile.id))[0]
     assert source_after.outcome == "won"
     assert source_after.embedding == source_before.embedding
+
+
+def test_derive_returns_source_refs_without_a_post_commit_store_read() -> None:
+    class NoSourceReadStore(InMemoryIcpLeadsStore):
+        def source_deals_for_profile(
+            self, profile_id: str, *, deal_ids: set[str] | None = None
+        ) -> list[DealRecord]:
+            raise AssertionError(f"unexpected post-commit read for {profile_id}: {deal_ids}")
+
+    store = NoSourceReadStore()
+    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+
+    profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
+
+    assert len(profile.source_deals) == 5
+
+
+def test_source_ref_projection_enforces_limits_and_privacy_defaults() -> None:
+    ids = [f"deal-{index:03}" for index in range(101)]
+    profile = StoredIcpProfile(
+        id="profile-bounds",
+        version=1,
+        profile=fake_structured(user="", model="test"),
+        evidence=[{"attribute": "industry", "deal_ids": ids, "why": "Won cohort"}],
+        origami_brief="Find peers.",
+    )
+    calls = [
+        InteractionEvidence(
+            source_external_id=f"call-{index:02}",
+            channel="call",
+            direction="unknown",
+            occurred_at=datetime.now(UTC),
+            subject="Evidence",
+            content="Bounded evidence",
+        )
+        for index in range(19)
+    ]
+    calls.append(calls[0])
+    deals = [
+        DealRecord(
+            id=deal_id,
+            company_name=None if index == 0 else f"Company {index}",
+            name="Private opportunity title",
+            stage="customer",
+            outcome="won",
+            interactions=calls if index == 0 else [],
+        )
+        for index, deal_id in enumerate(ids)
+    ]
+
+    projected = _with_source_deals(profile, deals)
+
+    assert len(projected.source_deals) == 100
+    assert projected.source_deals[0].company_name == "Won deal"
+    assert projected.source_deals[0].call_ids == [f"call-{index:02}" for index in range(19)]
+    assert all("Private opportunity" not in ref.company_name for ref in projected.source_deals)
+    assert projected.source_deals[-1].deal_id == "deal-099"
 
 
 def test_derive_icp_uses_email_as_active_evidence_not_negative_evidence() -> None:

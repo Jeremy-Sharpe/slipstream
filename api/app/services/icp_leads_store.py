@@ -55,7 +55,9 @@ class IcpLeadsStore(Protocol):
 
     def get_icp_profile(self, profile_id: str) -> StoredIcpProfile | None: ...
 
-    def source_deals_for_profile(self, profile_id: str) -> list[DealRecord]: ...
+    def source_deals_for_profile(
+        self, profile_id: str, *, deal_ids: set[str] | None = None
+    ) -> list[DealRecord]: ...
 
     def log_activity(
         self,
@@ -311,14 +313,19 @@ class SupabaseIcpLeadsStore:
         rows = self._client.table("icp_profiles").select("*").eq("id", profile_id).execute().data
         return _stored_profile(rows[0]) if rows else None
 
-    def source_deals_for_profile(self, profile_id: str) -> list[DealRecord]:
-        source_rows = (
+    def source_deals_for_profile(
+        self, profile_id: str, *, deal_ids: set[str] | None = None
+    ) -> list[DealRecord]:
+        if deal_ids == set():
+            return []
+        query = (
             self._client.table("icp_profile_source_deals")
             .select("deal_id,evidence")
             .eq("icp_profile_id", profile_id)
-            .execute()
-            .data
         )
+        if deal_ids is not None:
+            query = query.in_("deal_id", sorted(deal_ids))
+        source_rows = query.execute().data
         snapshots = [
             DealRecord.model_validate(row["evidence"]["deal_snapshot"])
             for row in source_rows
@@ -576,11 +583,16 @@ class InMemoryIcpLeadsStore:
         row = self.icp_profiles.get(profile_id)
         return _stored_profile(row) if row else None
 
-    def source_deals_for_profile(self, profile_id: str) -> list[DealRecord]:
+    def source_deals_for_profile(
+        self, profile_id: str, *, deal_ids: set[str] | None = None
+    ) -> list[DealRecord]:
+        if deal_ids == set():
+            return []
         source_rows = [
             row
             for (source_profile_id, _), row in self.icp_source_deals.items()
             if source_profile_id == profile_id
+            and (deal_ids is None or str(row["deal_id"]) in deal_ids)
         ]
         snapshots = [
             DealRecord.model_validate(row["evidence"]["deal_snapshot"])

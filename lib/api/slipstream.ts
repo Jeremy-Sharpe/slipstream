@@ -118,6 +118,7 @@ export type ApiIcpProfile = {
   id: string;
   version: number;
   evidence: Array<{ attribute: string; deal_ids: string[]; why: string }>;
+  source_deals?: Array<{ deal_id: string; company_name: string; call_ids: string[] }>;
   profile: {
     summary: string;
     industries: string[];
@@ -310,7 +311,17 @@ function parseIcpProfile(value: unknown): ApiIcpProfile {
     isStringArray(item.deal_ids) &&
     typeof item.why === "string",
   );
-  if (!validProfile || !validEvidence) {
+  const codePoints = (text: string) => Array.from(text).length;
+  const validSourceDeals = value.source_deals === undefined || (
+    Array.isArray(value.source_deals) && value.source_deals.length <= 100 && value.source_deals.every((item) =>
+      isRecord(item) &&
+      typeof item.deal_id === "string" && codePoints(item.deal_id) > 0 && codePoints(item.deal_id) <= 128 &&
+      typeof item.company_name === "string" && codePoints(item.company_name) > 0 && codePoints(item.company_name) <= 120 &&
+      isStringArray(item.call_ids) && item.call_ids.length <= 20 &&
+      item.call_ids.every((id) => codePoints(id) > 0 && codePoints(id) <= 200),
+    )
+  );
+  if (!validProfile || !validEvidence || !validSourceDeals) {
     throw new ApiError("Slipstream API returned malformed ICP data", 502);
   }
   return value as ApiIcpProfile;

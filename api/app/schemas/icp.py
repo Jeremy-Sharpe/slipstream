@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -18,6 +18,14 @@ class IcpSourceSummary(BaseModel):
     calls: int = Field(ge=0)
     emails: int = Field(ge=0)
     outcome_labelled: int = Field(ge=0)
+
+
+class IcpSourceDealRef(BaseModel):
+    deal_id: str = Field(min_length=1, max_length=128)
+    company_name: str = Field(min_length=1, max_length=120)
+    call_ids: list[Annotated[str, Field(min_length=1, max_length=200)]] = Field(
+        default_factory=list, max_length=20
+    )
 
 
 class IcpEvidenceInventory(IcpSourceSummary):
@@ -52,6 +60,7 @@ class StoredIcpProfile(BaseModel):
     model: str | None = None
     embedding_model: str | None = None
     created_at: datetime | None = None
+    source_deals: list[IcpSourceDealRef] = Field(default_factory=list, max_length=100)
 
 
 class IcpDeriveRequest(BaseModel):

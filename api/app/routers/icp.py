@@ -13,7 +13,7 @@ from app.schemas.icp import (
 )
 from app.services import fixture_history
 from app.services.dependencies import get_embedding_client, get_settings, get_store
-from app.services.icp import derive_icp, evidence_inventory
+from app.services.icp import derive_icp, evidence_inventory, with_source_deals
 from app.services.icp_leads_store import IcpLeadsStore
 
 router = APIRouter(prefix="/icp", tags=["icp"])
@@ -66,7 +66,7 @@ def latest(store: StoreDep) -> StoredIcpProfile:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No ready ICP profile found",
         )
-    return profile
+    return with_source_deals(store, profile)
 
 
 def _require(settings: Settings, integration: str) -> None:
