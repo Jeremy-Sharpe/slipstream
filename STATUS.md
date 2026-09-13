@@ -17,7 +17,7 @@ Who is on what, what the live environment actually holds, and what only a human 
 
 | Thing | Where | State |
 |---|---|---|
-| Production UI | https://slipstream-hackathon.vercel.app | Canonical alias serves the PR #47 build with the Revenue Loop and “Live synthetic lead proof”; Chromium exercised the one-click search without page or console failures. PR #51's matching dynamic first-response build is merged and locally verified, but Vercel rejected both GitHub and prebuilt uploads after the free project exceeded 100 deployments that day |
+| Production UI | https://slipstream-hackathon.vercel.app | Vercel production deployment `dpl_35iFEtxJ18tBy7kF541UVzLh64HX` serves the PR #51 dynamic Revenue Loop. Its first HTML response already contains OpenRouter, API revision `c342825`, 12 calls plus two emails, ICP v1 and one queued/zero sent; JavaScript is not required to discover the live proof |
 | Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `c3428258ab461e37b65bee9888527a6d8aaa622a`; readiness verifies OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`. The bounded demo evidence endpoint verifies 13 deals, 12 calls, two emails and ten safe fictional prospects. Storage is `memory`; Supabase, Origami and delivery remain disabled. Canonical Maya extraction and approved-unsent draft are present. |
 | API environment file | `/etc/slipstream/api.env` on the VPS, root owned, 0600 | Loaded by the systemd unit. Every key the API needs has to exist here as well as locally |
 | Local API environment | `api/.env`, gitignored | Not present in the current workspace. Production secrets exist only in the root-owned VPS environment |

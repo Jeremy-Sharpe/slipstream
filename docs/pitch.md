@@ -18,11 +18,11 @@ That already saves over an hour a day for a rep doing eight calls. But the real 
 
 Slipstream scores each call against a written rubric: discovery, objection handling, next-step quality and talk ratio. It then looks at the deals that actually won and derives the ideal customer profile with the supporting deals visible. In our synthetic history, the pattern is 25-to-80-person professional-services and allied-health firms, a real compliance trigger, and a decision-maker in the conversation.
 
-That profile becomes a search brief for Origami, our prospect-sourcing partner. New prospects come back with a fit reason and are scored against the won-deal profile. Each lead gets grounded outreach. The output of the last call improves who gets the next call.
+That profile becomes a prospect-search brief. In the live proof, OpenRouter creates ten clearly fictional, non-deliverable companies so judges can test the scoring and outreach loop without a paid data subscription. For customers, the same brief plugs into our Origami adapter for real sourcing. The output of the last call improves who gets the next call.
 
 This is one closed loop, not four disconnected AI features: conversation to CRM, CRM to coaching, won deals to ICP, and ICP to pipeline.
 
-For the weekend build, our CRM is Postgres shaped like HubSpot objects. The production FastAPI service is live behind HTTPS on Jeremy’s VPS, and the UI is live on Vercel. Thirteen labelled calls cover wins, losses, stalls and a no-show. The full credential-free path—from fixture ingestion through evidence-backed extraction to an approved follow-up—runs against production, and paid integrations fail closed when their keys are absent. The public demo has no Resend key, so its campaign status boundary is real without claiming an email was sent.
+For the weekend build, we use a lightweight CRM-style data store, a live backend and a public web app. Thirteen labelled calls cover wins, losses, stalls and a no-show. OpenRouter powers the live extraction, follow-up, mixed call-and-email customer profile and fictional lead proof. Every model result shows its evidence and source. Email delivery is deliberately switched off, so the paused campaign proves the automation without claiming anything was sent.
 
 The path to a product is direct. Replace file upload with an Aircall or Twilio recording webhook. Replace our HubSpot-shaped table writes with HubSpot API calls. Connect Gmail for delivery. The intelligence contract does not change.
 

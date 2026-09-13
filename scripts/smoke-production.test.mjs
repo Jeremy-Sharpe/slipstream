@@ -16,7 +16,7 @@ function json(value, status = 200) {
 
 function fixtureFetch(overrides = {}) {
   const paths = {
-    "https://ui.example/campaigns": new Response("<h2>Delivery execution</h2>"),
+    "https://ui.example/campaigns": new Response("<h2>Delivery execution</h2><p>Hackathon demo — intentionally unsent</p>"),
     "https://api.example/ready": json({
       status: "ok",
       environment: "production",
