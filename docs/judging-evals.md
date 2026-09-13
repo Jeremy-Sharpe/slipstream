@@ -2,6 +2,19 @@
 
 Every criterion the judges score, turned into a check the team can run. An LLM judge scores each rubric line from the same artefacts the real judges get (the repo, bounded server-rendered snapshots of the public Revenue Loop, Conversations, call detail, Intelligence, Leads and Campaigns routes, deployed provider and aggregate-to-lead API evidence, and the written pitch and demo script), and deterministic checks cover the submission requirements. A criterion passes when the judge's score reaches the team's target. The rubric wording is in `docs/hackathon.md`; the judge data is in `evals/criteria.mjs`; the `criteria-doc-sync` check fails if this table, that data and the rubric disagree.
 
+## Final internal result
+
+The full current-state run completed on 13 September 2026 after PR #71, against the public VPS UI and API: **15/15 scenarios passed, 95/100 points**. This is an internal Sonnet rubric evaluation, not an official hackathon score. The result is reproducible with `npm run evals`; its local report was `.hg-evals-reports/2026-09-13T06-47-56.104Z/eval-report.md`.
+
+| Area | Scores | Total |
+|---|---|---:|
+| Technical | T1 8/10 · T2 8/8 · T3 5/6 · T4 6/6 | 27/30 |
+| Innovation | I1 8/10 · I2 8/8 · I3 7/7 | 23/25 |
+| Business | B1 8/8 · B2 8/8 · B3 9/9 | 25/25 |
+| Finals | F1 6/6 · F2 8/8 · F3 6/6 | 20/20 |
+
+The five-point gap is explicit rather than hidden: the hosted API remains memory-backed, originality has room beyond the Revenue DNA mechanism, and some architecture/presentation patterns remain conventional. Every criterion still clears its predeclared target.
+
 ## How to run
 
 The runner is the shared Hourglass evals runner in `hourglass-claude-stack`, driven by your own Claude Code login. No API key and no Codex involved. Each judge run uses Sonnet through the subscription.
