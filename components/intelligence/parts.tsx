@@ -20,6 +20,11 @@ export function Chip({ href, children }: { href: string; children: ReactNode }) 
   );
 }
 
+/** One muted line where a section could not be filled: a failed fetch, or nothing derived yet. */
+export function ErrorLine({ children, className }: { children: ReactNode; className?: string }) {
+  return <p className={cn("text-[14px] text-faint", className)}>{children}</p>;
+}
+
 /** 44×4 bar on a hairline track. Ink for the won group, grey for the rest. */
 export function Bar({ value, tone = "ink" }: { value: number; tone?: "ink" | "faint" }) {
   return (
