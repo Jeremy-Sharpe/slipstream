@@ -11,6 +11,13 @@ import { WorkingLine } from "./run/WorkingLine";
 import { StreamingText, words } from "./run/StreamingText";
 import { humanize, Button, Score, cn, mmss } from "./ui";
 
+/** What a gate button says while its request is in flight. */
+const WORKING: Record<string, string> = {
+  "Approve & sync to CRM": "Syncing to CRM",
+  "Approve follow-up": "Approving",
+  "Approve reply": "Approving",
+};
+
 const LABELS: Record<StepId, { working: string; done: string }> = {
   transcribe: { working: "Transcribing", done: "Transcribed" },
   extract: { working: "Extracting fields", done: "Extracted fields" },
@@ -48,13 +55,16 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
   onReveal?: (el: HTMLElement) => void;
   onExpandClick?: (el: HTMLElement, bodyHeight: number) => void;
   onRetry: (id: StepId) => void;
-  onSynced: () => void;
-  onDraftApproved: () => void;
+  onSynced: () => void | Promise<void>;
+  onDraftApproved: () => void | Promise<void>;
 }) {
   const synced = data.synced;
   const approved = data.approved;
   // The draft body streams in the first time the step completes, then edits.
   const [draftStreamed, setDraftStreamed] = useState(false);
+  /* The gate the user just pressed, until its request settles: the button
+     shows what it is doing instead of sitting still on camera. */
+  const [pendingGate, setPendingGate] = useState<string | null>(null);
   const [draftGen, setDraftGen] = useState(0);
   // Re-stream when the run restarts or the body is replaced from outside
   // (state adjusted during render). Edits in the textarea update `edited`.
@@ -144,18 +154,36 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
     </div>
   );
 
-  const gate = (label: string, doneLine: string, note: string | undefined, onClick: () => void, isDone: boolean) => (
-    <div className="mt-4">
-      {isDone ? (
-        <div style={{ animation: "fade-in 200ms ease-out both" }}>
-          <p className="flex items-center gap-2 text-[14px] text-soft"><Check className="size-3.5 text-ink" strokeWidth={2.5} /> {doneLine}</p>
-          {note && <p className="mt-1 text-[13.5px] text-faint">{note}</p>}
-        </div>
-      ) : (
-        <Button variant="primary" onClick={onClick}>{label}</Button>
-      )}
-    </div>
-  );
+  const gate = (label: string, doneLine: string, note: string | undefined, onClick: () => void | Promise<void>, isDone: boolean) => {
+    const pending = pendingGate === label;
+    const press = async () => {
+      setPendingGate(label);
+      try {
+        await onClick();
+      } finally {
+        setPendingGate(null);
+      }
+    };
+    return (
+      <div className="mt-4">
+        {isDone ? (
+          <div style={{ animation: "fade-in 200ms ease-out both" }}>
+            <p className="flex items-center gap-2 text-[14px] text-soft"><Check className="size-3.5 text-ink" strokeWidth={2.5} /> {doneLine}</p>
+            {note && <p className="mt-1 text-[13.5px] text-faint">{note}</p>}
+          </div>
+        ) : (
+          <Button variant="primary" disabled={pending} className="disabled:opacity-100" onClick={press}>
+            {pending ? (
+              <>
+                <span aria-hidden className="inline-block size-3.5 shrink-0 rounded-full border-[1.5px] border-accent-ink/25 border-t-accent-ink" style={{ animation: "spin 700ms linear infinite" }} />
+                {WORKING[label] ?? "Working"}
+              </>
+            ) : label}
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   const card = (st: StepState): ReactNode => {
     if (st.status === "error") {
