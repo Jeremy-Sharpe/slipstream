@@ -11,6 +11,7 @@ from app.schemas.icp import (
     IcpSourceSummary,
     StoredIcpProfile,
 )
+from app.schemas.leads import LeadIn
 from app.services.demo_leads import (
     DemoLeadAttributes,
     DemoLeadBatch,
@@ -198,3 +199,62 @@ def test_generated_demo_leads_are_obviously_fictional_and_reused(monkeypatch: An
     assert all(lead.email is None and lead.linkedin_url is None for lead in first)
     assert all(lead.metadata["synthetic"] is True for lead in first)
     assert all(lead.similarity_score == 1 for lead in first)
+
+
+def test_demo_evidence_returns_bounded_safe_latest_profile_proof() -> None:
+    settings = Settings(_env_file=None, environment="test", openrouter_api_key="test")
+    app = create_app(settings)
+    store = app.state.icp_leads_store
+    profile = store.insert_icp_profile(
+        version=1,
+        profile=_profile().profile,
+        model=settings.effective_reasoning_model,
+        embedding_model=settings.effective_embedding_model,
+    )
+    for index in range(10):
+        store.upsert_lead(
+            LeadIn(
+                icp_profile_id=profile.id,
+                company_name=f"ICP Match {index + 1:02d} (fictional)",
+                company_domain=f"icp-match-{index + 1:02d}.example",
+                person_name=f"Demo Contact {index + 1:02d}",
+                title="Operations Manager",
+                industry="Professional services",
+                origami_row_id=f"openrouter-demo-{index}",
+                origami_relevance_score=0.9,
+                similarity_score=0.8,
+                embedding=[1.0, 0.0],
+                embedding_model=settings.effective_embedding_model,
+                metadata={
+                    "source": "openrouter_demo",
+                    "synthetic": True,
+                    "model": settings.effective_reasoning_model,
+                    "rationale": "Matches the observed operations trigger.",
+                },
+            )
+        )
+
+    with TestClient(app) as client:
+        response = client.get("/api/v1/demo/evidence")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "verified"
+    assert payload["lead_count"] == 10
+    assert payload["all_fictional"] is True
+    assert payload["all_reserved_domains"] is True
+    assert payload["no_delivery_coordinates"] is True
+    assert payload["models"] == [settings.effective_reasoning_model]
+    assert payload["delivery_enabled"] is False
+    assert len(payload["sample_leads"]) == 3
+    assert all("embedding" not in lead for lead in payload["sample_leads"])
+
+
+def test_demo_evidence_is_missing_until_an_icp_exists() -> None:
+    app = create_app(Settings(_env_file=None, environment="test"))
+
+    with TestClient(app) as client:
+        response = client.get("/api/v1/demo/evidence")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "No derived ICP is available"}

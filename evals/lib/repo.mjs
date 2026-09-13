@@ -19,6 +19,8 @@ export const PRODUCTION_SURFACES = [
 
 export const PRODUCTION_API_SURFACES = [
   { label: "API readiness and integration truth", path: "/ready" },
+  { label: "Authenticated provider verification without generation spend", path: "/api/v1/integrations/verify" },
+  { label: "Bounded live mixed-channel ICP-to-fictional-lead proof", path: "/api/v1/demo/evidence" },
   { label: "Live campaign execution state", path: "/api/v1/campaigns" },
   { label: "Executed Maya call record", path: "/api/v1/calls/e9981868-623b-5b59-ab18-5e0c342f2c15" },
   { label: "Evidence-backed Maya CRM extraction", path: "/api/v1/calls/e9981868-623b-5b59-ab18-5e0c342f2c15/extraction" },

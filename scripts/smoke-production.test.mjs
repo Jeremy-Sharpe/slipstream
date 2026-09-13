@@ -25,6 +25,16 @@ function fixtureFetch(overrides = {}) {
       integrations: { email_delivery: false },
     }),
     "https://api.example/api/v1/campaigns": json([]),
+    "https://api.example/api/v1/demo/evidence": json({
+      status: "verified",
+      lead_provider: "openrouter_demo",
+      lead_count: 10,
+      all_fictional: true,
+      all_reserved_domains: true,
+      no_delivery_coordinates: true,
+      delivery_enabled: false,
+      icp: { profile: { source_summary: { calls: 12, emails: 1 } } },
+    }),
     "https://api.example/openapi.json": json({
       paths: {
         "/api/v1/campaigns": { get: {}, post: {} },
@@ -98,8 +108,27 @@ test("validates the complete public production contract", async () => {
     revision,
     storage: "memory",
     campaignCount: 0,
+    leadProofCount: 10,
     configuredIntegrations: [],
   });
+});
+
+test("rejects an unsafe or incomplete lead proof", async () => {
+  await assert.rejects(
+    runSmoke({
+      uiUrl: "https://ui.example",
+      apiUrl: "https://api.example",
+      fetchImpl: fixtureFetch({
+        "https://api.example/api/v1/demo/evidence": json({
+          status: "incomplete",
+          lead_provider: "openrouter_demo",
+          lead_count: 10,
+          all_fictional: false,
+        }),
+      }),
+    }),
+    /did not report verified/,
+  );
 });
 
 test("rejects a stale API deployment", async () => {

@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
@@ -33,6 +33,106 @@ class DemoBootstrapResponse(BaseModel):
     lead_source: LeadSourceAccepted | None = None
     lead_provider: str
     spend_guardrail: str
+
+
+class DemoLeadEvidence(BaseModel):
+    company_name: str
+    company_domain: str
+    person_name: str
+    title: str | None
+    industry: str | None
+    relevance_score: float | None
+    similarity_score: float | None
+    rationale: str
+
+
+class DemoEvidenceResponse(BaseModel):
+    status: Literal["verified", "incomplete"]
+    claim: str
+    icp: StoredIcpProfile
+    lead_provider: str
+    lead_count: int
+    all_fictional: bool
+    all_reserved_domains: bool
+    no_delivery_coordinates: bool
+    models: list[str]
+    sample_leads: list[DemoLeadEvidence]
+    delivery_enabled: bool
+
+
+@router.get("/evidence", response_model=DemoEvidenceResponse)
+def evidence(settings: SettingsDep, store: StoreDep) -> DemoEvidenceResponse:
+    """Return a bounded, embedding-free proof of the current ICP-to-lead loop."""
+    latest = store.latest_icp_profile()
+    if latest is None:
+        raise HTTPException(status_code=404, detail="No derived ICP is available")
+    profile = with_source_deals(store, latest)
+    leads = [
+        lead
+        for lead in store.list_leads(icp_profile_id=str(profile.id))
+        if lead.metadata.get("source") == "openrouter_demo"
+    ]
+    all_fictional = bool(leads) and all(
+        lead.metadata.get("synthetic") is True for lead in leads
+    )
+    all_reserved_domains = bool(leads) and all(
+        bool(lead.company_domain and lead.company_domain.endswith(".example"))
+        for lead in leads
+    )
+    no_delivery_coordinates = bool(leads) and all(
+        lead.email is None and lead.linkedin_url is None for lead in leads
+    )
+    models = sorted(
+        {
+            str(lead.metadata["model"])
+            for lead in leads
+            if isinstance(lead.metadata.get("model"), str)
+            and str(lead.metadata["model"]).strip()
+        }
+    )
+    source = profile.profile.source_summary
+    verified = (
+        len(leads) == 10
+        and all_fictional
+        and all_reserved_domains
+        and no_delivery_coordinates
+        and profile.status == "ready"
+        and source is not None
+        and source.calls > 0
+        and source.emails > 0
+        and profile.model == settings.effective_reasoning_model
+        and profile.embedding_model == settings.effective_embedding_model
+        and models == [settings.effective_reasoning_model]
+    )
+    samples = [
+        DemoLeadEvidence(
+            company_name=lead.company_name,
+            company_domain=lead.company_domain or "",
+            person_name=lead.person_name or "",
+            title=lead.title,
+            industry=lead.industry,
+            relevance_score=lead.origami_relevance_score,
+            similarity_score=lead.similarity_score,
+            rationale=str(lead.metadata.get("rationale") or ""),
+        )
+        for lead in leads[:3]
+    ]
+    return DemoEvidenceResponse(
+        status="verified" if verified else "incomplete",
+        claim=(
+            "The deployed backend derived this mixed-channel ICP and generated ten "
+            "non-deliverable fictional prospects through OpenRouter."
+        ),
+        icp=profile,
+        lead_provider="openrouter_demo",
+        lead_count=len(leads),
+        all_fictional=all_fictional,
+        all_reserved_domains=all_reserved_domains,
+        no_delivery_coordinates=no_delivery_coordinates,
+        models=models,
+        sample_leads=samples,
+        delivery_enabled=settings.integration_flags["email_delivery"],
+    )
 
 
 @router.post("/bootstrap", response_model=DemoBootstrapResponse)
