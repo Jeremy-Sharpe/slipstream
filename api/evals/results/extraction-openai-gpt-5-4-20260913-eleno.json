@@ -1,0 +1,4821 @@
+{
+  "model": "openai/gpt-5.4",
+  "provider": "openrouter",
+  "records": [
+    {
+      "call_id": "call-01-northstar-labs",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Maya Chen",
+          "role": "Managing Partner",
+          "email": "maya@northstarlabs.example",
+          "phone": "+61 3 7010 1101"
+        },
+        "company": {
+          "name": "Northstar Labs",
+          "industry": "Quantitative investment research boutique",
+          "headcount": 42,
+          "location": "Southbank, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 58400,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the discovery phase scope and the measurement plan by Thursday morning",
+          "I will send two research notes redrafted from your published ones"
+        ],
+        "objections": [
+          {
+            "text": "we don't want another subscription sitting on the books",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send the discovery phase scope, measurement plan and two redrafted research notes, then walk Maya and her co-founder through the research note drafting pilot scope.",
+          "due": "2026-09-03"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Maya Chen",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Maya Chen"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "That's me."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.08,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.08,
+            "evidence": []
+          },
+          "title": {
+            "value": "Managing Partner",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Managing Partner at Northstar Labs"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Northstar Labs",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Northstar Labs"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.06,
+            "evidence": []
+          },
+          "industry": {
+            "value": "quantitative investment research boutique",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're a quantitative investment research boutique"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 42,
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "forty-two people"
+              }
+            ]
+          },
+          "location": {
+            "value": "Southbank",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Northstar Labs in Southbank"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.82,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "The shape I'd propose is a short paid discovery phase, two weeks"
+              },
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "If the scope holds up I'll sign off the discovery phase that afternoon."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "If the scope holds up I'll sign off the discovery phase that afternoon."
+              },
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I'll send the invite today with the scope attached and the redrafted notes ahead of it."
+              }
+            ]
+          },
+          "amount": {
+            "value": 58400,
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "For a process this size the build lands around $58,400."
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "Send the discovery phase scope and the measurement plan by Thursday morning.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "I will send the discovery phase scope and the measurement plan by Thursday morning."
+              }
+            ]
+          },
+          {
+            "value": "Send two research notes redrafted from Northstar Labs' published notes.",
+            "confidence": 0.91,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "I will send two research notes redrafted from your published ones as well"
+              },
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "I'd want the redrafts to use our own notes, not a generic sample."
+              }
+            ]
+          },
+          {
+            "value": "Send the invite that day with the scope attached and the redrafted notes ahead of it.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I'll send the invite today with the scope attached and the redrafted notes ahead of it."
+              }
+            ]
+          },
+          {
+            "value": "Deploy the build inside Northstar Labs' own systems and transfer the IP to them.",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "We build it, deploy it inside your own systems and transfer the IP to you"
+              }
+            ]
+          },
+          {
+            "value": "Provide the timing baseline from discovery even if Northstar Labs does not proceed.",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "The baseline is yours either way, even if you decide not to go ahead."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "They do not want another subscription on the books because prior tools went unused.",
+            "handling": "handled",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "we don't want another subscription sitting on the books. We've bought three tools in two years and we're still paying for one that nobody opens any more."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "There is no subscription."
+              }
+            ]
+          },
+          {
+            "text": "They need a defensible measurement plan to justify savings internally.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "I don't want a number we can't defend internally when my co-founder asks what it actually bought us."
+              },
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "I will send the discovery phase scope and the measurement plan by Thursday morning."
+              }
+            ]
+          },
+          {
+            "text": "Compliance requires a human sign-off on every note and a record of changes.",
+            "handling": "partial",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "She just wants a human signing every note that goes out the door, and a record of what changed."
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "your analyst review stays in the workflow rather than being designed out of it."
+              }
+            ]
+          },
+          {
+            "text": "The IP must not live in someone else's platform because their research process is core to the business.",
+            "handling": "handled",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "The IP point matters here, because the research process effectively is the business. If it lives in someone else's platform we've handed over the thing we sell."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "transfer the IP to you, so it becomes your asset."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Walkthrough of the discovery scope, research note drafting pilot agenda item, and measurement plan with Maya Chen and her co-founder.",
+          "due_date": "2026-09-03",
+          "owner": "Sam Whitfield",
+          "confidence": 0.97,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 23,
+              "quote": "Thursday 3 September at 2pm. Put the research note drafting pilot first on the agenda and bring the measurement plan."
+            },
+            {
+              "source": "transcript",
+              "sequence": 24,
+              "quote": "Thursday 3 September at 2pm, locked in."
+            }
+          ]
+        },
+        "summary": "Maya Chen, Managing Partner at Northstar Labs, said the 42-person quantitative investment research boutique publishes about 60 notes monthly and expects about 120 after a November fund launch. Current workflow uses Excel, Word, and SharePoint, with weak traceability to model runs. Sam proposed a two-week paid discovery, then a fixed-scope build around $58,400. Maya objected to subscriptions and stressed IP control, compliance review, and a defensible measurement plan. Sam said there is no subscription, IP transfers to Northstar, and he will send scope, measurement plan, redrafted notes, and an invite. A walkthrough is set for 2026-09-03.",
+        "conversation_id": "e9981868-623b-5b59-ab18-5e0c342f2c15",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": true,
+        "company_industry_exact": true,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3770,
+        "output": 1445
+      },
+      "latency_ms": 8998,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.0311,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-02-kestrel-lending",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Felix Morgan",
+          "role": "Head of Credit Operations",
+          "email": "felix@kestrellending.example",
+          "phone": "+61 3 7010 1102"
+        },
+        "company": {
+          "name": "Kestrel Lending",
+          "industry": "Non-bank commercial lender",
+          "headcount": 64,
+          "location": "Docklands, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 96000,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday",
+          "I will send the measurement plan alongside it"
+        ],
+        "objections": [
+          {
+            "text": "we'd be buying a tool we then depend on you to run for the next five years",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send the discovery phase scope, a redrafted facility letter and the measurement plan, then review them with Felix and the head of risk.",
+          "due": "2026-09-10"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Felix Morgan",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Felix Morgan, Head of Credit Operations at Kestrel Lending"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "Head of Credit Operations",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Head of Credit Operations at Kestrel Lending"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Kestrel Lending",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Kestrel Lending"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "non-bank commercial lender",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're a non-bank commercial lender"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 64,
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "sixty-four people across credit, settlements and broker support"
+              }
+            ]
+          },
+          "location": {
+            "value": "Docklands",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Kestrel Lending in Docklands?"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I would run a two-week discovery phase"
+              },
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the discovery phase scope"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "Send it to me and I will get it in front of both of them before the end of the week."
+              },
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "Can we hold Thursday 10 September at 10am to walk through it with your head of risk?"
+              }
+            ]
+          },
+          "amount": {
+            "value": 96000,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "For the volume you are describing that build sits at $96,000."
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I would run a two-week discovery phase with your documentation officers, mapping the standard facility and two security schedule variants.",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I would run a two-week discovery phase with your documentation officers, mapping the standard facility and two security schedule variants."
+              }
+            ]
+          },
+          {
+            "value": "We build it, deploy it into your systems and transfer the IP to you, so it is your asset and your team can change it.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "We build it, deploy it into your systems and transfer the IP to you, so it is your asset and your team can change it."
+              }
+            ]
+          },
+          {
+            "value": "Managed optimisation afterwards is separate and you can stop it whenever you like.",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "Managed optimisation afterwards is separate and you can stop it whenever you like."
+              }
+            ]
+          },
+          {
+            "value": "We won't design the checker out of the process, and every draft records which approval fields it used.",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "We won't design the checker out of the process, and every draft records which approval fields it used."
+              }
+            ]
+          },
+          {
+            "value": "We work on your files, in your environment, and you end up with a measured baseline and a scope whether or not you go ahead.",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "We work on your files, in your environment, and you end up with a measured baseline and a scope whether or not you go ahead."
+              }
+            ]
+          },
+          {
+            "value": "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday."
+              }
+            ]
+          },
+          {
+            "value": "I will send the measurement plan alongside it, so your head of risk can see how we would prove the saving before anyone signs anything.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the measurement plan alongside it, so your head of risk can see how we would prove the saving before anyone signs anything."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Concern about becoming dependent on the vendor long term.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "My concern is that we'd be buying a tool we then depend on you to run for the next five years"
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "We build it, deploy it into your systems and transfer the IP to you, so it is your asset and your team can change it."
+              }
+            ]
+          },
+          {
+            "text": "Risk will want assurance on what happens when the system drafts something wrong.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "The head of risk will ask what happens when it drafts something wrong"
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "Then your officer catches it, the same as when a person copies the wrong schedule today. We won't design the checker out of the process"
+              }
+            ]
+          },
+          {
+            "text": "Risk will want to see it working on real files, not a tidy demo.",
+            "handling": "handled",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "He will still want to see it working on real files though, not a demonstration built on tidy examples."
+              },
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "We work on your files, in your environment"
+              }
+            ]
+          },
+          {
+            "text": "Timeline risk because broker season starts soon.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "How long from the end of discovery to something the officers can actually use? Broker season does not move because a project runs late."
+              },
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "Six to eight weeks for the standard facility, longer if the schedules are as varied as they sound. I would rather ship the standard path first than promise everything at once."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send the discovery phase scope, sample redrafted facility letter, and measurement plan; then review it with Felix and Kestrel's head of risk.",
+          "due_date": "2026-09-10",
+          "owner": "Sam Whitfield and Felix Morgan",
+          "confidence": 0.92,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 24,
+              "quote": "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday. I will send the measurement plan alongside it"
+            },
+            {
+              "source": "transcript",
+              "sequence": 26,
+              "quote": "Can we hold Thursday 10 September at 10am to walk through it with your head of risk?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 27,
+              "quote": "Thursday 10 September at 10am works. I will book the room and bring our own volume numbers"
+            }
+          ]
+        },
+        "summary": "Felix Morgan, Head of Credit Operations at Kestrel Lending, described loan document turnaround slipping to four to five days from two, with broker season six weeks away. Kestrel is a non-bank commercial lender with 64 staff and produces about 240 document sets monthly, up to 400 in season. Main pain points are manual rekeying, Word template version control, and messy security schedules. Sam proposed a two-week discovery and a fixed-scope build priced at $96,000. Felix raised concerns about vendor dependency, drafting errors, proof on real files, and timing; Sam addressed these. Sam will send scope materials by Wednesday, and a review with the head of risk is set for 2026-09-10 10am.",
+        "conversation_id": "9cc27034-b508-54e2-ad41-f088e8e7f866",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": false,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": true,
+        "company_industry_exact": true,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3711,
+        "output": 1720
+      },
+      "latency_ms": 10951,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.0350775,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-03-afterglow-studio",
+      "repeat": 1,
+      "outcome": "lost",
+      "expected": {
+        "contact": {
+          "name": "Priya Shah",
+          "role": "Founder",
+          "email": "priya@afterglowstudio.example",
+          "phone": "+61 3 7010 1103"
+        },
+        "company": {
+          "name": "Afterglow Studio",
+          "industry": "Creative branding studio",
+          "headcount": 12,
+          "location": "Collingwood, VIC"
+        },
+        "deal": {
+          "stage": "closed_lost",
+          "value_aud": 15400,
+          "outcome": "lost"
+        },
+        "promises": [
+          "I will send the scope and the numbers through this afternoon"
+        ],
+        "objections": [
+          {
+            "text": "We do not have the volume to justify a build like that",
+            "handling": "ignored"
+          },
+          {
+            "text": "That is more than we spent on our entire software stack last year",
+            "handling": "ignored"
+          }
+        ],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Priya Shah",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Priya Shah"
+              },
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "Thanks Jordan"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Afterglow Studio",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Afterglow Studio"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "employee_count": {
+            "value": 12,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We are twelve people"
+              }
+            ]
+          },
+          "location": {
+            "value": "Collingwood",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "in Collingwood"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.66,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "what the discovery phase covers"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "lost",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "the answer today is no"
+              },
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "It is a no for now"
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.08,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "Jordan Lee said he would send the scope and numbers that afternoon, including the proposal drafting build, onboarding pack automation, and discovery phase coverage.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the scope and the numbers through this afternoon anyway. It will show the proposal drafting build, the onboarding pack automation and what the discovery phase covers"
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Buyer said they do not have enough volume to justify the build and want humans writing proposals.",
+            "handling": "partial",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 5,
+                "quote": "We do not have the volume to justify a build like that. The proposals are also where we win the work, so I want a human writing them."
+              },
+              {
+                "source": "transcript",
+                "sequence": 6,
+                "quote": "A human still signs them. The agent does the assembly"
+              }
+            ]
+          },
+          {
+            "text": "Buyer objected to the cost and said a price was quoted before understanding their work.",
+            "handling": "partial",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "the cost is the part I keep coming back to, and you have quoted me a number before you know what we actually do."
+              },
+              {
+                "source": "transcript",
+                "sequence": 8,
+                "quote": "Think about the cost the other way"
+              }
+            ]
+          },
+          {
+            "text": "Buyer said the proposed spend exceeds their entire software stack budget from last year.",
+            "handling": "partial",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "That is more than we spent on our entire software stack last year"
+              },
+              {
+                "source": "transcript",
+                "sequence": 10,
+                "quote": "Software is a subscription, though. This is different."
+              }
+            ]
+          },
+          {
+            "text": "Buyer said they are non-technical and would still need to maintain the asset.",
+            "handling": "partial",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "An asset we would still have to maintain. There are twelve of us and not one of us is technical."
+              },
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "That is what the managed optimisation option covers"
+              }
+            ]
+          },
+          {
+            "text": "Buyer did not want ongoing cost.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "So there is an ongoing cost after all, which is the thing I said at the start I did not want."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "Only if you choose it."
+              }
+            ]
+          },
+          {
+            "text": "Buyer said they are not the right fit.",
+            "handling": "ignored",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "I do not think we are the right fit for this, and I have said so three times now."
+              },
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the scope and the numbers through this afternoon anyway."
+              }
+            ]
+          },
+          {
+            "text": "Buyer said no today and no for now.",
+            "handling": "ignored",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "the answer today is no."
+              },
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "It is a no for now"
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Jordan Lee to send the scope and numbers, including the proposal drafting build, onboarding pack automation, and discovery phase coverage.",
+          "due_date": "2026-09-01",
+          "owner": "Jordan Lee",
+          "confidence": 0.97,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 24,
+              "quote": "I will send the scope and the numbers through this afternoon anyway. It will show the proposal drafting build, the onboarding pack automation and what the discovery phase covers"
+            }
+          ]
+        },
+        "summary": "Intro call with Afterglow Studio. Priya Shah said the company has 12 people in Collingwood and was mostly curious. She repeatedly objected on fit, low proposal volume, cost, desire for human-written proposals, lack of technical staff, and aversion to ongoing costs. Priya said, \"the answer today is no\" and later, \"It is a no for now.\" Jordan Lee said he would send scope and pricing that afternoon covering proposal drafting, onboarding pack automation, and the discovery phase.",
+        "conversation_id": "83b51506-bc58-5a00-bba4-2d6127dbeae9",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": false,
+        "promises": false,
+        "objection_handling": false,
+        "deal_outcome": true,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3685,
+        "output": 1250
+      },
+      "latency_ms": 8650,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.0279625,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-04-kite-and-co",
+      "repeat": 1,
+      "outcome": "stalled",
+      "expected": {
+        "contact": {
+          "name": "Daniel Ortiz",
+          "role": "Operations Lead",
+          "email": "daniel@kiteandco.example",
+          "phone": "+61 3 7010 1104"
+        },
+        "company": {
+          "name": "Kite & Co",
+          "industry": "Commercial law firm",
+          "headcount": 95,
+          "location": "Melbourne CBD, VIC"
+        },
+        "deal": {
+          "stage": "evaluation",
+          "value_aud": 132000,
+          "outcome": "stalled"
+        },
+        "promises": [
+          "I will send a one-page discovery phase scope by Friday",
+          "I will send a redacted sample summary from a lease you provide"
+        ],
+        "objections": [
+          {
+            "text": "That number has to go to the partnership, and they will not approve it before they have seen the pilot work on our own leases",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send a one-page discovery phase scope and a sample lease summary for Daniel to put in front of the managing partner, with no date agreed.",
+          "due": null
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Daniel Ortiz",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Daniel Ortiz"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "Operations Lead",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Operations Lead"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Kite & Co",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Kite & Co"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "commercial law firm",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "a commercial law firm"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "location": {
+            "value": "the CBD",
+            "confidence": 0.77,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "in the CBD"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "pilot",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Our partners have asked for a contract review pilot before the next financial year."
+              },
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "I can find budget for a pilot inside the operations line"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "Realistically I am looking at getting this in front of the partnership in October, not September"
+              },
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "I will come back to you once I know whether the discovery phase can come out of operations without the partnership signing it off first."
+              }
+            ]
+          },
+          "amount": {
+            "value": 132000,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "that build sits around $132,000"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send a one-page discovery phase scope by Friday.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "I will send a one-page discovery phase scope by Friday."
+              }
+            ]
+          },
+          {
+            "value": "I will send a redacted sample summary from a lease you provide as well, so he is looking at output rather than a description of it.",
+            "confidence": 0.78,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "I will send a redacted sample summary from a lease you provide as well, so he is looking at output rather than a description of it."
+              }
+            ]
+          },
+          {
+            "value": "We can work from a publicly available lease in the meantime so nobody has to clear anything, then swap to yours once it is approved.",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "We can work from a publicly available lease in the meantime so nobody has to clear anything, then swap to yours once it is approved."
+              }
+            ]
+          },
+          {
+            "value": "I will keep the scope current and check in the week the hearing finishes.",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will keep the scope current and check in the week the hearing finishes."
+              }
+            ]
+          },
+          {
+            "value": "If the managing partner wants to talk before then I can be in the CBD at a day's notice.",
+            "confidence": 0.86,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "If the managing partner wants to talk before then I can be in the CBD at a day's notice."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "The partnership will not approve the $132,000 build before seeing the pilot work on their own leases.",
+            "handling": "handled",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "they will not approve it before they have seen the pilot work on our own leases."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "the discovery phase is priced and scoped separately"
+              }
+            ]
+          },
+          {
+            "text": "No date is available for partnership review because the next agenda is full and the following meeting is the financial year planning session.",
+            "handling": "partial",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "What I cannot give you is a date for the partnership, because the next meeting agenda is already full and the one after that is the financial year planning session."
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "Then let us work to what you control."
+              }
+            ]
+          },
+          {
+            "text": "Daniel needs the managing partner to agree to the discovery phase first, and he is unavailable until the end of next week.",
+            "handling": "partial",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "I need the managing partner to agree to the discovery phase first, and he is in a hearing until the end of next week."
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "Is there anything I can put in his hands that makes that a five-minute conversation?"
+              }
+            ]
+          },
+          {
+            "text": "A client lease cannot be provided yet because the risk partner must sign off confidentiality, which takes about a week.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "I will not have a lease cleared for you to use until our risk partner signs off the confidentiality side, and that takes its own week."
+              },
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "We can work from a publicly available lease in the meantime so nobody has to clear anything"
+              }
+            ]
+          },
+          {
+            "text": "A public lease will not convince partners because it does not prove fit with their precedents.",
+            "handling": "handled",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "the partners will say a public lease proves nothing about our precedents."
+              },
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "They would be right, which is why it is a stopgap rather than the evidence. The evidence is the discovery phase on your own files, with your own template."
+              }
+            ]
+          },
+          {
+            "text": "Timing is likely October rather than September for partnership review.",
+            "handling": "ignored",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "Realistically I am looking at getting this in front of the partnership in October, not September"
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send a one-page discovery phase scope to Daniel.",
+          "due_date": "2026-09-04",
+          "owner": "Sam Whitfield",
+          "confidence": 0.97,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 20,
+              "quote": "I will send a one-page discovery phase scope by Friday."
+            },
+            {
+              "source": "transcript",
+              "sequence": 21,
+              "quote": "Send the scope first."
+            }
+          ]
+        },
+        "summary": "Daniel Ortiz, Operations Lead at Kite & Co, said the firm wants a contract review pilot focused on leases and supply agreements. The property team reviews around ninety leases a quarter, and partners want faster first-pass summaries with traceability to source clauses. Sam proposed a separately scoped two-week discovery phase and mentioned a larger build at $132,000, but Daniel said partnership approval would require evidence on their own leases. Daniel needs managing partner approval for discovery first and expects partnership review in October rather than September. Sam committed to send a one-page discovery scope by Friday.",
+        "conversation_id": "e751ce19-7b62-5ece-822a-7b98ff58392e",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": false,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": true,
+        "company_industry_exact": true,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3669,
+        "output": 1571
+      },
+      "latency_ms": 9671,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.0327375,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-05-craftwork",
+      "repeat": 1,
+      "outcome": "lost",
+      "expected": {
+        "contact": {
+          "name": "Lucy Beck",
+          "role": "Owner",
+          "email": "lucy@craftwork.example",
+          "phone": "+61 3 7010 1105"
+        },
+        "company": {
+          "name": "Craftwork",
+          "industry": "Independent craft retail and workshops",
+          "headcount": 8,
+          "location": "Northcote, VIC"
+        },
+        "deal": {
+          "stage": "closed_lost",
+          "value_aud": 9800,
+          "outcome": "lost"
+        },
+        "promises": [
+          "I will send a one-page overview of the build packages"
+        ],
+        "objections": [
+          {
+            "text": "My daughter built us a booking spreadsheet that does most of this",
+            "handling": "ignored"
+          }
+        ],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Lucy Beck",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Hi Lucy Beck"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Craftwork",
+            "confidence": 0.72,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "talk about Craftwork"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "craft supplies and workshops",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We sell craft supplies and run weekend workshops."
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 8,
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "we're eight people in Northcote"
+              }
+            ]
+          },
+          "location": {
+            "value": "Northcote",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "we're eight people in Northcote"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.61,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "That's exactly why the discovery phase exists. It's short, it's fixed, and it tells you what is worth automating before you commit to a build."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "lost",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "Send it, but please don't put me on a call schedule. I know the answer for this year."
+              },
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "the first stage is the part I'm saying no to."
+              },
+              {
+                "source": "transcript",
+                "sequence": 29,
+                "quote": "we'll stay as we are."
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "Jordan will send a one-page overview of the build packages, including the discovery phase, fixed build, and handover.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send a one-page overview of the build packages so you can see what is included at each level. It sets out the discovery phase, the fixed build and what the handover looks like."
+              }
+            ]
+          },
+          {
+            "value": "Jordan will keep the overview practical rather than glossy, with inclusions, assumptions, and an honest note on where the automation does not pay for a team of Lucy's size.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I'll keep the overview practical rather than glossy, with the inclusions, the assumptions and an honest note on where this sort of automation doesn't pay for a team your size."
+              }
+            ]
+          },
+          {
+            "value": "Jordan will lead with the note on where this sort of automation does not pay.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "Then I'll lead with it."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "The quoted build cost is too high relative to current spend.",
+            "handling": "partial",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "That number is more than we spend on rent in a quarter."
+              },
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "we do scale the scope"
+              }
+            ]
+          },
+          {
+            "text": "Current booking spreadsheet already handles most needs at no cost.",
+            "handling": "partial",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 3,
+                "quote": "My daughter built us a booking spreadsheet that does most of this. It's not elegant, but it works and it costs nothing."
+              },
+              {
+                "source": "transcript",
+                "sequence": 4,
+                "quote": "Spreadsheets are fine until the volume moves."
+              }
+            ]
+          },
+          {
+            "text": "Email volume is low and Lucy values personally knowing who is coming.",
+            "handling": "partial",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 5,
+                "quote": "it's maybe twenty emails a week, and I quite like knowing who's coming."
+              },
+              {
+                "source": "transcript",
+                "sequence": 6,
+                "quote": "That familiarity is worth keeping, and an agent doesn't remove it."
+              }
+            ]
+          },
+          {
+            "text": "The build cost is unaffordable even if ownership transfers.",
+            "handling": "partial",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "I'd still be paying for the build, and the build is the part I can't cover."
+              },
+              {
+                "source": "transcript",
+                "sequence": 8,
+                "quote": "There's a managed optimisation option afterwards as well, from about $1,500 a month"
+              }
+            ]
+          },
+          {
+            "text": "Payback assumptions do not translate into cash savings for this business.",
+            "handling": "partial",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "Six months of payback assumes those hours are worth something in cash. For us they're just my evenings."
+              },
+              {
+                "source": "transcript",
+                "sequence": 10,
+                "quote": "Your evenings are the cost."
+              }
+            ]
+          },
+          {
+            "text": "The business is not planning expansion; it is focused on making the current shop pay for itself.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "We're not opening a second shop. We're trying to make this one pay for itself."
+              },
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "Then the case is stronger"
+              }
+            ]
+          },
+          {
+            "text": "Some follow-up work is enjoyable and part of customer retention.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Some of that I actually enjoy. The follow-up notes are how people come back."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send a one-page overview"
+              }
+            ]
+          },
+          {
+            "text": "Lucy does not want to be put on a call schedule and already knows the answer for this year.",
+            "handling": "handled",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "please don't put me on a call schedule. I know the answer for this year."
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "Fair."
+              }
+            ]
+          },
+          {
+            "text": "Nothing has broken in four years, so there is no urgent trigger to buy now.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "Nothing has broken in four years."
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "Nothing had broken for the last retailer I spoke to either"
+              }
+            ]
+          },
+          {
+            "text": "Available funds are better spent on stock.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "I spend the money on stock instead."
+              },
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "looking at the annual number rather than the project number"
+              }
+            ]
+          },
+          {
+            "text": "Decision-making is based on bank balance survival, not per-hour economics.",
+            "handling": "partial",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "I don't think in per-hour terms. I think in whether the bank balance survives February."
+              },
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "That's exactly why the discovery phase exists."
+              }
+            ]
+          },
+          {
+            "text": "A discovery plan is not useful if it cannot be afforded to implement.",
+            "handling": "partial",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "A plan I can't afford to act on isn't much use to me."
+              },
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "It's a plan you can act on in stages."
+              }
+            ]
+          },
+          {
+            "text": "Lucy is saying no even to the first staged step.",
+            "handling": "partial",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "the first stage is the part I'm saying no to."
+              },
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "Understood."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send Lucy a practical one-page overview of build packages, including inclusions, assumptions, discovery phase, fixed build, handover, and where automation may not pay for a team of her size.",
+          "due_date": null,
+          "owner": "Jordan Lee",
+          "confidence": 0.98,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 14,
+              "quote": "I will send a one-page overview of the build packages so you can see what is included at each level. It sets out the discovery phase, the fixed build and what the handover looks like."
+            },
+            {
+              "source": "transcript",
+              "sequence": 26,
+              "quote": "I'll keep the overview practical rather than glossy, with the inclusions, the assumptions and an honest note on where this sort of automation doesn't pay for a team your size."
+            },
+            {
+              "source": "transcript",
+              "sequence": 28,
+              "quote": "Then I'll lead with it."
+            }
+          ]
+        },
+        "summary": "Jordan from Eleno discussed AI automation for Craftwork with Lucy Beck. Lucy said the business has eight people in Northcote, sells craft supplies, and runs weekend workshops. She repeatedly raised budget and fit concerns, saying the current spreadsheet works, email volume is low, cash is better spent on stock, and she is saying no for this year. Jordan committed to send a practical one-page overview of packages and discovery/build details, including where automation may not pay for a team of this size. Buyer asked not to be put on a call schedule and closed with \u201cwe'll stay as we are.\u201d",
+        "conversation_id": "a446344e-de36-5636-8552-e72a82aa039a",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": false,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": true,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": true,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3755,
+        "output": 2017
+      },
+      "latency_ms": 12872,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.0396425,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-06-meridian-mutual",
+      "repeat": 1,
+      "outcome": "stalled",
+      "expected": {
+        "contact": {
+          "name": "Tom Reid",
+          "role": "Head of Member Services",
+          "email": "tom@meridianmutual.example",
+          "phone": "+61 3 7010 1106"
+        },
+        "company": {
+          "name": "Meridian Mutual",
+          "industry": "Regional mutual bank",
+          "headcount": 118,
+          "location": "Geelong, VIC"
+        },
+        "deal": {
+          "stage": "evaluation",
+          "value_aud": 174000,
+          "outcome": "stalled"
+        },
+        "promises": [
+          "I will send a decision brief and an indicative staging plan by the end of next week",
+          "I will include a one-page summary the chief operating officer can lift straight into the board pack"
+        ],
+        "objections": [
+          {
+            "text": "Budget sits with the board in the new financial year, not with me this month",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send a decision brief and staging plan for Tom to circulate to the chief operating officer and the board.",
+          "due": null
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Tom Reid",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Tom Reid, it's Jordan from Eleno."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Meridian Mutual",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "what has actually been happening at Meridian Mutual"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "employee_count": {
+            "value": 118,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're a hundred and eighteen people"
+              }
+            ]
+          },
+          "location": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.76,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "after a discovery phase of four to six weeks"
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will send a decision brief and an indicative staging plan by the end of next week."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "I am not promising a date, but there is real interest here."
+              }
+            ]
+          },
+          "amount": {
+            "value": 174000,
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "would sit around $174,000 for the fixed scope"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "Jordan will send a decision brief and an indicative staging plan by the end of next week.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will send a decision brief and an indicative staging plan by the end of next week."
+              }
+            ]
+          },
+          {
+            "value": "The brief will include the questions needed before scope is firm.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "It will include the questions we would need answered before the scope is firm."
+              }
+            ]
+          },
+          {
+            "value": "Jordan will include a one-page summary the chief operating officer can use in the board pack.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "I will include a one-page summary the chief operating officer can lift straight into the board pack without editing it."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Board-controlled budget and timing make it too early to take a $174,000 number in September.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Budget sits with the board in the new financial year, not with me this month. I can't take a number like that to them in September without a lot more behind it."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "What I'd suggest is not a proposal but a decision brief"
+              }
+            ]
+          },
+          {
+            "text": "Technology committee is wary of vendor lock-in after the migration.",
+            "handling": "handled",
+            "confidence": 0.91,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "Our technology committee is tired of vendor lock-in after what the migration cost us."
+              },
+              {
+                "source": "transcript",
+                "sequence": 10,
+                "quote": "We deploy it into your environment and transfer the intellectual property to you, so it's yours rather than a subscription."
+              }
+            ]
+          },
+          {
+            "text": "No date can be committed for a working session because board pack timing depends on migration remediation sign-off.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "I can't commit to a date. The board pack timing depends on when the migration remediation work is signed off, and that is not mine to schedule."
+              },
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "Then let's make the brief do the work."
+              }
+            ]
+          },
+          {
+            "text": "Risk needs to see logging before allowing the system to touch member complaints.",
+            "handling": "handled",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "Risk will want to see that logging before they let it touch a member complaint."
+              },
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "every decision the agent makes is logged against the source message."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send a decision brief and indicative staging plan, including scope questions and a one-page board-pack summary; Tom will circulate the brief.",
+          "due_date": "2026-09-11",
+          "owner": "Jordan Lee",
+          "confidence": 0.94,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 16,
+              "quote": "I will send a decision brief and an indicative staging plan by the end of next week."
+            },
+            {
+              "source": "transcript",
+              "sequence": 22,
+              "quote": "I will include a one-page summary the chief operating officer can lift straight into the board pack without editing it."
+            },
+            {
+              "source": "transcript",
+              "sequence": 27,
+              "quote": "Send the brief and I will circulate it."
+            }
+          ]
+        },
+        "summary": "Tom Reid said Meridian Mutual has seen complaints rise \"about forty per cent\" after its core migration, with statement confusion, manual copy/paste between systems, and four-day first response times. Meridian has \"a hundred and eighteen people\" and 14 in member services. Jordan positioned a triage agent and quoted \"around $174,000\" for fixed scope after discovery. Tom said board budget timing prevents taking that number in September and no working-session date can be committed yet. Jordan committed to send a short decision brief, indicative staging plan, scope questions, and a one-page board-pack summary by end of next week; Tom said he will circulate it.",
+        "conversation_id": "fb16e3d4-03a9-542a-a4db-650669cffb38",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3666,
+        "output": 1241
+      },
+      "latency_ms": 8573,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.02778,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-07-fairfield-wealth",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Olivia Hart",
+          "role": "Practice Manager",
+          "email": "olivia@fairfieldwealth.example",
+          "phone": "+61 3 7010 1107"
+        },
+        "company": {
+          "name": "Fairfield Wealth Partners",
+          "industry": "Financial planning and wealth advice firm",
+          "headcount": 37,
+          "location": "Kew, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 59600,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the scope, the source logging design and the fixed price by Wednesday",
+          "I will also include two worked examples built from your own template"
+        ],
+        "objections": [
+          {
+            "text": "Our compliance manager will want to see how it logs its sources before any adviser is allowed to use it",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send scope, source logging design and fixed price, then walk both principals and the compliance manager through it.",
+          "due": "2026-09-10"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Olivia Hart",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Olivia Hart"
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "practice manager",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you are still the practice manager at Fairfield Wealth Partners in Kew?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Yes, still me."
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Fairfield Wealth Partners",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Fairfield Wealth Partners"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "employee_count": {
+            "value": 37,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We're thirty-seven people now"
+              }
+            ]
+          },
+          "location": {
+            "value": "Kew",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Fairfield Wealth Partners in Kew"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.72,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "after a discovery phase of about three weeks"
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "I will send the scope, the source logging design and the fixed price by Wednesday"
+              },
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "walk through it"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "What I can't do is sign it myself."
+              },
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "Thursday 10 September at 2pm works."
+              }
+            ]
+          },
+          "amount": {
+            "value": 59600,
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "lands at $59,600"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the scope, the source logging design and the fixed price by Wednesday so the principals have it before they are in a room together.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "I will send the scope, the source logging design and the fixed price by Wednesday so the principals have it before they are in a room together."
+              }
+            ]
+          },
+          {
+            "value": "I will also include two worked examples built from your own template, one simple and one with a superannuation recommendation, so it is not an abstract conversation.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "I will also include two worked examples built from your own template, one simple and one with a superannuation recommendation, so it is not an abstract conversation."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Price is higher than expected.",
+            "handling": "partial",
+            "confidence": 0.79,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "That's more than I expected and less than I feared."
+              }
+            ]
+          },
+          {
+            "text": "The buyer contact cannot sign and principals are unavailable until Thursday.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "What I can't do is sign it myself. Both principals are in client meetings until Thursday."
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "I will send the scope, the source logging design and the fixed price by Wednesday so the principals have it before they are in a room together."
+              }
+            ]
+          },
+          {
+            "text": "Compliance requires source traceability before advisers can use it.",
+            "handling": "handled",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "Our compliance manager will want to see how it logs its sources before any adviser is allowed to use it."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "Every generated paragraph carries a reference to the meeting note, the fact find field or the research document it came from, and she gets that source log next to the draft."
+              }
+            ]
+          },
+          {
+            "text": "Concern about template changes and being locked into a provider-owned configuration.",
+            "handling": "handled",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "The other thing they will ask is what happens when the template changes. We update it every time the licensee changes its requirements, which is at least twice a year."
+              },
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "We were burnt by a provider who owned the configuration and charged us to change a heading."
+              },
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "The template stays yours and the assistant reads it rather than hard-coding it, so a licensee change is a template edit, not a rebuild."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Meeting to walk through the scope, source logging design, fixed price, and worked examples with Olivia, both principals, and the compliance manager.",
+          "due_date": "2026-09-10",
+          "owner": "Sam Whitfield",
+          "confidence": 0.97,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 20,
+              "quote": "Can we lock in Thursday 10 September at 2pm with you, both principals and the compliance manager to walk through it?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 21,
+              "quote": "Thursday 10 September at 2pm works. I will get all four of us in the room"
+            },
+            {
+              "source": "transcript",
+              "sequence": 22,
+              "quote": "I will also include two worked examples built from your own template"
+            }
+          ]
+        },
+        "summary": "Discovery call with Olivia Hart, practice manager at Fairfield Wealth Partners in Kew. Team is now 37 after a June acquisition; SOA volume rose from about 30 to about 55 per month, with a four-person paraplanning team and a six-week backlog. Main needs are faster drafting, source traceability for compliance, and flexibility when templates change. Sam proposed a fixed-scope build at AUD 59,600 with a three-week discovery phase. Olivia cannot sign; principals review next. Sam will send scope, source logging design, fixed price, and worked examples by Wednesday. Follow-up walkthrough is booked for 2026-09-10.",
+        "conversation_id": "8ad4aaa2-4c34-5ae3-b79f-f6a407ef8966",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3858,
+        "output": 1347
+      },
+      "latency_ms": 8782,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.02985,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-08-ridgeline-commercial",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Ben Wallace",
+          "role": "Director",
+          "email": "ben@ridgelinecommercial.example",
+          "phone": "+61 3 7010 1108"
+        },
+        "company": {
+          "name": "Ridgeline Commercial",
+          "industry": "Commercial real estate agency",
+          "headcount": 52,
+          "location": "Cremorne, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 78200,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached",
+          "I will also run twenty of your real leases through the extraction before that meeting"
+        ],
+        "objections": [
+          {
+            "text": "If it quietly guesses a rent review mechanism and gets it wrong, that is worse than the analyst typing it",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send the discovery scope and fixed build price, then review the sample extraction with Ben and the head of property management.",
+          "due": "2026-09-11"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Ben Wallace",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Ben Wallace, Sam from Eleno."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "director running the commercial management side",
+            "confidence": 0.77,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "are you still the director running the commercial management side at Ridgeline Commercial?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "That's me."
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Ridgeline Commercial",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Ridgeline Commercial"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "property management",
+            "confidence": 0.66,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "about two thirds of that is property management rather than sales."
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 52,
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Fifty-two people in Cremorne"
+              }
+            ]
+          },
+          "location": {
+            "value": "Cremorne",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Fifty-two people in Cremorne"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "with a discovery phase of about three weeks first"
+              },
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "What does the discovery phase cost on its own?"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "What does the discovery phase cost on its own?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "Send it to me and I will bring in our head of property management"
+              }
+            ]
+          },
+          "amount": {
+            "value": 78200,
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "a fixed-scope build for Ridgeline Commercial lands at $78,200"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached.",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached."
+              }
+            ]
+          },
+          {
+            "value": "I will also run twenty of your real leases through the extraction before that meeting, so we are looking at your numbers rather than a generic accuracy claim.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "I will also run twenty of your real leases through the extraction before that meeting, so we are looking at your numbers rather than a generic accuracy claim."
+              }
+            ]
+          },
+          {
+            "value": "I will ask for those specifically.",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will ask for those specifically."
+              }
+            ]
+          },
+          {
+            "value": "Then we will cover data residency and ownership in the scope document, so you have an answer in writing rather than a verbal assurance.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "Then we will cover data residency and ownership in the scope document, so you have an answer in writing rather than a verbal assurance."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Buyer is concerned the system could guess a rent review mechanism incorrectly, which would be worse than manual entry.",
+            "handling": "handled",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "If it quietly guesses a rent review mechanism and gets it wrong, that is worse than the analyst typing it."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "Anything below threshold goes to a review queue instead of into the system."
+              }
+            ]
+          },
+          {
+            "text": "Buyer wants evidence on their own leases before committing.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "Measuring on our own leases before we commit is the right way round."
+              },
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "I will also run twenty of your real leases through the extraction before that meeting"
+              }
+            ]
+          },
+          {
+            "text": "Data ownership and residency matter because owners ask who holds the data.",
+            "handling": "handled",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "They ask who holds the data whenever we pitch for a new mandate."
+              },
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "we will cover data residency and ownership in the scope document"
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send the discovery scope, fixed build price, and sample methodology; then meet with Ben and the head of property management to review it.",
+          "due_date": "2026-09-11",
+          "owner": "Sam Whitfield",
+          "confidence": 0.87,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached."
+            },
+            {
+              "source": "transcript",
+              "sequence": 20,
+              "quote": "Can we book Friday 11 September at 9am with you and your head of property management to go through it?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 21,
+              "quote": "Friday 11 September at 9am works."
+            }
+          ]
+        },
+        "summary": "Ben Wallace from Ridgeline Commercial said lease abstraction takes about a week each month. Ridgeline has 52 people in Cremorne, with about two thirds in property management. Their team handles about 40 new or varied leases monthly across roughly 1,100 tenancies and 300 assets. Key pain points are missed review and option dates, messy scanned PDFs, and unlinked deeds of variation. Sam proposed a lease abstraction pipeline and quoted $78,200 for the fixed-scope build, with a $6,000 discovery phase credited toward the build if they proceed. Sam will send scope and pricing by Thursday, and a review meeting is booked for 2026-09-11 at 9am.",
+        "conversation_id": "4725fdc1-23b5-59b9-87c7-61b7a15f42a6",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3769,
+        "output": 1336
+      },
+      "latency_ms": 9437,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.0294625,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-09-bellbird-auctions",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Aisha Rahman",
+          "role": "General Manager",
+          "email": "aisha@bellbirdauctions.example",
+          "phone": "+61 3 7010 1109"
+        },
+        "company": {
+          "name": "Bellbird Auctions",
+          "industry": "Fine art and collectables auction house",
+          "headcount": 48,
+          "location": "Malvern, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 64000,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will send the discovery phase scope and a fixed-price build proposal by Thursday",
+          "I will include the review workflow and the accuracy checks your cataloguers would run"
+        ],
+        "objections": [
+          {
+            "text": "We do not want another subscription that we can never switch off",
+            "handling": "handled"
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send the discovery scope and build proposal, then meet Aisha and the managing director to walk it through.",
+          "due": "2026-09-10"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Aisha Rahman",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Aisha Rahman, thanks for making time."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "general manager",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you run the house day to day as general manager, is that right?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "That's right."
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Bellbird Auctions",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Bellbird Auctions as forty-eight people in Malvern"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "auctions",
+            "confidence": 0.71,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "a serious problem for a house like ours"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 48,
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Bellbird Auctions as forty-eight people in Malvern"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "That's right."
+              }
+            ]
+          },
+          "location": {
+            "value": "Malvern",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Bellbird Auctions as forty-eight people in Malvern"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "That's right."
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.8,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "A short paid discovery phase to map intake and cataloguing"
+              },
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "That is a fair way to start."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "Can we meet Thursday 10 September at 2pm with you and the managing director to walk the scope?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "Yes, Thursday 10 September at 2pm works."
+              }
+            ]
+          },
+          "amount": {
+            "value": 64000,
+            "confidence": 0.91,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "For a house your size that build sits near $64,000"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "Seller will send the discovery phase scope and a fixed-price build proposal by Thursday.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send the discovery phase scope and a fixed-price build proposal by Thursday."
+              }
+            ]
+          },
+          {
+            "value": "Seller will include the review workflow and the accuracy checks cataloguers would run.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will include the review workflow and the accuracy checks your cataloguers would run."
+              }
+            ]
+          },
+          {
+            "value": "Seller will confirm which systems are reachable through an interface before the next meeting.",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "Before then I will confirm which of your systems we can reach through an interface."
+              }
+            ]
+          },
+          {
+            "value": "Seller will keep the proposal to two pages plus the scope.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "I will keep the proposal to two pages plus the scope."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Buyer does not want another subscription they cannot switch off and wants ownership at the end.",
+            "handling": "handled",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "We do not want another subscription that we can never switch off. We already pay three vendors forever and own nothing at the end of it."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "At handover the agents, the prompts and the pipeline are yours, running inside your own systems, and you can keep them without us. Optimisation is a choice you make later, not a condition of the build."
+              }
+            ]
+          },
+          {
+            "text": "Managing director is concerned about attribution errors and misleading confident output.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "The managing director will want to know what happens the first time the assistant gets an attribution wrong."
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "Nothing goes to print without a human signing it off."
+              },
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "the output looked confident and was quietly wrong, and it made him wary of the whole category."
+              }
+            ]
+          },
+          {
+            "text": "Invented provenance would cause damage; uncertain extraction should be flagged instead.",
+            "handling": "handled",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "Flagging is the right behaviour. A blank field a cataloguer fills in is fine. An invented provenance line would do us real damage with a consignor."
+              },
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "anything it cannot read confidently gets flagged rather than guessed."
+              }
+            ]
+          },
+          {
+            "text": "Cataloguers have been promised time savings before, but prior systems only moved typing elsewhere.",
+            "handling": "partial",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "They have been told before that a new system would save them time, and it just moved the typing somewhere else in the process."
+              },
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "If the saving is not there you stop with a clear picture and no build commitment."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Meet with Aisha Rahman, the managing director, and the head cataloguer to walk the scope.",
+          "due_date": "2026-09-10",
+          "owner": "Jordan Lee",
+          "confidence": 0.96,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 18,
+              "quote": "Can we meet Thursday 10 September at 2pm with you and the managing director to walk the scope?"
+            },
+            {
+              "source": "transcript",
+              "sequence": 19,
+              "quote": "Yes, Thursday 10 September at 2pm works. I will bring him and our head cataloguer"
+            }
+          ]
+        },
+        "summary": "Discovery call with Aisha Rahman, general manager at Bellbird Auctions in Malvern. Bellbird has 48 staff and processes about 2,200 lots across four spring sales, with repeated re-keying across paper, email, and the sale management system. Buyer wants a first-pass drafting workflow for lot descriptions and provenance support, but is wary of subscriptions, attribution errors, and invented provenance. Seller positioned a short paid discovery and said a fixed-scope build is near $64,000, with IP handed over. Next meeting is set for 2026-09-10 at 2pm with Aisha, the managing director, and head cataloguer.",
+        "conversation_id": "75d9239c-7f3b-55d3-ab54-c1012fd8afaf",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3858,
+        "output": 1480
+      },
+      "latency_ms": 9247,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.031845,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-10-lumen-lane-retail",
+      "repeat": 1,
+      "outcome": "lost",
+      "expected": {
+        "contact": {
+          "name": "Noah Spencer",
+          "role": "Co-owner",
+          "email": "noah@lumenlaneretail.example",
+          "phone": "+61 3 7010 1110"
+        },
+        "company": {
+          "name": "Lumen Lane Retail",
+          "industry": "Boutique lighting retailer",
+          "headcount": 10,
+          "location": "Prahran, VIC"
+        },
+        "deal": {
+          "stage": "closed_lost",
+          "value_aud": 11200,
+          "outcome": "lost"
+        },
+        "promises": [
+          "I will send the automation overview"
+        ],
+        "objections": [
+          {
+            "text": "We are comparing you to a freelancer who set up our stock alerts for a few hundred dollars",
+            "handling": "ignored"
+          }
+        ],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Noah Spencer",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Noah Spencer, thanks for the call."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Lumen Lane Retail",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Lumen Lane Retail is ten people if you count casuals."
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "retail",
+            "confidence": 0.76,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Lumen Lane Retail is ten people if you count casuals. We sell lighting out of a Prahran showroom and online."
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 10,
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Lumen Lane Retail is ten people if you count casuals."
+              }
+            ]
+          },
+          "location": {
+            "value": "Prahran",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "We sell lighting out of a Prahran showroom and online."
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.62,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 8,
+                "quote": "The discovery phase would tell us exactly where those hours sit. It is short and paid, we map the workflow, and the build is fixed scope from there."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "lost",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "I appreciate the pitch, Jordan, but we are going to stay with what we have."
+              }
+            ]
+          },
+          "amount": {
+            "value": 11200,
+            "confidence": 0.84,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "a first project for a retailer usually lands around $11,200 for a fixed scope build"
+              },
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "eleven thousand is more than we have spent on any system, ever."
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send the automation overview so you can see what the build includes and what the handover looks like.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "I will send the automation overview so you can see what the build includes and what the handover looks like."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Current lower-cost freelancer solution already handles stock alerts satisfactorily.",
+            "handling": "partial",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 3,
+                "quote": "We are comparing you to a freelancer who set up our stock alerts for a few hundred dollars. He did it in a weekend and it has run since."
+              },
+              {
+                "source": "transcript",
+                "sequence": 4,
+                "quote": "That is the difference between a weekend fix and something you can lean on in December."
+              }
+            ]
+          },
+          {
+            "text": "Their admin workload is limited, so the automation value appears low.",
+            "handling": "partial",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 5,
+                "quote": "Nobody here is drowning in purchase orders."
+              },
+              {
+                "source": "transcript",
+                "sequence": 6,
+                "quote": "Across a month it is a part-time role nobody has ever costed."
+              },
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "It is maybe four hours a week between the two of us"
+              }
+            ]
+          },
+          {
+            "text": "Paying for discovery would be difficult to justify internally.",
+            "handling": "partial",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "Paying to be told how long our own admin takes is a hard sell to my co-owner."
+              },
+              {
+                "source": "transcript",
+                "sequence": 10,
+                "quote": "It is not about measuring, it is about designing the agents so they hold up."
+              }
+            ]
+          },
+          {
+            "text": "Supplier templates rarely change, reducing the perceived need for a robust implementation.",
+            "handling": "partial",
+            "confidence": 0.9,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 11,
+                "quote": "Our templates barely change. We buy from six suppliers and have done for years."
+              },
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "Six suppliers is a good starting point, because the extraction is simple and we can get the drafting live quickly."
+              }
+            ]
+          },
+          {
+            "text": "Customers expect human responses, so automated replies could hurt experience.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "People email us because they want a person. If they get an obviously automated reply about a pendant, that is worse than a slow one."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "Ours are drafts, not sends, so a human always approves."
+              }
+            ]
+          },
+          {
+            "text": "They do not view chains as direct competitors, weakening the automation urgency argument.",
+            "handling": "ignored",
+            "confidence": 0.82,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "We do not really compete with the chains. Our customers come to us because they want someone who knows lighting."
+              }
+            ]
+          },
+          {
+            "text": "Price is too high despite liking the non-subscription model.",
+            "handling": "partial",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "eleven thousand is more than we have spent on any system, ever."
+              },
+              {
+                "source": "transcript",
+                "sequence": 19,
+                "quote": "The subscription part I like. The number is the problem, not the model."
+              },
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "The overview sets out a smaller starting scope, just the supplier ordering, which brings the build down."
+              }
+            ]
+          },
+          {
+            "text": "They believe they are below Eleno's typical client size and would rather keep the current approach.",
+            "handling": "partial",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "I think we are in a different bracket to your usual client."
+              },
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "We have built for teams smaller than yours where the owner was the bottleneck."
+              },
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "we are going to stay with what we have. It suits how we buy."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Jordan to send the automation overview.",
+          "due_date": null,
+          "owner": "Jordan Lee",
+          "confidence": 0.95,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 16,
+              "quote": "I will send the automation overview so you can see what the build includes and what the handover looks like."
+            },
+            {
+              "source": "transcript",
+              "sequence": 17,
+              "quote": "Send it through."
+            }
+          ]
+        },
+        "summary": "Introductory pricing call with Noah Spencer at Lumen Lane Retail, a small lighting retailer in Prahran. Noah said they currently use a freelancer-built stock alert setup and estimate only about four hours a week on related admin. Main objections were price, paid discovery, limited workload, and concern that customers prefer human replies. Jordan positioned a smaller supplier-ordering scope and promised to send an automation overview. Noah ultimately declined, saying they will stay with their current setup.",
+        "conversation_id": "b7525e70-7bf4-553c-ae27-095c87827bb3",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": false,
+        "promises": false,
+        "objection_handling": false,
+        "deal_outcome": true,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3832,
+        "output": 1539
+      },
+      "latency_ms": 10295,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.032665,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-11-banksia-architects",
+      "repeat": 1,
+      "outcome": "stalled",
+      "expected": {
+        "contact": {
+          "name": "Grace Kim",
+          "role": "Studio Operations Manager",
+          "email": "grace@banksiaarchitects.example",
+          "phone": "+61 3 7010 1111"
+        },
+        "company": {
+          "name": "Banksia Architects",
+          "industry": "Architecture studio",
+          "headcount": 44,
+          "location": "Fitzroy, VIC"
+        },
+        "deal": {
+          "stage": "evaluation",
+          "value_aud": 66400,
+          "outcome": "stalled"
+        },
+        "promises": [
+          "I will send a short findings note and a fee proposal workflow map"
+        ],
+        "objections": [
+          {
+            "text": "The directors will not sign anything until the fit-out budget is settled",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send the findings note and fee proposal workflow map for Grace to raise with the directors once the fit-out budget is settled.",
+          "due": null
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Grace Kim",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Grace Kim, thanks for speaking with me."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "studio operations",
+            "confidence": 0.72,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "you manage studio operations, is that right?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Yes."
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Banksia Architects",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "I have Banksia Architects as a forty-four person studio in Fitzroy"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": "architecture",
+            "confidence": 0.55,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Banksia Architects"
+              }
+            ]
+          },
+          "employee_count": {
+            "value": 44,
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "a forty-four person studio"
+              }
+            ]
+          },
+          "location": {
+            "value": "Fitzroy",
+            "confidence": 0.93,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "in Fitzroy"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.86,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "A short paid discovery phase to map how a proposal is actually assembled"
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send a short findings note and a fee proposal workflow map"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "stalled",
+            "confidence": 0.89,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "The directors will not sign anything until the fit-out budget is settled."
+              },
+              {
+                "source": "transcript",
+                "sequence": 21,
+                "quote": "Realistically it is after the move, so October at the earliest."
+              }
+            ]
+          },
+          "amount": {
+            "value": 66400,
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 12,
+                "quote": "For a studio your size that lands near $66,400"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "I will send a short findings note and a fee proposal workflow map so you have something concrete to put in front of them when the budget conversation opens.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I will send a short findings note and a fee proposal workflow map so you have something concrete to put in front of them when the budget conversation opens."
+              }
+            ]
+          },
+          {
+            "value": "The note will separate what a build would change from what you could tighten yourselves for nothing, so it does not read as a pitch.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "The note will separate what a build would change from what you could tighten yourselves for nothing, so it does not read as a pitch."
+              }
+            ]
+          },
+          {
+            "value": "I will keep it to one page for exactly that reason, with the consultant coordination piece noted separately as a possible second phase rather than folded into the same number.",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will keep it to one page for exactly that reason, with the consultant coordination piece noted separately as a possible second phase rather than folded into the same number."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "The directors will not sign anything until the fit-out budget is settled, with limited appetite before the office move.",
+            "handling": "handled",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "The directors will not sign anything until the fit-out budget is settled."
+              },
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "there is not much appetite for anything else this side of the move."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "I am not going to push a proposal at directors who have not seen the problem framed yet."
+              }
+            ]
+          },
+          {
+            "text": "Grace cannot secure a meeting before the directors agree the work is worth funding.",
+            "handling": "handled",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 15,
+                "quote": "I cannot get a meeting in the diary for something they have not yet agreed is worth funding."
+              },
+              {
+                "source": "transcript",
+                "sequence": 20,
+                "quote": "Then I will leave the timing with you entirely."
+              }
+            ]
+          },
+          {
+            "text": "If the note reads like a pitch or every line points at hiring someone, the cash-focused director will stop reading.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "If every line points at hiring someone, the director watching cash will stop reading at the second paragraph"
+              },
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "so it does not read as a pitch."
+              }
+            ]
+          },
+          {
+            "text": "Bundling consultant coordination into the same figure will be seen as scope creep.",
+            "handling": "handled",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 27,
+                "quote": "If you bundle coordination into the same figure, the director watching cash will treat the whole thing as scope creep"
+              },
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "the consultant coordination piece noted separately as a possible second phase rather than folded into the same number."
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Sam to send a one-page findings note and fee proposal workflow map, separating build changes from no-cost process improvements and listing consultant coordination as a later option.",
+          "due_date": null,
+          "owner": "Sam Whitfield",
+          "confidence": 0.95,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 14,
+              "quote": "I will send a short findings note and a fee proposal workflow map"
+            },
+            {
+              "source": "transcript",
+              "sequence": 16,
+              "quote": "The note will separate what a build would change from what you could tighten yourselves for nothing"
+            },
+            {
+              "source": "transcript",
+              "sequence": 26,
+              "quote": "I will keep it to one page for exactly that reason, with the consultant coordination piece noted separately as a possible second phase"
+            }
+          ]
+        },
+        "summary": "Grace Kim of Banksia Architects said proposal creation is the biggest pain point: about 90 proposals a year, each taking two or three days, with content scattered across shared drives, email, and a desktop spreadsheet. Banksia is a 44-person studio in Fitzroy and is moving office next quarter. Sam outlined a proposal-focused discovery/build option priced near AUD 66,400. Grace said the directors will not sign anything until the fit-out budget is settled and timing is likely after the move, \u201cOctober at the earliest.\u201d Sam committed to send a one-page findings note and workflow map framed neutrally, with consultant coordination separated as a possible later phase.",
+        "conversation_id": "18ffc284-806b-5be8-b44e-704afa7d5c55",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": true,
+        "objection_handling": false,
+        "deal_outcome": true,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": true,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3822,
+        "output": 1437
+      },
+      "latency_ms": 9237,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.03111,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-12-dockside-dental",
+      "repeat": 1,
+      "outcome": "no_show",
+      "expected": {
+        "contact": {
+          "name": "Ethan Clarke",
+          "role": "Practice Owner",
+          "email": "ethan@docksidedental.example",
+          "phone": "+61 3 7010 1112"
+        },
+        "company": {
+          "name": "Dockside Dental",
+          "industry": "Dental practice",
+          "headcount": 18,
+          "location": "Williamstown, VIC"
+        },
+        "deal": {
+          "stage": "discovery",
+          "value_aud": 0,
+          "outcome": "no_show"
+        },
+        "promises": [
+          "I will send a short email with two times to reschedule"
+        ],
+        "objections": [],
+        "next_step": null
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Ethan Clarke",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Eleno calling for Ethan Clarke at Dockside Dental."
+              }
+            ]
+          },
+          "email": {
+            "value": null,
+            "confidence": 0.08,
+            "evidence": []
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": null,
+            "confidence": 0.06,
+            "evidence": []
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Dockside Dental",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "Eleno calling for Ethan Clarke at Dockside Dental."
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.03,
+            "evidence": []
+          },
+          "industry": {
+            "value": null,
+            "confidence": 0.04,
+            "evidence": []
+          },
+          "employee_count": {
+            "value": null,
+            "confidence": 0.02,
+            "evidence": []
+          },
+          "location": {
+            "value": null,
+            "confidence": 0.02,
+            "evidence": []
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "discovery",
+            "confidence": 0.51,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 0,
+                "quote": "We had a three o'clock phone appointment to talk through automating the recall and treatment plan paperwork."
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.83,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "Ethan has been pulled into a patient issue and won't make the call."
+              },
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "I will send a short email with two times to reschedule, and he can pick whichever suits."
+              }
+            ]
+          },
+          "amount": {
+            "value": null,
+            "confidence": 0.02,
+            "evidence": []
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "Jordan will send a short email with two times to reschedule.",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 2,
+                "quote": "I will send a short email with two times to reschedule, and he can pick whichever suits."
+              }
+            ]
+          }
+        ],
+        "objections": [],
+        "next_step": {
+          "description": "Jordan to send a short email with two times to reschedule; Ethan to pick whichever suits.",
+          "due_date": null,
+          "owner": "Jordan Lee",
+          "confidence": 0.95,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 2,
+              "quote": "I will send a short email with two times to reschedule, and he can pick whichever suits."
+            }
+          ]
+        },
+        "summary": "Jordan called Ethan Clarke at Dockside Dental for a scheduled phone appointment about automating recall and treatment plan paperwork. Ethan could not attend because he was \"pulled into a patient issue.\" Jordan said he would send a short email with two times to reschedule, and reception confirmed that email is best today.",
+        "conversation_id": "6ca21111-c7df-5753-a759-2e7275013055",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": false,
+        "deal_amount": true,
+        "next_step": false,
+        "promises": true,
+        "objection_handling": true,
+        "deal_outcome": false,
+        "promises_count": true,
+        "contact_phone": true,
+        "contact_title": false,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": true,
+        "objections": true,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 2038,
+        "output": 579
+      },
+      "latency_ms": 5239,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.01378,
+      "failed": false,
+      "error": null
+    },
+    {
+      "call_id": "call-13-marlowe-finch-demo",
+      "repeat": 1,
+      "outcome": "won",
+      "expected": {
+        "contact": {
+          "name": "Donnie Azoff",
+          "role": "CFO",
+          "email": "donnie@marlowefinch.example",
+          "phone": "+61 3 7010 1113"
+        },
+        "company": {
+          "name": "Marlowe & Finch Accounting",
+          "industry": "Accounting practice",
+          "headcount": 34,
+          "location": "Hawthorn, VIC"
+        },
+        "deal": {
+          "stage": "closed_won",
+          "value_aud": 48600,
+          "outcome": "won"
+        },
+        "promises": [
+          "I will get a proposal in your inbox today",
+          "I will send the proposal and statement of work by 5pm today"
+        ],
+        "objections": [
+          {
+            "text": "Price is my first concern",
+            "handling": "ignored"
+          },
+          {
+            "text": "the partners will want to know who signs off when the agent gets something wrong",
+            "handling": "partial"
+          }
+        ],
+        "next_step": {
+          "description": "Jordan Belfort to send the proposal and statement of work by 5pm for Donnie and the managing partner to review and sign.",
+          "due": "2026-09-11"
+        }
+      },
+      "extraction": {
+        "contact": {
+          "name": {
+            "value": "Donnie Azoff",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I'm Donnie, the CFO"
+              }
+            ]
+          },
+          "email": {
+            "value": "donnie@marlowefinch.example",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will send it to donnie@marlowefinch.example"
+              }
+            ]
+          },
+          "phone": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "title": {
+            "value": "CFO",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 1,
+                "quote": "I'm Donnie, the CFO"
+              }
+            ]
+          }
+        },
+        "company": {
+          "name": {
+            "value": "Marlowe & Finch Accounting",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "Marlowe & Finch Accounting"
+              }
+            ]
+          },
+          "domain": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "industry": {
+            "value": null,
+            "confidence": 0.05,
+            "evidence": []
+          },
+          "employee_count": {
+            "value": 34,
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 5,
+                "quote": "We have thirty-four people"
+              }
+            ]
+          },
+          "location": {
+            "value": "Hawthorn",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 16,
+                "quote": "Hawthorn coffee queue"
+              }
+            ]
+          }
+        },
+        "deal": {
+          "stage": {
+            "value": "evaluation",
+            "confidence": 0.82,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "What happens today if I say yes to reviewing something?"
+              },
+              {
+                "source": "transcript",
+                "sequence": 25,
+                "quote": "I will review it with the managing partner"
+              }
+            ]
+          },
+          "outcome": {
+            "value": "open",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 23,
+                "quote": "I said review it, not sign it."
+              },
+              {
+                "source": "transcript",
+                "sequence": 29,
+                "quote": "Send the proposal. Goodbye."
+              }
+            ]
+          },
+          "amount": {
+            "value": 48600,
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "$48,600 for the fixed-scope build, the discovery phase costed inside it"
+              }
+            ]
+          },
+          "currency": "AUD"
+        },
+        "promises": [
+          {
+            "value": "Seller will turn the call into a plain proposal covering the two agents, scope, discovery phase, build weeks, responsibilities, and ownership at the end.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "I turn this call into a plain proposal: the two agents, the scope of each, the discovery phase, the build weeks, who does what, and precisely what you own at the end of it."
+              }
+            ]
+          },
+          {
+            "value": "Seller will send a proposal in Donnie's inbox today with the statement of work attached.",
+            "confidence": 0.97,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 22,
+                "quote": "I will get a proposal in your inbox today, with the statement of work attached"
+              }
+            ]
+          },
+          {
+            "value": "Seller will send the proposal and statement of work by 5pm today.",
+            "confidence": 0.99,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 24,
+                "quote": "I will send the proposal and statement of work by 5pm today."
+              }
+            ]
+          },
+          {
+            "value": "Seller will send it to donnie@marlowefinch.example and make the first page clear on price, included discovery, and IP transfer.",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 26,
+                "quote": "I will send it to donnie@marlowefinch.example, and the first page will be painfully clear: $48,600 for the fixed-scope build, the discovery phase costed inside it, and the IP transferred to Marlowe & Finch Accounting at handover."
+              }
+            ]
+          },
+          {
+            "value": "Seller will keep the email numbers-focused.",
+            "confidence": 0.88,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 28,
+                "quote": "Numbers only."
+              }
+            ]
+          }
+        ],
+        "objections": [
+          {
+            "text": "Buyer says they need options and have not chosen a vendor yet.",
+            "handling": "partial",
+            "confidence": 0.95,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 3,
+                "quote": "I'm taking the call because we need options, not because we've chosen anyone."
+              }
+            ]
+          },
+          {
+            "text": "Buyer is concerned about the size of the hallucination guarantee promise.",
+            "handling": "partial",
+            "confidence": 0.92,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 5,
+                "quote": "That is a very big promise."
+              },
+              {
+                "source": "transcript",
+                "sequence": 4,
+                "quote": "I can guarantee the agents never hallucinate"
+              }
+            ]
+          },
+          {
+            "text": "Price is the buyer's first concern and partners will ask what this replaces.",
+            "handling": "partial",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 7,
+                "quote": "Price is my first concern. The partners have just signed off a software budget and they will ask me what this replaces."
+              }
+            ]
+          },
+          {
+            "text": "Buyer rejects cutting half the back office.",
+            "handling": "handled",
+            "confidence": 0.96,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 9,
+                "quote": "I am not cutting half my back office."
+              },
+              {
+                "source": "transcript",
+                "sequence": 10,
+                "quote": "Fair enough, call it capacity released rather than seats removed."
+              }
+            ]
+          },
+          {
+            "text": "Buyer has a governance concern about sign-off if the agent gets something wrong.",
+            "handling": "partial",
+            "confidence": 0.98,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 13,
+                "quote": "the partners will want to know who signs off when the agent gets something wrong."
+              },
+              {
+                "source": "transcript",
+                "sequence": 14,
+                "quote": "You sign off, exactly as you do today"
+              }
+            ]
+          },
+          {
+            "text": "Buyer does not like being rushed.",
+            "handling": "handled",
+            "confidence": 0.94,
+            "evidence": [
+              {
+                "source": "transcript",
+                "sequence": 17,
+                "quote": "I do not like being rushed."
+              },
+              {
+                "source": "transcript",
+                "sequence": 18,
+                "quote": "Today is easy. I turn this call into a plain proposal"
+              }
+            ]
+          }
+        ],
+        "next_step": {
+          "description": "Seller to send proposal and statement of work; buyer to review it with the managing partner.",
+          "due_date": "2026-09-11",
+          "owner": "Jordan Belfort",
+          "confidence": 0.96,
+          "evidence": [
+            {
+              "source": "transcript",
+              "sequence": 24,
+              "quote": "I will send the proposal and statement of work by 5pm today."
+            },
+            {
+              "source": "transcript",
+              "sequence": 25,
+              "quote": "Fine. Send it by 5pm today, 11 September. I will review it with the managing partner"
+            }
+          ]
+        },
+        "summary": "Donnie Azoff, CFO at Marlowe & Finch Accounting, described pain around client reporting and engagement letters. The seller proposed two fixed-scope agents for month-end reporting and engagement-letter drafting. Donnie raised concerns about price, governance, exaggerated claims, and being rushed, but said reviewing drafts would be valuable. Jordan committed to send a proposal and statement of work by 5pm on 2026-09-11 to donnie@marlowefinch.example. Donnie said he would review it with the managing partner and, if the scope matches the call, they will sign and start discovery.",
+        "conversation_id": "20b80221-c2e4-5b95-8165-81f352027c64",
+        "source": "model",
+        "model": "openai/gpt-5.4",
+        "prompt_version": "extract-v2",
+        "grounding": {
+          "repaired": 0,
+          "dropped": 0
+        }
+      },
+      "checks": {
+        "contact_name": true,
+        "contact_email": true,
+        "company_name": true,
+        "company_headcount": true,
+        "deal_amount": true,
+        "next_step": true,
+        "promises": false,
+        "objection_handling": false,
+        "deal_outcome": false,
+        "promises_count": false,
+        "contact_phone": true,
+        "contact_title": true,
+        "company_industry": false,
+        "company_industry_exact": false,
+        "company_location": false,
+        "deal_stage": false,
+        "objections": false,
+        "grounded": true
+      },
+      "grounding": {
+        "repaired": 0,
+        "dropped": 0
+      },
+      "tokens": {
+        "input": 3908,
+        "output": 1491
+      },
+      "latency_ms": 9452,
+      "model": "openai/gpt-5.4",
+      "cost_usd": 0.032135,
+      "failed": false,
+      "error": null
+    }
+  ],
+  "summary": {
+    "checks": {
+      "contact_name": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "contact_email": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "company_name": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "company_headcount": {
+        "passed": 11,
+        "total": 13,
+        "pct": 0.8461538461538461,
+        "mean_pct": 0.8461538461538461,
+        "min": 0.8461538461538461,
+        "max": 0.8461538461538461,
+        "mean_passed": 11.0,
+        "max_passed": 11
+      },
+      "deal_amount": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "next_step": {
+        "passed": 9,
+        "total": 13,
+        "pct": 0.6923076923076923,
+        "mean_pct": 0.6923076923076923,
+        "min": 0.6923076923076923,
+        "max": 0.6923076923076923,
+        "mean_passed": 9.0,
+        "max_passed": 9
+      },
+      "promises": {
+        "passed": 9,
+        "total": 13,
+        "pct": 0.6923076923076923,
+        "mean_pct": 0.6923076923076923,
+        "min": 0.6923076923076923,
+        "max": 0.6923076923076923,
+        "mean_passed": 9.0,
+        "max_passed": 9
+      },
+      "objection_handling": {
+        "passed": 1,
+        "total": 13,
+        "pct": 0.07692307692307693,
+        "mean_pct": 0.07692307692307693,
+        "min": 0.07692307692307693,
+        "max": 0.07692307692307693,
+        "mean_passed": 1.0,
+        "max_passed": 1
+      },
+      "deal_outcome": {
+        "passed": 4,
+        "total": 13,
+        "pct": 0.3076923076923077,
+        "mean_pct": 0.3076923076923077,
+        "min": 0.3076923076923077,
+        "max": 0.3076923076923077,
+        "mean_passed": 4.0,
+        "max_passed": 4
+      },
+      "promises_count": {
+        "passed": 5,
+        "total": 13,
+        "pct": 0.38461538461538464,
+        "mean_pct": 0.38461538461538464,
+        "min": 0.38461538461538464,
+        "max": 0.38461538461538464,
+        "mean_passed": 5.0,
+        "max_passed": 5
+      },
+      "contact_phone": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      },
+      "contact_title": {
+        "passed": 6,
+        "total": 13,
+        "pct": 0.46153846153846156,
+        "mean_pct": 0.46153846153846156,
+        "min": 0.46153846153846156,
+        "max": 0.46153846153846156,
+        "mean_passed": 6.0,
+        "max_passed": 6
+      },
+      "company_industry": {
+        "passed": 5,
+        "total": 13,
+        "pct": 0.38461538461538464,
+        "mean_pct": 0.38461538461538464,
+        "min": 0.38461538461538464,
+        "max": 0.38461538461538464,
+        "mean_passed": 5.0,
+        "max_passed": 5
+      },
+      "company_industry_exact": {
+        "passed": 3,
+        "total": 13,
+        "pct": 0.23076923076923078,
+        "mean_pct": 0.23076923076923078,
+        "min": 0.23076923076923078,
+        "max": 0.23076923076923078,
+        "mean_passed": 3.0,
+        "max_passed": 3
+      },
+      "company_location": {
+        "passed": 0,
+        "total": 13,
+        "pct": 0.0,
+        "mean_pct": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "mean_passed": 0.0,
+        "max_passed": 0
+      },
+      "deal_stage": {
+        "passed": 1,
+        "total": 13,
+        "pct": 0.07692307692307693,
+        "mean_pct": 0.07692307692307693,
+        "min": 0.07692307692307693,
+        "max": 0.07692307692307693,
+        "mean_passed": 1.0,
+        "max_passed": 1
+      },
+      "objections": {
+        "passed": 1,
+        "total": 13,
+        "pct": 0.07692307692307693,
+        "mean_pct": 0.07692307692307693,
+        "min": 0.07692307692307693,
+        "max": 0.07692307692307693,
+        "mean_passed": 1.0,
+        "max_passed": 1
+      },
+      "grounded": {
+        "passed": 13,
+        "total": 13,
+        "pct": 1.0,
+        "mean_pct": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "mean_passed": 13.0,
+        "max_passed": 13
+      }
+    },
+    "parse_failures": 0,
+    "mean_latency_ms": 9338.76923076923,
+    "total_cost_usd": 0.3951475,
+    "cost_per_call_usd": 0.03039596153846154,
+    "cost_billed": true,
+    "grounding_repaired": 0,
+    "grounding_dropped": 0,
+    "records": 13,
+    "repeats": 1
+  }
+}
