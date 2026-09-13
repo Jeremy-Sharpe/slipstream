@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Pill } from "@/components/ui";
 import type { IcpView } from "@/lib/intelligence";
 import { CompanyChip } from "./parts";
@@ -53,18 +52,6 @@ export function IcpCard({ icp }: { icp: IcpView }) {
         )}
       </dl>
 
-      <div className="mt-6 flex items-center justify-between gap-4">
-        <p className="text-[13px] text-soft">
-          Confidence {Math.round(icp.confidence * 100)}%
-          {icp.freshness && <span className="text-faint"> · {icp.freshness.reason}</span>}
-        </p>
-        <Link
-          href="/leads"
-          className="inline-flex h-8 items-center whitespace-nowrap rounded-full bg-white px-3.5 text-[13px] font-medium text-ink shadow-[inset_0_0_0_1px_#e8e8e8] transition-colors duration-150 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-        >
-          Edit brief in Leads →
-        </Link>
-      </div>
     </section>
   );
 }

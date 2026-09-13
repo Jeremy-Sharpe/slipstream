@@ -1,5 +1,4 @@
 import { Avatar } from "@/components/Avatar";
-import { fmtDate } from "@/components/ui";
 import type { Intelligence } from "@/lib/intelligence";
 import { DeriveButton } from "./DeriveButton";
 import { IcpCard } from "./IcpCard";
@@ -10,7 +9,7 @@ import { ErrorLine } from "./parts";
    coaching. Everything on the page comes from the API; anything not derived
    yet says so. */
 export function IntelligenceView({ intelligence }: { intelligence: Intelligence }) {
-  const { icp, stats, patterns, coachingFocus, coachingSource, coachRep, triggers, provenance, errors, scoredCalls, unscoredFixtures, needsDerive } = intelligence;
+  const { icp, stats, patterns, coachingFocus, coachRep, triggers, errors, scoredCalls, unscoredFixtures, needsDerive } = intelligence;
   const o = stats.outcomes;
 
   return (
@@ -55,14 +54,9 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
 
       <div className="mt-10"><Patterns patterns={patterns} error={errors.playbook} /></div>
       <div className="mt-10"><Triggers triggers={triggers} /></div>
-      <div className="mt-10"><Coaching lines={coachingFocus} rep={coachRep} source={coachingSource} /></div>
+      <div className="mt-10"><Coaching lines={coachingFocus} rep={coachRep} /></div>
 
-      <p className="mt-10 pb-8 text-[12px] text-faint">
-        {provenance.profileVersion != null ? `Profile v${provenance.profileVersion}` : "No profile yet"}
-        {provenance.profileCreatedAt ? ` · Derived ${fmtDate(provenance.profileCreatedAt)}` : ""}
-        {provenance.rubricVersion ? ` · Scored with rubric ${provenance.rubricVersion}` : ""}
-        {provenance.playbookGeneratedAt ? ` · Playbook ${fmtDate(provenance.playbookGeneratedAt)}` : ""}
-      </p>
+      <div className="pb-8" />
     </div>
   );
 }
