@@ -6,6 +6,8 @@ Use the won deals as primary evidence. Use the lost and stalled deals only as co
 
 The `interactions` arrays contain bounded evidence from calls and emails associated with each CRM deal. Weigh both channels, but do not infer facts that are absent from the supplied text.
 
+Describe the customer cohort, never the seller or sales rep. Do not include a lost, stalled or active account's industry, role or trigger in the ideal-customer attributes unless a won deal independently supports the same value. Do not repeat list items.
+
 Return JSON matching the schema. Include `summary`, `industries`, `headcount_band`, `roles`, `triggers`, `disqualifiers`, `evidence`, `confidence` and `origami_brief`.
 
 `source_summary` is computed by Slipstream after your response; omit it.

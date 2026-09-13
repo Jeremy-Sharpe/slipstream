@@ -1,5 +1,6 @@
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,9 @@ PROMPT = (Path(__file__).resolve().parents[1] / "prompts" / "icp-derive-v1.md").
     encoding="utf-8"
 )
 MAX_MODEL_INPUT_CHARS = 120_000
+MAX_PROFILE_VALUES = 12
+_HEADCOUNT_RANGE = re.compile(r"^(\d{1,6})\s*-\s*(\d{1,6})$")
+_HEADCOUNT_BOUND = re.compile(r"^(under|over)\s*-?\s*(\d{1,6})$", re.IGNORECASE)
 
 
 def derive_icp(
@@ -48,7 +52,9 @@ def derive_icp(
         user=user,
         schema=IcpProfile,
     )
-    profile = reasoning.output.model_copy(update={"source_summary": _source_summary(deals)})
+    profile = _ground_profile(reasoning.output, deals).model_copy(
+        update={"source_summary": _source_summary(deals)}
+    )
     stored = store.insert_icp_profile(
         version=store.max_icp_version() + 1,
         profile=profile,
@@ -209,6 +215,152 @@ def _source_summary(deals: list[DealRecord]) -> IcpSourceSummary:
         emails=sum(channel == "email" for channel, _ in sources),
         outcome_labelled=sum(deal.outcome in {"won", "lost", "stalled"} for deal in deals),
     )
+
+
+def _ground_profile(profile: IcpProfile, deals: list[DealRecord]) -> IcpProfile:
+    won = [deal for deal in deals if deal.outcome == "won"]
+    industries = _won_values(won, "industry", "industry")
+    roles = _won_values(won, "contact_role", "role")
+    triggers = _won_values(won, None, "trigger")
+    headcount_band = _won_headcount_band(won)
+    industry_text = _plain_list(industries)
+    role_text = _plain_list(roles)
+    trigger_text = _plain_list(triggers)
+    summary_parts = [
+        f"Observed win industries are {industry_text}."
+        if industries
+        else "Industry fit is not yet established from won deals.",
+    ]
+    if headcount_band != "Not established":
+        summary_parts.append(f"Winning accounts had {headcount_band} staff.")
+    if roles:
+        summary_parts.append(f"Winning conversations involved {role_text}.")
+    if triggers:
+        summary_parts.append(f"Observed buying triggers included {trigger_text}.")
+    summary = " ".join(summary_parts)
+    brief_parts = [
+        f"Find organisations matching these won-deal industries: {industry_text}."
+        if industries
+        else "Use the won accounts as seed examples and verify industry fit manually."
+    ]
+    if headcount_band != "Not established" or roles:
+        criteria = []
+        if headcount_band != "Not established":
+            criteria.append(f"companies with {headcount_band} staff")
+        if roles:
+            criteria.append(f"contacts in these roles: {role_text}")
+        brief_parts.append(f"Prioritise {' and '.join(criteria)}.")
+    if triggers:
+        brief_parts.append(f"Look for active signals including {trigger_text}.")
+    origami_brief = " ".join(brief_parts)
+    return profile.model_copy(
+        update={
+            "summary": summary,
+            "industries": industries,
+            "headcount_band": headcount_band,
+            "roles": roles,
+            "triggers": triggers,
+            "disqualifiers": _unique_text(profile.disqualifiers, limit=MAX_PROFILE_VALUES),
+            "origami_brief": origami_brief,
+        }
+    )
+
+
+def _won_values(
+    deals: list[DealRecord], field: str | None, signal: str
+) -> list[str]:
+    values: list[object] = []
+    limit = 500 if signal == "trigger" else 120
+    for deal in deals:
+        signals = deal.metadata.get("icp_signals", {})
+        if not isinstance(signals, dict):
+            signals = {}
+        value = getattr(deal, field) if field else deal.metadata.get(signal)
+        candidate = _valid_signal_text(value, limit) or _valid_signal_text(
+            signals.get(signal), limit
+        )
+        if candidate is not None:
+            values.append(candidate)
+    return _unique_text(values, limit=MAX_PROFILE_VALUES)
+
+
+def _valid_signal_text(value: object, limit: int) -> str | None:
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    return text if text and len(text) <= limit else None
+
+
+def _won_headcount_band(deals: list[DealRecord]) -> str:
+    deal_bands: list[str | None] = []
+    for deal in deals:
+        signals = deal.metadata.get("icp_signals")
+        raw_band = signals.get("headcount_band") if isinstance(signals, dict) else None
+        deal_bands.append(_valid_headcount_band(raw_band))
+    unique_bands = _unique_text(
+        [band for band in deal_bands if band is not None], limit=MAX_PROFILE_VALUES
+    )
+    if len(unique_bands) == 1:
+        band = unique_bands[0]
+        if all(
+            (deal_band == band or deal.employee_count is not None)
+            and (
+                deal.employee_count is None
+                or _headcount_in_band(deal.employee_count, band)
+            )
+            for deal, deal_band in zip(deals, deal_bands, strict=True)
+        ):
+            return band
+    counts = [deal.employee_count for deal in deals if deal.employee_count is not None]
+    if counts and len(counts) == len(deals):
+        return f"{min(counts)}-{max(counts)}"
+    return "Not established"
+
+
+def _valid_headcount_band(value: object) -> str | None:
+    if not isinstance(value, str) or len(value) > 40:
+        return None
+    band = value.strip()
+    range_match = _HEADCOUNT_RANGE.fullmatch(band)
+    if range_match and int(range_match.group(1)) <= int(range_match.group(2)):
+        return f"{int(range_match.group(1))}-{int(range_match.group(2))}"
+    bound_match = _HEADCOUNT_BOUND.fullmatch(band)
+    if bound_match:
+        return f"{bound_match.group(1).casefold()}-{int(bound_match.group(2))}"
+    return None
+
+
+def _headcount_in_band(count: int, band: str) -> bool:
+    range_match = _HEADCOUNT_RANGE.fullmatch(band)
+    if range_match:
+        return int(range_match.group(1)) <= count <= int(range_match.group(2))
+    bound_match = _HEADCOUNT_BOUND.fullmatch(band)
+    if not bound_match:
+        return False
+    boundary = int(bound_match.group(2))
+    return count < boundary if bound_match.group(1).casefold() == "under" else count > boundary
+
+
+def _unique_text(values: list[object], *, limit: int) -> list[str]:
+    seen: set[str] = set()
+    unique: list[str] = []
+    for value in values:
+        if value is None:
+            continue
+        text = str(value).strip()
+        key = text.casefold()
+        if text and key not in seen:
+            seen.add(key)
+            unique.append(text)
+            if len(unique) == limit:
+                break
+    return unique
+
+
+def _plain_list(values: list[str]) -> str:
+    if len(values) < 2:
+        return "".join(values)
+    return f"{', '.join(values[:-1])} and {values[-1]}"
 
 
 def _embed(embedder: object, model: str, texts: list[str]) -> list[list[float]]:
