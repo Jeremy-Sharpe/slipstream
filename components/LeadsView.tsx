@@ -37,7 +37,7 @@ export function LeadsView() {
     if (sort) {
       const key = SORT_KEYS[sort.col];
       out.sort((a, b) => {
-        const pick = (r: Row) => (key === "draft" ? Number(r.drafted) : key === "n" ? 0 : r[key]);
+        const pick = (r: Row) => (key === "draft" ? r.draft.subject : key === "n" ? 0 : r[key]);
         const av = pick(a), bv = pick(b);
         const c = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
         return sort.dir === "asc" ? c : -c;
@@ -78,12 +78,13 @@ export function LeadsView() {
                 type="button"
                 aria-label="Search the sheet"
                 onClick={() => setShowSearch((s) => !s)}
-                className={cn("flex h-8 items-center gap-2 rounded-full px-3 text-[13px] text-soft transition-colors duration-150 hover:bg-surface hover:text-ink", showSearch && "bg-surface text-ink")}
+                className={cn("flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[13.5px] text-soft shadow-[inset_0_0_0_1px_#e8e8e8] transition-colors duration-150 hover:text-ink", showSearch && "bg-surface text-ink")}
               >
-                <Search className="size-3.5" strokeWidth={1.75} /> Search
+                <Search className="size-4" strokeWidth={1.75} /> Search
               </button>
-              <Button variant="primary" size="sm" className="h-8 text-[13px]" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
-                {drafts > 0 ? `Approve all drafts · ${drafts}` : search?.status === "running" ? "Approve all drafts" : "All drafts approved"}
+              <Button variant="primary" className="h-9 gap-2 px-4 text-[13.5px]" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
+                {drafts > 0 || search?.status === "running" ? "Approve all drafts" : "All drafts approved"}
+                {drafts > 0 && <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1.5 text-[12px] tabular-nums">{drafts}</span>}
               </Button>
             </div>
           </header>
