@@ -33,6 +33,7 @@ from app.routers import (
     leads,
     scorecards,
 )
+from app.services import deliveries as delivery_service
 from app.services.campaigns import create_campaign_store
 from app.services.icp_leads_store import create_icp_leads_store
 from app.services.score import build_judge
@@ -115,8 +116,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.crm_sync_admission_slots = asyncio.Semaphore(4)
     app.state.email_delivery_locks = [asyncio.Lock() for _ in range(64)]
     app.state.email_delivery_gate_locks = [asyncio.Lock() for _ in range(64)]
-    app.state.email_delivery_waiter_slots = asyncio.Semaphore(deliveries.DELIVERY_WAITER_LIMIT)
-    app.state.email_delivery_batch_slots = asyncio.Semaphore(deliveries.BATCH_REQUEST_LIMIT)
+    app.state.email_delivery_waiter_slots = asyncio.Semaphore(
+        delivery_service.DELIVERY_WAITER_LIMIT
+    )
+    app.state.email_delivery_batch_slots = asyncio.Semaphore(
+        delivery_service.BATCH_REQUEST_LIMIT
+    )
     app.state.email_delivery_admission_slots = asyncio.Semaphore(4)
     app.state.email_delivery_db_slots = asyncio.Semaphore(4)
     app.state.email_delivery_db_executor = ThreadPoolExecutor(

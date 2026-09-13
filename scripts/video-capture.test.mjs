@@ -42,6 +42,6 @@ test("judge-facing handoff points consistently to the published v2 walkthrough",
   assert.doesNotMatch(checklist, /all 361 tests|public fallback video is 4:30/);
   assert.doesNotMatch(status, /public 4:30 fallback video is already linked/);
   assert.doesNotMatch(board, /evals:dry` passes and 292 API tests pass/);
-  assert.match(status, /367 API tests and 51 smoke tests pass/);
-  assert.match(board, /367 API tests and 51 smoke tests pass/);
+  assert.match(status, /367 API tests and 52 smoke tests pass/);
+  assert.match(board, /367 API tests and 52 smoke tests pass/);
 });
