@@ -6,6 +6,6 @@ import { usePathname } from "next/navigation";
    that size themselves to the viewport; the page itself never scrolls). */
 export function Frame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (pathname.startsWith("/leads")) return <div className="h-screen overflow-hidden px-8 py-4">{children}</div>;
+  if (pathname.startsWith("/leads")) return <div className="h-screen overflow-hidden px-8 py-8">{children}</div>;
   return <div className="mx-auto max-w-[1040px] px-8 py-8">{children}</div>;
 }

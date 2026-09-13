@@ -15,15 +15,15 @@ import "@glideapps/glide-data-grid/dist/index.css";
 import type { Lead } from "@/lib/types";
 
 /* The sheet. Glide Data Grid themed to the app tokens; canvas renderers for
-   the two-line contact, the score bar, the status pill, the LinkedIn link and
-   the draft check. Row numbers, Company and Contact stay frozen; the rest
-   scrolls like a spreadsheet at natural widths. The grid ends at the last row. */
+   the row number, the two-line contact, the score bar, the status pill, the
+   LinkedIn link and the draft check. Natural widths, everything scrolls
+   together like a spreadsheet, and the grid ends at the last row. */
 
 import type { Row, Sort } from "./columns";
 export type { Row, Sort };
 
 const INK = "#181925", SOFT = "#737373", FAINT = "#a3a3a3", LINE = "#e8e8e8", GREEN = "#16a34a";
-export const ROW_H = 52, HEADER_H = 40, MARKER_W = 44;
+export const ROW_H = 52, HEADER_H = 40;
 
 const THEME: Partial<Theme> = {
   accentColor: "#ff6847",
@@ -78,6 +78,7 @@ const svg = (body: string, stroke = FAINT) =>
 const HEADER_ICONS = Object.fromEntries(Object.entries(PATHS).map(([k, v]) => [k, () => svg(v)]));
 
 const COLUMNS: (GridColumn & { id: string; width: number })[] = [
+  { id: "n", title: "", width: 44, icon: "similarity" },
   { id: "company", title: "Company", width: 220, icon: "company" },
   { id: "contact", title: "Contact", width: 200, icon: "contact" },
   { id: "similarity", title: "Similarity", width: 120, icon: "similarity" },
@@ -89,6 +90,7 @@ const COLUMNS: (GridColumn & { id: string; width: number })[] = [
 ];
 
 type TextCell = CustomCell<{ kind: "text"; text: string; weight?: number }>;
+type IndexCell = CustomCell<{ kind: "index"; n: number }>;
 type ContactCell = CustomCell<{ kind: "contact"; name: string; title: string }>;
 type ScoreCell = CustomCell<{ kind: "score"; value: number }>;
 type PillCell = CustomCell<{ kind: "pill"; label: string; tone: "grey" | "green" }>;
@@ -120,6 +122,19 @@ const textRenderer: CustomRenderer<TextCell> = {
   },
 };
 
+const indexRenderer: CustomRenderer<IndexCell> = {
+  kind: GridCellKind.Custom,
+  isMatch: is<IndexCell>("index"),
+  draw: (args, cell) => {
+    const { ctx, rect, theme } = args;
+    ctx.textBaseline = "middle"; ctx.textAlign = "center";
+    ctx.font = `13px ${theme.fontFamily}`; ctx.fillStyle = FAINT;
+    ctx.fillText(String(cell.data.n), rect.x + rect.width / 2, rect.y + rect.height / 2);
+    ctx.textAlign = "start";
+    return true;
+  },
+};
+
 const contactRenderer: CustomRenderer<ContactCell> = {
   kind: GridCellKind.Custom,
   isMatch: is<ContactCell>("contact"),
@@ -142,12 +157,12 @@ const scoreRenderer: CustomRenderer<ScoreCell> = {
     const { ctx, rect, theme } = args;
     const x = rect.x + theme.cellHorizontalPadding, cy = rect.y + rect.height / 2;
     const v = cell.data.value;
+    const bw = 44, bh = 4, by = cy - bh / 2;
+    ctx.beginPath(); ctx.roundRect(x, by, bw, bh, 2); ctx.fillStyle = LINE; ctx.fill();
+    ctx.beginPath(); ctx.roundRect(x, by, Math.max(bh, bw * (v / 100)), bh, 2); ctx.fillStyle = INK; ctx.fill();
     ctx.textBaseline = "middle";
     ctx.font = `500 14px ${theme.fontFamily}`; ctx.fillStyle = v >= 80 ? GREEN : INK;
-    ctx.fillText(String(v), x, cy);
-    const bx = x + 34, bw = 44, bh = 4, by = cy - bh / 2;
-    ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 2); ctx.fillStyle = LINE; ctx.fill();
-    ctx.beginPath(); ctx.roundRect(bx, by, Math.max(bh, bw * (v / 100)), bh, 2); ctx.fillStyle = INK; ctx.fill();
+    ctx.fillText(String(v), x + bw + 8, cy);
     return true;
   },
 };
@@ -264,6 +279,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
     const text = (d: string, opts?: Partial<GridCell>) => ({ kind: GridCellKind.Text, data: d, displayData: d, allowOverlay: false, ...opts }) as GridCell;
     if (!r) return text("");
     switch (COLUMNS[col].id) {
+      case "n": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: String(row + 1), data: { kind: "index", n: row + 1 } } as IndexCell;
       case "company": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.company, data: { kind: "text", text: r.company, weight: 500 } } as TextCell;
       case "contact": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: `${r.contact} · ${r.title}`, data: { kind: "contact", name: r.contact, title: r.title } } as ContactCell;
       case "similarity":
@@ -291,15 +307,15 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
           getCellContent={getCell}
           width="100%"
           height="100%"
-          rowMarkers={{ kind: "number", width: MARKER_W, theme: { textLight: FAINT, borderColor: LINE } }}
+          rowMarkers="none"
           rowHeight={ROW_H}
           headerHeight={HEADER_H}
-          freezeColumns={2}
+          freezeColumns={0}
           theme={THEME}
           headerIcons={HEADER_ICONS}
-          customRenderers={[textRenderer, contactRenderer, scoreRenderer, pillRenderer, linkRenderer, draftRenderer]}
+          customRenderers={[indexRenderer, textRenderer, contactRenderer, scoreRenderer, pillRenderer, linkRenderer, draftRenderer]}
           getRowThemeOverride={getRowThemeOverride}
-          onHeaderClicked={(col) => onSort(sort?.col === col ? (sort.dir === "desc" ? { col, dir: "asc" } : null) : { col, dir: "desc" })}
+          onHeaderClicked={(col) => col > 0 && onSort(sort?.col === col ? (sort.dir === "desc" ? { col, dir: "asc" } : null) : { col, dir: "desc" })}
           onCellActivated={openRow}
           onCellClicked={openRow}
           onColumnResize={(col, size) => { if (col.id) setWidths((w) => ({ ...w, [col.id as string]: size })); }}

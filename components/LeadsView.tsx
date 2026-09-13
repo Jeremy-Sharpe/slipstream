@@ -54,33 +54,48 @@ export function LeadsView() {
   const onClose = useCallback(() => setOpenId(null), []);
 
   return (
-    <div className="grid h-[calc(100vh-32px)] grid-cols-[380px_minmax(0,1fr)] gap-8">
-      <SearchPane searches={searches} leads={leads} selectedId={search?.id ?? null} onSelect={setSelectedId} onFind={onFind} busy={busy} />
+    <div className="flex h-[calc(100vh-64px)] flex-col">
+      <div className="shrink-0">
+        <h1 className="text-[22px] font-semibold text-ink">Leads</h1>
+        <p className="mt-1 text-[13.5px] text-soft">Companies like the ones you closed, found from your won calls.</p>
+      </div>
 
-      <section className="flex min-h-0 min-w-0 flex-col">
-        <div className="flex h-10 shrink-0 items-center justify-end gap-2">
-          <button
-            type="button"
-            aria-label="Search the sheet"
-            onClick={() => setShowSearch((s) => !s)}
-            className={cn("flex h-8 items-center gap-2 rounded-full px-3 text-[13px] text-soft transition-colors duration-150 hover:bg-surface hover:text-ink", showSearch && "bg-surface text-ink")}
-          >
-            <Search className="size-3.5" strokeWidth={1.75} /> Search
-          </button>
-          <div className="flex items-center gap-2">
-            <Button variant="primary" size="sm" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
-              {drafts > 0 ? `Approve all drafts · ${drafts}` : search?.status === "running" ? "Approve all drafts" : "All drafts approved"}
-            </Button>
+      <div className="mt-8 grid min-h-0 flex-1 grid-cols-[380px_1px_minmax(0,1fr)]">
+        <div className="flex min-h-0 flex-col pr-8">
+          <header className="flex h-12 shrink-0 items-center border-b border-line text-[13.5px] font-medium text-ink">Brief</header>
+          <div className="min-h-0 flex-1 pt-4">
+            <SearchPane searches={searches} leads={leads} selectedId={search?.id ?? null} onSelect={setSelectedId} onFind={onFind} busy={busy} />
           </div>
         </div>
-        <div className="relative mt-2 min-h-0 flex-1">
-          {rows.length === 0 ? (
-            <p className="flex h-full items-center justify-center text-[14px] text-faint">{search?.status === "running" ? "Searching Victoria" : "No companies matched this brief"}</p>
-          ) : (
-            <LeadsGrid rows={rows} sort={sort} onSort={setSort} onOpen={onOpen} showSearch={showSearch} onSearchClose={() => setShowSearch(false)} />
-          )}
-        </div>
-      </section>
+
+        <div aria-hidden className="bg-line" />
+
+        <section className="flex min-h-0 min-w-0 flex-col pl-8">
+          <header className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-line">
+            <p className="text-[13.5px] font-medium text-ink">Preview · {rows.length} {rows.length === 1 ? "lead" : "leads"}</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Search the sheet"
+                onClick={() => setShowSearch((s) => !s)}
+                className={cn("flex h-8 items-center gap-2 rounded-full px-3 text-[13px] text-soft transition-colors duration-150 hover:bg-surface hover:text-ink", showSearch && "bg-surface text-ink")}
+              >
+                <Search className="size-3.5" strokeWidth={1.75} /> Search
+              </button>
+              <Button variant="primary" size="sm" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
+                {drafts > 0 ? `Approve all drafts · ${drafts}` : search?.status === "running" ? "Approve all drafts" : "All drafts approved"}
+              </Button>
+            </div>
+          </header>
+          <div className="relative min-h-0 flex-1 pt-4">
+            {rows.length === 0 ? (
+              <p className="flex h-full items-center justify-center text-[14px] text-faint">{search?.status === "running" ? "Searching Victoria" : "No companies matched this brief"}</p>
+            ) : (
+              <LeadsGrid rows={rows} sort={sort} onSort={setSort} onOpen={onOpen} showSearch={showSearch} onSearchClose={() => setShowSearch(false)} />
+            )}
+          </div>
+        </section>
+      </div>
 
       <LeadPanel lead={open} onClose={onClose} />
     </div>

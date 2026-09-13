@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Avatar } from "./Avatar";
 import { Button, cn } from "./ui";
 
 /* Settings: the few things a rep would actually touch. Values live in
@@ -78,9 +77,8 @@ export function SettingsView() {
 
       <div className="mt-8 flex flex-col gap-4">
         <Card title="Account">
-          <Row label="Profile">
-            <Avatar name={name} size={28} />
-            <Field value={name} onChange={setName} className="w-52" />
+          <Row label="Name">
+            <Field value={name} onChange={setName} />
           </Row>
           <Row label="Email">
             <Field value={email} onChange={setEmail} />
