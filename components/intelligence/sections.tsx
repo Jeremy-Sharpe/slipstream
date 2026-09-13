@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowRight, Fingerprint, Minus, Plus } from "lucide-react";
+import { ArrowRight, Fingerprint, FlaskConical, Minus, Plus, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { ApiIcpFreshness } from "@/lib/api/slipstream";
+import { simulateRevenueDnaShock, type SimulatedOutcome } from "@/lib/revenue-dna";
 import type { Intelligence, ObjectionHandling } from "@/lib/types/intelligence";
 import { cn } from "@/lib/utils";
 import { Bar, EvidenceChip, OutcomeTag, Section } from "./primitives";
@@ -95,6 +96,7 @@ export function DerivedIcp({ data, active }: Props) {
 }
 
 export function RevenueDna({ freshness, status, active }: { freshness: ApiIcpFreshness | null; status: "checking" | "live" | "missing" | "error"; active?: string }) {
+  const [simulatedOutcome, setSimulatedOutcome] = useState<SimulatedOutcome | null>(null);
   const current = freshness?.status === "current";
   const stale = freshness?.status === "stale";
   const headline = current
@@ -104,6 +106,9 @@ export function RevenueDna({ freshness, status, active }: { freshness: ApiIcpFre
       : status === "checking"
         ? "Checking the targeting fingerprint…"
         : "Relearn once to activate continuous targeting";
+  const simulation = simulatedOutcome && freshness
+    ? simulateRevenueDnaShock(simulatedOutcome, freshness.profile_version, freshness.leads_on_profile)
+    : null;
   return (
     <Section id="revenue-dna" title="Revenue DNA" meta="Outcome-triggered ICP freshness gate" active={active === "revenue-dna"}>
       <div className="flex items-start justify-between gap-8">
@@ -125,9 +130,40 @@ export function RevenueDna({ freshness, status, active }: { freshness: ApiIcpFre
           <div className="bg-page p-4"><p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Lead impact</p><p className="mt-2 text-[18px] font-semibold text-foreground">{freshness.leads_needing_rescore ? `${freshness.leads_needing_rescore} need a new score` : `${freshness.leads_on_profile} current`}</p></div>
         </div>
       )}
+      {current && freshness && (
+        <div className="mt-5 overflow-hidden rounded-lg border border-border bg-page">
+          <div className="flex flex-col justify-between gap-4 border-b border-border px-4 py-4 md:flex-row md:items-center">
+            <div className="flex gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary"><FlaskConical className="size-[18px]" /></span>
+              <div><p className="text-[15px] font-semibold text-foreground">Outcome shock test</p><p className="mt-0.5 text-[12px] text-muted-foreground">Presenter-safe simulation · does not write to the CRM or call a provider</p></div>
+            </div>
+            <div className="flex items-center gap-2">
+              {(["won", "lost"] as const).map((outcome) => (
+                <button key={outcome} type="button" aria-pressed={simulatedOutcome === outcome} onClick={() => setSimulatedOutcome(outcome)} className={cn("h-9 rounded-md border px-3 text-[13px] font-medium transition-colors", simulatedOutcome === outcome ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:border-foreground/30")}>New deal {outcome}</button>
+              ))}
+              {simulatedOutcome && <button type="button" onClick={() => setSimulatedOutcome(null)} aria-label="Reset outcome shock test" className="flex size-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground"><RotateCcw className="size-4" /></button>}
+            </div>
+          </div>
+          {simulation ? (
+            <div className="px-4 py-4" role="status" aria-live="polite">
+              <div className="flex items-center justify-between gap-4"><p className="text-[12px] font-semibold tracking-wide text-primary uppercase">Hypothetical {simulation.outcome} recorded</p><p className="text-[12px] text-muted-foreground">Live state remains unchanged</p></div>
+              <div className="mt-3 grid gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-4">
+                <ShockStep index="1" title="Signal" value={simulation.direction} />
+                <ShockStep index="2" title="Detect" value={simulation.staleProfile} />
+                <ShockStep index="3" title="Protect" value={`${simulation.affectedLeads} leads need re-score · ${simulation.sourcingState}`} />
+                <ShockStep index="4" title="Adapt" value={simulation.nextProfile} />
+              </div>
+            </div>
+          ) : <p className="px-4 py-3 text-[13px] text-muted-foreground">Choose a hypothetical outcome to watch it propagate from CRM evidence to ICP version, lead scores and sourcing control.</p>}
+        </div>
+      )}
       <p className="mt-4 text-[13px] text-muted-foreground">The sourcing API fails closed when this fingerprint is stale. A new win or loss must be learned before credits can be spent.</p>
     </Section>
   );
+}
+
+function ShockStep({ index, title, value }: { index: string; title: string; value: string }) {
+  return <div className="bg-card p-3"><p className="text-[10px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">{index} · {title}</p><p className="mt-1.5 text-[13px] leading-5 font-medium text-foreground">{value}</p></div>;
 }
 
 const HANDLING: { key: ObjectionHandling; label: string; note: string }[] = [

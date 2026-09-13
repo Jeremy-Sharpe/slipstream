@@ -17,7 +17,7 @@ Who is on what, what the live environment actually holds, and what only a human 
 
 | Thing | Where | State |
 |---|---|---|
-| Production UI | https://slipstream-hackathon.vercel.app | Vercel deployment `dpl_F17QVRsNEv2zMTVq7NXLyzq77xJV` serves the PR #53 Revenue DNA card, OpenRouter-first sourcing copy, dynamic Revenue Loop and the exact paused campaign in first-response HTML |
+| Production UI | https://slipstream-hackathon.vercel.app | Vercel deployment `dpl_F17QVRsNEv2zMTVq7NXLyzq77xJV` serves the PR #53 Revenue DNA card, OpenRouter-first sourcing copy, dynamic Revenue Loop and the exact paused campaign in first-response HTML. PR #56's value cards and mobile-shell polish are merged and locally browser-verified but not yet promoted: both the GitHub hook and one authenticated CLI attempt were rejected by Vercel's `api-deployments-free-per-day` one-day quota. Do not retry until the provider window resets. |
 | Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `16520b8dc829679b0e5461cedd7a2be77d367d6f`; readiness verifies OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`. The bounded demo evidence endpoint verifies 13 deals, 12 calls, two emails, ten safe fictional prospects and a current Revenue DNA fingerprint. Storage is `memory`; Supabase, Origami and delivery remain disabled. |
 | API environment file | `/etc/slipstream/api.env` on the VPS, root owned, 0600 | Loaded by the systemd unit. Every key the API needs has to exist here as well as locally |
 | Local API environment | `api/.env`, gitignored | Not present in the current workspace. Production secrets exist only in the root-owned VPS environment |
