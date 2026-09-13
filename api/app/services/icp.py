@@ -344,11 +344,12 @@ def _source_summary(deals: list[DealRecord]) -> IcpSourceSummary:
 
 
 def _ground_profile(profile: IcpProfile, deals: list[DealRecord]) -> IcpProfile:
-    won = [deal for deal in deals if deal.outcome == "won"]
+    won = _evidence_order([deal for deal in deals if deal.outcome == "won"])
     industries = _won_values(won, "industry", "industry")
     roles = _won_values(won, "contact_role", "role")
     triggers = _won_values(won, None, "trigger")
     headcount_band = _won_headcount_band(won)
+    known_headcounts = sum(_headcount_known(deal) for deal in won)
     industry_text = _plain_list(industries)
     role_text = _plain_list(roles)
     trigger_text = _plain_list(triggers)
@@ -358,7 +359,10 @@ def _ground_profile(profile: IcpProfile, deals: list[DealRecord]) -> IcpProfile:
         else "Industry fit is not yet established from won deals.",
     ]
     if headcount_band != "Not established":
-        summary_parts.append(f"Winning accounts had {headcount_band} staff.")
+        summary_parts.append(
+            f"Winning accounts had {headcount_band} staff among the {known_headcounts} won "
+            f"deals with a known headcount."
+        )
     if roles:
         summary_parts.append(f"Winning conversations involved {role_text}.")
     if triggers:
@@ -376,6 +380,11 @@ def _ground_profile(profile: IcpProfile, deals: list[DealRecord]) -> IcpProfile:
         if roles:
             criteria.append(f"contacts in these roles: {role_text}")
         brief_parts.append(f"Prioritise {' and '.join(criteria)}.")
+    if headcount_band != "Not established":
+        brief_parts.append(
+            f"The {headcount_band} staff band comes from the {known_headcounts} of {len(won)} "
+            f"won deals with a known headcount."
+        )
     if triggers:
         brief_parts.append(f"Look for active signals including {trigger_text}.")
     origami_brief = " ".join(brief_parts)
@@ -418,11 +427,7 @@ def _ground_evidence(
         (
             "headcount_band",
             [] if headcount_band == "Not established" else [headcount_band],
-            [
-                str(deal.id)
-                for deal in won
-                if deal.employee_count is not None or _deal_headcount_band(deal) is not None
-            ],
+            [str(deal.id) for deal in won if _headcount_known(deal)],
         ),
         (
             "contact_role",
@@ -490,10 +495,16 @@ def _valid_signal_text(value: object, limit: int) -> str | None:
     return text if text and len(text) <= limit else None
 
 
+def _headcount_known(deal: DealRecord) -> bool:
+    return deal.employee_count is not None or _deal_headcount_band(deal) is not None
+
+
 def _won_headcount_band(deals: list[DealRecord]) -> str:
-    deal_bands: list[str | None] = []
-    for deal in deals:
-        deal_bands.append(_deal_headcount_band(deal))
+    """Reconcile the band across the won deals that disclose a headcount, ignoring the rest."""
+    known = [deal for deal in deals if _headcount_known(deal)]
+    if len(known) < 2:
+        return "Not established"
+    deal_bands = [_deal_headcount_band(deal) for deal in known]
     unique_bands = _unique_text(
         [band for band in deal_bands if band is not None], limit=MAX_PROFILE_VALUES
     )
@@ -502,11 +513,11 @@ def _won_headcount_band(deals: list[DealRecord]) -> str:
         if all(
             (deal_band == band or deal.employee_count is not None)
             and (deal.employee_count is None or _headcount_in_band(deal.employee_count, band))
-            for deal, deal_band in zip(deals, deal_bands, strict=True)
+            for deal, deal_band in zip(known, deal_bands, strict=True)
         ):
             return band
-    counts = [deal.employee_count for deal in deals if deal.employee_count is not None]
-    if counts and len(counts) == len(deals):
+    counts = [deal.employee_count for deal in known if deal.employee_count is not None]
+    if counts and len(counts) == len(known):
         return f"{min(counts)}-{max(counts)}"
     return "Not established"
 
@@ -533,6 +544,13 @@ def _headcount_in_band(count: int, band: str) -> bool:
         return False
     boundary = int(bound_match.group(2))
     return count < boundary if bound_match.group(1).casefold() == "under" else count > boundary
+
+
+def _evidence_order(deals: list[DealRecord]) -> list[DealRecord]:
+    """Wins carrying call evidence lead the grounded lists; public client rows follow."""
+    call_derived = [deal for deal in deals if deal.metadata.get("fixture_call_id")]
+    listed_only = [deal for deal in deals if not deal.metadata.get("fixture_call_id")]
+    return [*call_derived, *listed_only]
 
 
 def _unique_text(values: list[object], *, limit: int) -> list[str]:

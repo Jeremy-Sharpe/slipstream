@@ -51,8 +51,18 @@ def _base_expected() -> dict[str, Any]:
     }
 
 
+def _spoken_amount(expected: dict[str, Any], call: Any) -> int | None:
+    """check_deal_amount only demands the figure when the transcript actually says it."""
+    amount = expected["deal"]["value_aud"]
+    transcript = eval_module.norm(call.transcript)
+    if amount and (str(amount) in transcript or f"{amount:,}" in transcript):
+        return amount
+    return None
+
+
 def _base_extraction(call: Any) -> dict[str, Any]:
     evidence = [{"source": "transcript", "sequence": 0, "quote": call.segments[0].body}]
+    amount = _spoken_amount(_base_expected(), call)
     return {
         "contact": {
             "name": {"value": "Maya  Chen", "evidence": evidence},
@@ -72,7 +82,7 @@ def _base_extraction(call: Any) -> dict[str, Any]:
         "deal": {
             "stage": {"value": "customer", "evidence": evidence},
             "outcome": {"value": "stalled", "evidence": evidence},
-            "amount": {"value": None, "evidence": []},
+            "amount": {"value": amount, "evidence": evidence if amount else []},
         },
         "promises": [
             {"value": "Send a gap summary", "evidence": evidence},
@@ -265,7 +275,7 @@ def _payload_from_labels(case: Any) -> ExtractionPayload:
                 confidence=0.9,
                 evidence=[EvidenceSpan(sequence=19, quote=_quote(call, 19))],
             ),
-            amount=_int_field(None, ""),
+            amount=_int_field(_spoken_amount(expected, call), _quote(call, 0)),
         ),
         promises=[
             _field(expected["promises"][0], _quote(call, 14), 14),

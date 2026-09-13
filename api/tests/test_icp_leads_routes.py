@@ -1,4 +1,6 @@
+import json
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from threading import Event, Lock
 from typing import Any
 
@@ -12,6 +14,34 @@ from app.schemas.icp import IcpProfile
 from app.schemas.leads import LeadIn
 from app.schemas.origami import Job
 from app.services.icp import cohort_revision, evidence_inventory
+
+FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures"
+
+
+def _expected_inventory() -> dict[str, Any]:
+    """Derive the fixture evidence counts from disk so the route test cannot go stale."""
+    calls = []
+    for folder in sorted(path for path in (FIXTURES_DIR / "calls").iterdir() if path.is_dir()):
+        if json.loads((folder / "script.json").read_text(encoding="utf-8")).get("demo"):
+            continue
+        calls.append(json.loads((folder / "expected.json").read_text(encoding="utf-8")))
+    clients = json.loads((FIXTURES_DIR / "crm" / "clients.json").read_text(encoding="utf-8"))
+    emails = json.loads(
+        (FIXTURES_DIR / "emails" / "icp-evidence.json").read_text(encoding="utf-8")
+    )
+    outcomes = [call["extraction"]["deal"]["outcome"] for call in calls]
+    won = outcomes.count("won") + len(clients)
+    contrast = sum(outcome in {"lost", "stalled"} for outcome in outcomes)
+    return {
+        "deals": len(calls) + len(clients),
+        "calls": len(calls),
+        "emails": len(emails),
+        "outcome_labelled": won + contrast,
+        "won_deals": won,
+        "contrast_deals": contrast,
+        "active_deals": sum(outcome == "no_show" for outcome in outcomes),
+        "ready_to_derive": won >= 2,
+    }
 
 
 def test_icp_derive_returns_503_with_missing_integration(client: TestClient) -> None:
@@ -29,16 +59,7 @@ def test_icp_evidence_inventory_is_keyless_and_becomes_ready(client: TestClient)
 
     assert loaded.status_code == 200
     assert inventory.status_code == 200
-    assert inventory.json() == {
-        "deals": 12,
-        "calls": 12,
-        "emails": 1,
-        "outcome_labelled": 11,
-        "won_deals": 5,
-        "contrast_deals": 6,
-        "active_deals": 1,
-        "ready_to_derive": True,
-    }
+    assert inventory.json() == _expected_inventory()
 
 
 def test_icp_freshness_requires_a_profile(client: TestClient) -> None:
@@ -89,10 +110,8 @@ def test_icp_freshness_exposes_current_revenue_dna_and_lead_version(client: Test
         "derived_cohort_revision": cohort_revision(deals),
         "current_cohort_revision": cohort_revision(deals),
         "source_summary": {
-            "deals": 12,
-            "calls": 12,
-            "emails": 1,
-            "outcome_labelled": 11,
+            key: _expected_inventory()[key]
+            for key in ("deals", "calls", "emails", "outcome_labelled")
         },
         "deals_added": 0,
         "outcome_labels_added": 0,

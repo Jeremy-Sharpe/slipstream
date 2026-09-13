@@ -1,6 +1,6 @@
 {
   "call_id": "call-13-marlowe-finch-demo",
-  "seller": "Harbourline IT",
+  "seller": "Eleno",
   "rep": "Jordan Belfort",
   "prospect": {
     "name": "Donnie Azoff",
@@ -16,163 +16,162 @@
     "domain": "marlowefinch.example"
   },
   "channel": "phone",
-  "scheduled_at": "2026-09-11T15:30:00+10:00",
+  "scheduled_at": "2026-09-11T09:00:00+10:00",
   "duration_target_seconds": 420,
   "outcome": "won",
   "demo": true,
   "deal_value_aud": 48600,
-  "trigger": "Cyber insurance renewal requiring Essential Eight controls",
+  "trigger": "Month-end client reporting and engagement letter drafting overwhelming the team",
   "turns": [
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Donnie Azoff, Jordan Belfort from Harbourline IT. I've heard Marlowe & Finch Accounting is the calmest thirty-four-person practice in Hawthorn, which means you must be hiding the chaos beautifully?"
+      "text": "Donnie Azoff, Jordan Belfort from Eleno. I've heard Marlowe & Finch Accounting is the calmest thirty-four-person practice in Hawthorn, so tell me, who is actually carrying month-end in there?"
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "That's generous. I'm Donnie, CFO, and there's definitely chaos. We've got a cyber insurance renewal on my desk and the partners want it gone before quarter close."
+      "text": "I'm Donnie, the CFO, and month-end is not calm at all. Client reporting and engagement letters are eating the team alive."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Perfect, picture this: three firms on your street have already moved, and the onboarding price is gone Friday. You don't need another committee, you need Harbourline on the tools before the insurer decides accountants are this season's pi\u00f1ata."
+      "text": "Then you're exactly who I built this pitch for. Picture it: three practices on your street have already signed, and the pilot price is gone Friday. It's $9,500 for the discovery phase and we start the build Monday. You don't need a committee, Donnie, you need engineers on the tools before another month-end swallows the place."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "Hold on. I'm taking the call because we need options, not because we've chosen anyone. What exactly are you proposing?"
+      "text": "Hold on. I'm taking the call because we need options, not because we've chosen anyone. What are you actually proposing to build?"
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Simple. Thirty seats, $135 per seat per month, managed IT, cyber hygiene, Microsoft 365, Xero access review, MFA, backups, helpdesk, partner-friendly reporting, the whole brass band. I can guarantee Essential Eight compliance inside a week."
+      "text": "Two agents, fixed scope, no science project. One drafts the month-end client reporting pack straight out of your ledger, the other drafts engagement letters from your own templates. Both run inside your systems, the IP is yours, no subscription. And I can guarantee the agents never hallucinate, so nothing goes out with an invented number in it."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "That's a very big promise. Also thirty seats is close, but we've thirty-four people including casual admin and seasonal tax support."
+      "text": "That is a very big promise. We have thirty-four people and every one has an opinion about how a report reads."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Thirty is the clean commercial start. We cover the core team now, catch the casuals in onboarding, and keep the invoice from looking like it swallowed a bowling ball. The annual figure is $48,600, and onboarding is at cost because I want this moving."
+      "text": "Opinions are fine, we encode the loudest one. The discovery phase is two weeks: we sit with your reporting lead, map the templates and wire the ledger. The build runs six weeks after that. Managed optimisation afterwards is optional, not a leash."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "Price is my first concern. Our incumbent charges less, and the partners are already grumpy about insurance premiums."
+      "text": "Price is my first concern. The partners have just signed off a software budget and they will ask me what this replaces."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Price is smoke, Donnie, premium is fire. Your insurer will halve the premium once they see our report, so the monthly line item becomes a rounding error with a login screen."
+      "text": "It replaces the Sunday nights, Donnie. You'll halve your back-office headcount by Christmas, so the line item pays for itself twice over before the first lodgement of the new year. Price is smoke. Capacity is the fire."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "You can't know that. The broker hasn't promised anything like a half reduction, and I can't sell fantasy savings to the partners."
+      "text": "I am not cutting half my back office. Two of those people are the reason the reports come out right."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Fair, fair, call it a sharp reduction rather than a tattoo. The point is the renewal asks for controls, and we package the answers so you aren't hunting screenshots from a router, a laptop and a drawer full of mystery passwords."
+      "text": "Fair enough, call it capacity released rather than seats removed. The point stands either way: your people stop moving figures out of one system and into another by hand, and start reviewing work that arrives already drafted."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "That part is real. We struggled last year to prove MFA coverage and backup testing. Still, our current provider knows the practice and the partners trust them."
+      "text": "That part I like. Reviewing a draft beats building one from scratch. But there is a governance question sitting underneath all of this."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Trust is lovely. Receipts are lovelier. None of our clients has ever been breached, and we run the service like a tax file with a stopwatch: evidence, cadence, accountability, no heroic cousin with a USB stick."
+      "text": "Governance is where we are strongest. None of our clients has ever had a compliance finding, and we run every engagement the same way: evidence at each step, review gates before anything sends, and a named engineer on the account."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "The incumbent isn't someone's cousin. They're a proper provider, and they've supported us for years."
+      "text": "Even so, the partners will want to know who signs off when the agent gets something wrong. Our current provider is slow, but nobody has ever had to answer that question about them."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "I hear you, and loyalty matters. The question is whether they're built for this renewal. Your incumbent is about to lose their certification, and even without that, you need insurer-grade evidence, not a nice bloke with fast email."
+      "text": "You sign off, exactly as you do today, except the draft arrives finished. And while we are here: Your incumbent is about to lose their ISO certification, which is its own answer to your governance question."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "About to lose certification? That's a pretty serious thing to say. I haven't heard that from anyone."
+      "text": "About to lose certification? That is a serious thing to say out loud, and I have not heard it from anyone else."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Let's not get stuck in the weeds. I'm saying the market's moving, auditors are waking up, insurers are grumpy, and you don't want Marlowe & Finch Accounting as the test case everyone whispers about at the Hawthorn lunch counter."
+      "text": "Let's not get bogged down in that. The market is moving, and you do not want Marlowe & Finch Accounting to be the practice everyone talks about in the Hawthorn coffee queue."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "I don't like being rushed. I do like the idea of evidence for the renewal, and a fixed commercial number helps. What would happen today if I said yes to reviewing it?"
+      "text": "I do not like being rushed. What happens today if I say yes to reviewing something?"
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Today is easy. I turn the call into a plain proposal, no interpretive dance, no discovery workshop that eats your calendar. You'll see seats, scope, onboarding, renewal evidence, support hours, response targets and the Monday start plan in one clean pack."
+      "text": "Today is easy. I turn this call into a plain proposal: the two agents, the scope of each, the discovery phase, the build weeks, who does what, and precisely what you own at the end of it."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "A clean pack is useful. I still need the managing partner to be comfortable before anyone signs."
+      "text": "A clean pack is useful. I still need the managing partner comfortable before anyone signs anything here."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Of course. Give the managing partner the tidy version: thirty core seats, insurer evidence first, no migration circus, and the finance line is predictable. I'll keep the terms sharp enough that nobody has to decode vendor soup at dinner."
+      "text": "Of course. Give the managing partner the short version: two agents, fixed scope, running in your systems, the IP transferred to you, no ongoing subscription, and a number that does not move once it is signed."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "Good. Clear and short will help."
+      "text": "Short and clear will help. He reads the first page and the last page, nothing else."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Beautiful. I will get a proposal in your inbox today, with a signed 30-seat agreement at $135 per seat per month and onboarding at cost. You sign, we start Monday, and your broker gets grown-up answers before they sharpen the pencil."
+      "text": "Then the first page carries the number and the last page carries the start date. I will get a proposal in your inbox today, with the statement of work attached so your managing partner can see the scope."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "I said review it, not definitely sign it. But if the agreement is clean and onboarding is genuinely at cost, I can take it to the managing partner tonight."
+      "text": "I said review it, not sign it. If the scope is genuinely fixed, I can take it to him tonight."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "That's the small step. Just say yes to the small step. I will send the proposal and 30-seat agreement by 5pm today, and we'll hold the Friday onboarding price while you get the signature."
+      "text": "That is the small step, and the small step is all I am asking for. I will send the proposal and statement of work by 5pm today."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "Fine. Send it by 5pm today, 11 September. I'll review it with the managing partner, and if the terms match what you've said, we'll sign the 30-seat agreement and start with onboarding Monday."
+      "text": "Fine. Send it by 5pm today, 11 September. I will review it with the managing partner, and if the scope matches what you have described, we will sign and start the discovery phase."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Excellent. I'll send it to donnie@marlowefinch.example, copy your office manager if you want, and keep the first page painfully clear: $48,600 annual managed service, onboarding at cost, insurer evidence first."
+      "text": "Excellent. I will send it to donnie@marlowefinch.example, and the first page will be painfully clear: $48,600 for the fixed-scope build, the discovery phase costed inside it, and the IP transferred to Marlowe & Finch Accounting at handover."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "Copy me only for now. And Jordan, trim the theatre from the email. The partners like numbers, not fireworks."
+      "text": "Copy nobody else for now. And Jordan, take the theatre out of the email. The partners like numbers, not fireworks."
     },
     {
       "speaker": "rep",
       "name": "Jordan Belfort",
-      "text": "Numbers only, fireworks in a separate attachment that mysteriously never arrives. Thanks Donnie, you've moved fast, which is exactly how we keep the renewal from becoming a Friday-night spreadsheet s\u00e9ance."
+      "text": "Numbers only. The fireworks go in a separate attachment that mysteriously never arrives. Thanks Donnie, you have moved faster than anyone else on your street."
     },
     {
       "speaker": "prospect",
       "name": "Donnie Azoff",
-      "text": "Right. Send the proposal. Bye."
+      "text": "Right. Send the proposal. Goodbye."
     }
-  ],
-  "audio_seconds": 420.0
+  ]
 }
