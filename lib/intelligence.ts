@@ -18,15 +18,34 @@ import { fixtureConversationId, getFixtures, type ApiFixtureSummary } from "@/li
 
 export type Tile = { label: string; value: string; line: string };
 
-export type Quote = { callId: string; href: string; company: string; turn: number; text: string };
+export type CallLink = { callId: string; href: string; company: string };
 
-export type Pattern = {
+export type Quote = CallLink & { turn: number; text: string };
+
+/* A behaviour measured across the cohort: won against the rest, with the quotes
+   behind it. The API computes these now; the client recomputes them only when the
+   API returns none. */
+export type BehaviourPattern = {
+  kind: "behaviour";
+  key: string;
   behaviour: string;
   takeaway: string;
   won: { n: number; of: number };
   other: { n: number; of: number };
   quotes: Quote[];
 };
+
+/* What the judge noticed that the fixed behaviours do not cover. Its quotes carry
+   no turn index, only the call they came from. */
+export type AnalystPattern = {
+  kind: "analyst";
+  key: string;
+  behaviour: string;
+  whyItMatters: string;
+  quotes: (CallLink & { text: string })[];
+};
+
+export type Pattern = BehaviourPattern | AnalystPattern;
 
 export type Trigger = { label: string; count: number | null };
 
@@ -164,49 +183,81 @@ function buildTiles(scorecards: ApiScorecard[], fixtures: ApiFixtureSummary[]): 
   return [analysed, winRate, nextStep];
 }
 
-async function buildPatterns(scorecards: ApiScorecard[], fixtures: ApiFixtureSummary[]): Promise<Pattern[]> {
+type CallLinks = { companies: Map<string, string>; hrefs: Map<string, string> };
+
+async function callLinks(fixtures: ApiFixtureSummary[]): Promise<CallLinks> {
+  return {
+    companies: new Map(fixtures.map((fixture) => [fixture.call_id, fixture.company])),
+    hrefs: new Map(await Promise.all(fixtures.map(async (fixture) => [fixture.call_id, `/calls/${await fixtureConversationId(fixture.call_id)}`] as const))),
+  };
+}
+
+function linkFor(links: CallLinks, callId: string): CallLink {
+  return { callId, href: links.hrefs.get(callId) ?? "/conversations", company: links.companies.get(callId) ?? callId };
+}
+
+/* The behaviours the API computed, the source whenever it returns any. */
+function apiPatterns(behaviours: NonNullable<ApiPlaybook["behaviours"]>, links: CallLinks): BehaviourPattern[] {
+  return behaviours.map((item) => ({
+    kind: "behaviour",
+    key: item.key,
+    behaviour: item.behaviour,
+    takeaway: item.takeaway,
+    won: item.won,
+    other: item.other,
+    quotes: item.quotes.map((quote) => ({ ...linkFor(links, quote.call_id), turn: quote.turn_index, text: quote.quote })),
+  }));
+}
+
+/* The judge's own patterns, shown beside the measured ones rather than instead of
+   them: it cites quotes, not counts. */
+function analystPatterns(patterns: ApiPlaybook["patterns"], links: CallLinks): AnalystPattern[] {
+  return patterns.map((item, index) => ({
+    kind: "analyst",
+    key: `analyst-${index}-${item.behaviour}`,
+    behaviour: item.behaviour,
+    whyItMatters: item.why_it_matters,
+    quotes: item.quotes.map((text, position) => ({ ...linkFor(links, item.call_ids[position] ?? item.call_ids[0]), text })),
+  }));
+}
+
+function buildPatterns(scorecards: ApiScorecard[], links: CallLinks): BehaviourPattern[] {
   const labelled = scorecards.filter((card) => card.outcome !== null);
   const won = labelled.filter((card) => card.outcome === "won");
   const other = labelled.filter((card) => card.outcome !== "won");
   if (!labelled.length) return [];
 
-  const companies = new Map(fixtures.map((fixture) => [fixture.call_id, fixture.company]));
-  const hrefs = new Map(await Promise.all(fixtures.map(async (fixture) => [fixture.call_id, `/calls/${await fixtureConversationId(fixture.call_id)}`] as const)));
   const quote = (card: ApiScorecard, evidence: { turn_index: number; quote: string } | undefined): Quote | null => {
     const key = card.source_external_id ?? card.call_id;
-    return evidence
-      ? {
-          callId: key,
-          href: hrefs.get(key) ?? "/conversations",
-          company: companies.get(key) ?? key,
-          turn: evidence.turn_index,
-          text: evidence.quote,
-        }
-      : null;
+    return evidence ? { ...linkFor(links, key), turn: evidence.turn_index, text: evidence.quote } : null;
   };
 
   const rate = (cards: ApiScorecard[], test: (card: ApiScorecard) => boolean) => (cards.length ? cards.filter(test).length / cards.length : 0);
 
-  const behaviours: { behaviour: string; test: (card: ApiScorecard) => boolean; takeaway: string; quote: (card: ApiScorecard) => Quote | null }[] = [
+  const behaviours: { key: string; behaviour: string; test: (card: ApiScorecard) => boolean; takeaway: string; quote: (card: ApiScorecard) => Quote | null }[] = [
     {
+      key: "dated-next-step",
       behaviour: "Secured a dated next step",
       test: (card) => card.next_step_secured,
       takeaway: `Won calls booked the next step ${pct(rate(won, (card) => card.next_step_secured))} of the time, the rest ${pct(rate(other, (card) => card.next_step_secured))}.`,
       quote: (card) => quote(card, card.next_step_evidence ?? undefined),
     },
     {
+      key: `discovery-floor-${DISCOVERY_FLOOR}`,
       behaviour: `${DISCOVERY_FLOOR} or more discovery questions`,
       test: (card) => card.discovery_questions >= DISCOVERY_FLOOR,
       takeaway: `Won calls asked ${mean(won.map((card) => card.discovery_questions)).toFixed(1)} discovery questions on average, the rest ${mean(other.map((card) => card.discovery_questions)).toFixed(1)}.`,
       quote: (card) => quote(card, card.discovery_evidence[0]),
     },
     {
+      key: "objection-handled",
       behaviour: "Objection handled on the call",
       test: (card) => card.objection_handling === "handled",
       takeaway: `Won calls answered the objection outright ${pct(rate(won, (card) => card.objection_handling === "handled"))} of the time, the rest ${pct(rate(other, (card) => card.objection_handling === "handled"))}.`,
       quote: (card) => quote(card, card.objection_evidence[0]),
     },
     {
+      key: "healthy-talk-ratio",
       behaviour: "Rep talk ratio in the healthy band",
       test: (card) => card.talk_ratio_band === "healthy",
       takeaway: `Winning reps spoke ${pct(mean(won.map((card) => card.rep_talk_ratio)))} of the call, the rest ${pct(mean(other.map((card) => card.rep_talk_ratio)))}.`,
@@ -215,6 +266,8 @@ async function buildPatterns(scorecards: ApiScorecard[], fixtures: ApiFixtureSum
   ];
 
   return behaviours.map((behaviour) => ({
+    kind: "behaviour" as const,
+    key: behaviour.key,
     behaviour: behaviour.behaviour,
     takeaway: behaviour.takeaway,
     won: { n: won.filter(behaviour.test).length, of: won.length },
@@ -290,6 +343,13 @@ export async function getIntelligence(): Promise<Intelligence> {
     ? await scorecardsFor(fixtures)
     : { scorecards: [] as ApiScorecard[], missing: [] as string[], error: null };
 
+  const links = await callLinks(fixtures);
+  const derivedBehaviours = playbook?.behaviours ?? [];
+  const patterns: Pattern[] = [
+    ...(derivedBehaviours.length ? apiPatterns(derivedBehaviours, links) : buildPatterns(scorecards, links)),
+    ...analystPatterns(playbook?.patterns ?? [], links),
+  ];
+
   const coaching = coachingFrom(playbook, scorecards);
   const errors = {
     icp: icpResult.status === "rejected" ? reason(icpResult.reason) : null,
@@ -301,7 +361,7 @@ export async function getIntelligence(): Promise<Intelligence> {
 
   return {
     tiles: buildTiles(scorecards, fixtures),
-    patterns: await buildPatterns(scorecards, fixtures),
+    patterns,
     coachingFocus: coaching.lines,
     coachingSource: coaching.source,
     triggers: (profile?.profile.triggers ?? []).map((label) => ({ label, count: null })),

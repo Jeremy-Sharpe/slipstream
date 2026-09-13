@@ -89,6 +89,7 @@ const COLUMNS: (GridColumn & { id: string; width: number })[] = [
 ];
 
 type TextCell = CustomCell<{ kind: "text"; text: string; weight?: number }>;
+type CompanyCell = CustomCell<{ kind: "company"; name: string; fictional: boolean }>;
 type ContactCell = CustomCell<{ kind: "contact"; name: string; title: string }>;
 type ScoreCell = CustomCell<{ kind: "score"; value: number }>;
 type PillCell = CustomCell<{ kind: "pill"; label: string; tone: "grey" | "green" }>;
@@ -116,6 +117,35 @@ const textRenderer: CustomRenderer<TextCell> = {
     ctx.textBaseline = "middle";
     ctx.font = `${cell.data.weight ?? 400} 14px ${theme.fontFamily}`; ctx.fillStyle = INK;
     ctx.fillText(fitText(ctx, cell.data.text, rect.width - theme.cellHorizontalPadding * 2), rect.x + theme.cellHorizontalPadding, rect.y + rect.height / 2);
+    return true;
+  },
+};
+
+/* Generated prospects are invented, so the company name carries a muted chip
+   (the grey Pill from ui.tsx, drawn on canvas). */
+const FICTIONAL = "Fictional";
+
+const companyRenderer: CustomRenderer<CompanyCell> = {
+  kind: GridCellKind.Custom,
+  isMatch: is<CompanyCell>("company"),
+  draw: (args, cell) => {
+    const { ctx, rect, theme } = args;
+    const x = rect.x + theme.cellHorizontalPadding, cy = rect.y + rect.height / 2;
+    let max = rect.width - theme.cellHorizontalPadding * 2, chipW = 0;
+    if (cell.data.fictional) {
+      ctx.font = `500 11px ${theme.fontFamily}`;
+      chipW = ctx.measureText(FICTIONAL).width + 14;
+      max -= chipW + 8;
+    }
+    ctx.textBaseline = "middle";
+    ctx.font = `500 14px ${theme.fontFamily}`; ctx.fillStyle = INK;
+    const name = fitText(ctx, cell.data.name, Math.max(24, max));
+    ctx.fillText(name, x, cy);
+    if (!cell.data.fictional) return true;
+    const cx = x + ctx.measureText(name).width + 8, h = 18;
+    ctx.beginPath(); ctx.roundRect(cx, cy - h / 2, chipW, h, 9); ctx.fillStyle = "#f5f5f5"; ctx.fill();
+    ctx.font = `500 11px ${theme.fontFamily}`; ctx.fillStyle = SOFT;
+    ctx.fillText(FICTIONAL, cx + 7, cy + 0.5);
     return true;
   },
 };
@@ -264,7 +294,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
     const text = (d: string, opts?: Partial<GridCell>) => ({ kind: GridCellKind.Text, data: d, displayData: d, allowOverlay: false, ...opts }) as GridCell;
     if (!r) return text("");
     switch (COLUMNS[col].id) {
-      case "company": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.company, data: { kind: "text", text: r.company, weight: 500 } } as TextCell;
+      case "company": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.company, data: { kind: "company", name: r.company, fictional: r.synthetic } } as CompanyCell;
       case "contact": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: `${r.contact} · ${r.title}`, data: { kind: "contact", name: r.contact, title: r.title } } as ContactCell;
       case "similarity":
         if (!r.scored) return { kind: GridCellKind.Loading, allowOverlay: false, skeletonWidth: 78, skeletonWidthVariability: 0 };
@@ -299,7 +329,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
           freezeColumns={2}
           theme={THEME}
           headerIcons={HEADER_ICONS}
-          customRenderers={[textRenderer, contactRenderer, scoreRenderer, pillRenderer, linkRenderer, draftRenderer]}
+          customRenderers={[textRenderer, companyRenderer, contactRenderer, scoreRenderer, pillRenderer, linkRenderer, draftRenderer]}
           getRowThemeOverride={getRowThemeOverride}
           onHeaderClicked={(col) => onSort(sort?.col === col ? (sort.dir === "desc" ? { col, dir: "asc" } : null) : { col, dir: "desc" })}
           onCellActivated={openRow}

@@ -1,4 +1,10 @@
+import json
+import re
+import unicodedata
+from collections.abc import Sequence
+from functools import lru_cache
 from pathlib import Path
+from typing import NamedTuple
 from uuid import NAMESPACE_URL, uuid5
 
 from pydantic import BaseModel, Field
@@ -11,12 +17,16 @@ from app.services.embeddings import embed_texts
 from app.services.icp import cosine_similarity, won_centroid
 from app.services.icp_leads_store import IcpLeadsStore
 
-PROMPT = (Path(__file__).resolve().parents[1] / "prompts" / "demo-leads-v1.md").read_text(
+PROMPT = (Path(__file__).resolve().parents[1] / "prompts" / "demo-leads-v2.md").read_text(
     encoding="utf-8"
 )
+FIXTURES_DIR = Path(__file__).resolve().parents[3] / "fixtures"
+SLUG_MAX_LENGTH = 40
 
 
 class DemoLeadAttributes(BaseModel):
+    company_name: str = Field(min_length=2, max_length=80)
+    person_name: str = Field(min_length=2, max_length=80)
     title: str = Field(min_length=2, max_length=100)
     industry: str = Field(min_length=2, max_length=100)
     employee_count: int = Field(ge=1, le=100_000)
@@ -27,6 +37,75 @@ class DemoLeadAttributes(BaseModel):
 
 class DemoLeadBatch(BaseModel):
     leads: list[DemoLeadAttributes] = Field(min_length=10, max_length=10)
+
+
+class ProtectedNames(NamedTuple):
+    """Real companies and people the generator must never reproduce."""
+
+    companies: frozenset[str]
+    people: frozenset[str]
+
+
+class ResolvedName(NamedTuple):
+    company: str
+    person: str
+    replaced: bool
+
+
+def company_domain(company_name: str) -> str:
+    """A reserved .example domain derived from the company name, never any other TLD."""
+    folded = (
+        unicodedata.normalize("NFKD", company_name).encode("ascii", "ignore").decode("ascii")
+    )
+    slug = "-".join(re.findall(r"[a-z0-9]+", folded.lower()))[:SLUG_MAX_LENGTH].strip("-")
+    return f"{slug or 'prospect'}.example"
+
+
+@lru_cache(maxsize=4)
+def protected_names(fixtures_dir: Path = FIXTURES_DIR) -> ProtectedNames:
+    companies: set[str] = set()
+    people: set[str] = set()
+    clients = fixtures_dir / "crm" / "clients.json"
+    if clients.is_file():
+        rows = json.loads(clients.read_text(encoding="utf-8"))
+        for row in rows:
+            name = row.get("name") if isinstance(row, dict) else None
+            if isinstance(name, str) and name.strip():
+                companies.add(name.strip().casefold())
+    for script in sorted(fixtures_dir.glob("calls/*/script.json")):
+        data = json.loads(script.read_text(encoding="utf-8"))
+        for key, sink in (("company", companies), ("prospect", people)):
+            section = data.get(key) if isinstance(data, dict) else None
+            name = section.get("name") if isinstance(section, dict) else None
+            if isinstance(name, str) and name.strip():
+                sink.add(name.strip().casefold())
+    return ProtectedNames(frozenset(companies), frozenset(people))
+
+
+def resolve_names(
+    items: Sequence[DemoLeadAttributes], protected: ProtectedNames
+) -> list[ResolvedName]:
+    """Replace any generated name that collides with a real name or an earlier row."""
+    resolved: list[ResolvedName] = []
+    used: set[str] = set()
+    for index, item in enumerate(items, start=1):
+        company = item.company_name.strip()
+        person = item.person_name.strip()
+        folded = company.casefold()
+        replaced = False
+        if (
+            folded in used
+            or folded in protected.companies
+            or any(real in folded for real in protected.companies)
+        ):
+            company = f"Prospect {index:02d} Pty Ltd"
+            replaced = True
+        if person.casefold() in protected.people:
+            person = f"Contact {index:02d}"
+            replaced = True
+        used.add(company.casefold())
+        resolved.append(ResolvedName(company=company, person=person, replaced=replaced))
+    return resolved
 
 
 def generate_demo_leads(
@@ -51,12 +130,13 @@ def generate_demo_leads(
         user=profile.origami_brief,
         schema=DemoLeadBatch,
     )
+    names = resolve_names(result.output.leads, protected_names())
     inputs = [
         LeadIn(
             icp_profile_id=str(profile.id),
-            company_name=f"ICP Match {index:02d} (fictional)",
-            company_domain=f"icp-match-{index:02d}.example",
-            person_name=f"Demo Contact {index:02d}",
+            company_name=name.company,
+            company_domain=company_domain(name.company),
+            person_name=name.person,
             title=item.title,
             industry=item.industry,
             employee_count=item.employee_count,
@@ -69,9 +149,12 @@ def generate_demo_leads(
                 "synthetic": True,
                 "model": result.model,
                 "rationale": item.rationale,
+                "name_replaced": name.replaced,
             },
         )
-        for index, item in enumerate(result.output.leads, start=1)
+        for index, (item, name) in enumerate(
+            zip(result.output.leads, names, strict=True), start=1
+        )
     ]
     texts = [
         " ".join(

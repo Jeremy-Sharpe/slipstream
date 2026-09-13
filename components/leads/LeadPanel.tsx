@@ -33,7 +33,10 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
         <>
           <header className="flex items-start gap-3 px-6 pt-6 pb-4">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[16px] font-semibold text-ink">{l.company}</p>
+              <div className="flex items-center gap-2">
+                <p className="truncate text-[16px] font-semibold text-ink">{l.company}</p>
+                {l.synthetic && <Pill className="shrink-0">Fictional</Pill>}
+              </div>
               <p className="truncate text-[13.5px] text-soft">{[l.contact, l.title, l.location].filter(Boolean).join(" · ")}</p>
             </div>
             <button type="button" aria-label="Close" onClick={onClose} className="flex size-8 shrink-0 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><X className="size-4" strokeWidth={1.75} /></button>

@@ -86,6 +86,8 @@ export type LeadStatus = "new" | "drafted" | "approved";
 export type Lead = {
   id: string;
   company: string;
+  /** Generated demo prospect: the company and contact are invented. */
+  synthetic: boolean;
   contact: string;
   title: string;
   location: string;

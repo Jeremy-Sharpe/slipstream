@@ -25,6 +25,7 @@ export function toLead(api: ApiLead, searchId: string, profile: ApiIcpProfile | 
   return {
     id: api.id,
     company: api.company_name,
+    synthetic: api.metadata?.synthetic === true,
     contact: api.person_name ?? "Unknown contact",
     title: api.title ?? "",
     location: api.location ?? "",

@@ -17,6 +17,7 @@ from app.schemas.leads import LeadIn
 from app.services.demo_leads import (
     DemoLeadAttributes,
     DemoLeadBatch,
+    company_domain,
     demo_job_id,
     generate_demo_leads,
 )
@@ -170,8 +171,48 @@ def test_current_profile_match_requires_exact_models_and_inventory() -> None:
     assert _profile_is_current(_profile(), inventory, settings, "b" * 64) is False
 
 
-def test_generated_demo_leads_are_obviously_fictional_and_reused(monkeypatch: Any) -> None:
-    store = InMemoryIcpLeadsStore()
+COMPANY_NAMES = [
+    "Marrick Capital Partners",
+    "Southbank Quant Research",
+    "Harbourline Advisory Group",
+    "Coburg Freight Systems",
+    "Yarraville Risk Collective",
+    "Parkville Ledger Co",
+    "Docklands Asset Works",
+    "Brunswick Claims Bureau",
+    "Fitzroy Audit House",
+    "Carlton Treasury Labs",
+]
+PERSON_NAMES = [
+    "Imogen Wheeler",
+    "Samuel Okafor",
+    "Ruby Castellano",
+    "Hamish Petrov",
+    "Nadia Brightwell",
+    "Callum Verity",
+    "Thea Lindqvist",
+    "Marcus Dalrymple",
+    "Sienna Whitlock",
+    "Arjun Mehta",
+]
+
+
+def _attributes(index: int, **overrides: Any) -> DemoLeadAttributes:
+    fields: dict[str, Any] = {
+        "company_name": COMPANY_NAMES[index],
+        "person_name": PERSON_NAMES[index],
+        "title": "Operations Manager",
+        "industry": "Professional services",
+        "employee_count": 40 + index,
+        "location": "Melbourne",
+        "rationale": "Matches the observed operations workflow trigger.",
+        "relevance_score": 0.9,
+    }
+    fields.update(overrides)
+    return DemoLeadAttributes(**fields)
+
+
+def _seeded_profile(store: InMemoryIcpLeadsStore) -> Any:
     deal = store.upsert_deal(
         {
             "crm_external_id": "won-demo",
@@ -193,25 +234,36 @@ def test_generated_demo_leads_are_obviously_fictional_and_reused(monkeypatch: An
         deal_id=str(deal.id),
         evidence={"deal_snapshot": deal.model_dump(mode="json")},
     )
+    return profile
+
+
+def _batch_returning(
+    monkeypatch: Any, leads: list[DemoLeadAttributes]
+) -> None:
+    def fake_structured(*_: Any, **__: Any) -> ReasoningResult[DemoLeadBatch]:
+        return ReasoningResult(
+            output=DemoLeadBatch(leads=leads),
+            model="openai/gpt-5.4-mini",
+            provider="openrouter",
+        )
+
+    monkeypatch.setattr("app.services.demo_leads.structured", fake_structured)
+
+
+def _embed(texts: list[str]) -> list[list[float]]:
+    return [[1.0, 0.0] for _ in texts]
+
+
+def test_generated_demo_leads_are_obviously_fictional_and_reused(monkeypatch: Any) -> None:
+    store = InMemoryIcpLeadsStore()
+    profile = _seeded_profile(store)
     calls = 0
 
     def fake_structured(*_: Any, **__: Any) -> ReasoningResult[DemoLeadBatch]:
         nonlocal calls
         calls += 1
         return ReasoningResult(
-            output=DemoLeadBatch(
-                leads=[
-                    DemoLeadAttributes(
-                        title="Operations Manager",
-                        industry="Professional services",
-                        employee_count=40 + index,
-                        location="Melbourne",
-                        rationale="Matches the observed operations workflow trigger.",
-                        relevance_score=0.9,
-                    )
-                    for index in range(10)
-                ]
-            ),
+            output=DemoLeadBatch(leads=[_attributes(index) for index in range(10)]),
             model="openai/gpt-5.4-mini",
             provider="openrouter",
         )
@@ -219,20 +271,59 @@ def test_generated_demo_leads_are_obviously_fictional_and_reused(monkeypatch: An
     monkeypatch.setattr("app.services.demo_leads.structured", fake_structured)
     settings = Settings(_env_file=None, openrouter_api_key="openrouter-test")
 
-    def embed(texts: list[str]) -> list[list[float]]:
-        return [[1.0, 0.0] for _ in texts]
-
-    first = generate_demo_leads(store, settings, embed, settings, profile=profile)
-    second = generate_demo_leads(store, settings, embed, settings, profile=profile)
+    first = generate_demo_leads(store, settings, _embed, settings, profile=profile)
+    second = generate_demo_leads(store, settings, _embed, settings, profile=profile)
 
     assert calls == 1
     assert [lead.id for lead in second] == [lead.id for lead in first]
     assert len(first) == 10
+    assert [lead.company_name for lead in first] == COMPANY_NAMES
+    assert [lead.person_name for lead in first] == PERSON_NAMES
     assert all(lead.company_domain and lead.company_domain.endswith(".example") for lead in first)
-    assert all(lead.person_name and lead.person_name.startswith("Demo Contact") for lead in first)
+    assert first[0].company_domain == "marrick-capital-partners.example"
     assert all(lead.email is None and lead.linkedin_url is None for lead in first)
     assert all(lead.metadata["synthetic"] is True for lead in first)
+    assert all(lead.metadata["name_replaced"] is False for lead in first)
     assert all(lead.similarity_score == 1 for lead in first)
+
+
+def test_generated_names_never_reuse_a_real_client(monkeypatch: Any) -> None:
+    store = InMemoryIcpLeadsStore()
+    profile = _seeded_profile(store)
+    leads = [_attributes(index) for index in range(10)]
+    leads[3] = _attributes(3, company_name="Bell Potter", person_name="Maya Chen")
+    _batch_returning(monkeypatch, leads)
+    settings = Settings(_env_file=None, openrouter_api_key="openrouter-test")
+
+    generated = generate_demo_leads(store, settings, _embed, settings, profile=profile)
+
+    assert "Bell Potter" in {row["name"] for row in _client_rows()}
+    assert generated[3].company_name == "Prospect 04 Pty Ltd"
+    assert generated[3].company_domain == "prospect-04-pty-ltd.example"
+    assert generated[3].person_name == "Contact 04"
+    assert generated[3].metadata["name_replaced"] is True
+    assert all(lead.metadata["name_replaced"] is False for lead in generated[:3] + generated[4:])
+    assert not any(
+        "bell potter" in (lead.company_name or "").casefold() for lead in generated
+    )
+
+
+def test_duplicate_generated_company_names_are_replaced(monkeypatch: Any) -> None:
+    store = InMemoryIcpLeadsStore()
+    profile = _seeded_profile(store)
+    leads = [_attributes(index) for index in range(10)]
+    leads[5] = _attributes(5, company_name=COMPANY_NAMES[0].upper())
+    _batch_returning(monkeypatch, leads)
+    settings = Settings(_env_file=None, openrouter_api_key="openrouter-test")
+
+    generated = generate_demo_leads(store, settings, _embed, settings, profile=profile)
+    companies = [lead.company_name for lead in generated]
+
+    assert companies[0] == COMPANY_NAMES[0]
+    assert companies[5] == "Prospect 06 Pty Ltd"
+    assert generated[5].metadata["name_replaced"] is True
+    assert len({name.casefold() for name in companies}) == 10
+    assert len({lead.company_domain for lead in generated}) == 10
 
 
 def test_demo_evidence_returns_bounded_safe_latest_profile_proof() -> None:
@@ -253,9 +344,9 @@ def test_demo_evidence_returns_bounded_safe_latest_profile_proof() -> None:
         store.upsert_lead(
             LeadIn(
                 icp_profile_id=profile.id,
-                company_name=f"ICP Match {index + 1:02d} (fictional)",
-                company_domain=f"icp-match-{index + 1:02d}.example",
-                person_name=f"Demo Contact {index + 1:02d}",
+                company_name=COMPANY_NAMES[index],
+                company_domain=company_domain(COMPANY_NAMES[index]),
+                person_name=PERSON_NAMES[index],
                 title="Operations Manager",
                 industry="Professional services",
                 origami_row_id=f"openrouter-demo-{index}",
