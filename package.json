@@ -11,7 +11,8 @@
     "evals:dry": "node scripts/run-evals.mjs --dry",
     "smoke:production": "node scripts/smoke-production.mjs",
     "seed:demo-campaign": "node scripts/seed-demo-campaign.mjs",
-    "test:smoke": "node --test scripts/*.test.mjs"
+    "test:smoke": "node --test scripts/*.test.mjs",
+    "test:demo-browser": "node scripts/revenue-loop-browser.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -34,6 +35,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "oxlint": "^1.50.0",
+    "playwright": "^1.55.0",
     "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"

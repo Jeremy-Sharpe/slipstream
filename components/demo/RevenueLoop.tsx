@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, BarChart3, Check, DatabaseZap, MailCheck, Pause, Play, Radar, Sparkles, Target, Volume2, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getCampaigns, getLatestIcp, getReadiness } from "@/lib/api/slipstream";
 import { EMPTY_DEMO_PROOF, campaignSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
 import { cn } from "@/lib/utils";
@@ -18,11 +18,15 @@ export function RevenueLoop() {
   const [proof, setProof] = useState<DemoProof>(EMPTY_DEMO_PROOF);
   const [verifiedAt, setVerifiedAt] = useState<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const stepRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
     try { setActive(parseStoredStep(window.sessionStorage.getItem(STORAGE_KEY), STEP_COUNT)); } catch { /* Persistence is optional in privacy-restricted browsers. */ }
   }, []);
   useEffect(() => { if (active >= 0) try { window.sessionStorage.setItem(STORAGE_KEY, String(active)); } catch { /* Keep in-memory controls working. */ } }, [active]);
+  useEffect(() => {
+    if (active >= 0) stepRefs.current[active]?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+  }, [active, reducedMotion]);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -121,7 +125,7 @@ export function RevenueLoop() {
         <div className="overflow-x-auto"><div className="grid min-w-[980px] grid-cols-7 gap-px bg-border">
           {steps.map((step, index) => {
             const Icon = step.icon; const reached = index <= active; const current = index === active;
-            return <button key={step.eyebrow} type="button" onClick={() => selectStep(index)} aria-current={current ? "step" : undefined} className={cn("relative min-h-40 bg-card px-4 py-5 text-left transition-all focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none motion-reduce:transition-none", reached ? "bg-primary-soft" : "hover:bg-page", current && "z-10 shadow-[inset_0_0_0_2px_var(--primary)]")}>
+            return <button ref={(element) => { stepRefs.current[index] = element; }} key={step.eyebrow} type="button" onClick={() => selectStep(index)} aria-current={current ? "step" : undefined} className={cn("relative min-h-40 bg-card px-4 py-5 text-left transition-all focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none motion-reduce:transition-none", reached ? "bg-primary-soft" : "hover:bg-page", current && "z-10 shadow-[inset_0_0_0_2px_var(--primary)]")}>
               <span className={cn("flex size-9 items-center justify-center rounded-full border", reached ? "border-primary bg-primary text-primary-foreground" : "border-border bg-page text-muted-foreground")}>{index < active ? <Check className="size-4" strokeWidth={2.5} /> : <Icon className="size-4" strokeWidth={2} />}</span>
               <span className="mt-4 block text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">{step.eyebrow}</span><span className="mt-1 block text-[15px] leading-5 font-semibold text-foreground">{step.title}</span><span className={cn("mt-2 block text-[12px] leading-4", reached ? "text-primary" : "text-muted-foreground")}>{step.result}</span>
               {index < steps.length - 1 && <ArrowRight className="absolute top-7 -right-2.5 z-20 size-5 rounded-full bg-card p-0.5 text-muted-foreground" aria-hidden />}

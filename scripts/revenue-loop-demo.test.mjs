@@ -60,6 +60,7 @@ test("presenter state restores only valid selections and reduced-motion stepping
   assert.equal(playbackLabel(true, false, 2, 7), "Next step");
   assert.equal(playbackLabel(true, false, 6, 7), "Restart loop");
   assert.equal(playbackLabel(false, true, 2, 7), "Pause guided loop");
+  assert.equal(playbackLabel(false, false, 6, 7), "Restart guided loop");
 });
 
 test("partial endpoint failure removes only the proof that could not be refreshed", () => {

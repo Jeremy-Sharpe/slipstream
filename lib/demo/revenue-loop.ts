@@ -73,7 +73,7 @@ export function nextPresenterStep(current: number, stepCount: number): number {
 
 export function playbackLabel(reducedMotion: boolean, playing: boolean, active: number, stepCount: number): string {
   if (reducedMotion) return active < 0 ? "Start loop" : active >= stepCount - 1 ? "Restart loop" : "Next step";
-  return playing ? "Pause guided loop" : active < 0 ? "Play guided loop" : "Resume guided loop";
+  return playing ? "Pause guided loop" : active < 0 ? "Play guided loop" : active >= stepCount - 1 ? "Restart guided loop" : "Resume guided loop";
 }
 
 export function modelLabel(provider?: string, model?: string): string {
