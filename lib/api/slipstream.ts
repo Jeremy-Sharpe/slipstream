@@ -110,6 +110,7 @@ export class ApiError extends Error {
 
 export type ApiReadiness = {
   revision: string;
+  environment?: string;
   storage: string;
   integrations: Record<string, boolean>;
   reasoning_provider?: string;
@@ -283,7 +284,7 @@ function parseReadiness(value: unknown): ApiReadiness {
   if (Object.keys(integrations).length !== Object.keys(value.integrations).length) {
     throw new ApiError("Slipstream API returned malformed integration flags", 502);
   }
-  const optionalStrings = ["reasoning_provider", "reasoning_model", "embedding_provider", "embedding_model"] as const;
+  const optionalStrings = ["environment", "reasoning_provider", "reasoning_model", "embedding_provider", "embedding_model"] as const;
   if (optionalStrings.some((key) => value[key] !== undefined && typeof value[key] !== "string")) {
     throw new ApiError("Slipstream API returned malformed model provenance", 502);
   }

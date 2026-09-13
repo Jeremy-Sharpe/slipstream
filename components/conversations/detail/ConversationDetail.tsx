@@ -194,9 +194,9 @@ export function ConversationDetail({ call, others }: { call: CallRecord; others:
           <Intelligence call={activeCall} />
           <Transcript call={activeCall} highlight={highlight} />
           <ScorecardCard call={activeCall} onHover={setHighlight} source={scorecardState.source === "live" ? `Live · ${scorecardState.model}` : "Labelled evaluation"} canGenerate={scoreTarget != null && !rerunning} generating={scorecardState.scoring} error={scorecardState.error} onGenerate={() => void runScorecard()} />
-          <FollowUpDraft key={`${draftId ?? "fixture"}:${pipelineRevision}`} call={activeCall} approved={approvedDraftId === draftId && draftId != null} locked={draftId != null} busy={approving} onApprove={() => void approveDraft()} />
+          <div id="follow-up-draft" className="scroll-mt-6"><FollowUpDraft key={`${draftId ?? "fixture"}:${pipelineRevision}`} call={activeCall} approved={approvedDraftId === draftId && draftId != null} locked={draftId != null} busy={approving} onApprove={() => void approveDraft()} /></div>
         </div>
-        <div className="sticky top-6 self-start rounded-xl border border-line bg-card p-6 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">
+        <div id="crm-writeback" className="sticky top-6 scroll-mt-6 self-start rounded-xl border border-line bg-card p-6 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">
           <CrmPanel key={`${draftId ?? "fixture"}:${pipelineRevision}`} call={activeCall} synced={synced} onSync={() => void sync()} onHover={setHighlight} timeline={timeline} />
         </div>
       </div>

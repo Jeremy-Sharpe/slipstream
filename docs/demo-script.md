@@ -12,7 +12,7 @@ Target: 3 minutes 30 seconds. One presenter talks; one teammate keeps the API fa
 
 ## 0:00–0:35 — Show the whole loop in one sentence
 
-Action: Start on Revenue Loop. Click `Run the revenue loop` as you deliver the first sentence. Let the seven verified beats advance while you point from the call through CRM, follow-up, team learning, ICP, Origami brief and controlled campaign. Then click the first beat's `Open transcript` link into Maya Chen.
+Action: Start on Revenue Loop. Click `Play guided loop` as you deliver the first sentence. The recorded Maya example and live proof are labelled separately. Pause on any beat you want to explain, or use Previous/Next. Then select the first beat and click `Open transcript` into Maya Chen; your selected beat persists when you return to the original Revenue Loop tab.
 
 Say: “Most sales AI ends when the call summary appears. Ours starts there. One buyer conversation writes the CRM, creates the safe follow-up, teaches the team who wins, and changes who they call next. This is the entire revenue loop, connected.”
 

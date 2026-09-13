@@ -63,7 +63,7 @@ export function LiveCampaignRuns() {
 
   const campaigns = state.status === "live" ? state.campaigns : [];
   return (
-    <section className="mx-11 mt-7 overflow-hidden rounded-xl border border-border bg-card" aria-label="Live delivery execution">
+    <section id="delivery-execution" className="mx-11 mt-7 scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card" aria-label="Live delivery execution">
       <p className="sr-only" role="status" aria-live="polite">
         {state.status === "loading" ? "Refreshing campaign execution status" : state.status === "error" ? `Campaign execution refresh failed: ${state.message}` : `${state.campaigns.length} live campaign records loaded`}
       </p>
