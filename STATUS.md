@@ -1,6 +1,6 @@
 # Status
 
-Who is on what, what the live environment actually holds, and what only a human can unblock. Updated 12 September 2026, 23:00 AEST.
+Who is on what, what the live environment actually holds, and what only a human can unblock. Updated 13 September 2026, 11:10 AEST.
 
 `BOARD.md` stays the source of truth for per-feature status. Do not restate board rows here. This file answers three questions the board does not: who is working on what right now, which keys and URLs are real, and what is waiting on a person.
 
@@ -9,20 +9,20 @@ Who is on what, what the live environment actually holds, and what only a human 
 | Person | Lanes | Where they are up to |
 |---|---|---|
 | Anna | `fixtures`, `scorecard`, `icp`, `leads`, `outreach`, `live-extraction`, `model-bakeoff` | Fixtures, scorecard, ICP and live extraction are merged. ICP ran end to end on an OpenRouter key alone. Leads and outreach are built and unit-tested but have never run against Origami because the key is still a placeholder. |
-| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, all five `web-wire-*` lanes, `coach-shell`, `coach-release`, `ci`, `playbook-store`, `submission` | The secure coach shell and all web wiring, including durable revision-safe scorecard/playbook actions, are merged and deployed. Cross-platform coach installers and credential-free repository CI are verified on GitHub-hosted runners. `submission` is auditing production; 176 API tests pass. Three migrations are merged but not applied to hosted Supabase, so the VPS remains on its tested in-memory store. |
+| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, all five `web-wire-*` lanes, `coach-shell`, `coach-release`, `ci`, `playbook-store`, `submission` | Product code and automated submission evidence are merged. Production runs private Qwen reasoning and Nomic embeddings, stores a grounded mixed-channel ICP and a safely paused campaign, and remains memory-backed until managed Supabase credentials and migrations are available. 349 API tests pass. |
 | Max (Maxim Durand) | Clay-style conversations UI foundation | Merged into main on 12 September and since wired to the live pipeline by Jeremy's agent. |
-| Romain | Not recorded on the board | No commits under this name and no board rows. Confirm what he is building before Sunday, or reassign `video`, which is still unclaimed. |
+| Romain | Not recorded on the board | No commits under this name and no board rows. The automated fallback video is already public; the remaining team-owned action is submitting the external form or optionally recording a human-presented replacement. |
 
 ## Environment
 
 | Thing | Where | State |
 |---|---|---|
 | Production UI | https://slipstream-hackathon.vercel.app | Vercel deployment `dpl_4To7zaLhVNc4nrUpXm4vtrK6SFSx` is Ready from `main` at `70d1cbc`; call, email, Intelligence and lead routes return successfully |
-| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `70d1cbc`; readiness healthy, latest-playbook route verified, storage `memory`, integration flags false |
+| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `c0a9b41`; readiness verifies private local Qwen reasoning and Nomic embeddings. Storage is `memory`; Supabase, Origami and delivery remain disabled. Latest ICP: 13 deals, 12 calls, one email, four won-only evidence dimensions. |
 | API environment file | `/etc/slipstream/api.env` on the VPS, root owned, 0600 | Loaded by the systemd unit. Every key the API needs has to exist here as well as locally |
 | Local API environment | `api/.env`, 0600, gitignored | Created 12 September. Supabase and ElevenLabs filled, Origami and OpenAI blank |
 | Hosted database | Supabase | Only migration `20260912000000` is applied. The email, scorecard and playbook persistence migrations are merged but unapplied, so those later tables/functions do not exist live |
-| Repository CI | GitHub Actions | PR #8 passed web lint/build, 176 API tests plus Ruff, fixture validation plus six tests, coach tests/build, all four migrations and all three pgTAP suites in run `34695291147` |
+| Repository CI | GitHub Actions | PR #43 passed web lint/build, 349 API tests plus Ruff, fixture validation, scheduler and coach checks, all nine migrations and seven pgTAP suites in run `34728972468` |
 | Coach installers | GitHub Actions | Main revision `d876e5c` produced retained unsigned Linux, macOS and Windows artifacts in run `34694011356`; signing/notarisation remains intentionally unconfigured |
 
 ## Keys
@@ -55,9 +55,6 @@ Embeddings are noise at this volume. Origami credits are the only variable cost 
 
 ## Needs a person
 
-1. Apply the three unapplied migrations to the hosted Supabase project with `supabase db push`. Until then durable email, scorecard and playbook storage is unavailable.
+1. Apply the eight unapplied migrations to the hosted Supabase project with `supabase db push`. Until then durable email, scorecard, playbook, ICP and campaign storage is unavailable.
 2. Get the real Origami key from Jeremy into `api/.env` and `/etc/slipstream/api.env`, then restart the API. Leads and outreach cannot run live without it.
-3. Confirm what Romain is building, or reassign the `video` row.
-4. Regenerate the demo call audio once ElevenLabs credits allow, with `generate_audio.py --demo`.
-5. Decide the fate of `feat/scorecard-wire` on origin: it is superseded by the scorecard store that merged with PR #4 and must not be merged as is; port its list, derive-over-all and latest-playbook endpoints or delete it. Details under Follow-ups in `docs/architecture.md`.
-6. Record and publish the 3-to-5-minute demo video, paste its public URL into `README.md`, and submit the external form. This is the only submission check an unattended coding agent cannot truthfully complete.
+3. Submit the external form before the deadline. The public 4:30 fallback video is already linked; optionally replace it with a human-presented cut first.
