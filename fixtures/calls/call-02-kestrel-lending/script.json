@@ -1,0 +1,166 @@
+{
+  "call_id": "call-02-kestrel-lending",
+  "seller": "Eleno",
+  "rep": "Sam Whitfield",
+  "prospect": {
+    "name": "Felix Morgan",
+    "role": "Head of Credit Operations",
+    "email": "felix@kestrellending.example",
+    "phone": "+61 3 7010 1102"
+  },
+  "company": {
+    "name": "Kestrel Lending",
+    "industry": "Non-bank commercial lender",
+    "headcount": 64,
+    "location": "Docklands, VIC",
+    "domain": "kestrellending.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-01T10:30:00+10:00",
+  "duration_target_seconds": 440,
+  "outcome": "won",
+  "deal_value_aud": 96000,
+  "trigger": "Loan document turnaround blowing out before broker season",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Felix, Sam Whitfield from Eleno. Thanks for the time. Just to confirm before we start, I have you as Felix Morgan, Head of Credit Operations at Kestrel Lending in Docklands?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "You've got it. We're a non-bank commercial lender, sixty-four people across credit, settlements and broker support. I took this call because our loan document turnaround is blowing out and broker season starts in six weeks."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What does the turnaround look like now, and where does it need to be?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "From credit approval to documents out the door is four to five days at the moment. Two years ago it was two. Brokers notice that, and a broker who waits five days for documents quietly sends the next deal somewhere else."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Walk me through what happens in those four days, step by step."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "A credit analyst assembles the file, a documentation officer drafts the facility letter and the security schedules from templates in Word, then a senior checks the lot against the approval. Every one of those steps is a person retyping something that already exists in the approval memo."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "How many sets of documents does that team produce in a month?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "About two hundred and forty in a normal month, and closer to four hundred through broker season. We have three documentation officers. Two of them worked through their leave last spring and I am not asking them to do that again this year."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What systems hold the approvals and the templates today?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Approvals live in our loan origination system, templates are Word files on a shared drive with version numbers in the filename, and executed copies go into SharePoint. Security schedules are the messy part, because they change with the asset type and nobody agrees on which template is current."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "What would a good outcome look like by the time brokers ramp up?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Documents out the same day as approval for the standard deals, and the officers spending their time on the complicated ones. If we hold two days on the unusual structures I would be satisfied. I would also want every version recorded, because our regulator asks and I would rather not be reconstructing it later."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "And who signs off a project like this at Kestrel Lending?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Our CEO signs, on my recommendation, with the head of risk in the room. Risk will push back hardest, and fairly, because he owns what happens when a document goes out wrong."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That is enough to be concrete. I would run a two-week discovery phase with your documentation officers, mapping the standard facility and two security schedule variants. Then a fixed-scope build that reads the approval, drafts the facility letter and the schedules, and hands your officer a document to check rather than write. For the volume you are describing that build sits at $96,000."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That is a real number. My concern is that we'd be buying a tool we then depend on you to run for the next five years, and that is exactly how we ended up replacing our last platform."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "You wouldn't. We build it, deploy it into your systems and transfer the IP to you, so it is your asset and your team can change it. Managed optimisation afterwards is separate and you can stop it whenever you like."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Good. The head of risk will ask what happens when it drafts something wrong, and he will not accept an answer that starts with the word never."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Then your officer catches it, the same as when a person copies the wrong schedule today. We won't design the checker out of the process, and every draft records which approval fields it used."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That is the answer he wants. He will still want to see it working on real files though, not a demonstration built on tidy examples."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "That is what the discovery phase is for. We work on your files, in your environment, and you end up with a measured baseline and a scope whether or not you go ahead."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "How long from the end of discovery to something the officers can actually use? Broker season does not move because a project runs late."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Six to eight weeks for the standard facility, longer if the schedules are as varied as they sound. I would rather ship the standard path first than promise everything at once."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "That suits me. Standard deals are seventy per cent of the volume and about ninety per cent of the frustration."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday. I will send the measurement plan alongside it, so your head of risk can see how we would prove the saving before anyone signs anything."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Send it to me and I will get it in front of both of them before the end of the week."
+    },
+    {
+      "speaker": "rep",
+      "name": "Sam Whitfield",
+      "text": "Can we hold Thursday 10 September at 10am to walk through it with your head of risk?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Felix Morgan",
+      "text": "Thursday 10 September at 10am works. I will book the room and bring our own volume numbers so we are arguing about the same baseline."
+    }
+  ]
+}

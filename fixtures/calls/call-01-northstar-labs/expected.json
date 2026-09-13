@@ -9,7 +9,7 @@
     },
     "company": {
       "name": "Northstar Labs",
-      "industry": "Architecture and lab planning consultancy",
+      "industry": "Quantitative investment research boutique",
       "headcount": 42,
       "location": "Southbank, VIC"
     },
@@ -19,17 +19,17 @@
       "outcome": "won"
     },
     "promises": [
-      "I will send the mapped Essential Eight gap summary by Thursday",
-      "I will include the onboarding sequence and the fixed project range"
+      "I will send the discovery phase scope and the measurement plan by Thursday morning",
+      "I will send two research notes redrafted from your published ones"
     ],
     "objections": [
       {
-        "text": "Our insurer is asking for Essential Eight evidence, and I am worried we will pay for a managed service but still fail the questionnaire",
+        "text": "we don't want another subscription sitting on the books",
         "handling": "handled"
       }
     ],
     "next_step": {
-      "description": "Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.",
+      "description": "Sam to send the discovery phase scope, measurement plan and two redrafted research notes, then walk Maya and her co-founder through the research note drafting pilot scope.",
       "due": "2026-09-03"
     }
   },
@@ -38,13 +38,13 @@
     "next_step_secured": true,
     "objection_handling": "handled",
     "rep_talk_ratio": 0.44,
-    "notes": "Sam uncovered the renewal trigger, mapped risk to a clear proposal and secured a dated review with the decision makers."
+    "notes": "Sam mapped the note production workflow before pricing anything, answered the subscription objection with the IP transfer model and left with a dated pilot scope review."
   },
   "icp_signals": {
-    "industry": "Architecture and lab planning consultancy",
+    "industry": "Quantitative investment research boutique",
     "headcount_band": "25-80",
     "role": "Managing Partner",
-    "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+    "trigger": "Research note production doubling ahead of a new fund launch"
   },
   "risk_flags": []
 }
