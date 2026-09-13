@@ -36,12 +36,14 @@ export function settleDemoProof(
 export function icpClaimSafety(profile: ApiIcpProfile): { cohort: boolean; citedProfile: boolean; brief: boolean } {
   const source = profile.profile.source_summary;
   const cohort = Boolean(source && source.deals > 0 && source.calls + source.emails > 0 && source.outcome_labelled > 0);
+  const supported = new Set(profile.evidence.filter((item) => item.why.trim().length > 0 && item.deal_ids.length > 0 && item.deal_ids.every((id) => id.trim().length > 0)).map((item) => item.attribute));
   const citedProfile = cohort
     && profile.profile.headcount_band.trim().length > 0
     && profile.profile.industries.some((industry) => industry.trim().length > 0)
-    && profile.evidence.length > 0
-    && profile.evidence.every((item) => item.attribute.trim().length > 0 && item.why.trim().length > 0 && item.deal_ids.length > 0 && item.deal_ids.every((id) => id.trim().length > 0));
-  return { cohort, citedProfile, brief: citedProfile && profile.profile.origami_brief.trim().length > 0 };
+    && supported.has("industry")
+    && supported.has("headcount_band");
+  const brief = citedProfile && supported.has("contact_role") && supported.has("trigger") && profile.profile.origami_brief.trim().length > 0;
+  return { cohort, citedProfile, brief };
 }
 
 export function findDemoCampaign(campaigns: ApiCampaign[]): ProofState<ApiCampaign> {

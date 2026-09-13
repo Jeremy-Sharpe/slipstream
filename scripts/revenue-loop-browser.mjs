@@ -6,7 +6,7 @@ const port = 3119;
 const base = `http://127.0.0.1:${port}`;
 const api = "https://slipstream-api.3-104-149-193.sslip.io";
 const ready = { revision: "browser-check", environment: "production", storage: "memory", integrations: {}, reasoning_provider: "local", reasoning_model: "qwen-test", embedding_provider: "local", embedding_model: "nomic-test" };
-const icp = { id: "icp-check", version: 1, profile: { summary: "Observed wins", industries: ["Professional services", "Allied health"], headcount_band: "25-80", roles: ["Founder"], triggers: ["Renewal"], confidence: 0.9, origami_brief: "Find similar firms", source_summary: { deals: 3, calls: 2, emails: 1, outcome_labelled: 3 } }, evidence: [{ attribute: "industry", deal_ids: ["deal-1"], why: "Won deals support it" }] };
+const icp = { id: "icp-check", version: 1, profile: { summary: "Observed wins", industries: ["Professional services", "Allied health"], headcount_band: "25-80", roles: ["Founder"], triggers: ["Renewal"], confidence: 0.9, origami_brief: "Find similar firms", source_summary: { deals: 3, calls: 2, emails: 1, outcome_labelled: 3 } }, evidence: ["industry", "headcount_band", "contact_role", "trigger"].map((attribute) => ({ attribute, deal_ids: ["deal-1"], why: "Won deals support it" })) };
 const campaigns = [{ id: "83b2a7b2-1ace-4dc5-b90a-d0dba9d2ed4c", name: "Hackathon demo — intentionally unsent", status: "paused", scheduled_for: "2099-01-01T00:00:00Z", created_by: "fixture", created_at: "2026-01-01T00:00:00Z", updated_at: "2026-01-01T00:00:00Z", counts: { queued: 1, running: 0, sent: 0, retryable: 0, failed: 0, reconcile: 0 }, items: [{ position: 0, draft_id: "draft-1", state: "queued", outcome: null, http_status: null, detail: null, retryable: false, reconciliation_required: false, receipt: null, attempt_count: 0, next_attempt_at: "2099-01-01T00:00:00Z", last_attempt_at: null }] }];
 
 async function waitForServer() {
@@ -52,6 +52,7 @@ try {
     await page.getByRole("button", { name: "Next step" }).click();
     assert.match(await page.locator('[aria-current="step"]').innerText(), /Safe follow-up/);
 
+    const verticalBeforeReveal = await page.evaluate(() => window.scrollY);
     await page.getByRole("button", { name: "Show complete loop" }).click();
     const revealed = await page.locator('[aria-current="step"]').evaluate((step) => {
       const viewport = step.parentElement?.parentElement;
@@ -60,6 +61,7 @@ try {
       return item.left >= bounds.left - 1 && item.right <= bounds.right + 1;
     });
     assert.equal(revealed, true, "the active horizontal step is revealed");
+    assert.equal(await page.evaluate(() => window.scrollY), verticalBeforeReveal, "horizontal reveal preserves the page's vertical position");
 
     const links = [
       [/One sales call/, "Open transcript", "#transcript"], [/CRM writes itself/, "Inspect CRM evidence", "#crm-writeback"], [/Safe follow-up/, "Review exact draft", "#follow-up-draft"], [/The team compounds/, "See win patterns", "#patterns"], [/ICP emerges/, "Open cited ICP", "#icp"], [/Next search writes itself/, "Open search brief", "#brief"], [/Outreach stays controlled/, "Inspect exact execution", "#delivery-execution"],
@@ -69,7 +71,9 @@ try {
       await page.getByRole("link", { name: linkName }).click();
       await page.waitForURL((url) => url.hash === hash);
       await page.locator(hash).waitFor({ state: "visible" });
-      assert.equal(await page.locator(hash).isVisible(), true, `${hash} is visible after following its evidence link`);
+      await page.waitForTimeout(100);
+      const intersectsViewport = await page.locator(hash).evaluate((element) => { const bounds = element.getBoundingClientRect(); return bounds.top < window.innerHeight && bounds.bottom > 0; });
+      assert.equal(intersectsViewport, true, `${hash} intersects the viewport after following its evidence link`);
       await page.goBack();
       await page.waitForURL(`${base}/demo`);
       await page.locator('[aria-current="step"]').waitFor();

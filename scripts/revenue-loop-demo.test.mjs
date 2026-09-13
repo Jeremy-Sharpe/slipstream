@@ -46,11 +46,14 @@ test("campaign proof is tied to the immutable demo id and exact zero-send guardr
 });
 
 test("ICP presentation claims require a substantive cohort, citations, and brief", () => {
-  const profile = { id: "icp-1", version: 1, profile: { summary: "Observed wins", industries: ["Services"], headcount_band: "25-80", roles: ["Founder"], triggers: ["Renewal"], confidence: 0.9, origami_brief: "Find similar firms", source_summary: { deals: 3, calls: 2, emails: 1, outcome_labelled: 3 } }, evidence: [{ attribute: "industry", deal_ids: ["deal-1"], why: "Won deals support it" }] };
+  const evidence = ["industry", "headcount_band", "contact_role", "trigger"].map((attribute) => ({ attribute, deal_ids: ["deal-1"], why: "Won deals support it" }));
+  const profile = { id: "icp-1", version: 1, profile: { summary: "Observed wins", industries: ["Services"], headcount_band: "25-80", roles: ["Founder"], triggers: ["Renewal"], confidence: 0.9, origami_brief: "Find similar firms", source_summary: { deals: 3, calls: 2, emails: 1, outcome_labelled: 3 } }, evidence };
   assert.deepEqual(icpClaimSafety(profile), { cohort: true, citedProfile: true, brief: true });
   assert.equal(icpClaimSafety({ ...profile, profile: { ...profile.profile, source_summary: { deals: 0, calls: 0, emails: 0, outcome_labelled: 0 } } }).cohort, false);
   assert.equal(icpClaimSafety({ ...profile, evidence: [] }).citedProfile, false);
   assert.equal(icpClaimSafety({ ...profile, evidence: [{ attribute: "industry", deal_ids: [], why: "Won deals support it" }] }).citedProfile, false);
+  assert.equal(icpClaimSafety({ ...profile, evidence: evidence.filter((item) => item.attribute !== "headcount_band") }).citedProfile, false);
+  assert.equal(icpClaimSafety({ ...profile, evidence: evidence.filter((item) => item.attribute !== "trigger") }).brief, false);
   assert.equal(icpClaimSafety({ ...profile, profile: { ...profile.profile, origami_brief: "   " } }).brief, false);
 });
 

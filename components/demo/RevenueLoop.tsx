@@ -19,13 +19,22 @@ export function RevenueLoop() {
   const [verifiedAt, setVerifiedAt] = useState<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const stepRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const stepsViewportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     try { setActive(parseStoredStep(window.sessionStorage.getItem(STORAGE_KEY), STEP_COUNT)); } catch { /* Persistence is optional in privacy-restricted browsers. */ }
   }, []);
   useEffect(() => { if (active >= 0) try { window.sessionStorage.setItem(STORAGE_KEY, String(active)); } catch { /* Keep in-memory controls working. */ } }, [active]);
   useEffect(() => {
-    if (active >= 0) stepRefs.current[active]?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+    const viewport = stepsViewportRef.current;
+    const step = active >= 0 ? stepRefs.current[active] : null;
+    if (!viewport || !step) return;
+    const left = step.offsetLeft < viewport.scrollLeft
+      ? step.offsetLeft
+      : step.offsetLeft + step.offsetWidth > viewport.scrollLeft + viewport.clientWidth
+        ? step.offsetLeft + step.offsetWidth - viewport.clientWidth
+        : viewport.scrollLeft;
+    if (left !== viewport.scrollLeft) viewport.scrollTo({ left, behavior: reducedMotion ? "auto" : "smooth" });
   }, [active, reducedMotion]);
 
   useEffect(() => {
@@ -126,15 +135,15 @@ export function RevenueLoop() {
           <Calculator className="size-5 text-primary" />
           <div><p className="text-[12px] font-semibold tracking-wide text-foreground uppercase">Rep capacity</p><p className="text-[11px] text-muted-foreground">Illustrative, not measured</p></div>
         </div>
-        <ImpactNumber value="10 min" label="admin per call" />
-        <ImpactNumber value="× 8" label="calls per day" />
+        <ImpactNumber value="10 min" label="fully recovered per call · assumption" />
+        <ImpactNumber value="× 8 × 5" label="calls/day × working days" />
         <ImpactNumber value="= 6.7 hrs" label="returned per week" />
         <ImpactNumber value="≈ $500" label="weekly capacity at $75/hr" accent />
       </aside>
 
       <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_3px_rgba(17,24,39,0.05)]">
         <div className="h-1 bg-muted"><div className="h-full bg-primary transition-[width] duration-700 ease-out motion-reduce:transition-none" style={{ width: `${progress}%` }} /></div>
-        <div className="overflow-x-auto"><div className="grid min-w-[980px] grid-cols-7 gap-px bg-border">
+        <div ref={stepsViewportRef} className="overflow-x-auto"><div className="grid min-w-[980px] grid-cols-7 gap-px bg-border">
           {steps.map((step, index) => {
             const Icon = step.icon; const reached = index <= active; const current = index === active;
             return <button ref={(element) => { stepRefs.current[index] = element; }} key={step.eyebrow} type="button" onClick={() => selectStep(index)} aria-current={current ? "step" : undefined} className={cn("relative min-h-40 bg-card px-4 py-5 text-left transition-all focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none motion-reduce:transition-none", reached ? "bg-primary-soft" : "hover:bg-page", current && "z-10 shadow-[inset_0_0_0_2px_var(--primary)]")}>
