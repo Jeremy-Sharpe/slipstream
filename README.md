@@ -2,7 +2,7 @@
 
 [![Continuous integration](https://github.com/Jeremy-Sharpe/slipstream/actions/workflows/ci.yml/badge.svg)](https://github.com/Jeremy-Sharpe/slipstream/actions/workflows/ci.yml)
 
-Accelerated sales for small B2B teams. Slipstream listens to every sales call, coaches the rep while the call is happening, writes the call into the CRM with a drafted follow-up, works out which kind of customer actually converts, and goes and finds more of them.
+**Your next customer should change when your last deal does.** Slipstream is the sales layer for small B2B teams that listens to calls, writes the CRM and follow-up, learns which customers actually convert, and refuses to spend the next lead-search credit when a new outcome has made that target stale.
 
 Built for the Forward: AI in Business Hackathon, University of Melbourne, 12 to 14 September 2026.
 
@@ -25,7 +25,7 @@ Demo video: https://github.com/Jeremy-Sharpe/slipstream/releases/download/demo-v
 - Reps lose deals because they do not know what to ask. Verbatim from a sales team we spoke to: "they lose some clients because they don't know what to ask."
 - Lead lists come from gut feel, not from who actually converted. Once the founder's network is exhausted, prospecting stalls. Verbatim from a team debrief: "once you exhaust your network you're actually pretty stuck outside of word of mouth referrals and paid marketing."
 
-**Why this is one product and not four:** each problem feeds the next. The call is the only honest record of the deal. If the call writes itself into the CRM, the CRM becomes true. If the CRM is true, you can see which deals won and why. If you know who wins, you know who to go and find. If you know who to find, the next call is with the right person, and the coach knows what to ask them.
+**The original mechanic is Revenue DNA, not merely bundling four tools:** each target profile carries a fingerprint of the exact calls, emails and won/lost outcomes that produced it. When one outcome changes, Slipstream detects that yesterday's target is stale, marks its downstream leads for re-scoring and blocks new provider spend until the profile relearns. This prevents a quiet failure in disconnected call-intelligence and lead-generation stacks: they keep buying tomorrow's leads from yesterday's assumptions. The rest of the loop makes the fingerprint possible—the call makes the CRM true, the CRM reveals who wins, and those wins decide who the team finds next.
 
 ## How it works
 
@@ -81,6 +81,8 @@ Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector
 | Live assistants | Cluely and its open-source clones | Generic answers from a screen; no CRM context, no memory of the deal, no downstream action |
 
 Slipstream is the closed loop. Its Revenue DNA gate is the key difference: call tools report on yesterday and lead tools spend against a persona, while Slipstream prevents tomorrow's search from using a target invalidated by today's outcome. Enterprise teams can approximate the rest by paying for Gong plus Clay plus a RevOps person to stitch them together. A 12-person services firm cannot, and that is the gap.
+
+**Two deliberate design decisions:** Revenue DNA turns model freshness into an enforceable spending boundary instead of a dashboard warning; evidence-linked fields make every automated CRM fact inspectable and drop unsupported claims instead of asking a rep to trust model fluency. The interactive, non-mutating outcome shock test on Intelligence lets a judge watch that first decision propagate from a hypothetical CRM outcome to stale-profile detection, lead re-scoring and sourcing protection without changing production data.
 
 ## Feasibility and value
 

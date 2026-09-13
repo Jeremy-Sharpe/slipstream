@@ -6,7 +6,7 @@ Small sales teams have a strange problem: they already own a CRM, but the truth 
 
 After each call, a rep should update the CRM and write the follow-up. That is ten minutes of admin, so it gets skipped. The pipeline becomes fiction. And when the founder’s network runs out, the team buys leads against a customer persona somebody guessed in a workshop.
 
-We built Slipstream: an AI sales layer that sits beside the CRM a team already has.
+We built Slipstream: an AI sales layer that sits beside the CRM a team already has. Its central idea is simple: your next customer should change when your last deal does.
 
 A call enters as audio. ElevenLabs separates the speakers, then Slipstream fills structured contact, company and deal fields—including promises, objections and the agreed next step. Every field carries evidence, so a rep can check the exact words before approving it.
 
