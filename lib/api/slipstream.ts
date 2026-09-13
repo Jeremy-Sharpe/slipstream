@@ -1,12 +1,12 @@
-import type { CallRecord, Extracted, Extraction, Handling } from "@/lib/types/calls";
+import { apiUrl } from "@/lib/api/client";
 
-export const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "https://slipstream-api.3-104-149-193.sslip.io"
-).replace(/\/$/, "");
+export { API_BASE_URL } from "@/lib/api/client";
 
 type Evidence = { sequence: number | null; quote: string };
 type ApiField<T> = { value: T | null; confidence: number; evidence: Evidence[] };
+
+export type CallOutcome = "won" | "stalled" | "lost" | "no_show" | "open";
+export type Handling = "handled" | "partial" | "ignored" | "none_raised";
 
 export type ApiCall = {
   id: string;
@@ -24,7 +24,7 @@ export type ApiCall = {
   }>;
 };
 
-type ApiExtraction = {
+export type ApiExtraction = {
   contact: {
     name: ApiField<string>;
     email: ApiField<string>;
@@ -612,7 +612,7 @@ function parsePlaybook(value: unknown): ApiPlaybook {
 }
 
 export async function getReadiness(signal?: AbortSignal): Promise<ApiReadiness> {
-  const response = await fetch(`${API_BASE_URL}/ready`, { signal });
+  const response = await fetch(apiUrl("/ready"), { signal });
   if (!response.ok) throw new ApiError(`Slipstream API returned ${response.status}`, response.status);
   const payload: unknown = await response.json().catch(() => null);
   return parseReadiness(payload);
@@ -764,7 +764,7 @@ export async function getScorecard(callId: string, signal?: AbortSignal): Promis
   }
 }
 
-export async function scoreCall(call: ApiCall, outcome: CallRecord["outcome"], signal?: AbortSignal): Promise<ApiScorecard> {
+export async function scoreCall(call: ApiCall, outcome: CallOutcome, signal?: AbortSignal): Promise<ApiScorecard> {
   const rep = call.rep ?? "Unknown rep";
   const repKey = rep.trim().toLocaleLowerCase();
   const speakers = call.segments.map((segment) => segment.speaker.trim().toLocaleLowerCase());
@@ -869,7 +869,7 @@ export async function getLatestPlaybook(signal?: AbortSignal): Promise<ApiPlaybo
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}/api/v1${path}`, {
+  const response = await fetch(apiUrl(path), {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
@@ -880,123 +880,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function runFixturePipeline(fixtureId: string): Promise<LivePipeline> {
-  const call = await request<ApiCall>(`/calls/fixtures/${encodeURIComponent(fixtureId)}/ingest`, {
-    method: "POST",
-  });
-  const extraction = await request<ApiExtraction>(`/calls/${call.id}/extract`, { method: "POST" });
-  const draft = await request<ApiDraft>(`/drafts/from-call/${call.id}`, { method: "POST" });
-  return { call, extraction, draft };
-}
-
 export function approveDraft(draftId: string): Promise<ApiDraft> {
   return request<unknown>(`/drafts/${encodeURIComponent(draftId)}/approve`, {
     method: "POST",
     body: JSON.stringify({ approved_by: "Hackathon demo" }),
   }).then(parseDraft);
-}
-
-function evidenceSpan(field: { evidence: Evidence[] }): number | null {
-  return field.evidence.find((item) => item.sequence != null)?.sequence ?? null;
-}
-
-function extracted<T>(field: ApiField<T>, emptyValue: T): Extracted<T> {
-  return {
-    value: field.value ?? emptyValue,
-    confidence: field.confidence,
-    span: evidenceSpan(field),
-  };
-}
-
-export function mergeLivePipeline(fallback: CallRecord, live: LivePipeline): CallRecord {
-  const { call, extraction: value, draft } = live;
-  const prospect = value.contact.name.value ?? "Unknown contact";
-  const rep = call.rep ?? "Unknown rep";
-  const turns = call.segments.map((segment) => ({
-    index: segment.sequence,
-    speaker: segment.speaker === rep ? ("rep" as const) : ("prospect" as const),
-    name: segment.speaker,
-    text: segment.body,
-    at: segment.start_ms / 1000,
-  }));
-  const liveOutcome = value.deal.outcome.value;
-  const outcome =
-    liveOutcome === "won" || liveOutcome === "lost" || liveOutcome === "stalled"
-      ? liveOutcome
-      : "open";
-  const extraction: Extraction = {
-    contact: {
-      name: extracted(value.contact.name, prospect),
-      role: extracted(value.contact.title, "Not found"),
-      email: extracted(value.contact.email, "Not found"),
-      phone: extracted(value.contact.phone, "Not found"),
-    },
-    company: {
-      name: extracted(value.company.name, "Unknown company"),
-      industry: extracted(value.company.industry, "Not found"),
-      headcount: extracted(value.company.employee_count, 0),
-      location: extracted(value.company.location, "Not found"),
-    },
-    deal: {
-      stage: extracted(value.deal.stage, "Not found"),
-      valueAud: extracted(value.deal.amount, 0),
-      outcome: extracted(value.deal.outcome, "open"),
-    },
-    promises: value.promises
-      .filter((item): item is ApiField<string> & { value: string } => item.value != null)
-      .map((item) => extracted(item, item.value)),
-    objections: value.objections.map((item) => ({
-      text: item.text,
-      handling: item.handling,
-      span: evidenceSpan(item),
-    })),
-    nextStep: value.next_step
-      ? {
-          value: value.next_step.description,
-          confidence: value.next_step.confidence,
-          span: evidenceSpan(value.next_step),
-        }
-      : null,
-    nextStepDue: value.next_step?.due_date ?? null,
-  };
-
-  return {
-    ...fallback,
-    id: call.source_external_id,
-    rep,
-    prospect,
-    company: value.company.name.value ?? "Unknown company",
-    domain: value.company.domain.value ?? "",
-    at: call.occurred_at,
-    durationSeconds: call.duration_seconds ?? 0,
-    outcome,
-    summary: value.summary,
-    turns,
-    extraction,
-    draft: { subject: draft.subject, body: draft.body },
-  };
-}
-
-export function mergeLiveScorecard(call: CallRecord, scorecard: ApiScorecard): CallRecord {
-  const span = (evidence: { turn_index: number } | null | undefined) =>
-    evidence ? call.turns[evidence.turn_index - 1]?.index ?? null : null;
-  return {
-    ...call,
-    scorecard: {
-      discoveryQuestions: {
-        value: scorecard.discovery_questions,
-        span: span(scorecard.discovery_evidence[0]),
-      },
-      nextStepSecured: {
-        value: scorecard.next_step_secured,
-        span: span(scorecard.next_step_evidence),
-      },
-      objectionHandling: {
-        value: scorecard.objection_handling,
-        span: span(scorecard.objection_evidence[0]),
-      },
-      talkRatio: scorecard.rep_talk_ratio,
-      notes: scorecard.summary,
-    },
-  };
 }
