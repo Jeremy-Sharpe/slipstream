@@ -1,6 +1,6 @@
 # Slipstream live demo script
 
-Target: 3 minutes 30 seconds. One presenter talks; one teammate keeps the API fallback terminal open. Use the production UI at https://slipstream-hackathon.vercel.app and the production API at https://slipstream-api.3-104-149-193.sslip.io. Do not narrate setup, architecture, or model names unless a judge asks.
+Target: 3 minutes 30 seconds. One presenter talks; one teammate keeps the API fallback terminal open. Use the production UI at https://slipstream.3-104-149-193.sslip.io and the production API at https://slipstream-api.3-104-149-193.sslip.io. Do not narrate setup, architecture, or model names unless a judge asks.
 
 ## Before walking on stage
 

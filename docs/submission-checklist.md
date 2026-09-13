@@ -7,7 +7,7 @@ unavailable deployment credentials or submitting the external form was verified 
 ## Verified now
 
 - Public repository: `https://github.com/Jeremy-Sharpe/slipstream`
-- Production UI: `https://slipstream-hackathon.vercel.app` responds with HTTP 200;
+- Production UI: `https://slipstream.3-104-149-193.sslip.io` responds with HTTP 200 and serves the newest Revenue DNA demo;
   Campaigns includes the live “Delivery execution” card.
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.

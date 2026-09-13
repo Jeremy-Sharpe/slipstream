@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { chromium } from "playwright";
 
-const baseUrl = process.env.SLIPSTREAM_WEB_URL ?? "https://slipstream-hackathon.vercel.app";
+const baseUrl = process.env.SLIPSTREAM_WEB_URL ?? "https://slipstream.3-104-149-193.sslip.io";
 const outputDir = resolve(process.env.SLIPSTREAM_VIDEO_DIR ?? ".artifacts/demo-video");
 const viewport = { width: 1440, height: 900 };
 
@@ -90,4 +90,3 @@ const video = page.video();
 await context.close();
 await browser.close();
 console.log(await video.path());
-
