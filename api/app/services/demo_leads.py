@@ -21,6 +21,8 @@ PROMPT = (Path(__file__).resolve().parents[1] / "prompts" / "demo-leads-v2.md").
     encoding="utf-8"
 )
 FIXTURES_DIR = Path(__file__).resolve().parents[3] / "fixtures"
+# The seller's retired demo brand: not a real company, but a name the generator keeps reaching for.
+RETIRED_BRANDS = frozenset({"harbourline"})
 SLUG_MAX_LENGTH = 40
 
 
@@ -79,7 +81,7 @@ def protected_names(fixtures_dir: Path = FIXTURES_DIR) -> ProtectedNames:
             name = section.get("name") if isinstance(section, dict) else None
             if isinstance(name, str) and name.strip():
                 sink.add(name.strip().casefold())
-    return ProtectedNames(frozenset(companies), frozenset(people))
+    return ProtectedNames(frozenset(companies | RETIRED_BRANDS), frozenset(people))
 
 
 def resolve_names(

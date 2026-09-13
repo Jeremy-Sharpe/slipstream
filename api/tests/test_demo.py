@@ -174,7 +174,7 @@ def test_current_profile_match_requires_exact_models_and_inventory() -> None:
 COMPANY_NAMES = [
     "Marrick Capital Partners",
     "Southbank Quant Research",
-    "Harbourline Advisory Group",
+    "Bayside Advisory Group",
     "Coburg Freight Systems",
     "Yarraville Risk Collective",
     "Parkville Ledger Co",
@@ -390,3 +390,21 @@ def test_demo_evidence_is_missing_until_an_icp_exists() -> None:
 
     assert response.status_code == 404
     assert response.json() == {"detail": "No derived ICP is available"}
+
+
+def test_retired_brand_is_replaced() -> None:
+    from app.services.demo_leads import DemoLeadAttributes, protected_names, resolve_names
+
+    item = DemoLeadAttributes(
+        company_name="Harbourline Commercial Finance",
+        person_name="Monique Telfer",
+        title="Head of Credit Operations",
+        industry="Non-bank commercial lender",
+        employee_count=58,
+        location="North Sydney, NSW",
+        rationale="Lending operations at the right scale.",
+        relevance_score=0.9,
+    )
+    resolved = resolve_names([item], protected_names())
+    assert resolved[0].company == "Prospect 01 Pty Ltd"
+    assert resolved[0].replaced is True
