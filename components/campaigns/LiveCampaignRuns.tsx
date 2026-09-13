@@ -1,13 +1,20 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Clock3, Loader2, RefreshCw, Server } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Clock3, Fingerprint, Loader2, RefreshCw, Server, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCampaigns, type ApiCampaign } from "@/lib/api/slipstream";
+import { getCampaigns, getIcpFreshness, type ApiCampaign, type ApiIcpFreshness } from "@/lib/api/slipstream";
 import { cn } from "@/lib/utils";
 
 type LoadState =
   | { status: "loading" }
   | { status: "live"; campaigns: ApiCampaign[] }
+  | { status: "error"; message: string };
+
+type FreshnessLoadState =
+  | { status: "loading" }
+  | { status: "live"; freshness: ApiIcpFreshness }
+  | { status: "missing" }
   | { status: "error"; message: string };
 
 const STATUS_LABEL: Record<ApiCampaign["status"], string> = {
@@ -32,12 +39,55 @@ function dueLabel(value: string): string {
   return new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
-export function LiveCampaignRuns({ initialCampaigns }: { initialCampaigns?: ApiCampaign[] | null }) {
+function RevenueDnaGate({ state }: { state: FreshnessLoadState }) {
+  const freshness = state.status === "live" ? state.freshness : null;
+  const current = freshness?.status === "current";
+  const stale = freshness?.status === "stale";
+  const statusLabel = current ? "Current" : stale ? "Sourcing blocked" : freshness ? "Relearn required" : state.status === "loading" ? "Checking" : "Unavailable";
+  const detail = current
+    ? `ICP v${freshness.profile_version} matches cohort ${freshness.current_cohort_revision.slice(0, 7)}. ${freshness.leads_on_profile} lead${freshness.leads_on_profile === 1 ? "" : "s"} inherit this targeting version.`
+    : stale
+      ? `A CRM outcome changed the target. ${freshness.leads_needing_rescore} lead${freshness.leads_needing_rescore === 1 ? "" : "s"} must be re-scored before another provider search.`
+      : freshness
+        ? `ICP v${freshness.profile_version} predates cohort fingerprinting. Relearn before spending another sourcing credit.`
+        : state.status === "loading"
+          ? "Comparing the current ICP with the latest CRM outcomes…"
+          : state.status === "error"
+            ? `Targeting proof unavailable: ${state.message}`
+            : "No derived ICP exists yet. Derive Revenue DNA before sourcing the next campaign.";
+
+  return (
+    <div className={cn("mx-5 mt-4 grid gap-3 rounded-lg border px-4 py-3 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center", current ? "border-emerald-200 bg-emerald-50/60" : stale ? "border-amber-300 bg-amber-50" : "border-border bg-page")}>
+      <span className={cn("flex size-9 items-center justify-center rounded-full", current ? "bg-emerald-100 text-emerald-700" : stale ? "bg-amber-100 text-amber-800" : "bg-muted text-muted-foreground")}>
+        {current ? <ShieldCheck className="size-[18px]" /> : <Fingerprint className="size-[18px]" />}
+      </span>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-[13px] font-semibold text-foreground">Revenue DNA spend gate</p>
+          <span className={cn("rounded-full px-2 py-0.5 text-[10.5px] font-semibold", current ? "bg-emerald-100 text-emerald-800" : stale ? "bg-amber-100 text-amber-900" : "bg-muted text-muted-foreground")}>{statusLabel}</span>
+        </div>
+        <p className="mt-1 text-[12px] leading-5 text-muted-foreground">{detail}</p>
+      </div>
+      <Link href="/intelligence#revenue-dna" className="inline-flex h-8 w-fit items-center gap-1.5 rounded-md border border-border bg-card px-3 text-[12px] font-medium text-foreground hover:bg-muted">
+        Inspect evidence <ArrowRight className="size-3.5" />
+      </Link>
+    </div>
+  );
+}
+
+export function LiveCampaignRuns({ initialCampaigns, initialFreshness, initialFreshnessError }: { initialCampaigns?: ApiCampaign[] | null; initialFreshness?: ApiIcpFreshness | null; initialFreshnessError?: string }) {
   const [state, setState] = useState<LoadState>(() => initialCampaigns === undefined
     ? { status: "loading" }
     : initialCampaigns === null
       ? { status: "error", message: "Campaign API unavailable during initial render" }
       : { status: "live", campaigns: initialCampaigns });
+  const [freshnessState, setFreshnessState] = useState<FreshnessLoadState>(() => initialFreshnessError
+    ? { status: "error", message: initialFreshnessError }
+    : initialFreshness === undefined
+    ? { status: "loading" }
+    : initialFreshness === null
+      ? { status: "missing" }
+      : { status: "live", freshness: initialFreshness });
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const controllerRef = useRef<AbortController>(null);
   const requestRef = useRef(0);
@@ -47,6 +97,7 @@ export function LiveCampaignRuns({ initialCampaigns }: { initialCampaigns?: ApiC
     controllerRef.current = controller;
     const requestId = ++requestRef.current;
     setState({ status: "loading" });
+    setFreshnessState({ status: "loading" });
     getCampaigns(controller.signal)
       .then((campaigns) => {
         if (!controller.signal.aborted && requestRef.current === requestId) setState({ status: "live", campaigns });
@@ -55,15 +106,24 @@ export function LiveCampaignRuns({ initialCampaigns }: { initialCampaigns?: ApiC
         if (controller.signal.aborted || requestRef.current !== requestId) return;
         setState({ status: "error", message: error instanceof Error ? error.message : "Campaign API unavailable" });
       });
+    getIcpFreshness(controller.signal)
+      .then((freshness) => {
+        if (controller.signal.aborted || requestRef.current !== requestId) return;
+        setFreshnessState(freshness ? { status: "live", freshness } : { status: "missing" });
+      })
+      .catch((error) => {
+        if (controller.signal.aborted || requestRef.current !== requestId) return;
+        setFreshnessState({ status: "error", message: error instanceof Error ? error.message : "Revenue DNA API unavailable" });
+      });
   }, []);
 
   useEffect(() => {
-    if (initialCampaigns === undefined) load();
+    if (initialCampaigns === undefined || (initialFreshness === undefined && !initialFreshnessError)) load();
     return () => {
       requestRef.current += 1;
       controllerRef.current?.abort();
     };
-  }, [initialCampaigns, load]);
+  }, [initialCampaigns, initialFreshness, initialFreshnessError, load]);
 
   const campaigns = state.status === "live" ? state.campaigns : [];
   return (
@@ -86,6 +146,8 @@ export function LiveCampaignRuns({ initialCampaigns }: { initialCampaigns?: ApiC
           {state.status === "loading" ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />} Refresh
         </button>
       </div>
+
+      <RevenueDnaGate state={freshnessState} />
 
       {state.status === "loading" && <div className="flex h-24 items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Reading execution state…</div>}
       {state.status === "error" && (

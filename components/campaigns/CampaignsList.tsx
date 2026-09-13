@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { ApiCampaign } from "@/lib/api/slipstream";
+import type { ApiCampaign, ApiIcpFreshness } from "@/lib/api/slipstream";
 import type { Campaign, CampaignStatus } from "@/lib/types/campaigns";
 import { cn } from "@/lib/utils";
 import { NewCampaignDialog } from "./NewCampaignDialog";
@@ -34,7 +34,7 @@ function ago(minutes: number): string {
 
 export const approvedCount = (c: Campaign) => c.people.filter((p) => p.status === "approved").length;
 
-export function CampaignsList({ loading = false, initialLiveCampaigns }: { loading?: boolean; initialLiveCampaigns?: ApiCampaign[] | null }) {
+export function CampaignsList({ loading = false, initialLiveCampaigns, initialFreshness, initialFreshnessError }: { loading?: boolean; initialLiveCampaigns?: ApiCampaign[] | null; initialFreshness?: ApiIcpFreshness | null; initialFreshnessError?: string }) {
   const router = useRouter();
   const campaigns = useCampaigns();
   const [tab, setTab] = useState<Tab>("all");
@@ -74,7 +74,7 @@ export function CampaignsList({ loading = false, initialLiveCampaigns }: { loadi
         </div>
       </div>
 
-      <LiveCampaignRuns initialCampaigns={initialLiveCampaigns} />
+      <LiveCampaignRuns initialCampaigns={initialLiveCampaigns} initialFreshness={initialFreshness} initialFreshnessError={initialFreshnessError} />
 
       <div className="mt-8 flex flex-col items-stretch justify-between gap-3 px-4 pb-[14px] sm:flex-row sm:items-end sm:px-11">
         <div><h2 className="text-[15px] font-semibold text-foreground">Sequence workspace</h2><p className="mt-0.5 text-xs text-muted-foreground">Evaluation data for designing and approving outreach sequences</p></div>

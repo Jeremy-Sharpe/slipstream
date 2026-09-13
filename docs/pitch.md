@@ -12,7 +12,7 @@ A call enters as audio. ElevenLabs separates the speakers. Slipstream fills the 
 
 Then Slipstream drafts the follow-up from what was agreed. In our demo, the rep claims cyber insurance will be cut in half. Slipstream records that risk but refuses to repeat it. One click approves the safe draft. Approval never pretends the email was sent.
 
-Approved drafts can enter a scheduled campaign. Sends are throttled, tracked and retried safely, and an operator can pause future work. The screen always shows the true delivery state.
+Approved drafts can enter a scheduled campaign. Sends are throttled, tracked and retried safely, and an operator can pause future work. The screen shows both the true delivery state and whether the targeting evidence is still current.
 
 That already saves over an hour a day for a rep doing eight calls. But the real difference is what happens across the whole team.
 
