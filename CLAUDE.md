@@ -75,7 +75,7 @@ Prompts live in `api/app/prompts/` as files, one per task, with a version in the
 
 ## Licensing
 
-The repo is MIT. `coach/` is forked from Cheating Daddy and stays GPL-3.0 with its own `LICENSE`. Do not copy code from `coach/` into other folders.
+The repo is MIT, including `coach/`, which is an original app. Do not copy GPL-licensed code into the repo.
 
 ## Running things
 

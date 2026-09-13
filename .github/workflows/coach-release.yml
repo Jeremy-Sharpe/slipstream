@@ -15,22 +15,11 @@ concurrency:
 
 jobs:
   package:
-    name: ${{ matrix.label }}
-    runs-on: ${{ matrix.runner }}
+    # The coach captures system audio through macOS loopback capture, so macOS is the only
+    # supported installer. Signing and notarisation stay unconfigured by design.
+    name: macOS
+    runs-on: macos-latest
     timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - label: Linux
-            runner: ubuntu-latest
-            artifact: slipstream-coach-linux
-          - label: macOS
-            runner: macos-latest
-            artifact: slipstream-coach-macos
-          - label: Windows
-            runner: windows-latest
-            artifact: slipstream-coach-windows
 
     defaults:
       run:
@@ -53,15 +42,15 @@ jobs:
       - name: Run coach tests
         run: npm test
 
-      - name: Build unsigned installers
-        run: npm run make
+      - name: Build unsigned DMG
+        run: npm run dist
         env:
-          CI: "true"
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
-      - name: Upload installers
+      - name: Upload installer
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: ${{ matrix.artifact }}-${{ github.sha }}
-          path: coach/out/make/**/*
+          name: slipstream-coach-macos-${{ github.sha }}
+          path: coach/dist/*.dmg
           if-no-files-found: error
           retention-days: 14
