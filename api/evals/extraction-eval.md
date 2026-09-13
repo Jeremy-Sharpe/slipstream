@@ -1,5 +1,7 @@
 # Extraction Eval
 
+The recorded reports in `api/evals/results/` were run on 12 September 2026 against the pre-rebrand Harbourline IT fixture cohort and are kept as the historical bake-off record, so every company name inside them refers to that earlier cohort; the eval runners themselves work unchanged against the rebranded Eleno fixtures.
+
 ## What It Measures
 
 This eval runs the live extraction path over the labelled call fixtures, one or more times per model, and compares the grounded `ExtractionResult` against `expected.json["extraction"]` for contact, company, deal, next-step, promise, objection, and evidence-grounding agreement.
@@ -43,14 +45,7 @@ The judged checks are `contact_name`, `contact_email`, `company_name`, `company_
 
 ## Results
 
-Anna Sekulic ran one pass over all thirteen fixture calls, including the demo call, on
-12 September 2026 with prompt `extract-v2`. Three OpenAI models ran directly and four
-models ran sequentially through OpenRouter after a concurrent attempt hit the shared
-account's credit ceiling. The direct-provider runner did not report OpenAI cost, so those
-rows are marked `not billed`; that means “not measured here”, not “free”. The preserved
-comparison is `results/extraction-comparison-20260912-final.md` and the per-call reports
-remain in `results/`. This evidence-only port from Anna's PR #7 deliberately excludes that
-branch's obsolete implementation changes.
+Anna Sekulic ran one pass over all thirteen fixture calls, including the demo call, on 12 September 2026 with prompt `extract-v2`. Three OpenAI models ran directly and four models ran sequentially through OpenRouter after a concurrent attempt hit the shared account's credit ceiling. The direct-provider runner did not report OpenAI cost, so those rows are marked `not billed`; that means “not measured here”, not “free”. The preserved comparison is `results/extraction-comparison-20260912-final.md` and the per-call reports remain in `results/`. This evidence-only port from Anna's PR #7 deliberately excludes that branch's obsolete implementation changes.
 
 | Model | Contact name | Contact email | Company name | Headcount | Deal amount | Next step | Promises | Objection handling | Grounded | Parse failures | Mean latency | Measured cost/call |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -62,27 +57,8 @@ branch's obsolete implementation changes.
 | `mistralai/mistral-medium-3.1` | 92% | 100% | 92% | 92% | 100% | 69% | 92% | 54% | 100% | 0 | 7.4 s | $0.0034 |
 | `anthropic/claude-haiku-4.5` | 62% | 62% | 62% | 62% | 23% | 46% | 46% | 15% | 62% | 5 | 10.5 s | $0.0081 |
 
-**Decision.** `mistralai/mistral-medium-3.1` is the operational pick: it has the
-highest mean judged pass rate (86.5%), the best deal-amount and objection-handling
-scores, 7.4-second mean latency, and a measured cost of $0.0034 per call. It still misses
-the predeclared 75% per-check gate on next step (69%) and objection handling (54%); the
-gate was not lowered after seeing the result. `openai/gpt-5.4-mini` is the accuracy-first
-alternative for contact and promise fields, but its cost was not captured and therefore
-cannot be honestly compared. Production remains provider-configurable and the public VPS
-is keyless, so this evaluation does not imply a currently active production model.
+**Decision.** `mistralai/mistral-medium-3.1` is the operational pick: it has the highest mean judged pass rate (86.5%), the best deal-amount and objection-handling scores, 7.4-second mean latency, and a measured cost of $0.0034 per call. It still misses the predeclared 75% per-check gate on next step (69%) and objection handling (54%); the gate was not lowered after seeing the result. `openai/gpt-5.4-mini` is the accuracy-first alternative for contact and promise fields, but its cost was not captured and therefore cannot be honestly compared. Production remains provider-configurable and the public VPS is keyless, so this evaluation does not imply a currently active production model.
 
-**Grounding changed real outputs.** Llama needed ten quote repairs and one drop,
-DeepSeek three repairs and two drops, and Mistral one repair. Every span retained after
-the deterministic pass is verbatim. DeepSeek's 92% grounding score represents one failed
-call, not an ungrounded span escaping validation.
+**Grounding changed real outputs.** Llama needed ten quote repairs and one drop, DeepSeek three repairs and two drops, and Mistral one repair. Every span retained after the deterministic pass is verbatim. DeepSeek's 92% grounding score represents one failed call, not an ungrounded span escaping validation.
 
-**Known weaknesses.** Deal-amount misses mostly confuse monthly/per-seat or onboarding
-figures with annual contract value. Next-step misses are dominated by a label convention:
-lost/no-show labels omit courtesy follow-ups that models correctly observe in the call.
-Objection-handling misses cluster around the ambiguous `partial` versus `handled` boundary.
-Claude Haiku failed five parses and DeepSeek one because those outputs omitted evidence
-sequence numbers. The raw model schema now accepts that recoverable shape long enough for
-the grounding pass to locate the quote, while the canonical result still rejects any
-transcript evidence left without an index. The historical table is intentionally unchanged;
-the models must be rerun before claiming an improved score. Claude Sonnet, Claude Opus and
-repeat runs were not completed because the shared OpenRouter credit was exhausted.
+**Known weaknesses.** Deal-amount misses mostly confuse monthly/per-seat or onboarding figures with annual contract value. Next-step misses are dominated by a label convention: lost/no-show labels omit courtesy follow-ups that models correctly observe in the call. Objection-handling misses cluster around the ambiguous `partial` versus `handled` boundary. Claude Haiku failed five parses and DeepSeek one because those outputs omitted evidence sequence numbers. The raw model schema now accepts that recoverable shape long enough for the grounding pass to locate the quote, while the canonical result still rejects any transcript evidence left without an index. The historical table is intentionally unchanged; the models must be rerun before claiming an improved score. Claude Sonnet, Claude Opus and repeat runs were not completed because the shared OpenRouter credit was exhausted.
