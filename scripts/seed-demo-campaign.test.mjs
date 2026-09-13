@@ -44,7 +44,7 @@ function fixtureFetch({ storage = "memory", emailDelivery = false, reasoning = f
     if (url.endsWith("/extraction")) return json({ detail: "Extraction not found" }, 404);
     if (url.includes("/drafts/from-call/")) return json({ id: "22222222-2222-4222-8222-222222222222", source: reasoning ? "model" : "deterministic", model: reasoning ? "local-qwen" : "grounded-template-v1" });
     if (url.endsWith("/emails")) return json({ id: "33333333-3333-4333-8333-333333333333" });
-    if (url.endsWith("/draft-reply")) return json({ id: "44444444-4444-4444-8444-444444444444", recipient_email: "donnie@marlowefinch.example", source: "deterministic", model: "thread-grounded-template-v2" });
+    if (url.endsWith("/draft-reply")) return json({ id: "44444444-4444-4444-8444-444444444444", recipient_email: "donnie@marlowefinch.example", source: reasoning ? "model" : "deterministic", model: reasoning ? "local-qwen" : "thread-grounded-template-v2" });
     if (url.includes("22222222-2222-4222-8222-222222222222/approve")) return json({ id: "22222222-2222-4222-8222-222222222222", status: "approved", sent_at: null });
     if (url.includes("44444444-4444-4444-8444-444444444444/approve")) return json({ id: "44444444-4444-4444-8444-444444444444", status: "approved", sent_at: null });
     if (url.endsWith("/campaigns")) {

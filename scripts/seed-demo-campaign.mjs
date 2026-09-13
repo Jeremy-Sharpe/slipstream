@@ -213,8 +213,12 @@ export async function seedDemoCampaign({
   );
   assert(typeof emailDraft?.id === "string", "email reply drafting did not return a draft ID");
   assert(emailDraft?.recipient_email === "donnie@marlowefinch.example", "email reply has the wrong recipient");
-  assert(emailDraft?.source === "deterministic", "email reply has unexpected provenance");
-  assert(emailDraft?.model === "thread-grounded-template-v2", "email reply used the wrong template");
+  // A configured model drafts the reply; the grounded template is its fallback.
+  const modelReply = ready?.reasoning_configured === true
+    && emailDraft?.source === "model"
+    && emailDraft?.model === ready?.reasoning_model;
+  const templateReply = emailDraft?.source === "deterministic" && emailDraft?.model === "thread-grounded-template-v2";
+  assert(modelReply || templateReply, "email reply has unexpected provenance");
   const approvedEmailDraft = emailDraft.status === "approved"
     ? emailDraft
     : await requestJson(fetchImpl, `${base}/api/v1/drafts/${emailDraft.id}/approve`, {

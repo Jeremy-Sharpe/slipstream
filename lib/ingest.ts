@@ -18,6 +18,9 @@ import { domainName } from "@/lib/adapters";
 import { company, user } from "@/lib/data/seller";
 import { displayName, isRep, parseEmail } from "@/lib/email";
 import type { ConversationEntry } from "@/lib/store/conversations";
+import { parseTranscript } from "@/lib/transcript";
+
+export { parseTranscript, type ParsedTurn } from "@/lib/transcript";
 
 export const REP_NAME = user.name;
 const MAILBOX = user;
@@ -50,26 +53,6 @@ export async function ingestRecording(file: File): Promise<{ call: ApiCall; entr
   const subject = file.name.replace(/\.[a-z0-9]+$/i, "").slice(0, 200) || "Uploaded recording";
   const call = await transcribeCall(file, subject, REP_NAME);
   return { call, entry: entryForCall(call, { fileName: file.name }) };
-}
-
-/* "[00:12] Sam: ..." / "Sam (0:12): ..." / "Sam: ..." — the same lines the
-   paste box has always accepted. */
-const LINE = /^(?:\[(\d{1,2}:\d{2}(?::\d{2})?)\]\s*)?([A-Z][\w .'-]{1,40}?)(?:\s*\((\d{1,2}:\d{2}(?::\d{2})?)\))?:\s*(.+)$/;
-
-export type ParsedTurn = { speaker: string; text: string };
-
-export function parseTranscript(text: string): { turns: ParsedTurn[]; speakers: string[] } {
-  const matches = text
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => line.match(LINE))
-    .filter((match): match is RegExpMatchArray => !!match);
-  if (matches.length < 2) {
-    return { turns: [{ speaker: "Prospect", text: text.trim() }], speakers: ["Prospect"] };
-  }
-  const turns = matches.map((match) => ({ speaker: match[2], text: match[4] }));
-  return { turns, speakers: [...new Set(turns.map((turn) => turn.speaker))] };
 }
 
 /** Persisted through the live-coach socket, relayed by app/gateway/transcript so the token stays on the server. */
