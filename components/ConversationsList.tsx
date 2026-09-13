@@ -62,7 +62,7 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
                       <span className="truncate text-[14px] font-medium text-ink">{c.contact}</span>
                     </span>
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="truncate text-[14px] text-ink">{c.company}</span>
+                      <span className="shrink-0 truncate text-[14px] text-ink">{c.company}</span>
                       <span className="truncate text-[13.5px] text-soft">· {c.kind === "email" ? subjectOf(c) : c.title}</span>
                     </span>
                     <span className="flex items-center"><OutcomePill outcome={c.outcome} /></span>

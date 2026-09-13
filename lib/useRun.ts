@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CallRecord } from "./types";
 import { actions } from "./store";
 
@@ -60,7 +60,7 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
   }, []);
 
   const at = useCallback((ms: number, fn: () => void) => { timers.current.push(window.setTimeout(fn, instant ? 0 : ms)); }, [instant]);
-  const trace = traceFor(call);
+  const trace = useMemo(() => traceFor(call), [call]);
 
   /** Schedules a list of steps back to back; returns the total time. */
   const schedule = useCallback((ids: StepId[], t0: number, stopAfter?: { id: StepId; note?: string; wait?: boolean }, onEnd?: () => void) => {

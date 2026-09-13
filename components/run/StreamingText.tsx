@@ -65,7 +65,7 @@ export function StreamingText({ tokens, sources = [], followUps = [], onCite, on
           <div className="mt-2 transition-opacity duration-400" style={{ opacity: done ? 1 : 0, pointerEvents: done ? "auto" : "none" }}>
             <button type="button" aria-expanded={open} onClick={() => setOpen((c) => !c)} className="-ml-1 flex items-center gap-2 rounded-md px-1 py-0.5 transition-colors duration-150 hover:bg-white">
               <span className="flex -space-x-1">{sources.map((s) => <Avatar key={s.i} name={s.name} size={14} className="ring-[1.5px] ring-surface" />)}</span>
-              <span className="text-[13px] text-soft">{sources.length} turns</span>
+              <span className="text-[13px] text-soft">{sources.length} {sources.some((s) => s.label) ? "messages" : "turns"}</span>
             </button>
           </div>
           <div className="grid transition-[grid-template-rows,opacity] duration-300" style={{ gridTemplateRows: done && open ? "1fr" : "0fr", opacity: done && open ? 1 : 0, transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
