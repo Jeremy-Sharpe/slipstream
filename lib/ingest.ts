@@ -14,7 +14,7 @@ import {
   type ApiEmailRecord,
   type EmailIngestInput,
 } from "@/lib/api/slipstream";
-import { domainName } from "@/lib/adapters";
+import { domainName, isMachineId, titleFromFileName } from "@/lib/adapters";
 import { company, user } from "@/lib/data/seller";
 import { displayName, isRep, parseEmail } from "@/lib/email";
 import type { ConversationEntry } from "@/lib/store/conversations";
@@ -31,12 +31,14 @@ const stamp = () => Date.now().toString(36);
 
 export function entryForCall(call: ApiCall, extra: { fileName?: string; pasted?: boolean; company?: string; contact?: string } = {}): ConversationEntry {
   const parts = (call.subject ?? "").split(/\s+[—–-]\s+/);
+  const named = parts.length > 1;
+  const title = titleFromFileName(extra.fileName) ?? (isMachineId(call.subject) ? null : call.subject) ?? "Recording";
   return {
     id: call.id,
     kind: "call",
-    subject: call.subject ?? call.source_external_id,
-    company: extra.company ?? (parts.length > 1 ? parts[0].trim() : call.source_external_id),
-    contact: extra.contact ?? (parts.length > 1 ? parts.slice(1).join(" - ").trim() : "Unknown contact"),
+    subject: named ? call.subject! : title,
+    company: extra.company ?? (named ? parts[0].trim() : title),
+    contact: extra.contact ?? (named ? parts.slice(1).join(" - ").trim() : "Unnamed contact"),
     at: call.occurred_at,
     sourceExternalId: call.source_external_id,
     ...(extra.fileName ? { fileName: extra.fileName } : {}),

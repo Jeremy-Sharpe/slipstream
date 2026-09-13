@@ -202,10 +202,10 @@ export function RunView({ source }: { source: RunSource }) {
       <div className="mt-3 flex items-center gap-3">
         <Avatar name={call.contact} size={36} />
         <div className="min-w-0 flex-1">
-          <h1 className="flex items-center gap-2 text-[20px] font-semibold text-ink">
-            {call.contact}
-            <span className="font-normal text-faint">·</span>
-            <span>{call.company}</span>
+          <h1 className="flex min-w-0 items-center gap-2 text-[20px] font-semibold text-ink">
+            <span className="truncate">{call.contact}</span>
+            <span className="shrink-0 font-normal text-faint">·</span>
+            <span className="min-w-0 truncate">{call.company}</span>
           </h1>
           <p className="mt-0.5 flex h-6 items-center gap-2 text-[13px] text-soft">
             <OutcomePill outcome={call.outcome} />

@@ -51,6 +51,8 @@ export type IcpRow = {
   attribute: string;
   label: string;
   value: string;
+  /** The same value as separate items, so the card can render them as pills. */
+  values: string[];
   /** The counted reason the model gave for this attribute. */
   why: string;
   deals: { id: string; company: string; href: string }[];
@@ -115,19 +117,19 @@ const ATTRIBUTE_LABELS: Record<string, string> = {
   trigger: "Buying trigger",
 };
 
-function attributeValue(attribute: string, profile: ApiIcpProfile["profile"], why: string): string {
+function attributeValues(attribute: string, profile: ApiIcpProfile["profile"], why: string): string[] {
   switch (attribute) {
     case "industry":
-      return profile.industries.join(" · ");
+      return profile.industries;
     case "headcount_band":
-      return `${profile.headcount_band} staff`;
+      return [`${profile.headcount_band} staff`];
     case "contact_role":
     case "role":
-      return profile.roles.join(" · ");
+      return profile.roles;
     case "trigger":
-      return profile.triggers.join(" · ");
+      return profile.triggers;
     default:
-      return why;
+      return [why];
   }
 }
 
@@ -304,7 +306,8 @@ async function buildIcp(
     profile.evidence.map(async (item) => ({
       attribute: item.attribute,
       label: ATTRIBUTE_LABELS[item.attribute] ?? item.attribute.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()),
-      value: attributeValue(item.attribute, profile.profile, item.why),
+      value: attributeValues(item.attribute, profile.profile, item.why).join(" · "),
+      values: attributeValues(item.attribute, profile.profile, item.why),
       why: item.why,
       deals: await Promise.all(
         item.deal_ids

@@ -22,6 +22,14 @@ function dayLabel(iso: string, now: number | null) {
   return longDay.format(new Date(iso));
 }
 
+/** The subject earns its slot only when it says more than the company and contact already do. */
+function showSubject(row: ConversationRow): boolean {
+  const subject = (row.subject ?? "").trim();
+  if (!subject || subject === row.company) return false;
+  const [head] = subject.split(/\s+[—–-]\s+/);
+  return !(head.trim() === row.company && subject.includes(row.contact));
+}
+
 export function ConversationsList({ query = "", filter = "all" }: { query?: string; filter?: ConversationFilter }) {
   const { rows: all, loading, error, retry } = useConversationList();
   const [now, setNow] = useState<number | null>(null);
@@ -81,8 +89,8 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
                       <span className="truncate text-[14px] font-medium text-ink">{row.contact}</span>
                     </span>
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="shrink-0 truncate text-[14px] text-ink">{row.company}</span>
-                      <span className="truncate text-[13.5px] text-soft">· {row.subject}</span>
+                      <span className="min-w-0 max-w-[60%] truncate text-[14px] text-ink">{row.company}</span>
+                      {showSubject(row) && <span className="min-w-0 truncate text-[13.5px] text-soft">· {row.subject}</span>}
                     </span>
                     <span className="flex items-center">{row.run?.outcome && <OutcomePill outcome={row.run.outcome} />}</span>
                     <span className="text-[13.5px] tabular-nums text-soft">{fmtTime(row.at)}</span>

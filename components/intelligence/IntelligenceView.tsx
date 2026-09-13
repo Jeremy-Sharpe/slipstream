@@ -58,12 +58,10 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
       <div className="mt-10"><Coaching lines={coachingFocus} rep={coachRep} source={coachingSource} /></div>
 
       <p className="mt-10 pb-8 text-[12px] text-faint">
-        {provenance.rubricVersion ? `Scored with rubric ${provenance.rubricVersion}` : "No rubric version yet"}
-        {provenance.playbookModel ? ` · playbook by ${provenance.playbookModel}` : " · playbook not derived"}
-        {provenance.playbookGeneratedAt ? ` · generated ${fmtDate(provenance.playbookGeneratedAt)}` : ""}
-        {provenance.profileVersion != null ? ` · profile v${provenance.profileVersion}` : ""}
-        {provenance.cohortRevision ? ` · cohort ${provenance.cohortRevision.slice(0, 7)}` : ""}
+        {provenance.profileVersion != null ? `Profile v${provenance.profileVersion}` : "No profile yet"}
         {provenance.profileCreatedAt ? ` · derived ${fmtDate(provenance.profileCreatedAt)}` : ""}
+        {provenance.rubricVersion ? ` · scored with rubric ${provenance.rubricVersion}` : ""}
+        {provenance.playbookGeneratedAt ? ` · playbook ${fmtDate(provenance.playbookGeneratedAt)}` : ""}
       </p>
     </div>
   );
