@@ -1,0 +1,50 @@
+{
+  "call_id": "call-02-kestrel-lending",
+  "extraction": {
+    "contact": {
+      "name": "Felix Morgan",
+      "role": "Head of Credit Operations",
+      "email": "felix@kestrellending.example",
+      "phone": "+61 3 7010 1102"
+    },
+    "company": {
+      "name": "Kestrel Lending",
+      "industry": "Non-bank commercial lender",
+      "headcount": 64,
+      "location": "Docklands, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 96000,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday",
+      "I will send the measurement plan alongside it"
+    ],
+    "objections": [
+      {
+        "text": "we'd be buying a tool we then depend on you to run for the next five years",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send the discovery phase scope, a redrafted facility letter and the measurement plan, then review them with Felix and the head of risk.",
+      "due": "2026-09-10"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.43,
+    "notes": "Sam quantified the document turnaround and the volumes before naming a number, answered the lock-in objection with IP transfer and booked a dated review with the head of risk."
+  },
+  "icp_signals": {
+    "industry": "Non-bank commercial lender",
+    "headcount_band": "25-80",
+    "role": "Head of Credit Operations",
+    "trigger": "Loan document turnaround blowing out before broker season"
+  },
+  "risk_flags": []
+}

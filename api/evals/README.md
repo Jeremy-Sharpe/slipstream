@@ -36,6 +36,8 @@ Snapshot prices were copied from OpenRouter on 12 September 2026 into [openroute
 
 ## Results
 
+The recorded reports in `api/evals/results/` were run on 12 September 2026 against the pre-rebrand Harbourline IT fixture cohort and are kept as the historical bake-off record, so every company name inside them refers to that earlier cohort; the eval runners themselves work unchanged against the rebranded Eleno fixtures.
+
 Run on 12 September 2026 over the twelve labelled history calls, one pass per model, eleven models through OpenRouter, 28 minutes wall clock with four models in flight. The original report recorded $1.54 of known billed cost but its first harness version wrote zero cost and latency for failed parse attempts, so that total is explicitly a lower bound. The corrected harness preserves known usage across retries, marks incomplete pricing unknown and excludes any incompletely priced or failed model from cheapest-model selection. Full historical per-call reports are in [results/](results/); the comparison is `results/scorecard-comparison-20260912-1653.md`.
 
 | Model | Discovery within 1 | Discovery exact | Next step | Objection | Parse failures | Mean latency | Cost per call |

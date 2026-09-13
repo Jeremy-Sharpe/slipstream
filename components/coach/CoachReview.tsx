@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { coachRequest } from "@/lib/coach/api";
 import type { CoachSession, CoachSuggestionStatus } from "@/lib/coach/types";
 
@@ -59,10 +59,10 @@ export function CoachReview({ id }: { id: string }) {
 
   if (!session) {
     return (
-      <div role={error ? "alert" : "status"} className="mx-8 mt-7 flex items-center gap-3 text-sm text-muted-foreground">
+      <div role={error ? "alert" : "status"} className="flex items-center gap-3 text-[14px] text-soft">
         {error ?? "Loading the coached call…"}
         {error && (
-          <Button variant="outline" size="sm" onClick={() => setAttempt((n) => n + 1)}>
+          <Button size="sm" onClick={() => setAttempt((n) => n + 1)}>
             Retry
           </Button>
         )}
@@ -80,24 +80,24 @@ export function CoachReview({ id }: { id: string }) {
   ];
 
   return (
-    <div className="flex flex-col gap-7 px-8 pt-7 pb-16">
+    <div className="flex flex-col gap-8 pb-16">
       <section>
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{SESSION_STATUS[session.status]}</p>
-        <h2 className="mt-1 text-xl font-semibold text-foreground">{customer || "Coached call"}</h2>
-        <p className="mt-2 max-w-2xl text-sm text-ink-2">{context.brief}</p>
+        <p className="text-[12px] font-medium tracking-wide text-faint uppercase">{SESSION_STATUS[session.status]}</p>
+        <h2 className="mt-1 text-[18px] font-semibold text-ink">{customer || "Coached call"}</h2>
+        <p className="mt-2 max-w-2xl text-[14px] text-text">{context.brief}</p>
         {session.model && (
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-[12.5px] text-soft">
             Advice from {session.model}
             {session.last_analysis_ms != null && ` · last analysis took ${(session.last_analysis_ms / 1000).toFixed(1)} s`}
           </p>
         )}
         {state.analysis_status === "unavailable" && session.status !== "ended" && (
-          <p role="status" className="mt-2 text-sm text-destructive">The last analysis failed. The transcript is still being saved.</p>
+          <p role="status" className="mt-2 text-[14px] text-danger">The last analysis failed. The transcript is still being saved.</p>
         )}
       </section>
 
       {error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-[14px] text-danger">
           {error}{" "}
           <button type="button" className="underline" onClick={() => setAttempt((n) => n + 1)}>
             Retry
@@ -107,37 +107,37 @@ export function CoachReview({ id }: { id: string }) {
 
       <dl className="grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map(([label, value]) => (
-          <div key={label} className="rounded-lg border border-border bg-card p-4">
-            <dt className="text-xs text-muted-foreground">{label}</dt>
-            <dd className="mt-1 text-xl font-medium tabular-nums text-foreground">{value}</dd>
+          <div key={label} className="rounded-2xl bg-white shadow-[var(--shadow-card)] p-4">
+            <dt className="text-[12.5px] text-soft">{label}</dt>
+            <dd className="mt-1 text-[20px] font-semibold tabular-nums text-ink">{value}</dd>
           </div>
         ))}
       </dl>
 
       {session.status === "ended" && (
-        <p className="text-sm text-ink-2">
+        <p className="text-[14px] text-text">
           {session.conversation_id ? `Saved to Slipstream as a call. ${RECORDING[session.recording_status]}` : "No speech was captured, so no call was saved."}
         </p>
       )}
 
       <section>
-        <h3 className="text-sm font-semibold text-foreground">What the coach suggested</h3>
+        <h3 className="text-[12px] font-medium tracking-wide text-faint uppercase">What the coach suggested</h3>
         {state.suggestions.length ? (
           <ul className="mt-3 grid gap-3 md:grid-cols-2">
             {state.suggestions.map((s) => (
-              <li key={s.id} className="rounded-lg border border-border bg-card p-4">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <li key={s.id} className="rounded-2xl bg-white shadow-[var(--shadow-card)] p-4">
+                <div className="flex items-center justify-between text-[12.5px] text-soft">
                   <span>{s.kind === "ask" ? "Ask" : "Mention"}</span>
                   <span>{SUGGESTION_STATUS[s.status]}</span>
                 </div>
-                <p className="mt-2 text-sm font-medium text-foreground">{s.text}</p>
-                <p className="mt-2 text-xs text-muted-foreground">{s.reason}</p>
-                {s.quote && <blockquote className="mt-3 border-l-2 border-border pl-3 text-xs text-ink-2">“{s.quote}”</blockquote>}
+                <p className="mt-2 text-[14px] font-medium text-ink">{s.text}</p>
+                <p className="mt-2 text-[12.5px] text-soft">{s.reason}</p>
+                {s.quote && <blockquote className="mt-3 border-l-2 border-line pl-3 text-[12.5px] text-text">“{s.quote}”</blockquote>}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-[14px] text-soft">
             {session.status === "ready" ? "Suggestions appear once the rep starts listening." : "The coach has not suggested anything yet."}
           </p>
         )}
@@ -145,12 +145,12 @@ export function CoachReview({ id }: { id: string }) {
 
       {state.commitments.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-foreground">Commitments heard on the call</h3>
+          <h3 className="text-[12px] font-medium tracking-wide text-faint uppercase">Commitments heard on the call</h3>
           <ul className="mt-2 flex flex-col gap-2">
             {state.commitments.map((c) => (
-              <li key={c.topic} className="text-sm text-foreground">
+              <li key={c.topic} className="text-[14px] text-ink">
                 {c.text}
-                <p className="mt-0.5 text-xs text-muted-foreground">“{c.quote}”</p>
+                <p className="mt-0.5 text-[12.5px] text-soft">“{c.quote}”</p>
               </li>
             ))}
           </ul>
@@ -158,18 +158,18 @@ export function CoachReview({ id }: { id: string }) {
       )}
 
       <section>
-        <h3 className="text-sm font-semibold text-foreground">Live transcript</h3>
+        <h3 className="text-[12px] font-medium tracking-wide text-faint uppercase">Live transcript</h3>
         {state.turns.length ? (
           <div className="mt-3 flex max-w-3xl flex-col gap-2.5">
             {state.turns.map((t) => (
-              <p key={t.sequence} className="text-sm leading-relaxed text-ink-2">
-                <span className="mr-2 font-medium text-foreground">{SPEAKER[t.role]}</span>
+              <p key={t.sequence} className="text-[14px] leading-relaxed text-text">
+                <span className="mr-2 font-medium text-ink">{SPEAKER[t.role]}</span>
                 {t.text}
               </p>
             ))}
           </div>
         ) : (
-          <p className="mt-2 text-sm text-muted-foreground">No speech captured yet.</p>
+          <p className="mt-2 text-[14px] text-soft">No speech captured yet.</p>
         )}
       </section>
     </div>

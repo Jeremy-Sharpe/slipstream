@@ -14,6 +14,10 @@ def load_fixture_history(store: IcpLeadsStore, fixtures_dir: Path) -> FixtureHis
         expected = _read_json(call_dir / "expected.json")
         script = _read_json(call_dir / "script.json")
         _load_call(store, expected, script)
+    clients_file = fixtures_dir / "crm" / "clients.json"
+    if clients_file.is_file():
+        for row in _read_json_list(clients_file):
+            _load_client(store, row)
     email_evidence = fixtures_dir / "emails" / "icp-evidence.json"
     if email_evidence.is_file():
         _load_email_evidence(store, _read_json_list(email_evidence))
@@ -67,7 +71,7 @@ def _load_call(store: IcpLeadsStore, expected: dict[str, Any], script: dict[str,
         {
             "company_id": company["id"],
             "primary_contact_id": contact["id"],
-            "name": f"{extraction['company']['name']} managed IT",
+            "name": f"{extraction['company']['name']} AI automation",
             "stage": stage,
             "outcome": outcome,
             "amount": extraction["deal"].get("value_aud"),
@@ -94,6 +98,49 @@ def _load_call(store: IcpLeadsStore, expected: dict[str, Any], script: dict[str,
                     "content": summary,
                 }
             ],
+        }
+    )
+
+
+def _load_client(store: IcpLeadsStore, row: dict[str, Any]) -> None:
+    """Record a publicly listed client as a won deal with no call, email or contact evidence."""
+    provenance = {
+        "source": "fixtures",
+        "evidence": "public_client_list",
+        "source_url": row.get("source_url"),
+    }
+    company = store.upsert_company(
+        {
+            "name": row["name"],
+            "domain": str(row["domain"]).strip().lower(),
+            "industry": row.get("industry"),
+            "employee_count": None,
+            "location": row.get("location"),
+            "metadata": dict(provenance),
+        }
+    )
+    store.upsert_deal(
+        {
+            "company_id": company["id"],
+            "primary_contact_id": None,
+            "name": f"{row['name']} AI automation (public client)",
+            "stage": _map_stage(row.get("stage")),
+            "outcome": _map_outcome(str(row["outcome"]), demo=False),
+            "amount": None,
+            "currency": "AUD",
+            "owner_name": None,
+            "summary": row.get("summary"),
+            "close_date": None,
+            "crm_external_id": str(row["crm_external_id"]),
+            "metadata": {
+                **provenance,
+                "icp_signals": {
+                    "industry": row.get("industry"),
+                    "headcount_band": None,
+                    "role": None,
+                    "trigger": None,
+                },
+            },
         }
     )
 

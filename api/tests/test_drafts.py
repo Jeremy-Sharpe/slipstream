@@ -25,8 +25,8 @@ def test_follow_up_is_grounded_and_idempotent(client: TestClient) -> None:
     assert draft["recipient_name"] == "Donnie Azoff"
     assert draft["recipient_email"] == "donnie@marlowefinch.example"
     assert draft["subject"] == "Next steps — Marlowe & Finch Accounting"
-    assert "proposal and 30-seat agreement" in draft["body"]
-    assert "halve the premium" not in draft["body"]
+    assert "proposal and statement of work" in draft["body"]
+    assert "halve your back-office headcount" not in draft["body"]
     assert draft["status"] == "draft"
     assert draft["source"] == "deterministic"
     assert draft["prompt_version"] == "grounded-template-v1"
@@ -109,7 +109,7 @@ def test_follow_up_can_be_drafted_by_model(client: TestClient, monkeypatch) -> N
     assert payload["contact"]["name"] == "Donnie Azoff"
     assert payload["next_step"]["description"] in captured["user"]
     assert payload["promises"]
-    assert any("proposal and 30-seat agreement" in promise for promise in payload["promises"])
+    assert any("proposal and statement of work" in promise for promise in payload["promises"])
     assert payload["transcript"]
     assert payload["transcript"][0]["speaker"]
     assert payload["transcript"][0]["body"]
@@ -171,17 +171,17 @@ def test_runaway_model_body_returns_502(client: TestClient, monkeypatch) -> None
 @pytest.mark.parametrize(
     "claim",
     [
-        "I can guarantee Essential Eight compliance inside a week.",
-        "We are guaranteeing full compliance within a week.",
-        "We are making guarantees of full compliance within a week.",
+        "I can guarantee the agents never hallucinate.",
+        "We are guaranteeing a fully autonomous month-end close.",
+        "We are making guarantees of zero hallucinations.",
         "Our platform is completely breach-proof.",
-        "Our platform is completely secure.",
-        "Your insurance premiums will fall by 50%.",
-        "Your insurance premiums will be reduced by 50%.",
-        "Your insurer will\nreduce the annual premium after our report.",
+        "The reporting agent is 100% accurate.",
+        "You'll halve your back-office headcount by Christmas.",
+        "The agents will cut your payroll by half.",
+        "Your back-office staff will\nbe reduced once the agents are live.",
         "The incumbent is not certified.",
-        "Your incumbent is not ISO 27001 certified.",
-        "We cannot promise a timeline, but we guarantee your insurance premiums will fall by 50%.",
+        "Your current vendor is about to fold.",
+        "We cannot promise a timeline, but we guarantee zero hallucinations.",
     ],
 )
 def test_risky_model_claim_returns_502(
@@ -213,7 +213,7 @@ def test_risky_model_claim_gets_one_transcript_free_regeneration(
     def fake(reasoning, *, system, user, schema, max_tokens=4000, timeout=None):
         payloads.append(json.loads(user))
         body = (
-            "I guarantee Essential Eight compliance inside a week."
+            "I guarantee the agents never hallucinate."
             if len(payloads) == 1
             else "Thanks for your time. I will send the proposal for review."
         )
@@ -237,14 +237,14 @@ def test_risky_model_claim_gets_one_transcript_free_regeneration(
 @pytest.mark.parametrize(
     "body",
     [
-        "We cannot promise a specific insurance saving.",
-        "We cannot guarantee a specific insurance saving.",
-        "Removing unused seats reduces the subscription price.",
-        "We will document your current security controls without making guarantees.",
-        "We will send the report to your insurer.",
+        "We cannot promise a specific headcount saving.",
+        "We cannot guarantee a specific headcount saving.",
+        "The agents reduce the manual drafting each month.",
+        "We will document your current workflow without making guarantees.",
+        "Every figure is accurate to the source document.",
         (
-            "Removing unused seats reduces the subscription price, "
-            "and we will send the report to your insurer."
+            "The agents reduce the manual drafting each month, "
+            "and your current provider keeps the ledger exports."
         ),
     ],
 )
@@ -272,8 +272,8 @@ def test_safety_validation_keeps_subject_and_body_independent(
     def fake(reasoning, *, system, user, schema, max_tokens=4000, timeout=None):
         return ReasoningResult(
             output=FollowUpDraftContent(
-                subject="Lower subscription costs",
-                body="We will send the report to your insurer.",
+                subject="Lower drafting costs",
+                body="Every figure is accurate to the source document.",
             ),
             model="fake/model",
             provider="openrouter",

@@ -1,6 +1,7 @@
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from app.core.config import Settings
 from app.schemas.icp import DealRecord, IcpProfile, InteractionEvidence, StoredIcpProfile
@@ -20,6 +21,58 @@ from app.services.icp import (
     won_centroid,
 )
 from app.services.icp_leads_store import MAX_ICP_DEALS, InMemoryIcpLeadsStore
+
+FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures"
+
+
+def _json(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _history_calls() -> list[dict[str, Any]]:
+    """expected.json for every non-demo call fixture, in folder order."""
+    calls = []
+    for folder in sorted(path for path in (FIXTURES_DIR / "calls").iterdir() if path.is_dir()):
+        if _json(folder / "script.json").get("demo"):
+            continue
+        calls.append(_json(folder / "expected.json"))
+    return calls
+
+
+def _client_rows() -> list[dict[str, Any]]:
+    return _json(FIXTURES_DIR / "crm" / "clients.json")
+
+
+def _email_rows() -> list[dict[str, Any]]:
+    return _json(FIXTURES_DIR / "emails" / "icp-evidence.json")
+
+
+def _won_calls() -> list[dict[str, Any]]:
+    return [
+        call for call in _history_calls() if call["extraction"]["deal"]["outcome"] == "won"
+    ]
+
+
+def _won_industries() -> list[str]:
+    """Won industries in the order the grounding applies: call evidence first, clients after."""
+    ordered = [call["icp_signals"]["industry"] for call in _won_calls()] + [
+        row["industry"]
+        for row in sorted(_client_rows(), key=lambda row: row["crm_external_id"])
+        if row["outcome"] == "won"
+    ]
+    unique: list[str] = []
+    for industry in ordered:
+        if industry.casefold() not in {value.casefold() for value in unique}:
+            unique.append(industry)
+    return unique[:MAX_PROFILE_VALUES]
+
+
+def _lost_industries() -> set[str]:
+    return {
+        call["extraction"]["company"]["industry"]
+        for call in _history_calls()
+        if call["extraction"]["deal"]["outcome"] == "lost"
+    }
 
 
 def fake_embed(texts: list[str]) -> list[list[float]]:
@@ -60,26 +113,28 @@ def fake_structured(**kwargs: object) -> IcpProfile:
 
 def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     store = InMemoryIcpLeadsStore()
-    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    load_fixture_history(store, FIXTURES_DIR)
+    won_bands = {call["icp_signals"]["headcount_band"] for call in _won_calls()}
 
     profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
 
     assert profile.version == 1
     assert profile.profile.cohort_revision is not None
     assert "cohort_revision" not in IcpProfile.model_json_schema()["properties"]
-    assert profile.profile.source_summary.deals == 12
-    assert profile.profile.source_summary.calls == 12
-    assert profile.profile.source_summary.emails == 1
-    assert profile.profile.source_summary.outcome_labelled == 11
-    assert profile.profile.industries == [
-        "Architecture and lab planning consultancy",
-        "Multi-site allied health clinic",
-        "Family law firm",
-        "Accounting practice",
-        "Multi-site physiotherapy clinic",
-    ]
-    assert profile.profile.headcount_band == "25-80"
-    assert "Creative branding studio" not in profile.profile.industries
+    assert profile.profile.source_summary.deals == len(_history_calls()) + len(_client_rows())
+    assert profile.profile.source_summary.calls == len(_history_calls())
+    assert profile.profile.source_summary.emails == len(_email_rows())
+    assert profile.profile.source_summary.outcome_labelled == len(_history_calls()) - sum(
+        call["extraction"]["deal"]["outcome"] == "no_show" for call in _history_calls()
+    ) + len(_client_rows())
+    assert profile.profile.industries == _won_industries()
+    assert len(profile.profile.industries) <= MAX_PROFILE_VALUES
+    assert profile.profile.headcount_band == won_bands.pop()
+    assert not won_bands
+    assert f"among the {len(_won_calls())} won deals with a known headcount" in (
+        profile.profile.summary
+    )
+    assert not _lost_industries() & set(profile.profile.industries)
     assert "Sam" not in profile.profile.summary
     assert "Jordan" not in profile.profile.summary
     assert "won-deal industries" in profile.profile.origami_brief
@@ -90,21 +145,24 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
         "trigger",
     ]
     won_ids = {str(deal.id) for deal in store.list_icp_deals() if deal.outcome == "won"}
+    assert len(won_ids) == len(_won_calls()) + len(_client_rows())
     assert all(
         set(item.deal_ids).issubset(won_ids) and item.deal_ids for item in profile.profile.evidence
     )
+    band_evidence = next(
+        item for item in profile.profile.evidence if item.attribute == "headcount_band"
+    )
+    assert len(band_evidence.deal_ids) == len(_won_calls())
     assert all(
         "Sam" not in item.why and "Jordan" not in item.why for item in profile.profile.evidence
     )
-    assert len(store.source_deals_for_profile(str(profile.id))) == 5
-    assert len(profile.source_deals) == 5
+    assert len(store.source_deals_for_profile(str(profile.id))) == len(won_ids)
+    assert len(profile.source_deals) == len(won_ids)
     assert {source.deal_id for source in profile.source_deals} == won_ids
-    assert all(source.company_name and source.call_ids for source in profile.source_deals)
-    assert all(
-        call_id.startswith("call-")
-        for source in profile.source_deals
-        for call_id in source.call_ids
-    )
+    assert all(source.company_name for source in profile.source_deals)
+    call_ids = [call_id for source in profile.source_deals for call_id in source.call_ids]
+    assert len(call_ids) == len(_won_calls())
+    assert all(call_id.startswith("call-") for call_id in call_ids)
     assert all(
         not deal.metadata.get("demo") for deal in store.source_deals_for_profile(str(profile.id))
     )
@@ -126,7 +184,7 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
 
 def test_revenue_dna_detects_new_outcome_and_marks_existing_leads_for_rescore() -> None:
     store = InMemoryIcpLeadsStore()
-    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    load_fixture_history(store, FIXTURES_DIR)
     profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
     store.upsert_lead(
         LeadIn(
@@ -166,11 +224,11 @@ def test_derive_returns_source_refs_without_a_post_commit_store_read() -> None:
             raise AssertionError(f"unexpected post-commit read for {profile_id}: {deal_ids}")
 
     store = NoSourceReadStore()
-    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    load_fixture_history(store, FIXTURES_DIR)
 
     profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
 
-    assert len(profile.source_deals) == 5
+    assert len(profile.source_deals) == len(_won_calls()) + len(_client_rows())
 
 
 def test_source_ref_projection_enforces_limits_and_privacy_defaults() -> None:
@@ -217,7 +275,7 @@ def test_source_ref_projection_enforces_limits_and_privacy_defaults() -> None:
 
 def test_derive_icp_uses_email_as_active_evidence_not_negative_evidence() -> None:
     store = InMemoryIcpLeadsStore()
-    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    load_fixture_history(store, FIXTURES_DIR)
     company = store.upsert_company({"name": "Acme", "domain": "acme.example"})
     store.upsert_deal(
         {
@@ -252,16 +310,18 @@ def test_derive_icp_uses_email_as_active_evidence_not_negative_evidence() -> Non
     assert active["interactions"][0]["channel"] == "email"
     assert "cyber insurance renewal" in active["interactions"][0]["content"]
     assert all(deal["id"] != active["id"] for deal in captured["contrast_deals"])
-    assert profile.profile.source_summary.deals == 13
-    assert profile.profile.source_summary.calls == 12
-    assert profile.profile.source_summary.emails == 2
+    assert profile.profile.source_summary.deals == (
+        len(_history_calls()) + len(_client_rows()) + 1
+    )
+    assert profile.profile.source_summary.calls == len(_history_calls())
+    assert profile.profile.source_summary.emails == len(_email_rows()) + 1
     assert "Acme" not in profile.profile.summary
     assert "cyber insurance renewal is due next month" not in profile.profile.origami_brief
 
 
 def test_derive_icp_deduplicates_model_disqualifiers() -> None:
     store = InMemoryIcpLeadsStore()
-    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    load_fixture_history(store, FIXTURES_DIR)
 
     def repeated(**kwargs: object) -> IcpProfile:
         profile = fake_structured(**kwargs)
@@ -319,7 +379,7 @@ def test_ground_profile_rejects_malformed_and_unsupported_won_signals() -> None:
     ]
 
 
-def test_ground_profile_reconciles_headcount_band_across_every_win() -> None:
+def test_ground_profile_reconciles_headcount_band_across_wins_that_disclose_one() -> None:
     base = fake_structured(user="", model="test")
     first = DealRecord(
         id="won-1",
@@ -357,6 +417,62 @@ def test_ground_profile_reconciles_headcount_band_across_every_win() -> None:
         unknown.model_copy(update={"metadata": {"icp_signals": {"headcount_band": "under-080"}}}),
     ]
     assert _ground_profile(base, equivalent_bands).headcount_band == "under-80"
+
+
+def test_headcount_band_holds_when_only_some_wins_disclose_a_headcount() -> None:
+    base = fake_structured(user="", model="test")
+    disclosed = [
+        DealRecord(
+            id=f"call-win-{index}",
+            name=f"Call win {index}",
+            stage="customer",
+            outcome="won",
+            industry=f"Call industry {index}",
+            employee_count=count,
+            metadata={
+                "fixture_call_id": f"call-{index}",
+                "icp_signals": {"headcount_band": "25-80"},
+            },
+        )
+        for index, count in enumerate((42, 64, 37))
+    ]
+    undisclosed = [
+        DealRecord(
+            id=f"client-win-{index}",
+            name=f"Public client {index}",
+            stage="customer",
+            outcome="won",
+            industry=f"Client industry {index}",
+            metadata={
+                "source": "fixtures",
+                "evidence": "public_client_list",
+                "icp_signals": {
+                    "industry": f"Client industry {index}",
+                    "headcount_band": None,
+                    "role": None,
+                    "trigger": None,
+                },
+            },
+        )
+        for index in range(4)
+    ]
+
+    profile = _ground_profile(base, [*undisclosed, *disclosed])
+
+    assert profile.headcount_band == "25-80"
+    assert "among the 3 won deals with a known headcount" in profile.summary
+    assert "3 of 7 won deals with a known headcount" in profile.origami_brief
+    assert "None" not in profile.summary
+    assert "None" not in profile.origami_brief
+    assert profile.roles == []
+    assert profile.triggers == []
+    assert profile.industries == [
+        *[f"Call industry {index}" for index in range(3)],
+        *[f"Client industry {index}" for index in range(4)],
+    ]
+    band_evidence = next(item for item in profile.evidence if item.attribute == "headcount_band")
+    assert band_evidence.deal_ids == [str(deal.id) for deal in disclosed]
+    assert _ground_profile(base, [disclosed[0], *undisclosed]).headcount_band == "Not established"
 
 
 def test_ground_evidence_does_not_cite_values_excluded_by_the_cap() -> None:

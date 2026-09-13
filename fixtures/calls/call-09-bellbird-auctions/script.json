@@ -1,0 +1,176 @@
+{
+  "call_id": "call-09-bellbird-auctions",
+  "seller": "Eleno",
+  "rep": "Jordan Lee",
+  "prospect": {
+    "name": "Aisha Rahman",
+    "role": "General Manager",
+    "email": "aisha@bellbirdauctions.example",
+    "phone": "+61 3 7010 1109"
+  },
+  "company": {
+    "name": "Bellbird Auctions",
+    "industry": "Fine art and collectables auction house",
+    "headcount": 48,
+    "location": "Malvern, VIC",
+    "domain": "bellbirdauctions.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-07T10:00:00+10:00",
+  "duration_target_seconds": 450,
+  "outcome": "won",
+  "deal_value_aud": 64000,
+  "trigger": "Consignment intake and cataloguing bottleneck before the spring sales",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Aisha Rahman, thanks for making time. I have Bellbird Auctions as forty-eight people in Malvern, and you run the house day to day as general manager, is that right?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "That's right. Specialists, cataloguers, front of house, finance and a small logistics team. The pressing thing is consignment intake before the spring sales. We take in more in six weeks than across the rest of the year, and the cataloguing queue never clears in time."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Walk me through what happens from the moment a seller brings a piece in?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "A specialist writes condition notes on paper or in an email, someone re-keys those into our sale management system, then a cataloguer writes the lot description, measurements and provenance line. The same information gets typed three times before it reaches the printed catalogue."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "How many lots go through that path in a spring season, and who carries the re-keying?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "About two thousand two hundred lots across four sales. Two cataloguers and one administrator carry it, with specialists checking descriptions at night. Through August and September they are all working weekends, and we still push consignment deadlines back."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Where does the source material actually live, the photographs, the condition notes, the seller correspondence?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "Photographs sit in a shared drive by sale number, notes are in the sale management system, and seller correspondence is in individual inboxes. Provenance documents are usually scanned files a seller emails us. Nothing is joined up, so a cataloguer hunts before they write."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "If this worked the way you wanted next spring, what would be different?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "A specialist records condition notes once, and a first-pass lot description comes back with measurements, materials and a provenance paragraph already drafted from the documents we hold. The cataloguer edits rather than writes. I would take that even at seventy percent quality."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Who signs off on something like this, and what do they care about?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "I recommend, our managing director approves, and the board sees anything over a threshold. He cares about catalogue accuracy, because a wrong attribution is a serious problem for a house like ours. The board cares about whether we own what we pay for."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Here is roughly where this lands. A short paid discovery phase to map intake and cataloguing, then a fixed-scope build of an intake and cataloguing assistant. For a house your size that build sits near $64,000, and the agents and prompts are handed over to you at the end. Managed optimisation afterwards is optional."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "That is the part I want to push on. We do not want another subscription that we can never switch off. We already pay three vendors forever and own nothing at the end of it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That is exactly why we transfer the intellectual property. At handover the agents, the prompts and the pipeline are yours, running inside your own systems, and you can keep them without us. Optimisation is a choice you make later, not a condition of the build. I will send the discovery phase scope and a fixed-price build proposal by Thursday."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "Good. The managing director will want to know what happens the first time the assistant gets an attribution wrong."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I will include the review workflow and the accuracy checks your cataloguers would run. Every drafted description reaches a cataloguer with the source it was built from, so they check against the condition note rather than trusting the text. Nothing goes to print without a human signing it off."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "That will land well. He has sat through demonstrations where the output looked confident and was quietly wrong, and it made him wary of the whole category."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Can we meet Thursday 10 September at 2pm with you and the managing director to walk the scope?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "Yes, Thursday 10 September at 2pm works. I will bring him and our head cataloguer, who knows the real bottlenecks better than either of us."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Before then I will confirm which of your systems we can reach through an interface. That shapes the build more than anything else does."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "The sale management system has a partner interface, and the shared drive is straightforward. The provenance documents are the messy part, because sellers send anything from a typed letter to a photograph of a handwritten receipt."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That is normal. Document extraction copes with the messy end, and anything it cannot read confidently gets flagged rather than guessed."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "Flagging is the right behaviour. A blank field a cataloguer fills in is fine. An invented provenance line would do us real damage with a consignor."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Agreed. We would set that confidence threshold with your cataloguers during discovery rather than choosing it for them."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "They will appreciate being asked. They have been told before that a new system would save them time, and it just moved the typing somewhere else in the process."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "The discovery phase is short and paid on purpose. If the saving is not there you stop with a clear picture and no build commitment."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "That is a fair way to start. It also gives me something concrete for the board rather than a vendor promise about hours saved."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I will keep the proposal to two pages plus the scope. Anything longer will not get read before Thursday."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Aisha Rahman",
+      "text": "Thanks Jordan. Send it Wednesday if you can, and I will have read it properly before we sit down."
+    }
+  ]
+}

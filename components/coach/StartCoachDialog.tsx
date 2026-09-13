@@ -1,22 +1,13 @@
 "use client";
 
-import { Copy, ExternalLink, Headphones } from "lucide-react";
+import { Copy, ExternalLink, Headphones, X } from "lucide-react";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
+import { Segmented } from "@/components/home/Segmented";
+import { Button } from "@/components/ui";
 import { coachRequest, launchLink } from "@/lib/coach/api";
 import type { CoachLaunch, CoachSession } from "@/lib/coach/types";
-import { cn } from "@/lib/utils";
 
 const SOURCES: { key: CoachSession["audio_mode"]; label: string; detail: string }[] = [
   { key: "both", label: "Call and mic", detail: "Hears the call app and your microphone separately, so it knows who said what. Wear headphones." },
@@ -24,8 +15,9 @@ const SOURCES: { key: CoachSession["audio_mode"]; label: string; detail: string 
   { key: "mic", label: "Speakerphone", detail: "Hears the room through your microphone. It cannot tell speakers apart." },
 ];
 
-const TEXTAREA =
-  "min-h-20 w-full rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+const FIELD =
+  "w-full rounded-xl bg-surface px-3.5 text-[13.5px] text-ink outline-none placeholder:text-faint transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-accent/40";
+const LABEL = "flex flex-col gap-1.5 text-[12px] font-medium tracking-wide text-faint uppercase";
 
 type Ready = { session: CoachSession; url: string };
 
@@ -39,6 +31,10 @@ export function StartCoachDialog() {
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState<Ready | null>(null);
   const [copied, setCopied] = useState(false);
+  const [portal, setPortal] = useState<HTMLElement | null>(null);
+  const firstField = useRef<HTMLInputElement>(null);
+
+  useEffect(() => setPortal(document.getElementById("portal") ?? document.body), []);
 
   function changeOpen(next: boolean) {
     setOpen(next);
@@ -51,6 +47,18 @@ export function StartCoachDialog() {
     }
     if (!next) setError(null);
   }
+
+  useEffect(() => {
+    if (!open) return;
+    firstField.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") changeOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // changeOpen only reads state setters and `ready`; re-binding on `ready` keeps it current.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, ready]);
 
   async function prepare(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -82,44 +90,41 @@ export function StartCoachDialog() {
   }
 
   const detail = SOURCES.find((s) => s.key === source)?.detail;
+  const title = ready ? `Coach ready for ${ready.session.context.customer.name}` : "Start call with coach";
 
-  return (
-    <Dialog open={open} onOpenChange={changeOpen}>
-      <DialogTrigger render={<Button variant="outline" className="h-9 rounded-md px-3.5 text-[16px] font-medium" />}>
-        <Headphones className="size-[18px]" strokeWidth={2} /> Start call with coach
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{ready ? `Coach ready for ${ready.session.context.customer.name}` : "Start call with coach"}</DialogTitle>
-          <DialogDescription>
-            {ready
-              ? "Open the desktop coach, then press Start listening when your call begins."
-              : "Run the call in the app you already use. The coach sits beside it and suggests what to ask next, from what you tell it here and what is said on the call."}
-          </DialogDescription>
-        </DialogHeader>
+  const dialog = (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-[rgba(24,25,37,0.24)] px-4" onMouseDown={(e) => e.target === e.currentTarget && changeOpen(false)}>
+      <div role="dialog" aria-modal="true" aria-labelledby="start-coach-title" className="w-full max-w-[460px] rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="start-coach-title" className="text-[18px] font-semibold text-ink">{title}</h2>
+            <p className="mt-1 text-[13.5px] text-soft">
+              {ready
+                ? "Open the desktop coach, then press Start listening when your call begins."
+                : "Run the call in the app you already use. The coach sits beside it and suggests what to ask next, from what you tell it here and what is said on the call."}
+            </p>
+          </div>
+          <button type="button" aria-label="Close" onClick={() => changeOpen(false)} className="grid size-8 shrink-0 place-items-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
+            <X className="size-4" strokeWidth={1.75} />
+          </button>
+        </div>
 
         {ready ? (
-          <div className="flex flex-col gap-3">
+          <div className="mt-5 flex flex-col gap-3">
             <a
               href={ready.url}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-foreground hover:bg-primary/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-accent px-4 text-[13.5px] font-medium text-accent-ink transition-colors duration-150 hover:bg-[#ff7d61] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               <ExternalLink className="size-4" strokeWidth={1.75} /> Open desktop coach
             </a>
-            <Button variant="outline" onClick={() => copy(ready.url)}>
+            <Button onClick={() => copy(ready.url)}>
               <Copy className="size-4" strokeWidth={1.75} /> {copied ? "Link copied" : "Copy link to paste into the coach"}
             </Button>
-            <p className="text-xs text-muted-foreground">
-              The link works once and expires in 10 minutes. Audio only starts when you press Start listening in the coach.
-            </p>
-            <Link
-              href={`/coach/${ready.session.id}`}
-              onClick={() => changeOpen(false)}
-              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-            >
+            <p className="text-[12.5px] text-soft">The link works once and expires in 10 minutes. Audio only starts when you press Start listening in the coach.</p>
+            <Link href={`/coach/${ready.session.id}`} onClick={() => changeOpen(false)} className="text-[13.5px] font-medium text-ink underline-offset-4 hover:underline">
               Follow this call in Slipstream
             </Link>
-            <details className="text-xs text-muted-foreground">
+            <details className="text-[12.5px] text-soft">
               <summary className="cursor-pointer">No desktop coach yet?</summary>
               <p className="mt-2">
                 It runs on macOS 14.2 or later. Download the latest build from the Coach installers workflow on GitHub. When running it from the repository (<code>cd coach && npm install && npm start</code>), use Copy link and paste it into the coach.
@@ -127,68 +132,66 @@ export function StartCoachDialog() {
             </details>
           </div>
         ) : (
-          <form id="start-coach" onSubmit={prepare} className="flex flex-col gap-3">
+          <form id="start-coach" onSubmit={prepare} className="mt-5 flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-3">
-              <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+              <label className={LABEL}>
                 Who are you calling?
-                <Input value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} placeholder="Emily Chen" />
+                <input ref={firstField} value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} placeholder="Emily Chen" className={`${FIELD} h-9 normal-case tracking-normal`} />
               </label>
-              <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+              <label className={LABEL}>
                 Company
-                <Input value={company} onChange={(e) => setCompany(e.target.value)} required maxLength={100} placeholder="Fitzroy Planning Group" />
+                <input value={company} onChange={(e) => setCompany(e.target.value)} required maxLength={100} placeholder="Fitzroy Planning Group" className={`${FIELD} h-9 normal-case tracking-normal`} />
               </label>
             </div>
-            <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+            <label className={LABEL}>
               What do you know so far? (optional)
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 maxLength={2000}
-                className={TEXTAREA}
+                className={`${FIELD} min-h-20 py-2 normal-case tracking-normal`}
                 placeholder="Their situation, the goal of this call, anything they have already told you."
               />
             </label>
-            <fieldset className="flex flex-col gap-1.5">
-              <legend className="text-xs font-medium text-muted-foreground">What should the coach listen to?</legend>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {SOURCES.map((s) => (
-                  <button
-                    key={s.key}
-                    type="button"
-                    aria-pressed={source === s.key}
-                    onClick={() => setSource(s.key)}
-                    className={cn(
-                      "h-8 rounded-md border px-3 text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
-                      source === s.key ? "border-primary/50 bg-primary-soft font-medium text-foreground" : "border-border text-muted-foreground hover:bg-muted",
-                    )}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-[12px] font-medium tracking-wide text-faint uppercase">What should the coach listen to?</legend>
+              <div className="mt-1.5">
+                <Segmented value={source} options={SOURCES} onChange={setSource} />
               </div>
-              <p className="text-xs text-muted-foreground">{detail}</p>
+              <p className="text-[12.5px] text-soft">{detail}</p>
             </fieldset>
-            <p className="text-xs text-muted-foreground">Only start once everyone on the call has agreed to transcription.</p>
+            <p className="text-[12.5px] text-soft">Only start once everyone on the call has agreed to transcription.</p>
           </form>
         )}
 
         {error && (
-          <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          <p role="alert" className="mt-4 rounded-xl bg-danger-tint px-3 py-2 text-[13px] text-danger">
             {error}
           </p>
         )}
 
         {!ready && (
-          <DialogFooter>
-            <Button variant="outline" onClick={() => changeOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" form="start-coach" disabled={busy}>
+          <div className="mt-5 flex justify-end gap-2">
+            <Button onClick={() => changeOpen(false)}>Cancel</Button>
+            <Button variant="primary" type="submit" form="start-coach" disabled={busy}>
               {busy ? "Preparing coach…" : "Prepare coach"}
             </Button>
-          </DialogFooter>
+          </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => changeOpen(true)}
+        className="flex h-9 w-full items-center gap-2.5 rounded-full bg-surface px-3 text-[13.5px] font-medium text-ink transition-colors duration-150 hover:bg-[#ececec] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+      >
+        <Headphones className="size-[17px]" strokeWidth={1.75} /> Start call with coach
+      </button>
+      {open && portal && createPortal(dialog, portal)}
+    </>
   );
 }

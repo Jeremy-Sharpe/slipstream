@@ -51,7 +51,7 @@ async function forward(request: NextRequest, context: Context) {
   // API_BASE_URL may be an internal address (for example loopback on the VPS). The desktop coach
   // runs on the rep's computer, so it gets COACH_PUBLIC_API_URL when that is set.
   const base = (process.env.API_BASE_URL || API_BASE_URL).replace(/\/$/, "");
-  const token = process.env.INGEST_TOKEN;
+  const token = process.env.SLIPSTREAM_INGEST_TOKEN || process.env.INGEST_TOKEN;
   try {
     const response = await fetch(`${base}/api/v1/coach/${path}`, {
       method: request.method,

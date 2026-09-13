@@ -19,16 +19,16 @@
       "outcome": "stalled"
     },
     "promises": [
-      "I will send a short findings note and an office move risk checklist"
+      "I will send a short findings note and a fee proposal workflow map"
     ],
     "objections": [
       {
-        "text": "The directors will not approve anything until the new financial year budget is clearer",
+        "text": "The directors will not sign anything until the fit-out budget is settled",
         "handling": "partial"
       }
     ],
     "next_step": {
-      "description": "Sam to send findings note and risk checklist for Grace to discuss with directors.",
+      "description": "Sam to send the findings note and fee proposal workflow map for Grace to raise with the directors once the fit-out budget is settled.",
       "due": null
     }
   },
@@ -36,14 +36,14 @@
     "discovery_questions": 6,
     "next_step_secured": false,
     "objection_handling": "partial",
-    "rep_talk_ratio": 0.47,
-    "notes": "Sam did good discovery, but the directors were missing and budget timing kept the next step vague."
+    "rep_talk_ratio": 0.44,
+    "notes": "Sam ran strong discovery on the proposal workflow, but the two deciding directors were absent and the fit-out budget timing left the follow-up without a date."
   },
   "icp_signals": {
     "industry": "Architecture studio",
     "headcount_band": "25-80",
     "role": "Studio Operations Manager",
-    "trigger": "Office move planning and cyber insurance evidence gap"
+    "trigger": "Fee proposal drafting and consultant coordination ahead of an office move"
   },
   "risk_flags": []
 }

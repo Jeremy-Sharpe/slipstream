@@ -1,0 +1,79 @@
+[
+  {
+    "name": "Bell Potter",
+    "domain": "bellpotter.example",
+    "industry": "Stockbroking and financial advisory firm",
+    "location": "Melbourne, VIC",
+    "outcome": "won",
+    "stage": "closed_won",
+    "crm_external_id": "eleno-client:bell-potter",
+    "source_url": "https://eleno.com.au",
+    "summary": "Publicly showcased Eleno client. Engagement scope, contacts and value are not disclosed; recorded as a won deal with no call or email evidence."
+  },
+  {
+    "name": "Leonard Joel",
+    "domain": "leonardjoel.example",
+    "industry": "Fine art and collectables auction house",
+    "location": "South Yarra, VIC",
+    "outcome": "won",
+    "stage": "closed_won",
+    "crm_external_id": "eleno-client:leonard-joel",
+    "source_url": "https://eleno.com.au",
+    "summary": "Publicly showcased Eleno client. Engagement scope, contacts and value are not disclosed; recorded as a won deal with no call or email evidence."
+  },
+  {
+    "name": "Denning Investment Partners",
+    "domain": "denningpartners.example",
+    "industry": "Real estate debt fund manager",
+    "location": "Sydney, NSW",
+    "outcome": "won",
+    "stage": "closed_won",
+    "crm_external_id": "eleno-client:denning-investment-partners",
+    "source_url": "https://eleno.com.au",
+    "summary": "Publicly showcased Eleno client. Engagement scope, contacts and value are not disclosed; recorded as a won deal with no call or email evidence."
+  },
+  {
+    "name": "Ark Capital",
+    "domain": "arkcapital.example",
+    "industry": "Real estate debt and equity fund manager",
+    "location": "Melbourne, VIC",
+    "outcome": "won",
+    "stage": "closed_won",
+    "crm_external_id": "eleno-client:ark-capital",
+    "source_url": "https://eleno.com.au",
+    "summary": "Publicly showcased Eleno client. Engagement scope, contacts and value are not disclosed; recorded as a won deal with no call or email evidence."
+  },
+  {
+    "name": "Gorman Commercial",
+    "domain": "gormancommercial.example",
+    "industry": "Commercial real estate agency",
+    "location": "Hawthorn East, VIC",
+    "outcome": "won",
+    "stage": "closed_won",
+    "crm_external_id": "eleno-client:gorman-commercial",
+    "source_url": "https://eleno.com.au",
+    "summary": "Publicly showcased Eleno client. Engagement scope, contacts and value are not disclosed; recorded as a won deal with no call or email evidence."
+  },
+  {
+    "name": "Nichols Crowder",
+    "domain": "nicholscrowder.example",
+    "industry": "Commercial and industrial real estate agency",
+    "location": "Moorabbin, VIC",
+    "outcome": "won",
+    "stage": "closed_won",
+    "crm_external_id": "eleno-client:nichols-crowder",
+    "source_url": "https://eleno.com.au",
+    "summary": "Publicly showcased Eleno client. Engagement scope, contacts and value are not disclosed; recorded as a won deal with no call or email evidence."
+  },
+  {
+    "name": "North East Link",
+    "domain": "northeastlink.example",
+    "industry": "State transport infrastructure project",
+    "location": "Melbourne, VIC",
+    "outcome": "won",
+    "stage": "closed_won",
+    "crm_external_id": "eleno-client:north-east-link",
+    "source_url": "https://eleno.com.au",
+    "summary": "Publicly showcased Eleno client. Engagement scope, contacts and value are not disclosed; recorded as a won deal with no call or email evidence."
+  }
+]

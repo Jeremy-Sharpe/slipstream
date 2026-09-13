@@ -1,0 +1,166 @@
+{
+  "call_id": "call-06-meridian-mutual",
+  "seller": "Eleno",
+  "rep": "Jordan Lee",
+  "prospect": {
+    "name": "Tom Reid",
+    "role": "Head of Member Services",
+    "email": "tom@meridianmutual.example",
+    "phone": "+61 3 7010 1106"
+  },
+  "company": {
+    "name": "Meridian Mutual",
+    "industry": "Regional mutual bank",
+    "headcount": 118,
+    "location": "Geelong, VIC",
+    "domain": "meridianmutual.example"
+  },
+  "channel": "phone",
+  "scheduled_at": "2026-09-03T10:00:00+10:00",
+  "duration_target_seconds": 405,
+  "outcome": "stalled",
+  "deal_value_aud": 174000,
+  "trigger": "Complaints volume up after a core banking migration",
+  "turns": [
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Tom Reid, it's Jordan from Eleno. Before I pitch anything at you, tell me what has actually been happening at Meridian Mutual since the core banking migration?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "Complaints are up about forty per cent. Some of that is genuine migration fallout, statements that look wrong, direct debits that moved dates. But a lot of it is members ringing because they can't tell from the new statement what changed. We're a hundred and eighteen people and member services is fourteen of them."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Who is handling that intake today, and what do they have to do for each one?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "Two of the team triage the queue every morning. Each complaint has to be classified, logged against the member record, checked for whether it is reportable, and then routed. The classification is the slow part, because our categories were written for the old system and half of them no longer map to anything."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Where do the complaint records actually live once they are logged?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "In the case management module of the new core platform, with the correspondence sitting in a shared mailbox that doesn't talk to it. So people copy and paste between the two. That's where the errors creep in, and it's also why our reporting to the board takes three days to assemble."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "What would good look like in six months, in numbers you would actually be measured on?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "Time to first response under one business day, consistent classification so the trend reporting means something, and the two triage people back on the phones instead of in a queue. Right now first response is running at four days and the team is doing overtime to hold even that."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "And who signs something like this off, you or the board?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "That's the honest problem. I can sponsor it, but anything above a threshold goes to the board through the chief operating officer, and the board meets monthly. We're a mutual, so the members own us and the board takes spending seriously."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Right. What we would build is a triage agent that reads the incoming correspondence, classifies it against a category set we design with your team, drafts the acknowledgement, and writes the case record straight into the platform. We deploy it into your environment and transfer the intellectual property to you, so it's yours rather than a subscription."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "The ownership point matters here. Our technology committee is tired of vendor lock-in after what the migration cost us."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That's usually the first thing they ask. On scale, a build like this for Meridian Mutual would sit around $174,000 for the fixed scope, after a discovery phase of four to six weeks."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "Budget sits with the board in the new financial year, not with me this month. I can't take a number like that to them in September without a lot more behind it."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Fair. What I'd suggest is not a proposal but a decision brief: the current cost of manual triage, the risk of inconsistent classification in a regulated complaints process, and a staged path with the numbers attached."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "A decision brief would travel better than a deck. The board reacts badly to vendor language, but they will read something that states the problem in our own terms."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "I will send a decision brief and an indicative staging plan by the end of next week. It will include the questions we would need answered before the scope is firm."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "Good. Keep it short. Anything over four pages gets skimmed and then misquoted back at me in the meeting."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Understood. Can we put a working session in with your operations lead and the chief operating officer before the board pack goes out?"
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "I can't commit to a date. The board pack timing depends on when the migration remediation work is signed off, and that is not mine to schedule."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That's the piece I would want to understand, because a complaints agent built during remediation is easier to justify than one built after the noise has died down."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "I agree in principle. But if I bring it forward and remediation slips, I have spent credibility I need for other things."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "Then let's make the brief do the work. I will include a one-page summary the chief operating officer can lift straight into the board pack without editing it."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "That would actually help. He writes those at eleven at night, and anything pre-built tends to get used."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "On the compliance side, we design the classification set with your risk team rather than imposing ours, and every decision the agent makes is logged against the source message."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "Risk will want to see that logging before they let it touch a member complaint. They have been burnt once already this year."
+    },
+    {
+      "speaker": "rep",
+      "name": "Jordan Lee",
+      "text": "That's a reasonable gate, and I would rather they test it properly than wave it through. A complaints process is not the place to find out later."
+    },
+    {
+      "speaker": "prospect",
+      "name": "Tom Reid",
+      "text": "Send the brief and I will circulate it. I am not promising a date, but there is real interest here."
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import Any
 
@@ -20,12 +21,40 @@ from app.services.demo_leads import (
     generate_demo_leads,
 )
 from app.services.fixture_history import load_fixture_history
-from app.services.icp import cohort_revision
+from app.services.icp import cohort_revision, evidence_inventory
 from app.services.icp_leads_store import InMemoryIcpLeadsStore
+
+FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures"
+
+
+def _fixture_inventory() -> IcpEvidenceInventory:
+    """The evidence the fixtures on disk actually produce, so counts never go stale."""
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, FIXTURES_DIR)
+    return evidence_inventory(store)
+
+
+def _fixture_deal_count() -> int:
+    calls = [path for path in (FIXTURES_DIR / "calls").iterdir() if path.is_dir()]
+    return len(calls) + len(_client_rows())
+
+
+def _fixture_won_count() -> int:
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, FIXTURES_DIR)
+    return sum(
+        deal.outcome == "won" for deal in store.list_fixture_deals(include_demo=True)
+    )
+
+
+def _client_rows() -> list[dict[str, Any]]:
+    return json.loads(
+        (FIXTURES_DIR / "crm" / "clients.json").read_text(encoding="utf-8")
+    )
 
 
 def _profile() -> StoredIcpProfile:
-    source = IcpSourceSummary(deals=12, calls=12, emails=1, outcome_labelled=11)
+    source = IcpSourceSummary.model_validate(_fixture_inventory().model_dump())
     profile = IcpProfile(
         summary="Professional-services teams with manual compliance work.",
         industries=["Professional services"],
@@ -79,6 +108,9 @@ def test_demo_bootstrap_runs_bounded_two_key_proof(monkeypatch: Any) -> None:
 
     assert response.status_code == 200
     assert response.json()["status"] == "lead search started"
+    history = response.json()["history"]
+    assert history["deals"] == _fixture_deal_count()
+    assert history["outcomes"]["won"] == _fixture_won_count()
     assert response.json()["lead_source"] == {
         "origami_job_id": demo_job_id(_profile(), "openai/gpt-5.4-mini"),
         "icp_profile_id": "profile-demo",
@@ -122,17 +154,11 @@ def test_demo_bootstrap_rejects_unverified_keys_before_loading_data(
 def test_current_profile_match_requires_exact_models_and_inventory() -> None:
     from app.routers.demo import _profile_is_current
 
-    inventory = IcpEvidenceInventory(
-        deals=12,
-        calls=12,
-        emails=1,
-        outcome_labelled=11,
-        won_deals=5,
-        contrast_deals=6,
-        active_deals=1,
-        ready_to_derive=True,
-    )
+    inventory = _fixture_inventory()
     settings = Settings(_env_file=None, openrouter_api_key="openrouter-test")
+
+    assert inventory.ready_to_derive is True
+    assert inventory.won_deals > inventory.active_deals
 
     assert _profile_is_current(_profile(), inventory, settings, "a" * 64) is True
     assert _profile_is_current(
@@ -213,7 +239,7 @@ def test_demo_evidence_returns_bounded_safe_latest_profile_proof() -> None:
     settings = Settings(_env_file=None, environment="test", openrouter_api_key="test")
     app = create_app(settings)
     store = app.state.icp_leads_store
-    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    load_fixture_history(store, FIXTURES_DIR)
     current_revision = cohort_revision(store.list_icp_deals())
     profile = store.insert_icp_profile(
         version=1,
