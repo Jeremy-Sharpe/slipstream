@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Avatar } from "@/components/Avatar";
 import { cn } from "@/components/ui";
 
 /* Small pieces shared by the Intelligence sections. */
@@ -21,14 +20,13 @@ export function Chip({ href, children }: { href: string; children: ReactNode }) 
   );
 }
 
-/** 28px chip: the won contact's gradient disc and their company, linking to the call. */
-export function PersonChip({ href, name, children }: { href: string; name: string; children: ReactNode }) {
+/** 28px white hairline chip naming a won company, linking to its call. */
+export function CompanyChip({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
       href={href}
-      className="inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white py-0 pr-2.5 pl-1 text-[13px] leading-none text-ink shadow-[inset_0_0_0_1px_#e8e8e8] transition-colors duration-150 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+      className="inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-full bg-white px-3 text-[13px] leading-none text-ink shadow-[inset_0_0_0_1px_#e8e8e8] transition-colors duration-150 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
     >
-      <Avatar name={name} size={20} />
       {children}
     </Link>
   );

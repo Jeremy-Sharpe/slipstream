@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { icpProfile, icpRows, provenance } from "@/lib/intelligence";
-import { PersonChip } from "./parts";
+import { CompanyChip } from "./parts";
 
-/* The hero: the derived ICP sentence, four attributes with the won contacts
+/* The hero: the derived ICP sentence, four attributes with the won companies
    that support each, and the way into the Leads brief. */
 export function IcpCard() {
   const s = provenance.source_summary;
@@ -18,7 +18,7 @@ export function IcpCard() {
             <dd className="text-[14px] leading-7 text-ink">{r.value}</dd>
             <dd className="flex flex-wrap gap-1.5">
               {r.calls.map((c) => (
-                <PersonChip key={c.id} href={`/calls/${c.id}`} name={c.contact}>{c.company}</PersonChip>
+                <CompanyChip key={c.id} href={`/calls/${c.id}`}>{c.company}</CompanyChip>
               ))}
             </dd>
           </div>

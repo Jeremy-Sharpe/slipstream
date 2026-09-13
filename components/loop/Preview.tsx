@@ -77,9 +77,7 @@ export function Preview({ n }: { n: string }) {
           <p className="text-text">{provenance.won_deals} won deals → {icpRows.map((r) => r.value.toLowerCase()).slice(0, 3).join(" · ")}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {chips.map((c) => (
-              <span key={c.id} className="inline-flex h-7 items-center gap-1.5 rounded-full bg-surface-2 py-0 pr-2.5 pl-1 text-[13px] leading-none">
-                <Avatar name={c.contact} size={20} />{c.company}
-              </span>
+              <span key={c.id} className="inline-flex h-7 items-center rounded-full bg-surface-2 px-3 text-[13px] leading-none">{c.company}</span>
             ))}
           </div>
         </Box>
