@@ -21,6 +21,18 @@ export const EMPTY_DEMO_PROOF: DemoProof = {
   campaign: { status: "loading" },
 };
 
+export function settleDemoProof(
+  runtime: PromiseSettledResult<ApiReadiness>,
+  icp: PromiseSettledResult<ApiIcpProfile | null>,
+  campaigns: PromiseSettledResult<ApiCampaign[]>,
+): DemoProof {
+  return {
+    runtime: runtime.status === "fulfilled" ? { status: "verified", value: runtime.value } : { status: "failed" },
+    icp: icp.status === "fulfilled" ? icp.value ? { status: "verified", value: icp.value } : { status: "missing" } : { status: "failed" },
+    campaign: campaigns.status === "fulfilled" ? findDemoCampaign(campaigns.value) : { status: "failed" },
+  };
+}
+
 export function findDemoCampaign(campaigns: ApiCampaign[]): ProofState<ApiCampaign> {
   const campaign = campaigns.find((item) => item.id === DEMO_CAMPAIGN_ID);
   return campaign ? { status: "verified", value: campaign } : { status: "missing" };
@@ -30,8 +42,11 @@ export function campaignSafety(campaign: ApiCampaign): { verified: boolean; summ
   const scheduledAt = Date.parse(campaign.scheduled_for);
   const scheduleMatches = Number.isFinite(scheduledAt) && new Date(scheduledAt).toISOString() === DEMO_CAMPAIGN_SCHEDULE;
   const noAttempts = campaign.items.every((item) => item.attempt_count === 0);
-  const exactEnrollment = campaign.counts.queued === 1 && campaign.items.length === 1 && campaign.items[0]?.state === "queued";
-  const controlled = campaign.status === "paused" && scheduleMatches && campaign.counts.sent === 0 && noAttempts && exactEnrollment;
+  const noOtherStates = campaign.counts.running === 0 && campaign.counts.sent === 0 && campaign.counts.retryable === 0 && campaign.counts.failed === 0 && campaign.counts.reconcile === 0;
+  const item = campaign.items[0];
+  const noDeliveryEvidence = item?.receipt == null && item?.http_status == null && item?.last_attempt_at == null && item?.outcome == null && !item?.reconciliation_required;
+  const exactEnrollment = campaign.counts.queued === 1 && campaign.items.length === 1 && item?.state === "queued";
+  const controlled = campaign.status === "paused" && scheduleMatches && noOtherStates && noAttempts && noDeliveryEvidence && exactEnrollment;
   if (controlled) {
     return {
       verified: true,
@@ -44,6 +59,16 @@ export function campaignSafety(campaign: ApiCampaign): { verified: boolean; summ
     summary: `${campaign.status} · ${campaign.counts.sent} sent`,
     detail: "The live campaign no longer matches the zero-send presentation guardrail. Inspect execution before presenting.",
   };
+}
+
+export function parseStoredStep(value: string | null, stepCount: number): number {
+  if (value == null || value.trim() === "") return -1;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed < stepCount ? parsed : -1;
+}
+
+export function nextPresenterStep(current: number, stepCount: number): number {
+  return current < 0 || current >= stepCount - 1 ? 0 : current + 1;
 }
 
 export function modelLabel(provider?: string, model?: string): string {

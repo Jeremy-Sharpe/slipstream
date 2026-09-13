@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, BarChart3, Check, DatabaseZap, MailCheck, Pause,
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getCampaigns, getLatestIcp, getReadiness } from "@/lib/api/slipstream";
-import { EMPTY_DEMO_PROOF, campaignSafety, findDemoCampaign, modelLabel, proofFooter, type DemoProof } from "@/lib/demo/revenue-loop";
+import { EMPTY_DEMO_PROOF, campaignSafety, modelLabel, nextPresenterStep, parseStoredStep, proofFooter, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
 import { cn } from "@/lib/utils";
 
 type LoopStep = { eyebrow: string; title: string; result: string; detail: string; impact: string; provenance: string; verified: boolean; href: string; cta: string; icon: LucideIcon };
@@ -16,28 +16,42 @@ export function RevenueLoop() {
   const [active, setActive] = useState(-1);
   const [playing, setPlaying] = useState(false);
   const [proof, setProof] = useState<DemoProof>(EMPTY_DEMO_PROOF);
+  const [verifiedAt, setVerifiedAt] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    const stored = Number(window.sessionStorage.getItem(STORAGE_KEY));
-    if (Number.isInteger(stored) && stored >= 0 && stored < STEP_COUNT) setActive(stored);
+    try { setActive(parseStoredStep(window.sessionStorage.getItem(STORAGE_KEY), STEP_COUNT)); } catch { /* Persistence is optional in privacy-restricted browsers. */ }
   }, []);
-  useEffect(() => { if (active >= 0) window.sessionStorage.setItem(STORAGE_KEY, String(active)); }, [active]);
+  useEffect(() => { if (active >= 0) try { window.sessionStorage.setItem(STORAGE_KEY, String(active)); } catch { /* Keep in-memory controls working. */ } }, [active]);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => { setReducedMotion(query.matches); if (query.matches) setPlaying(false); };
+    update(); query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 5000);
-    Promise.allSettled([getReadiness(controller.signal), getLatestIcp(controller.signal), getCampaigns(controller.signal)])
-      .then(([runtime, icp, campaigns]) => {
-        if (!mounted) return;
-        setProof({
-          runtime: runtime.status === "fulfilled" ? { status: "verified", value: runtime.value } : { status: "failed" },
-          icp: icp.status === "fulfilled" ? icp.value ? { status: "verified", value: icp.value } : { status: "missing" } : { status: "failed" },
-          campaign: campaigns.status === "fulfilled" ? findDemoCampaign(campaigns.value) : { status: "failed" },
-        });
-      })
-      .finally(() => window.clearTimeout(timeout));
-    return () => { mounted = false; window.clearTimeout(timeout); controller.abort(); };
+    let request = 0;
+    let controller: AbortController | null = null;
+    const refresh = async () => {
+      controller?.abort();
+      const nextController = new AbortController();
+      controller = nextController;
+      const current = ++request;
+      const timeout = window.setTimeout(() => nextController.abort(), 5000);
+      const [runtime, icp, campaigns] = await Promise.allSettled([getReadiness(nextController.signal), getLatestIcp(nextController.signal), getCampaigns(nextController.signal)]);
+      window.clearTimeout(timeout);
+      if (!mounted || current !== request) return;
+        setProof(settleDemoProof(runtime, icp, campaigns));
+        setVerifiedAt(Date.now());
+    };
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 30_000);
+    const onFocus = () => void refresh();
+    window.addEventListener("focus", onFocus);
+    return () => { mounted = false; request += 1; window.clearInterval(interval); window.removeEventListener("focus", onFocus); controller?.abort(); };
   }, []);
 
   const steps = useMemo<LoopStep[]>(() => {
@@ -64,7 +78,7 @@ export function RevenueLoop() {
 
   const togglePlayback = () => {
     if (playing) { setPlaying(false); return; }
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setActive((current) => current < 0 || current >= steps.length - 1 ? 0 : current + 1); return; }
+    if (reducedMotion) { setActive((current) => nextPresenterStep(current, steps.length)); return; }
     if (active < 0 || active >= steps.length - 1) setActive(0);
     setPlaying(true);
   };
@@ -86,7 +100,7 @@ export function RevenueLoop() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => selectStep(steps.length - 1)} className="h-11 rounded-lg border border-background/20 px-4 text-[14px] font-semibold text-background transition-colors hover:bg-background/10 focus-visible:ring-2 focus-visible:ring-background focus-visible:outline-none">Show complete loop</button>
-            <button type="button" onClick={togglePlayback} className="flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-[15px] font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-background focus-visible:outline-none">
+            <button type="button" onClick={togglePlayback} className="flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-[15px] font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-background focus-visible:outline-none motion-reduce:hover:scale-100">
               {playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}{playing ? "Pause guided loop" : active < 0 ? "Play guided loop" : "Resume guided loop"}
             </button>
           </div>
@@ -121,7 +135,7 @@ export function RevenueLoop() {
           <span className="text-xs text-muted-foreground">Presenter-controlled · selection persists while evidence opens</span>
         </div>
       </section>
-      <div className="mt-4 flex flex-col justify-between gap-2 px-1 text-[12px] text-muted-foreground sm:flex-row"><span>This replay navigates existing evidence; it does not simulate provider calls or send email.</span><span>{proofFooter(proof)}</span></div>
+      <div className="mt-4 flex flex-col justify-between gap-2 px-1 text-[12px] text-muted-foreground sm:flex-row"><span>This replay navigates existing evidence; it does not simulate provider calls or send email.</span><span>{proofFooter(proof)}{verifiedAt ? ` · checked ${new Date(verifiedAt).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : ""}</span></div>
       <span className="sr-only" role="status" aria-live="polite">Stage {Math.max(active + 1, 1)}: {selected.title}. {selected.result}</span>
     </div>
   );
