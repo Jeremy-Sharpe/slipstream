@@ -50,7 +50,7 @@ Fallback: Use the API commands below, then show the returned `status: approved`,
 
 ## 2:10–2:55 — The team learns who to call next
 
-Action: Open the call scorecard, point to its `Labelled evaluation` badge, then switch to Intelligence. Point to the live OpenRouter model, the mixed call-and-email cohort, the derived ICP and one won-deal evidence item. Open Leads and click `Run search`: unchanged evidence reuses the current profile and the screen returns ten fictional prospects with `.example` domains and no deliverable contact details.
+Action: Open the call scorecard, point to its `Labelled evaluation` badge, then switch to Intelligence. Point to the live OpenRouter model, the mixed call-and-email cohort, the derived ICP and one won-deal evidence item. Open Leads and click `Run search`: unchanged evidence reuses the current profile. Refresh Leads after it finishes and visibly confirm that the screen renders ten fictional prospects with `.example` domains and no deliverable contact details.
 
 Say: “A saved transcript is not coaching. This badge matters: the scorecard on screen is our labelled evaluation corpus, while this ICP is a live OpenRouter artifact grounded in calls and emails. Across thirteen deals, the analysis separates behaviours correlated with wins from behaviours that create stalls. It learns the customer pattern: 25-to-80-person professional-services and allied-health firms, with a compliance trigger and a decision-maker involved. Then the same backend generates ten clearly fictional prospects and scores them against deals we actually won. That proves the closed loop without paying for or pretending we queried a real lead database; Origami is an optional adapter, not a demo dependency.”
 
