@@ -12,7 +12,7 @@ unavailable deployment credentials or submitting the external form was verified 
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
-- API Ruff checks and all 292 tests pass, including scorecard/playbook revision, coach lifecycle,
+- API Ruff checks and all 349 tests pass, including scorecard/playbook revision, coach lifecycle,
   email concurrency, campaign leasing/controls and provider-environment isolation coverage.
 - All six fixture tests pass.
 - All nine Supabase migrations and seven pgTAP suites pass from an empty ephemeral
@@ -35,6 +35,9 @@ unavailable deployment credentials or submitting the external form was verified 
   the grounded follow-up and records an approved-unsent audit state; it cannot deliver.
 - The production campaign list contains one synthetic record named “Hackathon demo —
   intentionally unsent”; it is paused, scheduled for 2099, and reports zero sends.
+- The latest production ICP is model-derived over 13 CRM deals enriched by 12 calls and
+  one email. Its customer attributes, headcount band and four evidence dimensions are
+  grounded in the five won deals and stamped with exact Qwen and Nomic model identities.
 
 ## Deployment-only gaps
 
@@ -53,8 +56,10 @@ unavailable deployment credentials or submitting the external form was verified 
    updating the README URL.
 2. Pull `main`, then run `npm run evals:dry`. It must report `PASSED`; do not waive a
    failing check.
-3. Run `npm run smoke:production -- --revision "$(git rev-parse HEAD)" --exercise-fixture` to confirm both
-   deployments and the protected campaign boundary immediately before submitting.
+3. Read the deployed revision from `/ready`, then pass it to `npm run smoke:production --
+   --revision <deployed-revision> --exercise-fixture` to confirm both deployments and the
+   protected campaign boundary immediately before submitting. Documentation-only commits
+   do not require restarting the memory-backed API.
 4. If a VPS restart cleared the memory-backed campaign, recreate it on the VPS with
    `sudo bash -lc 'set -a; source /etc/slipstream/api.env; export SLIPSTREAM_INGEST_TOKEN="$INGEST_TOKEN"; export SLIPSTREAM_API_URL=http://127.0.0.1:8000; cd /opt/slipstream/current; npm run seed:demo-campaign'`.
    Loopback avoids the public reverse proxy deadline while CPU inference runs. The command
