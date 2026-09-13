@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const route = new URL("../app/(app)/campaigns/loading.tsx", import.meta.url);
+const route = new URL("../app/legacy/(app)/campaigns/loading.tsx", import.meta.url);
 const skeleton = new URL(
-  "../components/campaigns/CampaignsLoading.tsx",
+  "../components/legacy/campaigns/CampaignsLoading.tsx",
   import.meta.url,
 );
 

@@ -6,10 +6,10 @@ const root = new URL("../", import.meta.url);
 
 test("intelligence dashboards collapse fixed desktop grids on phones", async () => {
   const [view, header, primitives, sections] = await Promise.all([
-    readFile(new URL("components/intelligence/IntelligenceView.tsx", root), "utf8"),
-    readFile(new URL("components/intelligence/IntelligenceHeader.tsx", root), "utf8"),
-    readFile(new URL("components/intelligence/primitives.tsx", root), "utf8"),
-    readFile(new URL("components/intelligence/sections.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/intelligence/IntelligenceView.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/intelligence/IntelligenceHeader.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/intelligence/primitives.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/intelligence/sections.tsx", root), "utf8"),
   ]);
 
   assert.match(header, /flex flex-col[^"\n]+sm:flex-row/);

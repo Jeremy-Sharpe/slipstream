@@ -6,8 +6,8 @@ const root = new URL("../", import.meta.url);
 
 test("conversation detail collapses its desktop chrome and CRM columns on phones", async () => {
   const [header, detail] = await Promise.all([
-    readFile(new URL("components/conversations/detail/DetailHeader.tsx", root), "utf8"),
-    readFile(new URL("components/conversations/detail/ConversationDetail.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/conversations/detail/DetailHeader.tsx", root), "utf8"),
+    readFile(new URL("components/legacy/conversations/detail/ConversationDetail.tsx", root), "utf8"),
   ]);
 
   assert.match(header, /hidden items-center[^"\n]+sm:flex/);

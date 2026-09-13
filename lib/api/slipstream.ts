@@ -1,4 +1,4 @@
-import type { CallRecord, Extracted, Extraction, Handling } from "@/lib/types/calls";
+import type { CallRecord, Extracted, Extraction, Handling } from "@/lib/legacy/types/calls";
 
 export const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_BASE_URL ??

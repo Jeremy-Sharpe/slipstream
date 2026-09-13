@@ -1,0 +1,188 @@
+/* Legacy (Clay-style) stylesheet. This is the old app/globals.css, kept for the
+   screens under /legacy. It is its own Tailwind compile, scanning only the
+   legacy trees, and every token that would collide with the product theme in
+   app/globals.css is namespaced (legacy-*) so the two stylesheets can coexist
+   on one page without either winning by load order. The raw design tokens
+   (--background, --primary, ...) are scoped to the body that renders a legacy
+   page (body:has(.legacy-root)) so that shadcn portals, which mount on body,
+   still see them. */
+@import "tailwindcss" source(none);
+@source ".";
+@source "../../components/legacy";
+@source "../../lib/legacy";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --color-avatar: var(--avatar);
+    --color-icon-well: var(--icon-well);
+    --color-inactive: var(--inactive);
+    --color-page: var(--page);
+    --color-signal: var(--signal);
+    --color-primary-soft: var(--primary-soft);
+    --color-legacy-ink: var(--foreground);
+    --color-ink-2: var(--secondary);
+    --color-legacy-line: var(--border);
+    --font-legacy-heading: var(--legacy-font-sans);
+    --font-legacy-sans: var(--legacy-font-sans);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-legacy-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-legacy-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-legacy-background: var(--background);
+    --radius-legacy-sm: calc(var(--radius) * 0.6);
+    --radius-legacy-md: calc(var(--radius) * 0.8);
+    --radius-legacy-lg: var(--radius);
+    --radius-legacy-xl: calc(var(--radius) * 1.4);
+    --radius-legacy-2xl: calc(var(--radius) * 1.8);
+    --radius-legacy-3xl: calc(var(--radius) * 2.2);
+    --radius-legacy-4xl: calc(var(--radius) * 2.6);
+}
+
+body:has(.legacy-root),
+.legacy-root {
+    /* Slipstream palette: Clay-neutral greys, white surfaces, tangerine as the
+       only accent. Every colour in a component comes from here. */
+    --background: #FFFFFF;            /* page */
+    --foreground: #111827;            /* ink: headings, names, labels */
+    --card: #FFFFFF;
+    --card-foreground: #111827;
+    --popover: #FFFFFF;
+    --popover-foreground: #111827;
+    --primary: #FF6847;               /* tangerine: primary action, active item */
+    --primary-foreground: #182521;
+    --primary-soft: #FFEDE7;          /* active rail item background */
+    --secondary: #374151;             /* ink-2: secondary text inside cells */
+    --secondary-foreground: #FFFFFF;
+    --muted: #F3F4F6;                 /* hover fills */
+    --muted-foreground: #6B7280;      /* icons, row numbers, counters */
+    --accent: #F3F4F6;
+    --accent-foreground: #111827;
+    --destructive: #B54129;
+    --border: #E5E7EB;                /* every border */
+    --input: #E5E7EB;
+    --ring: #FF6847;
+    --page: #F9FAFB;                  /* expanded panels, subtle wells */
+    --signal: #FF6847;                /* evidence highlights, citations */
+    --chart-1: #111827;
+    --chart-2: #6B7280;
+    --chart-3: #FF6847;
+    --chart-4: #D1D5DB;
+    --chart-5: #E5E7EB;
+    --radius: 0.5rem;
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #111827;
+    --sidebar-primary: #FF6847;
+    --sidebar-primary-foreground: #182521;
+    --sidebar-accent: #F3F4F6;
+    --sidebar-accent-foreground: #111827;
+    --sidebar-border: #E5E7EB;
+    --sidebar-ring: #FF6847;
+    --avatar: #F3F4F6;
+    --icon-well: #F3F4F6;
+    --inactive: #A4A4A0;
+    /* Inter from next/font (exposed by the root layout as --font-inter). */
+    --legacy-font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+body:has(.legacy-root) .dark,
+.legacy-root.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  body:has(.legacy-root) *,
+  .legacy-root,
+  .legacy-root * {
+    @apply border-border outline-ring/50;
+    }
+  body:has(.legacy-root),
+  .legacy-root {
+    @apply bg-legacy-background font-legacy-sans text-sm text-foreground antialiased;
+    }
+}
+
+/* The product stylesheet (app/globals.css) styles body and headings without a
+   layer. Restate the old body defaults with higher specificity, and hand
+   heading tracking back to the legacy utilities. */
+body:has(.legacy-root) {
+  font-family: var(--legacy-font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--foreground);
+  background: var(--background);
+}
+body:has(.legacy-root) :is(h1, h2, h3) { letter-spacing: revert-layer; }
+
+/* The Clay references were measured at ~1.39x (Retina captures) and the
+   layout is specified in those units, so the whole app is scaled back to
+   Clay's real density here. Viewport-height utilities have to compensate,
+   because 100vh inside a zoomed element is scaled too. */
+body:has(.legacy-root), .legacy-root { --ui-scale: 0.72; }
+body:has(.legacy-root) { zoom: var(--ui-scale); }
+@layer utilities {
+  :is(body:has(.legacy-root), .legacy-root) .h-screen { height: calc(100vh / var(--ui-scale)); }
+  :is(body:has(.legacy-root), .legacy-root) .min-h-screen { min-height: calc(100vh / var(--ui-scale)); }
+  :is(body:has(.legacy-root), .legacy-root) .h-\[calc\(100vh-56px\)\] { height: calc(100vh / var(--ui-scale) - 56px); }
+  :is(body:has(.legacy-root), .legacy-root) .h-\[calc\(100vh-64px\)\] { height: calc(100vh / var(--ui-scale) - 64px); }
+  :is(body:has(.legacy-root), .legacy-root) .min-h-\[calc\(100vh-64px\)\] { min-height: calc(100vh / var(--ui-scale) - 64px); }
+  .legacy-root.min-h-screen { min-height: calc(100vh / var(--ui-scale)); }
+}
