@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Frame } from "@/components/Frame";
 import { Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
@@ -17,9 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex min-h-screen">
           <Sidebar />
           <main className="min-w-0 flex-1">
-            <div className="mx-auto max-w-[1040px] px-8 py-8">{children}</div>
+            <Frame>{children}</Frame>
           </main>
         </div>
+        <div id="portal" />
       </body>
     </html>
   );

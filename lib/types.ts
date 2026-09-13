@@ -56,6 +56,30 @@ export type Lead = {
   headcount: number;
   similarity: number;
   status: "drafted" | "approved";
+  /** Short phrase from the evidence, e.g. "Cyber-insurance renewal". */
+  trigger: string;
+  /** The search that found this lead. */
+  searchId: string;
+  /** When the row landed in a running search (drives the arrival highlight). */
+  landedAt?: number;
   evidence: Evidence[];
   draft: { subject: string; body: string };
+};
+
+export type SearchStatus = "running" | "done";
+export type SearchStep = "read" | "search" | "score" | "draft";
+export type Search = {
+  id: string;
+  /** 1-based, "Search 3". */
+  n: number;
+  brief: string;
+  count: number;
+  status: SearchStatus;
+  step: SearchStep;
+  /** Rows landed / scored / drafted so far. */
+  found: number;
+  scored: number;
+  drafted: number;
+  startedAt: number;
+  elapsedMs?: number;
 };

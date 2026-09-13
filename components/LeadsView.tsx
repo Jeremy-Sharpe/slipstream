@@ -1,155 +1,89 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Minus, Plus } from "lucide-react";
-import { icp } from "@/lib/icp";
+import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
+import { Search } from "lucide-react";
 import { actions, useStore } from "@/lib/store";
 import type { Lead } from "@/lib/types";
-import { Avatar } from "./Avatar";
-import { WorkingLine } from "./run/WorkingLine";
-import { Button, Pill, Score, cn } from "./ui";
+import { useLeadSearch } from "@/lib/useLeadSearch";
+import { SearchPane } from "./leads/SearchPane";
+import { LeadPanel } from "./leads/LeadPanel";
+import type { Row, Sort } from "./leads/LeadsGridInner";
+import { Button, cn } from "./ui";
 
-type Phase = "idle" | "searching" | "scoring" | "done";
+const LeadsGrid = dynamic(() => import("./leads/LeadsGridInner"), { ssr: false, loading: () => <div className="h-full w-full" /> });
 
+/* Leads: searches on the left (the same run primitive as a call), the sheet on the right. */
 export function LeadsView() {
-  const { leads } = useStore();
-  const [brief, setBrief] = useState(icp.brief);
-  const [count, setCount] = useState(10);
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [startedAt, setStartedAt] = useState<number>();
-  const [shown, setShown] = useState<number>(leads.length);
-  const [open, setOpen] = useState<string | null>(null);
-  const timers = useRef<number[]>([]);
+  const { leads, searches } = useStore();
+  const params = useSearchParams();
+  const { start } = useLeadSearch({ instant: params.get("instant") === "1" });
+  const [selectedId, setSelectedId] = useState<string>(searches[0]?.id ?? "s1");
+  const [sort, setSort] = useState<Sort>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const search = searches.find((s) => s.id === selectedId) ?? searches[0];
+  const busy = searches.some((s) => s.status === "running");
 
-  // The search streams rows in one by one, then scores them. Same event
-  // shape as the run: { status, progress }.
-  const find = () => {
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
-    setOpen(null);
-    setShown(0);
-    setStartedAt(Date.now());
-    setPhase("searching");
-    const n = Math.min(count, leads.length);
-    for (let i = 1; i <= n; i++) timers.current.push(window.setTimeout(() => setShown(i), 350 * i));
-    timers.current.push(window.setTimeout(() => setPhase("scoring"), 350 * n + 200));
-    timers.current.push(window.setTimeout(() => setPhase("done"), 350 * n + 1400));
-  };
+  const rows = useMemo<Row[]>(() => {
+    if (!search) return [];
+    const mine = leads.filter((l) => l.searchId === search.id);
+    const running = search.status === "running";
+    const out = mine.map((l, i) => ({ ...l, scored: !running || i < search.scored, drafted: !running || i < search.drafted }));
+    // Newest at the top while a search lands rows; otherwise the search order.
+    if (running) out.reverse();
+    if (sort) {
+      const key = (["company", "contact", "title", "location", "trigger", "similarity", "status", "draft"] as const)[sort.col];
+      out.sort((a, b) => {
+        const av = key === "draft" ? a.draft.subject : a[key], bv = key === "draft" ? b.draft.subject : b[key];
+        const c = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
+        return sort.dir === "asc" ? c : -c;
+      });
+    }
+    return out;
+  }, [leads, search, sort]);
 
-  const visible = leads.slice(0, phase === "idle" ? leads.length : shown);
-  const pending = leads.filter((l) => l.status !== "approved").length;
+  const hot = rows.filter((r) => r.scored && r.similarity >= 80).length;
+  const drafts = rows.filter((r) => r.drafted && r.status !== "approved").length;
+  const open = openId ? leads.find((l) => l.id === openId) ?? null : null;
+
+  const onFind = useCallback((brief: string, count: number) => { const id = start(brief, count); setSelectedId(id); setSort(null); setOpenId(null); }, [start]);
+  const onOpen = useCallback((l: Lead) => setOpenId(l.id), []);
+  const onClose = useCallback(() => setOpenId(null), []);
 
   return (
-    <div className="pb-24">
-      <h1 className="text-[22px] font-semibold text-ink">Leads</h1>
-      <p className="mt-1 text-[13.5px] text-soft">Companies like the five you closed.</p>
+    <div className="grid h-[calc(100vh-32px)] grid-cols-[380px_minmax(0,1fr)] gap-8">
+      <SearchPane searches={searches} leads={leads} selectedId={search?.id ?? null} onSelect={setSelectedId} onFind={onFind} busy={busy} />
 
-      <section className="mt-8 rounded-2xl bg-surface-2 p-5">
-        <div className="flex items-baseline justify-between">
-          <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-faint">Brief</p>
-          <p className="text-[12.5px] text-faint">From {icp.wonDeals} won deals · ICP v{icp.version}</p>
-        </div>
-        <textarea
-          value={brief}
-          onChange={(e) => setBrief(e.target.value)}
-          rows={4}
-          className="mt-3 w-full resize-none bg-transparent text-[15px] leading-6 text-ink outline-none"
-        />
-        <div className="mt-4 flex items-center justify-between">
+      <section className="flex min-h-0 min-w-0 flex-col">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-4">
+          <p className="text-[14px] text-soft">{rows.length} leads · {hot} hot · {drafts} drafts</p>
           <div className="flex items-center gap-2">
-            <span className="text-[13px] text-soft">Find</span>
-            <div className="flex h-8 items-center rounded-full bg-white px-1 shadow-[var(--shadow-card)]">
-              <button type="button" aria-label="Fewer" onClick={() => setCount((c) => Math.max(5, c - 5))} className="flex size-6 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><Minus className="size-3" strokeWidth={2} /></button>
-              <span className="w-7 text-center text-[13.5px] tabular-nums text-ink">{count}</span>
-              <button type="button" aria-label="More" onClick={() => setCount((c) => Math.min(50, c + 5))} className="flex size-6 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><Plus className="size-3" strokeWidth={2} /></button>
-            </div>
-            <span className="text-[13px] text-soft">companies</span>
+            <button
+              type="button"
+              aria-label="Search the sheet"
+              onClick={() => setShowSearch((s) => !s)}
+              className={cn("flex h-8 items-center gap-2 rounded-full px-3 text-[13px] text-soft transition-colors duration-150 hover:bg-surface hover:text-ink", showSearch && "bg-surface text-ink")}
+            >
+              <Search className="size-3.5" strokeWidth={1.75} /> Search <kbd className="text-[11px] text-faint">⌘F</kbd>
+            </button>
+            <Button variant="primary" size="sm" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
+              {drafts === 0 ? "All drafts approved" : `Approve all drafts · ${drafts}`}
+            </Button>
           </div>
-          <div className="flex items-center gap-3">
-            {phase === "searching" && <WorkingLine label="Searching" startedAt={startedAt} detail={`${shown} of ${Math.min(count, leads.length)}`} />}
-            {phase === "scoring" && <WorkingLine label="Scoring against won deals" startedAt={startedAt} />}
-            {phase === "done" && <span className="text-[13px] text-soft">{shown} leads · scored</span>}
-            <Button variant="primary" onClick={find} disabled={phase === "searching" || phase === "scoring"}>Find leads</Button>
-          </div>
+        </div>
+        <div className="relative mt-2 min-h-0 flex-1 overflow-hidden rounded-xl border border-line">
+          {rows.length === 0 ? (
+            <p className="flex h-full items-center justify-center text-[14px] text-faint">{search?.status === "running" ? "Searching Victoria" : "No companies matched this brief"}</p>
+          ) : (
+            <LeadsGrid rows={rows} sort={sort} onSort={setSort} onOpen={onOpen} showSearch={showSearch} onSearchClose={() => setShowSearch(false)} />
+          )}
         </div>
       </section>
 
-      <ul className="mt-6 divide-y divide-line-soft border-y border-line-soft">
-        {visible.length === 0 && phase === "searching" && <li className="py-12 text-center text-[14px] text-faint">Searching…</li>}
-        {visible.map((l) => (
-          <LeadRow key={l.id} lead={l} open={open === l.id} onToggle={() => setOpen((o) => (o === l.id ? null : l.id))} scoring={phase === "searching"} />
-        ))}
-      </ul>
-
-      <div className="pointer-events-none fixed right-8 bottom-6">
-        <Button variant="primary" className="pointer-events-auto shadow-[0_8px_24px_rgba(24,25,37,.12)]" disabled={pending === 0} onClick={() => actions.approveAllLeads()}>
-          {pending === 0 ? "All drafts approved" : `Approve all drafts · ${pending}`}
-        </Button>
-      </div>
+      <LeadPanel lead={open} onClose={onClose} />
     </div>
-  );
-}
-
-function LeadRow({ lead, open, onToggle, scoring }: { lead: Lead; open: boolean; onToggle: () => void; scoring: boolean }) {
-  const [body, setBody] = useState(lead.draft.body);
-  return (
-    <li className="rise">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="grid h-14 w-full grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_128px_40px_92px_16px] items-center gap-x-4 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-      >
-        <span className="flex min-w-0 items-center">
-          <span className="truncate text-[14px] font-medium text-ink">{lead.company}</span>
-        </span>
-        <span className="flex min-w-0 items-center gap-2.5">
-          <Avatar name={lead.contact} size={28} />
-          <span className="truncate text-[14px] text-ink">{lead.contact}</span>
-          <span className="truncate text-[13.5px] text-soft">· {lead.title}</span>
-        </span>
-        <span className="truncate text-[13.5px] text-soft">{lead.location}</span>
-        <span className="text-right">{scoring ? <span className="text-[13.5px] tabular-nums text-faint">…</span> : <Score value={lead.similarity} />}</span>
-        <span className="flex items-center">{lead.status === "approved" ? <Pill tone="green">Approved</Pill> : <Pill>Drafted</Pill>}</span>
-        <ChevronDown className={cn("size-4 text-faint transition-transform duration-150", open && "rotate-180")} strokeWidth={1.75} />
-      </button>
-      <div className="grid transition-[grid-template-rows] duration-200 ease-out" style={{ gridTemplateRows: open ? "1fr" : "0fr" }}>
-        <div className="overflow-hidden">
-          <div className="mb-3 grid grid-cols-2 gap-6 rounded-2xl bg-surface-2 p-5">
-            <div>
-              <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-faint">Why this matched</p>
-              <ul className="mt-3 flex flex-col gap-4">
-                {lead.evidence.map((e, i) => (
-                  <li key={i} className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-3">
-                    <p className="pt-px text-[13.5px] text-soft">{e.attribute}</p>
-                    <div className="min-w-0">
-                      <p className="text-[14px] font-medium text-ink">{e.value}</p>
-                      <p className="mt-1 text-[13.5px] leading-5 text-text">“{e.quote}”</p>
-                      <p className="mt-0.5 text-[13.5px] text-soft">{e.call} · <span className="tabular-nums">{e.t}</span></p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex flex-col">
-              <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-faint">Outreach draft</p>
-              <p className="mt-3 text-[13.5px] font-medium text-ink">{lead.draft.subject}</p>
-              <textarea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                readOnly={lead.status === "approved"}
-                rows={body.split("\n").length + 1}
-                className="mt-2 w-full flex-1 resize-none rounded-lg bg-white/70 px-3 py-2 text-[14px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
-              />
-              <div className="mt-3 flex justify-end">
-                {lead.status === "approved" ? <span className="text-[13px] text-soft">Approved · nothing is sent</span> : <Button variant="primary" size="sm" onClick={() => actions.approveLead(lead.id)}>Approve</Button>}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </li>
   );
 }

@@ -3,7 +3,8 @@
 import { useSyncExternalStore } from "react";
 import { calls as seed } from "./calls";
 import { leads as leadSeed } from "./leads";
-import type { CallRecord, Lead } from "./types";
+import { icp } from "./icp";
+import type { CallRecord, Lead, Search } from "./types";
 
 // One in-memory store for the demo. Runs, approvals and added calls live here
 // so the inbox, the run and Leads agree; a backend replaces these functions.
@@ -15,6 +16,7 @@ type State = {
   synced: Record<string, boolean>;
   approved: Record<string, boolean>;
   leads: Lead[];
+  searches: Search[];
 };
 
 const state: State = {
@@ -23,6 +25,7 @@ const state: State = {
   synced: {},
   approved: {},
   leads: [...leadSeed],
+  searches: [{ id: "s1", n: 1, brief: icp.brief, count: 12, status: "done", step: "draft", found: 12, scored: 12, drafted: 12, startedAt: Date.now() - 3600_000, elapsedMs: 4100 }],
 };
 
 const listeners = new Set<() => void>();
@@ -78,5 +81,8 @@ export const actions = {
   /** A (re)run replays both gates, so the approvals start clean. */
   resetApprovals(id: string) { delete state.synced[id]; delete state.approved[id]; commit(); },
   approveLead(id: string) { state.leads = state.leads.map((l) => (l.id === id ? { ...l, status: "approved" } : l)); commit(); },
-  approveAllLeads() { state.leads = state.leads.map((l) => ({ ...l, status: "approved" })); commit(); },
+  approveAllLeads(searchId: string) { state.leads = state.leads.map((l) => (l.searchId === searchId ? { ...l, status: "approved" } : l)); commit(); },
+  addSearch(s: Search) { state.searches = [s, ...state.searches]; commit(); },
+  updateSearch(id: string, patch: Partial<Search>) { state.searches = state.searches.map((s) => (s.id === id ? { ...s, ...patch } : s)); commit(); },
+  addLead(l: Lead) { state.leads = [...state.leads, l]; commit(); },
 };

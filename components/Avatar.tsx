@@ -11,32 +11,18 @@ function hash(s: string) {
   return Math.abs(h);
 }
 
+/** The two gradient stops for a person, shared with canvas renderers. */
+export function gradientFor(name: string): [string, string] {
+  return GRADIENTS[hash(name) % GRADIENTS.length];
+}
+
 export function Avatar({ name, size = 28, className = "" }: { name: string; size?: number; className?: string }) {
-  const [a, b] = GRADIENTS[hash(name) % GRADIENTS.length];
+  const [a, b] = gradientFor(name);
   return (
     <span
       aria-hidden
       className={`inline-block shrink-0 rounded-full ${className}`}
       style={{ width: size, height: size, background: `radial-gradient(circle at 30% 25%, ${a}, transparent 72%), linear-gradient(140deg, ${a}, ${b})` }}
     />
-  );
-}
-
-// Tinted initial tile per company: eight fixed pastel pairs.
-const TILES = [
-  { bg: "#eef2ff", text: "#4f46e5" }, { bg: "#f0fdf4", text: "#16a34a" }, { bg: "#fef3c7", text: "#b45309" }, { bg: "#fce7f3", text: "#be185d" },
-  { bg: "#f1f5f9", text: "#475569" }, { bg: "#ecfeff", text: "#0e7490" }, { bg: "#faf5ff", text: "#7c3aed" }, { bg: "#fff1f2", text: "#be123c" },
-];
-
-export function CompanyTile({ name, size = 28, className = "" }: { name: string; size?: number; className?: string }) {
-  const c = TILES[hash(name) % TILES.length];
-  return (
-    <span
-      aria-hidden
-      className={`inline-flex shrink-0 items-center justify-center rounded-lg font-semibold ${className}`}
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.42), backgroundColor: c.bg, color: c.text }}
-    >
-      {name.charAt(0).toUpperCase()}
-    </span>
   );
 }

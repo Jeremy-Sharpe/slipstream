@@ -183,7 +183,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
         );
       case "search":
         if (st.status === "running") {
-          return <WorkingLine label="Searching Victoria for firms like the 5 you closed" startedAt={st.startedAt} detail={`${st.progress ?? 0} of 10`} spinner />;
+          return <WorkingLine label="Searching Victoria for firms like the 5 you closed" startedAt={st.startedAt} detail={`${st.progress ?? 0} of 10`} />;
         }
         if (st.status !== "done") return null;
         return (
