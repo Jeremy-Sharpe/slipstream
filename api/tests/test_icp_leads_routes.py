@@ -31,7 +31,7 @@ def test_icp_evidence_inventory_is_keyless_and_becomes_ready(client: TestClient)
     assert inventory.json() == {
         "deals": 12,
         "calls": 12,
-        "emails": 0,
+        "emails": 1,
         "outcome_labelled": 11,
         "won_deals": 5,
         "contrast_deals": 6,

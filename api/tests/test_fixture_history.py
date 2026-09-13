@@ -18,3 +18,13 @@ def test_history_load_is_idempotent_and_has_expected_outcome_mix() -> None:
         deal.metadata["source"] == "fixtures"
         for deal in store.list_fixture_deals(include_demo=True)
     )
+    interactions = [
+        item
+        for deal in store.list_fixture_deals(include_demo=False)
+        for item in deal.interactions
+    ]
+    assert sum(item.channel == "call" for item in interactions) == 12
+    assert sum(item.channel == "email" for item in interactions) == 1
+    assert {item.source_external_id for item in interactions if item.channel == "email"} == {
+        "wattle-001"
+    }

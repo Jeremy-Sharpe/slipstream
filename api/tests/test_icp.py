@@ -65,7 +65,7 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     assert profile.version == 1
     assert profile.profile.source_summary.deals == 12
     assert profile.profile.source_summary.calls == 12
-    assert profile.profile.source_summary.emails == 0
+    assert profile.profile.source_summary.emails == 1
     assert profile.profile.source_summary.outcome_labelled == 11
     assert profile.profile.industries == [
         "Architecture and lab planning consultancy",
@@ -218,7 +218,7 @@ def test_derive_icp_uses_email_as_active_evidence_not_negative_evidence() -> Non
     assert all(deal["id"] != active["id"] for deal in captured["contrast_deals"])
     assert profile.profile.source_summary.deals == 13
     assert profile.profile.source_summary.calls == 12
-    assert profile.profile.source_summary.emails == 1
+    assert profile.profile.source_summary.emails == 2
     assert "Acme" not in profile.profile.summary
     assert "cyber insurance renewal is due next month" not in profile.profile.origami_brief
 

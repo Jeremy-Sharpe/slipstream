@@ -14,6 +14,9 @@ def load_fixture_history(store: IcpLeadsStore, fixtures_dir: Path) -> FixtureHis
         expected = _read_json(call_dir / "expected.json")
         script = _read_json(call_dir / "script.json")
         _load_call(store, expected, script)
+    email_evidence = fixtures_dir / "emails" / "icp-evidence.json"
+    if email_evidence.is_file():
+        _load_email_evidence(store, _read_json_list(email_evidence))
     deals = store.list_fixture_deals(include_demo=True)
     outcomes = {"won": 0, "lost": 0, "stalled": 0, "open": 0}
     for deal in deals:
@@ -95,6 +98,46 @@ def _load_call(store: IcpLeadsStore, expected: dict[str, Any], script: dict[str,
     )
 
 
+def _load_email_evidence(store: IcpLeadsStore, rows: list[dict[str, Any]]) -> None:
+    for row in rows:
+        external_id = str(row["deal_external_id"])
+        deal = store.get_deal_by_external_id(external_id)
+        if deal is None:
+            raise ValueError(f"Email evidence references unknown fixture deal {external_id}")
+        interaction = {key: value for key, value in row.items() if key != "deal_external_id"}
+        if any(
+            item.source_external_id == interaction["source_external_id"]
+            and item.channel == "email"
+            for item in deal.interactions
+        ):
+            continue
+        store.upsert_deal(
+            {
+                "id": str(deal.id),
+                "company_id": str(deal.company_id) if deal.company_id else None,
+                "primary_contact_id": (
+                    str(deal.primary_contact_id) if deal.primary_contact_id else None
+                ),
+                "name": deal.name,
+                "stage": deal.stage,
+                "outcome": deal.outcome,
+                "amount": deal.amount,
+                "currency": deal.currency,
+                "owner_name": deal.owner_name,
+                "summary": deal.summary,
+                "close_date": deal.close_date,
+                "crm_external_id": deal.crm_external_id,
+                "embedding": deal.embedding,
+                "embedding_model": deal.embedding_model,
+                "metadata": deal.metadata,
+                "interactions": [
+                    *[item.model_dump(mode="json") for item in deal.interactions],
+                    interaction,
+                ],
+            }
+        )
+
+
 def _map_outcome(outcome: str, *, demo: bool) -> str:
     if demo:
         return "open"
@@ -124,3 +167,10 @@ def _summary(expected: dict[str, Any], script: dict[str, Any]) -> str:
 
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _read_json_list(path: Path) -> list[dict[str, Any]]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, list) or not all(isinstance(item, dict) for item in payload):
+        raise ValueError(f"Expected a list of objects in {path}")
+    return payload
