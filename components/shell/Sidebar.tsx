@@ -67,10 +67,18 @@ export function Sidebar() {
   const pathname = usePathname();
   const count = useConversations().length;
   const [collapsed, setCollapsed] = useState(false);
+  const [compactViewport, setCompactViewport] = useState(false);
 
   // Default expanded on the server; apply the stored choice after mount.
   useEffect(() => {
     try { setCollapsed(localStorage.getItem(STORAGE_KEY) === "collapsed"); } catch {}
+  }, []);
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const update = () => setCompactViewport(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
   }, []);
   const toggle = () => {
     setCollapsed((c) => {
@@ -78,14 +86,15 @@ export function Sidebar() {
       return !c;
     });
   };
+  const visuallyCollapsed = collapsed || compactViewport;
 
   const top = TOP.map((item) => (item.href === "/" ? { ...item, count } : item));
   const toggleButton = (
     <button
       type="button"
       onClick={toggle}
-      aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      aria-expanded={!collapsed}
+      aria-label={visuallyCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      aria-expanded={!visuallyCollapsed}
       className="flex size-8 items-center justify-center rounded-md text-foreground/70 hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
     >
       <PanelLeft className="size-[18px]" strokeWidth={1.75} />
@@ -94,15 +103,19 @@ export function Sidebar() {
 
   return (
     <TooltipProvider>
-      <aside className={cn("sticky top-0 flex h-screen shrink-0 flex-col border-r border-border bg-card transition-[width] duration-150", collapsed ? "w-14" : "w-[336px]")}>
-        <div className={cn("flex h-16 shrink-0 items-center", collapsed ? "justify-center" : "justify-between pr-5 pl-4")}>
-          {!collapsed && (
+      <aside className={cn("sticky top-0 flex h-screen w-14 shrink-0 flex-col border-r border-border bg-card transition-none md:transition-[width] md:duration-150", visuallyCollapsed ? "md:w-14" : "md:w-[336px]")}>
+        <div className={cn("flex h-16 shrink-0 items-center", visuallyCollapsed ? "justify-center" : "justify-between pr-5 pl-4")}>
+          {!visuallyCollapsed && (
             <Link href="/home" className="flex items-center gap-2 text-[26px] leading-none font-bold tracking-[-0.03em] text-foreground">
               <Zap className="size-[26px] text-primary" strokeWidth={2.5} />
               slipstream
             </Link>
           )}
-          {collapsed ? (
+          {compactViewport ? (
+            <Link href="/home" aria-label="Slipstream home" className="flex size-8 items-center justify-center rounded-md text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+              <Zap className="size-5" strokeWidth={2.5} />
+            </Link>
+          ) : visuallyCollapsed ? (
             <Tooltip>
               <TooltipTrigger render={toggleButton} />
               <TooltipContent side="right">Expand sidebar</TooltipContent>
@@ -110,15 +123,15 @@ export function Sidebar() {
           ) : toggleButton}
         </div>
 
-        <div className={cn("flex min-h-0 flex-1 flex-col", collapsed ? "px-2 pt-2" : "px-3 pt-2")}>
-          <Group items={top} pathname={pathname} collapsed={collapsed} />
+        <div className={cn("flex min-h-0 flex-1 flex-col", visuallyCollapsed ? "px-2 pt-2" : "px-3 pt-2")}>
+          <Group items={top} pathname={pathname} collapsed={visuallyCollapsed} />
           <div className="my-3.5 h-px bg-border" />
-          {!collapsed && <p className="mb-2 pl-3 text-[14px] leading-none text-muted-foreground">Pipeline</p>}
-          <Group items={PIPELINE} pathname={pathname} collapsed={collapsed} />
+          {!visuallyCollapsed && <p className="mb-2 pl-3 text-[14px] leading-none text-muted-foreground">Pipeline</p>}
+          <Group items={PIPELINE} pathname={pathname} collapsed={visuallyCollapsed} />
         </div>
 
-        <div className={cn("shrink-0 border-t border-border py-3", collapsed ? "px-2" : "px-3")}>
-          <Group items={BOTTOM} pathname={pathname} collapsed={collapsed} />
+        <div className={cn("shrink-0 border-t border-border py-3", visuallyCollapsed ? "px-2" : "px-3")}>
+          <Group items={BOTTOM} pathname={pathname} collapsed={visuallyCollapsed} />
         </div>
       </aside>
     </TooltipProvider>

@@ -1,16 +1,18 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, BarChart3, Calculator, Check, DatabaseZap, MailCheck, Pause, Play, Radar, Sparkles, Target, Volume2, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Calculator, Check, DatabaseZap, MailCheck, Pause, Play, Radar, Sparkles, Target, TrendingUp, UsersRound, Volume2, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getCampaigns, getLatestIcp, getReadiness } from "@/lib/api/slipstream";
-import { EMPTY_DEMO_PROOF, campaignSafety, icpClaimSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
+import { EMPTY_DEMO_PROOF, campaignSafety, icpClaimSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, rateScenario, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
 import { cn } from "@/lib/utils";
 
 type LoopStep = { eyebrow: string; title: string; result: string; detail: string; impact: string; provenance: string; verified: boolean; href: string; cta: string; icon: LucideIcon };
 const MAYA_CALL = "/conversations/call-01-northstar-labs";
 const STEP_COUNT = 7;
 const STORAGE_KEY = "slipstream.revenue-loop.step";
+const COACHING_SCENARIO = rateScenario({ volume: 40, baselineRate: 0.2, scenarioRate: 0.225 });
+const TARGETING_SCENARIO = rateScenario({ volume: 200, baselineRate: 0.05, scenarioRate: 0.06 });
 
 export function RevenueLoop({ initialProof = EMPTY_DEMO_PROOF }: { initialProof?: DemoProof }) {
   const [active, setActive] = useState(-1);
@@ -141,6 +143,23 @@ export function RevenueLoop({ initialProof = EMPTY_DEMO_PROOF }: { initialProof?
         <ImpactNumber value="≈ $500" label="weekly capacity at $75/hr" accent />
       </aside>
 
+      <aside className="mt-3 grid gap-px overflow-hidden rounded-xl border border-border bg-border shadow-[0_1px_3px_rgba(17,24,39,0.04)] lg:grid-cols-2" aria-label="Illustrative pipeline upside scenarios">
+        <ValueScenario
+          icon={TrendingUp}
+          eyebrow="Coaching scenario"
+          title={`+${COACHING_SCENARIO.additionalOutcomes} win / month`}
+          formula="40 qualified opportunities · 20% → 22.5% win rate"
+          detail="What one prevented miss would mean; illustrative, not a forecast."
+        />
+        <ValueScenario
+          icon={UsersRound}
+          eyebrow="Targeting scenario"
+          title={`+${TARGETING_SCENARIO.additionalOutcomes} buyer conversations / month`}
+          formula="200 outbound prospects · 5% → 6% positive replies"
+          detail="What one-point better targeting would mean; illustrative, not measured."
+        />
+      </aside>
+
       <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_3px_rgba(17,24,39,0.05)]">
         <div className="h-1 bg-muted"><div className="h-full bg-primary transition-[width] duration-700 ease-out motion-reduce:transition-none" style={{ width: `${progress}%` }} /></div>
         <div ref={stepsViewportRef} className="relative overflow-x-auto"><div className="grid min-w-[980px] grid-cols-7 gap-px bg-border">
@@ -175,4 +194,8 @@ function ProofPill({ label, value, live, mono = false }: { label: string; value:
 
 function ImpactNumber({ value, label, accent = false }: { value: string; label: string; accent?: boolean }) {
   return <div className="border-b border-border px-5 py-3 last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0"><strong className={cn("block text-[18px] tracking-[-0.02em]", accent ? "text-primary" : "text-foreground")}>{value}</strong><span className="text-[11px] text-muted-foreground">{label}</span></div>;
+}
+
+function ValueScenario({ icon: Icon, eyebrow, title, formula, detail }: { icon: LucideIcon; eyebrow: string; title: string; formula: string; detail: string }) {
+  return <div className="flex gap-4 bg-card px-5 py-4"><span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary"><Icon className="size-5" /></span><div><p className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">{eyebrow}</p><p className="mt-0.5 text-[20px] font-bold tracking-[-0.025em] text-foreground">{title}</p><p className="mt-1 text-[12px] font-medium text-secondary">{formula}</p><p className="mt-1 text-[11px] text-muted-foreground">{detail}</p></div></div>;
 }
