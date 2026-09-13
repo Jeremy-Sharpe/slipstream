@@ -83,6 +83,9 @@ REFUSAL_RE = re.compile(
     r"\b(no for now|saying no|stay as|no firm path|not ready|won't|can't)\b",
     re.IGNORECASE,
 )
+QUOTED_SPAN_RE = re.compile(r"[“\"]([^“”\"]+)[”\"]")
+SECURED_CLAIM_RE = re.compile(r"\bsecured\b", re.IGNORECASE)
+SECURED_DENIAL_RE = re.compile(r"\b(?:not|no|never)\s+secured\b", re.IGNORECASE)
 T = TypeVar("T")
 APP_ROOT = Path(__file__).resolve().parents[1]
 API_ROOT = Path(__file__).resolve().parents[2]
@@ -676,7 +679,9 @@ def score_call(
         scored_at=scoring_started_at or datetime.now(UTC),
     )
     return (
-        stamp_scorecard_revision(scorecard),
+        stamp_scorecard_revision(
+            scorecard.model_copy(update=_judged_coaching(judged, scorecard, next_step_secured))
+        ),
         result,
     )
 
@@ -899,6 +904,56 @@ def _grounded_coaching(
         f"and had a {talk_ratio:.0%} talk ratio."
     )
     return went_well, to_improve, summary
+
+
+def _judged_coaching(
+    judged: JudgedScorecard,
+    scorecard: Scorecard,
+    next_step_secured: bool,
+) -> dict[str, Any]:
+    went_well = _valid_narratives(judged.went_well, scorecard)
+    to_improve = _valid_narratives(judged.to_improve, scorecard)
+    summary = next(iter(_valid_narratives([judged.summary], scorecard)), "")
+    if summary and not next_step_secured and _claims_next_step_secured(summary):
+        summary = ""
+    update: dict[str, Any] = {}
+    if went_well or to_improve:
+        update["went_well"] = went_well
+        update["to_improve"] = to_improve
+    if summary:
+        update["summary"] = summary
+    return update
+
+
+def _valid_narratives(narratives: list[str], scorecard: Scorecard) -> list[str]:
+    valid: list[str] = []
+    seen: set[str] = set()
+    for narrative in narratives:
+        text = narrative.strip()
+        if not text or text in seen:
+            continue
+        if any(not _quote_in_transcript(quote, scorecard) for quote in _quoted_spans(text)):
+            continue
+        valid.append(text)
+        seen.add(text)
+    return valid
+
+
+def _quote_in_transcript(quote: str, scorecard: Scorecard) -> bool:
+    needle = " ".join(quote.split()).casefold()
+    turns = scorecard.source_turns or []
+    return bool(needle) and (
+        any(needle in " ".join(turn.text.split()).casefold() for turn in turns)
+        or _quote_is_supported(quote, scorecard)
+    )
+
+
+def _quoted_spans(text: str) -> list[str]:
+    return [span for match in QUOTED_SPAN_RE.finditer(text) if (span := match.group(1).strip())]
+
+
+def _claims_next_step_secured(summary: str) -> bool:
+    return bool(SECURED_CLAIM_RE.search(summary)) and not SECURED_DENIAL_RE.search(summary)
 
 
 def _outcome_stat(outcome_group: str, scorecards: list[Scorecard]) -> OutcomeStats:
