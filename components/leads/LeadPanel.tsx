@@ -26,9 +26,10 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
 
   useEffect(() => {
     if (!lead) return;
+    // Capture phase: the sheet's canvas keeps focus after a row click and stops Escape from bubbling.
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [lead, onClose]);
 
   const l = shown;
