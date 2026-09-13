@@ -67,7 +67,7 @@ export function LiveCampaignRuns({ initialCampaigns }: { initialCampaigns?: ApiC
 
   const campaigns = state.status === "live" ? state.campaigns : [];
   return (
-    <section id="delivery-execution" className="mx-11 mt-7 scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card" aria-label="Live delivery execution">
+    <section id="delivery-execution" className="mx-4 mt-7 scroll-mt-6 overflow-hidden rounded-xl border border-border bg-card sm:mx-11" aria-label="Live delivery execution">
       <p className="sr-only" role="status" aria-live="polite">
         {state.status === "loading" ? "Refreshing campaign execution status" : state.status === "error" ? `Campaign execution refresh failed: ${state.message}` : `${state.campaigns.length} live campaign records loaded`}
       </p>
@@ -149,7 +149,7 @@ export function LiveCampaignRuns({ initialCampaigns }: { initialCampaigns?: ApiC
           })}
         </div>
       )}
-      <div className="flex items-center gap-4 border-t border-border bg-page px-5 py-2 text-[11.5px] text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border bg-page px-5 py-2 text-[11.5px] text-muted-foreground">
         <span className="flex items-center gap-1"><CheckCircle2 className="size-3.5 text-emerald-600" /> confirmed sends</span>
         <span className="flex items-center gap-1"><Clock3 className="size-3.5" /> resumable retries</span>
         <span className="flex items-center gap-1"><AlertTriangle className="size-3.5 text-amber-600" /> reconciliation surfaced</span>
