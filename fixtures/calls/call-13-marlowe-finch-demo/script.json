@@ -17,7 +17,7 @@
   },
   "channel": "phone",
   "scheduled_at": "2026-09-11T09:00:00+10:00",
-  "duration_target_seconds": 420,
+  "duration_target_seconds": 334,
   "outcome": "won",
   "demo": true,
   "deal_value_aud": 48600,

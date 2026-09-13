@@ -1,9 +1,8 @@
 import type { CallRecord } from "@/lib/types/calls";
 
-// Generated from fixtures/calls/*/{script,expected}.json — the thirteen
-// Harbourline IT calls with diarised turns, extraction with confidence and
-// source spans, scorecards, a follow-up draft and a timeline. Replaced by
-// Supabase reads once the API lands; keep the shape.
+// GENERATED FILE — do not edit by hand.
+// Written by scripts/generate-fixture-ui.mjs from fixtures/calls/*/{script,expected}.json
+// and fixtures/seller.json. Run `npm run generate:fixture-ui` after any fixture change.
 export const calls: CallRecord[] = [
  {
   "id": "call-01-northstar-labs",
@@ -14,277 +13,291 @@ export const calls: CallRecord[] = [
   "at": "2026-08-31T09:15:00+10:00",
   "durationSeconds": 420,
   "outcome": "won",
-  "trigger": "Cyber insurance renewal requiring Essential Eight controls",
-  "summary": "Strong buying signal. Maya (Managing Partner, 42 staff) is dealing with cyber insurance renewal requiring essential eight controls.",
+  "trigger": "Research note production doubling ahead of a new fund launch",
+  "summary": "Strong buying signal. Maya (Managing Partner, 42 staff) is dealing with research note production doubling ahead of a new fund launch.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Hi Maya, it's Sam from Harbourline IT. Thanks for making time, and just so I have the context right, are you Maya Chen from Northstar Labs in Southbank?",
+    "text": "Hi Maya, it's Sam from Eleno. Thanks for making the time. Before I get into anything, can I confirm I have you as Maya Chen, Managing Partner at Northstar Labs in Southbank?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "Yes, that's me. We're a lab planning and architecture practice, forty-two people now, mostly architects, project leads and admin. The call is timely because our cyber insurance renewal landed last week and it was more pointed than last year.",
-    "at": 16
+    "text": "That's me. We're a quantitative investment research boutique, forty-two people, mostly researchers, data engineers and a small client team. Your timing is decent, because we launch a new fund in November and the research note load roughly doubles with it.",
+    "at": 15
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What changed in the renewal pack that made this feel urgent?",
-    "at": 38
+    "text": "That helps. Tell me about the note load itself. What are you producing now, and what does doubling actually mean in numbers?",
+    "at": 34
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "They have asked us to show multi-factor coverage, backup testing, admin separation and some evidence around patching. Previously we just ticked a few boxes. This time the broker said the underwriter wants Essential Eight-style controls before they quote.",
+    "text": "We publish about sixty notes a month across four strategies. After the launch it's closer to a hundred and twenty. Each note is a model run, a chart pack and eight hundred words of commentary that has to stay consistent with what we said last quarter, or the client notices before we do.",
     "at": 44
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "How are you handling those controls today across Microsoft 365, laptops and project files?",
-    "at": 65
+    "text": "Who does the first draft today, and how long does one note take them?",
+    "at": 69
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "Patch management is half manual and half Intune, and nobody loves it. We've MFA for email but not every app. Project files are in SharePoint, but architects still sync big drawing folders locally because they travel to sites.",
-    "at": 73
+    "text": "Two senior analysts write the first draft and the partners review it. A note takes an analyst two to three hours, and most of that isn't thinking. It's pulling numbers out of the model, rebuilding the chart pack and rewriting the same three paragraphs of standing context we've written four hundred times.",
+    "at": 76
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Who is responsible internally when something breaks or when the insurer asks for evidence?",
-    "at": 94
+    "text": "Where do the model runs and the published notes actually live?",
+    "at": 101
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "Our finance partner owns risk, our studio manager does the day-to-day chasing, and I make the final call. We've an ad hoc IT contractor who is lovely, but he isn't built for reporting or controls evidence.",
-    "at": 102
+    "text": "Model runs are in Excel on a shared drive, drafts are in Word, published versions sit in SharePoint. Nothing links a note back to the model run it came from, which becomes a problem the moment compliance asks a question about a number we published in June.",
+    "at": 106
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What would a good result look like by the time the insurer comes back for the final questionnaire?",
-    "at": 122
+    "text": "What has to be true six weeks after the fund launches for you to call this a win?",
+    "at": 128
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "I need to show that a sensible provider has reviewed us, closed the obvious gaps and can produce records. I don't expect magic in two weeks, but I want confidence that we're not guessing.",
-    "at": 133
+    "text": "Analysts spend their time on the analysis instead of the assembly. If a first draft arrives with the numbers already in it and the standing sections already written, I'd take that happily. I'm not asking anything to form an opinion for us. The opinion is what clients pay for.",
+    "at": 137
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Where have staff felt the pain most, security paperwork, day-to-day support, or project file reliability?",
-    "at": 152
+    "text": "Who else needs to be comfortable before Northstar Labs commits to something like this?",
+    "at": 160
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "The paperwork is the trigger, but support is the quiet frustration. New starters wait too long, password resets go to whichever admin is free, and site laptops get forgotten until they refuse to update during a deadline.",
-    "at": 160
+    "text": "Me and my co-founder, and our compliance officer has a veto over anything that touches published research. She's reasonable. She just wants a human signing every note that goes out the door, and a record of what changed.",
+    "at": 166
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "That helps. Harbourline usually starts with a fixed onboarding project, then a managed services agreement at $135 per seat per month for a practice your size, with security reporting included.",
-    "at": 181
+    "text": "That's useful. The shape I'd propose is a short paid discovery phase, two weeks, where we map one strategy end to end with your analysts. Then a fixed-scope build of a drafting agent that pulls the model run, assembles the chart pack and writes the standing sections. For a process this size the build lands around $58,400.",
+    "at": 184
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "Our insurer is asking for Essential Eight evidence, and I am worried we will pay for a managed service but still fail the questionnaire. We have had vendors sell us a dashboard before and then leave us to explain it.",
-    "at": 198
+    "text": "Before you go further, we don't want another subscription sitting on the books. We've bought three tools in two years and we're still paying for one that nobody opens any more.",
+    "at": 211
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "That is a fair concern. We would separate the promise into two parts: first the evidence you can use with the broker, then the ongoing support model. I will send the mapped Essential Eight gap summary by Thursday so you can see exactly what is covered and what remains your risk.",
-    "at": 220
+    "text": "That's the part of our model worth hearing. There is no subscription. We build it, deploy it inside your own systems and transfer the IP to you, so it becomes your asset. Ongoing tuning is a separate arrangement you can stop whenever you like.",
+    "at": 226
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "That would be useful. The finance partner will ask whether there's a large project fee on top, because the renewal and an office refit are hitting the same quarter.",
-    "at": 249
+    "text": "That's a better answer than I expected. The IP point matters here, because the research process effectively is the business. If it lives in someone else's platform we've handed over the thing we sell.",
+    "at": 247
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will include the onboarding sequence and the fixed project range. For Northstar Labs I would expect the project to sit around $8,000 to $11,000 unless the device audit uncovers something odd.",
-    "at": 265
+    "text": "I won't tell you the agent is never wrong. It will get the standing sections right and it will occasionally phrase a number oddly, which is why your analyst review stays in the workflow rather than being designed out of it.",
+    "at": 263
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "That's inside what I can approve with finance, provided the monthly number stays close to what you just said and the support response times are written down.",
-    "at": 283
+    "text": "I appreciate you saying it. The last vendor told us their model was perfect and then argued with our compliance officer for an hour about a footnote.",
+    "at": 282
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Let us lock the next step while the renewal is warm. Can we meet Thursday 3 September at 2pm with you and the finance partner to review the proposal and the evidence pack?",
-    "at": 298
+    "text": "We time ten notes during the discovery phase before we build anything, then time ten after. The baseline is yours either way, even if you decide not to go ahead.",
+    "at": 295
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "Yes, Thursday 3 September at 2pm works. Send the invite to me and I will forward it to Grace in finance. If the proposal matches this discussion, I'm comfortable moving ahead.",
-    "at": 317
+    "text": "How would you measure the saving? I don't want a number we can't defend internally when my co-founder asks what it actually bought us.",
+    "at": 309
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "One practical thing I want to avoid is over-promising maturity in week one. We'd show the insurer what is already true, what we can close quickly, and what needs a dated remediation plan.",
-    "at": 334
+    "text": "I will send the discovery phase scope and the measurement plan by Thursday morning. I will send two research notes redrafted from your published ones as well, so you can see the output shape before you commit to anything.",
+    "at": 320
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "That language would help. The underwriter seems more interested in whether we know our gaps than whether we pretend to be perfect, and I'd rather be honest than scramble later.",
-    "at": 353
+    "text": "Fair enough. I'd want the measurement plan written down before I take this to my co-founder, and I'd want the redrafts to use our own notes, not a generic sample.",
+    "at": 339
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Exactly. We can also give your studio manager a simple evidence folder, so next year the renewal is a maintenance task rather than a panic.",
-    "at": 369
+    "text": "When suits you and your co-founder for a walkthrough of that scope?",
+    "at": 353
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "That would be a relief. She is organised, but she is tired of chasing screenshots from three different systems whenever someone asks a security question.",
-    "at": 384
+    "text": "Thursday 3 September at 2pm. Put the research note drafting pilot first on the agenda and bring the measurement plan. If the scope holds up I'll sign off the discovery phase that afternoon.",
+    "at": 359
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Great, I will send the invite, the gap summary and the commercial proposal by Thursday morning. Thanks Maya, this gives us enough to be precise.",
-    "at": 398
+    "text": "Thursday 3 September at 2pm, locked in. I'll send the invite today with the scope attached and the redrafted notes ahead of it.",
+    "at": 374
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Maya Chen",
-    "text": "Thanks Sam. I appreciate that you did not jump straight to a bundle. Speak Thursday.",
-    "at": 412
+    "text": "That works. Send it to me directly and I'll forward it to my co-founder and our compliance officer so nobody is surprised.",
+    "at": 385
+   },
+   {
+    "index": 26,
+    "speaker": "rep",
+    "name": "Sam Whitfield",
+    "text": "Will do. I'd rather find out we're the wrong fit in week two of a discovery phase than in month six of a build, so that two weeks does that job as well.",
+    "at": 395
+   },
+   {
+    "index": 27,
+    "speaker": "prospect",
+    "name": "Maya Chen",
+    "text": "Thanks Sam. I liked that you asked what we actually do before telling me what to buy. Speak Thursday.",
+    "at": 411
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Maya Chen",
-     "confidence": 0.97,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "Managing Partner",
-     "confidence": 0.88,
-     "span": 7
+     "confidence": 0.96,
+     "span": 0
     },
     "email": {
      "value": "maya@northstarlabs.example",
-     "confidence": 0.86,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1101",
-     "confidence": 0.88,
-     "span": 18
+     "confidence": 0.82,
+     "span": null
     }
    },
    "company": {
     "name": {
      "value": "Northstar Labs",
-     "confidence": 0.88,
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
-     "value": "Architecture and lab planning consultancy",
-     "confidence": 0.88,
+     "value": "Quantitative investment research boutique",
+     "confidence": 0.96,
      "span": 1
     },
     "headcount": {
      "value": 42,
-     "confidence": 0.95,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
      "value": "Southbank, VIC",
-     "confidence": 0.86,
+     "confidence": 0.96,
      "span": 0
     }
    },
    "deal": {
     "stage": {
      "value": "closed_won",
-     "confidence": 0.96,
-     "span": 9
+     "confidence": 0.88,
+     "span": null
     },
     "valueAud": {
      "value": 58400,
-     "confidence": 0.86,
-     "span": null
+     "confidence": 0.96,
+     "span": 12
     },
     "outcome": {
      "value": "won",
-     "confidence": 0.93,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send the mapped Essential Eight gap summary by Thursday",
-     "confidence": 0.97,
-     "span": 14
+     "value": "I will send the discovery phase scope and the measurement plan by Thursday morning",
+     "confidence": 0.96,
+     "span": 20
     },
     {
-     "value": "I will include the onboarding sequence and the fixed project range",
-     "confidence": 0.98,
-     "span": 16
+     "value": "I will send two research notes redrafted from your published ones",
+     "confidence": 0.96,
+     "span": 20
     }
    ],
    "objections": [
     {
-     "text": "Our insurer is asking for Essential Eight evidence, and I am worried we will pay for a managed service but still fail the questionnaire",
+     "text": "we don't want another subscription sitting on the books",
      "handling": "handled",
      "span": 13
     }
    ],
    "nextStep": {
-    "value": "Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.",
-    "confidence": 0.92,
-    "span": 14
+    "value": "Sam to send the discovery phase scope, measurement plan and two redrafted research notes, then walk Maya and her co-founder through the research note drafting pilot scope.",
+    "confidence": 0.88,
+    "span": 20
    },
    "nextStepDue": "2026-09-03"
   },
@@ -295,25 +308,25 @@ export const calls: CallRecord[] = [
    },
    "nextStepSecured": {
     "value": true,
-    "span": 14
+    "span": 20
    },
    "objectionHandling": {
     "value": "handled",
     "span": 13
    },
    "talkRatio": 0.44,
-   "notes": "Sam uncovered the renewal trigger, mapped risk to a clear proposal and secured a dated review with the decision makers."
+   "notes": "Sam mapped the note production workflow before pricing anything, answered the subscription objection with the IP transfer model and left with a dated pilot scope review."
   },
   "icpSignals": {
-   "industry": "Architecture and lab planning consultancy",
+   "industry": "Quantitative investment research boutique",
    "headcountBand": "25-80",
    "role": "Managing Partner",
-   "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+   "trigger": "Research note production doubling ahead of a new fund launch"
   },
   "riskFlags": [],
   "draft": {
    "subject": "Next steps — Northstar Labs",
-   "body": "Hi Maya,\n\nThanks for the time today.\nYou mentioned cyber insurance renewal requiring Essential Eight controls; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the mapped essential eight gap summary by thursday\n- Include the onboarding sequence and the fixed project range\n\nNext step: Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.\n\nSam Whitfield"
+   "body": "Hi Maya,\n\nThanks for the time today.\nYou mentioned research note production doubling ahead of a new fund launch; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the discovery phase scope and the measurement plan by Thursday morning\n- Send two research notes redrafted from your published ones\n\nNext step: Sam to send the discovery phase scope, measurement plan and two redrafted research notes, then walk Maya and her co-founder through the research note drafting pilot scope.\n\nSam Whitfield"
   },
   "timeline": [
    {
@@ -343,247 +356,247 @@ export const calls: CallRecord[] = [
   ]
  },
  {
-  "id": "call-02-arcwell-health",
+  "id": "call-02-kestrel-lending",
   "rep": "Sam Whitfield",
   "prospect": "Felix Morgan",
-  "company": "Arcwell Health",
-  "domain": "arcwellhealth.example",
-  "at": "2026-09-01T14:30:00+10:00",
-  "durationSeconds": 450,
+  "company": "Kestrel Lending",
+  "domain": "kestrellending.example",
+  "at": "2026-09-01T10:30:00+10:00",
+  "durationSeconds": 440,
   "outcome": "won",
-  "trigger": "Phishing incident and follow-up cyber insurance conditions",
-  "summary": "Strong buying signal. Felix (Operations Manager, 64 staff) is dealing with phishing incident and follow-up cyber insurance conditions.",
+  "trigger": "Loan document turnaround blowing out before broker season",
+  "summary": "Strong buying signal. Felix (Head of Credit Operations, 64 staff) is dealing with loan document turnaround blowing out before broker season.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Felix Morgan, Sam Whitfield from Harbourline IT. I have Arcwell Health as a two-site allied health group with you looking after operations, is that still right?",
+    "text": "Felix, Sam Whitfield from Eleno. Thanks for the time. Just to confirm before we start, I have you as Felix Morgan, Head of Credit Operations at Kestrel Lending in Docklands?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "That's right. We've physios, occupational therapists, reception and a small finance team across Brunswick and Essendon. The reason I booked this is a phishing incident last month that rattled the directors.",
+    "text": "You've got it. We're a non-bank commercial lender, sixty-four people across credit, settlements and broker support. I took this call because our loan document turnaround is blowing out and broker season starts in six weeks.",
     "at": 16
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What happened in the phishing incident, and what did it expose about the current setup?",
-    "at": 35
+    "text": "What does the turnaround look like now, and where does it need to be?",
+    "at": 34
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "A receptionist approved a fake supplier bank change. We caught it before money moved, but the mailbox was compromised for a day. Our current IT person cleaned it up, but there was no proper incident note or training follow-up.",
-    "at": 45
+    "text": "From credit approval to documents out the door is four to five days at the moment. Two years ago it was two. Brokers notice that, and a broker who waits five days for documents quietly sends the next deal somewhere else.",
+    "at": 41
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "How does support work between the two clinics when reception, clinicians and practice software are all busy?",
-    "at": 69
+    "text": "Walk me through what happens in those four days, step by step.",
+    "at": 63
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "Honestly, everyone messages me first. Then I triage whether it's Best Practice, Xero, Microsoft 365 or the internet. It's workable until a Monday morning when both clinics have full books.",
-    "at": 80
+    "text": "A credit analyst assembles the file, a documentation officer drafts the facility letter and the security schedules from templates in Word, then a senior checks the lot against the approval. Every one of those steps is a person retyping something that already exists in the approval memo.",
+    "at": 69
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Who needs to be confident before Arcwell Health changes provider?",
-    "at": 98
+    "text": "How many sets of documents does that team produce in a month?",
+    "at": 94
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "The clinical director, me, and one GP who sits on the board. The clinicians care about uptime and privacy. The board cares about insurance, audit trail and not paying for theatre.",
-    "at": 105
+    "text": "About two hundred and forty in a normal month, and closer to four hundred through broker season. We have three documentation officers. Two of them worked through their leave last spring and I am not asking them to do that again this year.",
+    "at": 100
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What would you want fixed in the first thirty days if we started?",
-    "at": 124
+    "text": "What systems hold the approvals and the templates today?",
+    "at": 123
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "MFA everywhere, a reliable joiner and leaver process, backup testing for shared drives and someone running security awareness without making staff feel silly. I'd also like one helpdesk number instead of five workarounds.",
-    "at": 132
+    "text": "Approvals live in our loan origination system, templates are Word files on a shared drive with version numbers in the filename, and executed copies go into SharePoint. Security schedules are the messy part, because they change with the asset type and nobody agrees on which template is current.",
+    "at": 127
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Where does the cyber insurance renewal sit in the calendar?",
-    "at": 152
+    "text": "What would a good outcome look like by the time brokers ramp up?",
+    "at": 153
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "The broker wants updated answers by 18 September. They specifically asked about admin accounts, patching cadence and whether we can prove backups have been restored.",
+    "text": "Documents out the same day as approval for the standard deals, and the officers spending their time on the complicated ones. If we hold two days on the unusual structures I would be satisfied. I would also want every version recorded, because our regulator asks and I would rather not be reconstructing it later.",
     "at": 159
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "For sixty-four staff, Harbourline would likely be $128 per seat per month, plus an onboarding project to clean identity, backups and device management before the insurer deadline.",
-    "at": 174
+    "text": "And who signs off a project like this at Kestrel Lending?",
+    "at": 188
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "Data sovereignty is the thing our clinical director will ask about. We deal with patient information, and she will not accept a vague answer about where tickets or backups go.",
-    "at": 191
+    "text": "Our CEO signs, on my recommendation, with the head of risk in the room. Risk will push back hardest, and fairly, because he owns what happens when a document goes out wrong.",
+    "at": 194
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Good, she should ask. We keep Microsoft 365 data in your Australian tenant, document where backup metadata sits, and make any remote access auditable. I will send the incident-response checklist and onboarding proposal by Friday so she can see the detail.",
+    "text": "That is enough to be concrete. I would run a two-week discovery phase with your documentation officers, mapping the standard facility and two security schedule variants. Then a fixed-scope build that reads the approval, drafts the facility letter and the schedules, and hands your officer a document to check rather than write. For the volume you are describing that build sits at $96,000.",
     "at": 210
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "That would take heat out of the conversation. What about the rollout? We can't close both clinics or interrupt appointments.",
-    "at": 235
+    "text": "That is a real number. My concern is that we'd be buying a tool we then depend on you to run for the next five years, and that is exactly how we ended up replacing our last platform.",
+    "at": 243
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will include the two clinic rollout plan and the cyber insurance evidence register. The first week is discovery and identity controls, then we schedule endpoint work in reception gaps and after-hours windows.",
-    "at": 248
+    "text": "You wouldn't. We build it, deploy it into your systems and transfer the IP to you, so it is your asset and your team can change it. Managed optimisation afterwards is separate and you can stop it whenever you like.",
+    "at": 263
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "That sounds sensible. The price is higher than our current person, but I can justify it if the board sees risk reduction and not just support tickets.",
-    "at": 268
+    "text": "Good. The head of risk will ask what happens when it drafts something wrong, and he will not accept an answer that starts with the word never.",
+    "at": 284
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Can we book Friday 4 September at 11am for you, the clinical director and me to walk through the proposal before it goes to the board?",
-    "at": 285
+    "text": "Then your officer catches it, the same as when a person copies the wrong schedule today. We won't design the checker out of the process, and every draft records which approval fields it used.",
+    "at": 298
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "Yes, Friday 4 September at 11am is good. Send me the invite and I will add Dr Patel. If the checklist answers her privacy questions, I think we will proceed.",
-    "at": 301
+    "text": "That is the answer he wants. He will still want to see it working on real files though, not a demonstration built on tidy examples.",
+    "at": 316
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "On the clinical side, we'd keep the change visible but lightweight. Reception gets a single contact path, clinicians get clear timing for MFA changes, and the board gets evidence without needing to read technical logs.",
-    "at": 320
+    "text": "That is what the discovery phase is for. We work on your files, in your environment, and you end up with a measured baseline and a scope whether or not you go ahead.",
+    "at": 329
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "That balance matters. If clinicians feel the security work is being done to them rather than with them, I will spend a month smoothing frustration instead of running the clinics.",
-    "at": 342
+    "text": "How long from the end of discovery to something the officers can actually use? Broker season does not move because a project runs late.",
+    "at": 347
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "We can make the first staff message plain: why the changes are happening, what will change this week, and where to get help if a login prompt appears before an appointment.",
-    "at": 360
+    "text": "Six to eight weeks for the standard facility, longer if the schedules are as varied as they sound. I would rather ship the standard path first than promise everything at once.",
+    "at": 359
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "Good. The phishing incident embarrassed people, and I don't want training that sounds like a lecture. A practical tone will land much better.",
-    "at": 380
+    "text": "That suits me. Standard deals are seventy per cent of the volume and about ninety per cent of the frustration.",
+    "at": 375
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will also note that the board can start with the insurance evidence and then decide whether any deeper maturity work waits until after the renewal.",
-    "at": 394
+    "text": "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday. I will send the measurement plan alongside it, so your head of risk can see how we would prove the saving before anyone signs anything.",
+    "at": 386
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "That's sensible. They will approve urgent controls quickly, but anything that smells like a giant transformation will get pushed into a later meeting.",
-    "at": 410
+    "text": "Send it to me and I will get it in front of both of them before the end of the week.",
+    "at": 407
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Perfect. I will send the invite, proposal and checklist by Thursday afternoon so you've time to read it before Friday.",
-    "at": 424
+    "text": "Can we hold Thursday 10 September at 10am to walk through it with your head of risk?",
+    "at": 418
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Felix Morgan",
-    "text": "Thanks Sam. This is the first call where I have felt someone understood the clinic constraints, not only the security words.",
-    "at": 437
+    "text": "Thursday 10 September at 10am works. I will book the room and bring our own volume numbers so we are arguing about the same baseline.",
+    "at": 427
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Felix Morgan",
-     "confidence": 0.87,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
-     "value": "Operations Manager",
-     "confidence": 0.94,
+     "value": "Head of Credit Operations",
+     "confidence": 0.96,
      "span": 0
     },
     "email": {
-     "value": "felix@arcwellhealth.example",
-     "confidence": 0.89,
-     "span": 0
+     "value": "felix@kestrellending.example",
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1102",
-     "confidence": 0.93,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
-     "value": "Arcwell Health",
-     "confidence": 0.89,
+     "value": "Kestrel Lending",
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
-     "value": "Multi-site allied health clinic",
-     "confidence": 0.92,
-     "span": 0
+     "value": "Non-bank commercial lender",
+     "confidence": 0.96,
+     "span": 1
     },
     "headcount": {
      "value": 64,
@@ -591,21 +604,21 @@ export const calls: CallRecord[] = [
      "span": null
     },
     "location": {
-     "value": "Brunswick and Essendon, VIC",
-     "confidence": 0.91,
-     "span": 1
+     "value": "Docklands, VIC",
+     "confidence": 0.96,
+     "span": 0
     }
    },
    "deal": {
     "stage": {
      "value": "closed_won",
-     "confidence": 0.9,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
-     "value": 103600,
-     "confidence": 0.88,
-     "span": null
+     "value": 96000,
+     "confidence": 0.96,
+     "span": 14
     },
     "outcome": {
      "value": "won",
@@ -615,80 +628,80 @@ export const calls: CallRecord[] = [
    },
    "promises": [
     {
-     "value": "I will send the incident-response checklist and onboarding proposal by Friday",
-     "confidence": 0.97,
-     "span": 14
+     "value": "I will send the discovery phase scope and a sample redrafted facility letter by Wednesday",
+     "confidence": 0.96,
+     "span": 24
     },
     {
-     "value": "I will include the two clinic rollout plan and the cyber insurance evidence register",
-     "confidence": 0.94,
-     "span": 16
+     "value": "I will send the measurement plan alongside it",
+     "confidence": 0.96,
+     "span": 24
     }
    ],
    "objections": [
     {
-     "text": "Data sovereignty is the thing our clinical director will ask about",
+     "text": "we'd be buying a tool we then depend on you to run for the next five years",
      "handling": "handled",
-     "span": 13
+     "span": 15
     }
    ],
    "nextStep": {
-    "value": "Sam to send proposal and meet Felix plus clinical director for rollout approval.",
-    "confidence": 0.93,
-    "span": 18
+    "value": "Sam to send the discovery phase scope, a redrafted facility letter and the measurement plan, then review them with Felix and the head of risk.",
+    "confidence": 0.88,
+    "span": 24
    },
-   "nextStepDue": "2026-09-04"
+   "nextStepDue": "2026-09-10"
   },
   "scorecard": {
    "discoveryQuestions": {
-    "value": 4,
+    "value": 6,
     "span": 0
    },
    "nextStepSecured": {
     "value": true,
-    "span": 18
+    "span": 24
    },
    "objectionHandling": {
     "value": "handled",
-    "span": 13
+    "span": 15
    },
-   "talkRatio": 0.46,
-   "notes": "Sam connected a recent phishing incident to clinic operations, answered the sovereignty concern and agreed a dated proposal review."
+   "talkRatio": 0.43,
+   "notes": "Sam quantified the document turnaround and the volumes before naming a number, answered the lock-in objection with IP transfer and booked a dated review with the head of risk."
   },
   "icpSignals": {
-   "industry": "Multi-site allied health clinic",
+   "industry": "Non-bank commercial lender",
    "headcountBand": "25-80",
-   "role": "Operations Manager",
-   "trigger": "Phishing incident and follow-up cyber insurance conditions"
+   "role": "Head of Credit Operations",
+   "trigger": "Loan document turnaround blowing out before broker season"
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Next steps — Arcwell Health",
-   "body": "Hi Felix,\n\nThanks for the time today.\nYou mentioned phishing incident and follow-up cyber insurance conditions; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the incident-response checklist and onboarding proposal by friday\n- Include the two clinic rollout plan and the cyber insurance evidence register\n\nNext step: Sam to send proposal and meet Felix plus clinical director for rollout approval.\n\nSam Whitfield"
+   "subject": "Next steps — Kestrel Lending",
+   "body": "Hi Felix,\n\nThanks for the time today.\nYou mentioned loan document turnaround blowing out before broker season; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the discovery phase scope and a sample redrafted facility letter by Wednesday\n- Send the measurement plan alongside it\n\nNext step: Sam to send the discovery phase scope, a redrafted facility letter and the measurement plan, then review them with Felix and the head of risk.\n\nSam Whitfield"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-01T14:39:30+10:00",
+    "at": "2026-09-01T10:39:20+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-01T14:40:30+10:00",
+    "at": "2026-09-01T10:40:20+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-01T14:40:30+10:00",
+    "at": "2026-09-01T10:40:20+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-01T14:41:30+10:00",
+    "at": "2026-09-01T10:41:20+10:00",
     "icon": "mail"
    }
   ]
@@ -699,300 +712,286 @@ export const calls: CallRecord[] = [
   "prospect": "Priya Shah",
   "company": "Afterglow Studio",
   "domain": "afterglowstudio.example",
-  "at": "2026-09-02T10:00:00+10:00",
+  "at": "2026-09-01T14:00:00+10:00",
   "durationSeconds": 390,
   "outcome": "lost",
   "trigger": null,
-  "summary": "Not a fit right now. Priya (Founder, 12 staff) is dealing with an it review.",
+  "summary": "Not a fit right now. Jordan quoted a build price in the first sentence, never asked what the studio does, talked past the volume and cost objections and left with no next step.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Hi Priya Shah, Jordan from Harbourline IT. Great to speak with Afterglow Studio. We help Melbourne firms move from ad hoc IT to a proper managed service, and our standard package is $120 per seat per month.",
+    "text": "Priya Shah, Jordan Lee from Eleno. Good to finally speak with Afterglow Studio. We build custom AI agents for Melbourne businesses, and for a studio your size a first automation build usually lands between $15,000 and $18,000, with a short discovery phase on top of that.",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "Hi Jordan. We're only twelve people, so I was mostly curious. Our computers are fine most weeks, and we use a local break-fix person when something annoying happens.",
-    "at": 17
+    "text": "Hi Jordan. We are twelve people in Collingwood and I was mostly curious. Most of what we do is creative work that changes shape on every job.",
+    "at": 22
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "That's exactly where managed services helps, because waiting for things to break costs time. With us you get helpdesk, Microsoft 365 admin, patching, endpoint security, backup checks and quarterly reviews, all wrapped into one predictable monthly number.",
-    "at": 29
+    "text": "That is exactly where the value is. Every studio thinks their work is bespoke, and then you look at the proposals, the scopes of work and the monthly status reports, and eighty per cent of it is the same nine paragraphs with different client names in them.",
+    "at": 34
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "We are probably too small for a monthly managed service. The designers are on Macs, the account team uses Google Workspace, and there is not much infrastructure.",
-    "at": 46
+    "text": "Some of it is, but we do about four proposals a month. It is not a factory.",
+    "at": 56
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Small teams actually need it more because there's no internal IT person. Harbourline IT can bring the same structure bigger firms have, and it means you're not relying on whoever is least busy to fix a printer or password issue.",
-    "at": 58
+    "text": "Four a month is still forty-eight a year, and if each one takes your team three hours you are looking at a working fortnight gone. An agent can draft the scope, pull your rate card and have it sitting in your inbox in under a minute.",
+    "at": 64
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "The printer bit's real, but it's not painful enough to spend a lot. We might have two support issues a month, maybe three when freelancers are in.",
-    "at": 76
+    "text": "We do not have the volume to justify a build like that. The proposals are also where we win the work, so I want a human writing them.",
+    "at": 86
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The bigger risk isn't the ticket count, it's the security baseline. Cyber insurance and client questionnaires are getting stricter, so having managed endpoint protection and patch records makes you look professional when a client asks.",
-    "at": 88
+    "text": "A human still signs them. The agent does the assembly, and your people spend their time on the pitch rather than the formatting. Every client we deploy for says the same thing in the first week.",
+    "at": 99
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "Most of our clients are hospitality and lifestyle brands. They care about creative work. Nobody has sent us a security questionnaire, and if they did, I'd probably just answer it myself.",
-    "at": 104
+    "text": "Maybe. But the cost is the part I keep coming back to, and you have quoted me a number before you know what we actually do.",
+    "at": 116
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "We also include onboarding, so we'd clean up user accounts, make sure everyone has MFA, standardise devices and document your apps. For a team like Afterglow Studio, that project could be $4,000 to $6,000 depending on what we find.",
-    "at": 118
+    "text": "Think about the cost the other way. If a proposal goes out two days late and you lose one retainer a year at thirty thousand, the build has paid for itself before the first invoice.",
+    "at": 128
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "That is more than double what we pay now. Our current guy charges when we need him, and some months we pay nothing at all.",
-    "at": 135
+    "text": "That is more than we spent on our entire software stack last year, and we actually use that software every single day.",
+    "at": 144
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Right, but the monthly fee buys peace of mind. If a laptop is stolen or someone clicks a bad link, you've a team ready. Break-fix is cheaper until the one day it's not.",
-    "at": 146
+    "text": "Software is a subscription, though. This is different. We build it, deploy it and transfer the IP to you, so it is an asset on your books instead of a bill that renews forever.",
+    "at": 154
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "I understand the argument, but there's not a burning problem. We're watching costs this quarter, and I don't want another subscription unless it removes a daily headache.",
-    "at": 161
+    "text": "An asset we would still have to maintain. There are twelve of us and not one of us is technical.",
+    "at": 170
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The daily headache can be hidden, though. Designers losing twenty minutes here and there adds up, and with a managed agreement you can send everything through one channel instead of interrupting each other.",
-    "at": 173
+    "text": "That is what the managed optimisation option covers. It is there if you want it and it is not compulsory, but most studios take it for the first year because it removes the worry.",
+    "at": 180
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "Maybe, but I'd need to see a very small plan. I'm not going to take a twelve-seat studio into a corporate IT package because it sounds responsible.",
-    "at": 188
+    "text": "So there is an ongoing cost after all, which is the thing I said at the start I did not want.",
+    "at": 195
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Our minimum managed plan is still designed around the full stack, because partial coverage creates gaps. We can start with the baseline and then add anything specific later.",
-    "at": 200
+    "text": "Only if you choose it. The pattern I see with creative studios is that admin creeps up until someone burns out, and then you are hiring a coordinator at eighty thousand a year to do work an agent could have done.",
+    "at": 205
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "That's probably not for us then. I was hoping there might be a light-touch option or an annual check-up.",
-    "at": 213
+    "text": "We already have a studio coordinator and she is excellent. She would tell you the proposals are the easy part of her week.",
+    "at": 224
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will send some info this afternoon. It will explain the service inclusions, the onboarding project and why proactive support tends to be better value over a year.",
-    "at": 221
+    "text": "Then she is spending her week on the wrong work. I have sat with agencies where the coordinator was a copy-and-paste machine three days a week, and once we automated the proposal packs she moved onto client care.",
+    "at": 235
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "You can send it, but I don't want to waste your time. Unless the price is much closer to what we pay casually, I can't see us moving.",
-    "at": 234
+    "text": "I hear you, but you still have not asked me what she actually does.",
+    "at": 253
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The reason I'm pushing the managed option is that creative studios often underestimate the cost of interruption. If a designer loses files before a client presentation, the impact isn't just an IT invoice, it's reputation and rework.",
-    "at": 246
+    "text": "Fair, and I will get to that. The reason I lead with the build is that studios your size tend to wait too long, and then the work arrives all at once and there is no time to put anything in properly.",
+    "at": 260
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "I hear that, but our files are backed up in the design tools and we've not had that kind of incident.",
-    "at": 263
+    "text": "That still sounds like buying ahead of a problem we do not have.",
+    "at": 279
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "You would also get a proper onboarding audit. We'd review admin accounts, device health, domains, password sharing, MFA and whether freelancers still have access after a project finishes.",
-    "at": 272
+    "text": "Or buying ahead of growth. You said four proposals a month now. If that goes to eight you are not adding half a person, you are adding a bottleneck that shows up in how fast you answer new business.",
+    "at": 285
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "Those are real things, but they aren't things I'm ready to put a monthly contract around.",
-    "at": 285
+    "text": "Our response time is fine. We usually turn a proposal around in two days.",
+    "at": 303
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "If budget is the blocker, I can still show the cost over twelve months compared with reactive work and staff downtime. Sometimes the managed plan comes out closer than it first appears.",
-    "at": 292
+    "text": "Two days is slower than it sounds when three studios are pitching the same job. The one that answers in four hours reads as the one that wants it more. That is a revenue argument, not an efficiency one.",
+    "at": 310
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "Maybe for another studio. For us, the cash cost is obvious and the downtime cost is still theoretical.",
-    "at": 307
+    "text": "Jordan, I do not think we are the right fit for this, and I have said so three times now.",
+    "at": 328
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The overview will also show the security baseline we recommend for even a small studio: MFA, device encryption, admin account separation, backup confirmation and a simple incident contact path. That gives you a benchmark, even if you choose not to move now.",
-    "at": 315
+    "text": "I will send the scope and the numbers through this afternoon anyway. It will show the proposal drafting build, the onboarding pack automation and what the discovery phase covers, so you have something to look at when the volume does arrive.",
+    "at": 338
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "A benchmark is fine. I just don't want the benchmark to turn into pressure to buy something we've already said is too heavy.",
-    "at": 333
+    "text": "You can send it. I do not want to waste your time though, because the answer today is no.",
+    "at": 357
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The thing I'd be careful of is waiting until the first serious client requirement appears. By then you're trying to write policies, clean accounts, find device records and reassure a client at the same time. The managed plan keeps all of that ready before anyone asks, and it gives you a professional answer rather than a scramble.",
-    "at": 344
+    "text": "Understood. Have a read and come back to me when the proposal load picks up, because it always does, and the studios that move early are the ones not scrambling in their busiest quarter.",
+    "at": 366
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Priya Shah",
-    "text": "I understand, but that still feels like buying ahead of a problem.",
-    "at": 369
-   },
-   {
-    "index": 28,
-    "speaker": "rep",
-    "name": "Jordan Lee",
-    "text": "Understood. I will send the overview and you can come back if anything changes or if a client asks for security evidence.",
-    "at": 375
-   },
-   {
-    "index": 29,
-    "speaker": "prospect",
-    "name": "Priya Shah",
-    "text": "Thanks Jordan. I appreciate the call, but it's a no for now.",
-    "at": 385
+    "text": "Thanks Jordan. It is a no for now, and I would rather be straight with you about it.",
+    "at": 382
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Priya Shah",
-     "confidence": 0.87,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "Founder",
-     "confidence": 0.91,
+     "confidence": 0.82,
      "span": null
     },
     "email": {
      "value": "priya@afterglowstudio.example",
-     "confidence": 0.91,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1103",
-     "confidence": 0.88,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
      "value": "Afterglow Studio",
-     "confidence": 0.89,
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
      "value": "Creative branding studio",
-     "confidence": 0.92,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 12,
-     "confidence": 0.91,
-     "span": 0
+     "confidence": 0.88,
+     "span": null
     },
     "location": {
      "value": "Collingwood, VIC",
-     "confidence": 0.95,
-     "span": null
+     "confidence": 0.96,
+     "span": 1
     }
    },
    "deal": {
     "stage": {
      "value": "closed_lost",
-     "confidence": 0.97,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
      "value": 15400,
-     "confidence": 0.94,
+     "confidence": 0.88,
      "span": null
     },
     "outcome": {
      "value": "lost",
-     "confidence": 0.9,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send some info this afternoon",
-     "confidence": 0.97,
-     "span": 16
+     "value": "I will send the scope and the numbers through this afternoon",
+     "confidence": 0.96,
+     "span": 24
     }
    ],
    "objections": [
     {
-     "text": "We are probably too small for a monthly managed service",
+     "text": "We do not have the volume to justify a build like that",
      "handling": "ignored",
-     "span": 3
+     "span": 5
     },
     {
-     "text": "That is more than double what we pay now",
+     "text": "That is more than we spent on our entire software stack last year",
      "handling": "ignored",
      "span": 9
     }
@@ -1011,10 +1010,10 @@ export const calls: CallRecord[] = [
    },
    "objectionHandling": {
     "value": "ignored",
-    "span": 3
+    "span": 5
    },
-   "talkRatio": 0.61,
-   "notes": "Jordan pitched the managed service before understanding the studio, ignored the size and price objections and left with no next step."
+   "talkRatio": 0.66,
+   "notes": "Jordan quoted a build price in the first sentence, never asked what the studio does, talked past the volume and cost objections and left with no next step."
   },
   "icpSignals": {
    "industry": "Creative branding studio",
@@ -1024,32 +1023,32 @@ export const calls: CallRecord[] = [
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Leaving the door open — Afterglow Studio",
-   "body": "Hi Priya,\n\nThanks for being straight with me today. It sounds like the current setup is working for you, so I won't push.\n\nIf anything changes — an insurer asking for evidence, or a bad week with the computers — send me a note and I'll pick it up from here.\n\n\nJordan Lee"
+   "subject": "Next steps — Afterglow Studio",
+   "body": "Hi Priya,\n\nThanks for being straight with me today. It sounds like the current setup is working for you, so I won't push.\n\nWhat I owe you:\n- Send the scope and the numbers through this afternoon\n\nIf that changes, send me a note and I'll pick it up from there.\n\nJordan Lee"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-02T10:08:30+10:00",
+    "at": "2026-09-01T14:08:30+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-02T10:09:30+10:00",
+    "at": "2026-09-01T14:09:30+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-02T10:09:30+10:00",
+    "at": "2026-09-01T14:09:30+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-02T10:10:30+10:00",
+    "at": "2026-09-01T14:10:30+10:00",
     "icon": "mail"
    }
   ]
@@ -1060,221 +1059,207 @@ export const calls: CallRecord[] = [
   "prospect": "Daniel Ortiz",
   "company": "Kite & Co",
   "domain": "kiteandco.example",
-  "at": "2026-09-02T16:00:00+10:00",
+  "at": "2026-09-02T11:00:00+10:00",
   "durationSeconds": 430,
   "outcome": "stalled",
-  "trigger": "Procurement security questionnaire before panel appointment",
-  "summary": "Interest is real, timing is not. Daniel (Operations Lead, 95 staff) is dealing with procurement security questionnaire before panel appointment.",
+  "trigger": "Partners want a contract review pilot before the next financial year",
+  "summary": "Interest is real, timing is not. Daniel (Operations Lead, 95 staff) is dealing with partners want a contract review pilot before the next financial year.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Daniel, thanks for joining. I have you as Daniel Ortiz, operations lead at Kite & Co, a commercial law firm in the CBD. What prompted the conversation with Harbourline IT?",
+    "text": "Daniel, thanks for making the time. I have you as Daniel Ortiz, Operations Lead at Kite & Co, a commercial law firm in the CBD. What prompted you to take the call with Eleno?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "That's right. We're reviewing our panel of suppliers after a procurement refresh. IT support is bundled into that, partly because our partners have started asking for clearer security reporting.",
+    "text": "That is right. Our partners have asked for a contract review pilot before the next financial year. They have all read the same three articles and now want to know why we are still reading leases line by line.",
     "at": 18
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What does the partner group want to see that they aren't getting today?",
-    "at": 35
+    "text": "What sort of contracts, and what volume are we talking about?",
+    "at": 38
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "They want fewer surprises. When a barrister can't access a brief or a senior associate is locked out before court, it becomes an operational incident. The current provider fixes things eventually, but there's no rhythm or account management.",
-    "at": 42
+    "text": "Mostly commercial leases and supply agreements. The property team alone reviews around ninety leases a quarter, and a first-pass review of a lease is two to four hours for a junior before a partner looks at it at all.",
+    "at": 44
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "How are your systems set up across document management, Microsoft 365 and remote access?",
-    "at": 65
+    "text": "What does that first pass actually involve?",
+    "at": 64
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "We're on Microsoft 365, Xero for finance, and a cloud document platform for matters. Remote access is mostly browser based, but some partners still have old habits around local files and personal devices.",
-    "at": 73
+    "text": "Pulling the key dates, the rent review mechanism, assignment and make-good clauses and anything unusual into a summary the partner reads. Ninety per cent of it is the same fields every single time. The judgement is in the other ten per cent.",
+    "at": 68
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Who will decide whether a new provider is worth moving to?",
-    "at": 92
+    "text": "Where do the documents sit, and what does the summary get written into?",
+    "at": 90
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "The managing partner signs off, the finance director checks the numbers, and procurement controls the process. I can recommend a shortlist, but I can't award it on this call.",
-    "at": 99
+    "text": "Documents are in our practice management system and summaries are Word memos saved against the matter. There is a precedent template that everyone has quietly modified, so no two summaries look the same, which the partners complain about constantly.",
+    "at": 97
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What would make you confident enough to recommend Harbourline IT for that shortlist?",
-    "at": 116
+    "text": "If the pilot works, what does the partner group see that convinces them?",
+    "at": 117
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "I need evidence that you understand confidentiality, response times and change management. We're ninety-five staff, but partner influence makes us feel larger. A botched migration would be painful politically.",
+    "text": "A junior producing a first-pass summary in twenty minutes instead of three hours, with the same fields every time, and a partner able to see where each field came from in the document. If they cannot trace it back to the clause they will not trust it.",
     "at": 124
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Where are the current risks most visible day to day?",
-    "at": 141
+    "text": "And who decides whether the pilot becomes a project?",
+    "at": 149
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "Joiners and leavers are messy, shared mailboxes are inconsistent, and procurement keeps asking me for supplier documents I have to chase. There's also a cyber insurance renewal in November, but it's not the only driver.",
-    "at": 146
+    "text": "The partnership decides, which is eleven people who meet monthly. I can recommend it and I can find budget for a pilot inside the operations line, but a build of any real size goes to them.",
+    "at": 153
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "At that size, the managed services agreement would normally sit around $140 per seat per month, with a scoped onboarding project for identity, device management and documentation.",
-    "at": 167
+    "text": "Understood. What I would propose is a two-week discovery phase on the property team's lease review, then a fixed-scope build of a clause extraction and summary agent that writes into your precedent template with a link back to the source clause. For ninety leases a quarter plus the supply agreements, that build sits around $132,000.",
+    "at": 172
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "Procurement will not let us progress without the full questionnaire and insurance certificates. They will ask about data handling, subcontractors, incident response and professional indemnity before a partner even reads the proposal.",
-    "at": 183
+    "text": "That number has to go to the partnership, and they will not approve it before they have seen the pilot work on our own leases.",
+    "at": 201
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "That makes sense. I can answer the supplier side and show our standard controls, although some items depend on the final scope. I will send the security pack and a sample service schedule so you can test whether procurement is comfortable.",
-    "at": 202
+    "text": "That is reasonable, and it is why the discovery phase is priced and scoped separately. It is small enough to sit inside your operations line, and at the end you have a measured baseline and output on your own documents to put in front of them.",
+    "at": 214
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "That would help, but it may disappear into the vendor portal for a while. Our procurement manager is methodical and the managing partner is away until the week after next.",
-    "at": 226
+    "text": "That helps. What I cannot give you is a date for the partnership, because the next meeting agenda is already full and the one after that is the financial year planning session.",
+    "at": 238
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Would it be useful to pencil a review with the managing partner when he is back?",
-    "at": 244
+    "text": "Then let us work to what you control. If the discovery phase runs this month, you walk into the planning session with real output instead of a proposal.",
+    "at": 255
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "Possibly, but I don't want to put a date in before procurement accepts the documents. If they bounce the questionnaire, the partner call would be premature.",
-    "at": 253
+    "text": "In principle yes. In practice I need the managing partner to agree to the discovery phase first, and he is in a hearing until the end of next week.",
+    "at": 269
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Understood. I will send the pack and service schedule today, and you can tell me what procurement comes back with.",
-    "at": 268
+    "text": "Is there anything I can put in his hands that makes that a five-minute conversation?",
+    "at": 285
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "Yes, send it through. I'm interested, but I need the process to move first. Once procurement clears the basics, we can talk about who joins the next call.",
-    "at": 280
+    "text": "A single page with the cost, the two weeks and exactly which leases you would work on. He will not read more than a page before he is back in front of a client.",
+    "at": 292
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "The sample service schedule will spell out response targets, account review cadence and what evidence is produced monthly. That way procurement can compare more than hourly rates.",
-    "at": 296
+    "text": "I will send a one-page discovery phase scope by Friday. I will send a redacted sample summary from a lease you provide as well, so he is looking at output rather than a description of it.",
+    "at": 310
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "That will be useful. They tend to reduce vendors to a spreadsheet, and IT support is hard to compare unless the service boundaries are explicit.",
-    "at": 312
+    "text": "Send the scope first. I will not have a lease cleared for you to use until our risk partner signs off the confidentiality side, and that takes its own week.",
+    "at": 329
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "If procurement wants clarification, I can answer in writing or join a short call with them before the partner group spends time on it.",
-    "at": 327
+    "text": "Understood. We can work from a publicly available lease in the meantime so nobody has to clear anything, then swap to yours once it is approved.",
+    "at": 345
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "Possibly. I need to see how they react first. They can be quite strict about keeping suppliers out until the formal shortlist is set.",
-    "at": 341
+    "text": "That would help, although the partners will say a public lease proves nothing about our precedents.",
+    "at": 358
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "No problem. I will make the pack self-contained, including our insurance certificates, data handling summary and a plain-English incident response outline.",
-    "at": 355
+    "text": "They would be right, which is why it is a stopgap rather than the evidence. The evidence is the discovery phase on your own files, with your own template.",
+    "at": 367
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "That gives me a decent chance of getting it through the first gate. After that the internal politics are the bigger unknown.",
-    "at": 368
+    "text": "Agreed. Realistically I am looking at getting this in front of the partnership in October, not September, and I would rather tell you that now than string it out.",
+    "at": 382
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will also avoid assuming the current provider has done nothing. The comparison should be about service evidence and accountability, not throwing stones at people who may have been operating under a loose brief.",
-    "at": 381
+    "text": "I appreciate it. I will keep the scope current and check in the week the hearing finishes. If the managing partner wants to talk before then I can be in the CBD at a day's notice.",
+    "at": 397
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Daniel Ortiz",
-    "text": "That tone will help. The partners dislike vendor drama, and the incumbent still supports us while this process runs.",
-    "at": 401
-   },
-   {
-    "index": 28,
-    "speaker": "rep",
-    "name": "Sam Whitfield",
-    "text": "Thanks Daniel. I will keep it concise and label the parts procurement usually wants first.",
-    "at": 412
-   },
-   {
-    "index": 29,
-    "speaker": "prospect",
-    "name": "Daniel Ortiz",
-    "text": "Appreciated. That will make my life easier even if the timetable isn't completely in my hands.",
-    "at": 421
+    "text": "That works. I will come back to you once I know whether the discovery phase can come out of operations without the partnership signing it off first.",
+    "at": 416
    }
   ],
   "extraction": {
@@ -1286,77 +1271,82 @@ export const calls: CallRecord[] = [
     },
     "role": {
      "value": "Operations Lead",
-     "confidence": 0.92,
+     "confidence": 0.96,
      "span": 0
     },
     "email": {
      "value": "daniel@kiteandco.example",
-     "confidence": 0.95,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1104",
-     "confidence": 0.86,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
      "value": "Kite & Co",
-     "confidence": 0.86,
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
      "value": "Commercial law firm",
-     "confidence": 0.87,
+     "confidence": 0.96,
      "span": 0
     },
     "headcount": {
      "value": 95,
-     "confidence": 0.97,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
      "value": "Melbourne CBD, VIC",
-     "confidence": 0.95,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     }
    },
    "deal": {
     "stage": {
      "value": "evaluation",
-     "confidence": 0.95,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
      "value": 132000,
-     "confidence": 0.87,
-     "span": null
+     "confidence": 0.96,
+     "span": 12
     },
     "outcome": {
      "value": "stalled",
-     "confidence": 0.87,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send the security pack and a sample service schedule",
-     "confidence": 0.98,
-     "span": 14
+     "value": "I will send a one-page discovery phase scope by Friday",
+     "confidence": 0.96,
+     "span": 20
+    },
+    {
+     "value": "I will send a redacted sample summary from a lease you provide",
+     "confidence": 0.96,
+     "span": 20
     }
    ],
    "objections": [
     {
-     "text": "Procurement will not let us progress without the full questionnaire and insurance certificates",
+     "text": "That number has to go to the partnership, and they will not approve it before they have seen the pilot work on our own leases",
      "handling": "partial",
      "span": 13
     }
    ],
    "nextStep": {
-    "value": "Sam to send security pack and sample service schedule for Daniel to circulate.",
+    "value": "Sam to send a one-page discovery phase scope and a sample lease summary for Daniel to put in front of the managing partner, with no date agreed.",
     "confidence": 0.88,
-    "span": 14
+    "span": 20
    },
    "nextStepDue": null
   },
@@ -1367,49 +1357,49 @@ export const calls: CallRecord[] = [
    },
    "nextStepSecured": {
     "value": false,
-    "span": 14
+    "span": 20
    },
    "objectionHandling": {
     "value": "partial",
     "span": 13
    },
-   "talkRatio": 0.43,
-   "notes": "The firm had a real procurement trigger, but the managing partner was absent and the next step stayed vague."
+   "talkRatio": 0.44,
+   "notes": "Strong discovery on the lease review workflow, but the partnership holds the decision, the managing partner was unavailable and the next step carries no date."
   },
   "icpSignals": {
    "industry": "Commercial law firm",
    "headcountBand": "81-120",
    "role": "Operations Lead",
-   "trigger": "Procurement security questionnaire before panel appointment"
+   "trigger": "Partners want a contract review pilot before the next financial year"
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Following up — Kite & Co",
-   "body": "Hi Daniel,\n\nThanks for the time today.\nYou mentioned procurement security questionnaire before panel appointment; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the security pack and a sample service schedule\n\nNext step: Sam to send security pack and sample service schedule for Daniel to circulate.\n\nNo rush on your side; when the timing is clearer I'm happy to walk the directors through it.\n\nSam Whitfield"
+   "subject": "Next steps — Kite & Co",
+   "body": "Hi Daniel,\n\nThanks for the time today.\nYou mentioned partners want a contract review pilot before the next financial year; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send a one-page discovery phase scope by Friday\n- Send a redacted sample summary from a lease you provide\n\nNext step: Sam to send a one-page discovery phase scope and a sample lease summary for Daniel to put in front of the managing partner, with no date agreed.\n\nNo rush on your side; when the timing is clearer I'm happy to walk the decision makers through it.\n\nSam Whitfield"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-02T16:09:10+10:00",
+    "at": "2026-09-02T11:09:10+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-02T16:10:10+10:00",
+    "at": "2026-09-02T11:10:10+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-02T16:10:10+10:00",
+    "at": "2026-09-02T11:10:10+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-02T16:11:10+10:00",
+    "at": "2026-09-02T11:11:10+10:00",
     "icon": "mail"
    }
   ]
@@ -1420,309 +1410,295 @@ export const calls: CallRecord[] = [
   "prospect": "Lucy Beck",
   "company": "Craftwork",
   "domain": "craftwork.example",
-  "at": "2026-09-03T11:30:00+10:00",
-  "durationSeconds": 360,
+  "at": "2026-09-02T15:30:00+10:00",
+  "durationSeconds": 420,
   "outcome": "lost",
   "trigger": null,
-  "summary": "Not a fit right now. Lucy (Owner, 8 staff) is dealing with an it review.",
+  "summary": "Not a fit right now. Jordan opened with a build price, never asked a question, and talked past the free spreadsheet Lucy already relies on.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Hi Lucy Beck, Jordan Lee from Harbourline IT. Thanks for speaking with me about Craftwork. Our managed services plan starts at $95 per seat per month and gives small teams a proper IT helpdesk, security stack and regular maintenance.",
+    "text": "Hi Lucy Beck, Jordan Lee from Eleno. Thanks for making time to talk about Craftwork. We build custom AI agents and workflow automation for growing businesses, and a fixed-scope build usually lands between $25,000 and $45,000, with a short paid discovery phase in front of it.",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "Hi Jordan. I should say upfront we're a small shop in Northcote with eight people, some casual. We run workshops, sell online a bit, and mainly need the till and Wi-Fi to behave.",
-    "at": 17
+    "text": "Hi Jordan. I should say upfront that we're eight people in Northcote, some of them casual. We sell craft supplies and run weekend workshops. That number is more than we spend on rent in a quarter.",
+    "at": 24
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "That's exactly why a managed agreement is helpful. Retail downtime is expensive, and a predictable monthly fee means you can call us instead of trying to work out whether the issue is Shopify, Xero, the router or a laptop.",
-    "at": 31
+    "text": "Understood, and we do scale the scope. The smallest thing we build for a retailer like yours is usually a booking and enquiry agent that answers workshop questions, holds places and pushes the confirmed bookings into your systems without anyone retyping them.",
+    "at": 42
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "My cousin helps us for cheap when the till or Wi-Fi plays up. He knows our setup, and most of the time he can pop in after work or talk me through it.",
-    "at": 48
+    "text": "My daughter built us a booking spreadsheet that does most of this. It's not elegant, but it works and it costs nothing.",
+    "at": 64
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Family help is common, but it usually has gaps. If there's a ransomware issue, a lost laptop, or a staff member leaving with access, you want proper offboarding, endpoint protection and backup checks instead of favours.",
-    "at": 62
+    "text": "Spreadsheets are fine until the volume moves. Once you're running four workshops a week, the enquiries, the waitlists and the refunds all land in one inbox, and that inbox is you. Automation takes the repetitive part off the owner.",
+    "at": 75
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "I get that, but we're not a law firm. We've a handful of iPads, a point-of-sale machine, two laptops and some craft teachers who use their own devices.",
-    "at": 78
+    "text": "The inbox is me, that's true. But it's maybe twenty emails a week, and I quite like knowing who's coming.",
+    "at": 95
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The package would still cover those devices, plus Microsoft 365 or Google Workspace, password policy, domain security, and quarterly reports. For Craftwork, onboarding would likely be around $3,500, which gets the environment documented.",
-    "at": 90
+    "text": "That familiarity is worth keeping, and an agent doesn't remove it. What it removes is the retyping, the double bookings and the late replies. We deploy it into your own systems and transfer the intellectual property to you, so there's no ongoing subscription.",
+    "at": 105
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "That would be a lot for us. Some weeks we're watching every invoice, especially outside school holiday workshop periods.",
-    "at": 104
+    "text": "Transferring the ownership sounds good, but I'd still be paying for the build, and the build is the part I can't cover.",
+    "at": 127
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The way I'd think about it's risk smoothing. Instead of a surprise emergency bill and lost trading time, you pay a smaller monthly amount and know the basics are covered by a team.",
-    "at": 112
+    "text": "There's a managed optimisation option afterwards as well, from about $1,500 a month, which keeps the agent tuned as your workshop mix changes. Most clients see the payback inside six months once the hours come back.",
+    "at": 138
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "But our surprise emergency bills have been pretty small. The last one was a new router, and my cousin charged us a slab and the parts.",
-    "at": 126
+    "text": "Six months of payback assumes those hours are worth something in cash. For us they're just my evenings.",
+    "at": 157
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "That works until the problem isn't a router. Cyber insurance, payment security and customer data expectations are increasing, and a managed provider helps show you're taking reasonable steps.",
-    "at": 138
+    "text": "Your evenings are the cost. Owners undervalue that constantly. If we take five hours a week back, that's two hundred and fifty hours a year, and it's the difference between opening a second shop and staying where you are.",
+    "at": 166
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "We don't have cyber insurance, and nobody has asked us about Essential Eight. I mostly answered your email because I wondered if there was an affordable health check.",
-    "at": 150
+    "text": "We're not opening a second shop. We're trying to make this one pay for itself.",
+    "at": 186
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "We can do health checks, but Harbourline IT's really set up for ongoing managed services. A one-off check without ongoing support can find problems and then leave you with no one accountable for fixing them.",
-    "at": 162
+    "text": "Then the case is stronger, because margin in retail comes from the parts nobody wants to do. Stock reordering, supplier emails, workshop reminders, the follow-up note that sells the next class. All of that is automatable.",
+    "at": 194
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "Then I think we're not your customer right now. I'm not saying never, but it's hard to justify before there's a real trigger.",
-    "at": 177
+    "text": "Some of that I actually enjoy. The follow-up notes are how people come back.",
+    "at": 212
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will send a one-page managed services overview. It will show what is included and give you something to keep on file if you decide to professionalise support later.",
-    "at": 187
+    "text": "I will send a one-page overview of the build packages so you can see what is included at each level. It sets out the discovery phase, the fixed build and what the handover looks like.",
+    "at": 219
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "Sure, send it, but please don't put me into a heavy follow-up sequence. I know the answer for this quarter.",
-    "at": 199
+    "text": "Send it, but please don't put me on a call schedule. I know the answer for this year.",
+    "at": 237
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The managed service also gives you continuity when staff change. Casual retail teams can end up with shared passwords, old accounts and nobody quite sure who has access to the online store.",
-    "at": 208
+    "text": "Fair. Although I'd say the businesses that wait usually wait until something breaks. A missed workshop, a supplier order that never went out, a refund that sat for three weeks. That's when the phone call happens, and it's more expensive then.",
+    "at": 247
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "We do have some messy passwords, but I can fix that with a password manager without signing up to a whole IT service.",
-    "at": 222
+    "text": "Nothing has broken in four years.",
+    "at": 268
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "A password manager is a good start, but it's still only one piece. We'd also look at MFA, device updates, DNS records, backups, user permissions and support documentation.",
-    "at": 232
+    "text": "Nothing had broken for the last retailer I spoke to either, right up until their stock system stopped talking to their online store during a sale weekend. The point of building this now is that you choose the timing.",
+    "at": 271
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "That sounds thorough, just bigger than the problem I have.",
-    "at": 244
+    "text": "Or the point of waiting is that I spend the money on stock instead.",
+    "at": 291
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I understand the scale concern, but a lot of small shops only call us after an avoidable issue has already cost them a weekend. I'd rather help before it becomes urgent.",
-    "at": 248
+    "text": "Both can be true. What I'd encourage is looking at the annual number rather than the project number. Spread across three years with the ownership in your hands, a build that removes five hours a week is cheap per hour.",
+    "at": 298
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "And I'd rather wait until there's something urgent enough to justify it.",
-    "at": 261
+    "text": "I don't think in per-hour terms. I think in whether the bank balance survives February.",
+    "at": 318
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Fair enough. Keep the overview somewhere handy, because if you open a second store or start handling more online orders, the maths changes quickly.",
-    "at": 266
+    "text": "That's exactly why the discovery phase exists. It's short, it's fixed, and it tells you what is worth automating before you commit to a build. Plenty of clients stop after discovery with a plan and no build.",
+    "at": 326
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "If we open a second store, I will probably call. Right now we're trying to make this one smoother.",
-    "at": 277
+    "text": "A plan I can't afford to act on isn't much use to me.",
+    "at": 345
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The one-page overview will be practical rather than glossy. I will include the minimum controls, the support inclusions, the onboarding assumptions and the reasons we usually avoid tiny retainers that can't be properly accountable.",
-    "at": 285
+    "text": "It's a plan you can act on in stages. Start with the booking agent, add the supplier reordering next year, then the reporting. We build in fixed scopes precisely so it doesn't have to be one big commitment.",
+    "at": 352
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "Okay. I will read it with that frame, but I'm still expecting it to be more than we need.",
-    "at": 300
+    "text": "Staged still starts at the first stage, and the first stage is the part I'm saying no to.",
+    "at": 371
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I'd still encourage you to compare the annual cost against the risk of a bad trading day, because a Saturday outage or compromised mailbox can be more expensive than it feels when everything is calm. The managed plan is meant to remove that uncertainty.",
-    "at": 308
+    "text": "Understood. I'll keep the overview practical rather than glossy, with the inclusions, the assumptions and an honest note on where this sort of automation doesn't pay for a team your size.",
+    "at": 381
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "I hear you, but calm is where we're.",
-    "at": 327
+    "text": "That last part would be the useful bit, honestly.",
+    "at": 396
    },
    {
     "index": 28,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Even if you don't choose us, I'd make sure the hourly provider can name who owns backups, account removal, MFA and support response during trading hours, because those are the areas that usually fall between casual arrangements.",
-    "at": 330
+    "text": "Then I'll lead with it. And if the workshop side grows, or you take on wholesale, the numbers change quickly and it's worth another look.",
+    "at": 401
    },
    {
     "index": 29,
     "speaker": "prospect",
     "name": "Lucy Beck",
-    "text": "I can ask them that.",
-    "at": 346
-   },
-   {
-    "index": 30,
-    "speaker": "rep",
-    "name": "Jordan Lee",
-    "text": "No problem. I will send the overview and check back down the track.",
-    "at": 348
-   },
-   {
-    "index": 31,
-    "speaker": "prospect",
-    "name": "Lucy Beck",
-    "text": "Thanks Jordan. Good luck with it, but for now we will stay as we're.",
-    "at": 354
+    "text": "Thanks Jordan. Good luck with it, but we'll stay as we are.",
+    "at": 414
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Lucy Beck",
-     "confidence": 0.91,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "Owner",
-     "confidence": 0.93,
-     "span": null
+     "confidence": 0.96,
+     "span": 4
     },
     "email": {
      "value": "lucy@craftwork.example",
-     "confidence": 0.9,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1105",
-     "confidence": 0.88,
-     "span": 6
+     "confidence": 0.82,
+     "span": null
     }
    },
    "company": {
     "name": {
      "value": "Craftwork",
-     "confidence": 0.93,
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
      "value": "Independent craft retail and workshops",
-     "confidence": 0.94,
-     "span": 1
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 8,
-     "confidence": 0.86,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
      "value": "Northcote, VIC",
-     "confidence": 0.97,
+     "confidence": 0.96,
      "span": 1
     }
    },
    "deal": {
     "stage": {
      "value": "closed_lost",
-     "confidence": 0.86,
-     "span": 4
+     "confidence": 0.88,
+     "span": null
     },
     "valueAud": {
      "value": 9800,
-     "confidence": 0.93,
+     "confidence": 0.88,
      "span": null
     },
     "outcome": {
      "value": "lost",
-     "confidence": 0.89,
-     "span": 4
+     "confidence": 0.88,
+     "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send a one-page managed services overview",
-     "confidence": 0.9,
+     "value": "I will send a one-page overview of the build packages",
+     "confidence": 0.96,
      "span": 14
     }
    ],
    "objections": [
     {
-     "text": "My cousin helps us for cheap when the till or Wi-Fi plays up",
+     "text": "My daughter built us a booking spreadsheet that does most of this",
      "handling": "ignored",
      "span": 3
     }
@@ -1743,8 +1719,8 @@ export const calls: CallRecord[] = [
     "value": "ignored",
     "span": 3
    },
-   "talkRatio": 0.61,
-   "notes": "Jordan treated a tiny retail shop like a managed services prospect and did not adapt when Lucy named the cheap informal alternative."
+   "talkRatio": 0.69,
+   "notes": "Jordan opened with a build price, never asked a question, and talked past the free spreadsheet Lucy already relies on."
   },
   "icpSignals": {
    "industry": "Independent craft retail and workshops",
@@ -1754,646 +1730,651 @@ export const calls: CallRecord[] = [
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Leaving the door open — Craftwork",
-   "body": "Hi Lucy,\n\nThanks for being straight with me today. It sounds like the current setup is working for you, so I won't push.\n\nIf anything changes — an insurer asking for evidence, or a bad week with the computers — send me a note and I'll pick it up from here.\n\n\nJordan Lee"
+   "subject": "Next steps — Craftwork",
+   "body": "Hi Lucy,\n\nThanks for being straight with me today. It sounds like the current setup is working for you, so I won't push.\n\nWhat I owe you:\n- Send a one-page overview of the build packages\n\nIf that changes, send me a note and I'll pick it up from there.\n\nJordan Lee"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-03T11:38:00+10:00",
+    "at": "2026-09-02T15:39:00+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-03T11:39:00+10:00",
+    "at": "2026-09-02T15:40:00+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-03T11:39:00+10:00",
+    "at": "2026-09-02T15:40:00+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-03T11:40:00+10:00",
+    "at": "2026-09-02T15:41:00+10:00",
     "icon": "mail"
    }
   ]
  },
  {
-  "id": "call-06-meridian-ai",
+  "id": "call-06-meridian-mutual",
   "rep": "Jordan Lee",
   "prospect": "Tom Reid",
-  "company": "Meridian AI",
-  "domain": "meridianai.example",
-  "at": "2026-09-04T15:15:00+10:00",
-  "durationSeconds": 440,
+  "company": "Meridian Mutual",
+  "domain": "meridianmutual.example",
+  "at": "2026-09-03T10:00:00+10:00",
+  "durationSeconds": 405,
   "outcome": "stalled",
-  "trigger": "Microsoft 365 migration under consideration for next financial year",
-  "summary": "Interest is real, timing is not. Tom (Head of Engineering, 118 staff) is dealing with microsoft 365 migration under consideration for next financial year.",
+  "trigger": "Complaints volume up after a core banking migration",
+  "summary": "Interest is real, timing is not. Tom (Head of Member Services, 118 staff) is dealing with complaints volume up after a core banking migration.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Tom Reid, it's Jordan from Harbourline IT. I know Meridian AI has grown quickly in Richmond. What made you take a call about managed IT now?",
+    "text": "Tom Reid, it's Jordan from Eleno. Before I pitch anything at you, tell me what has actually been happening at Meridian Mutual since the core banking migration?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "We're at one hundred and eighteen people and the tooling is catching up with us. Engineering is fine, but the rest of the company is spread across Google Workspace, Microsoft 365 trials, a few SaaS admin accounts and a lot of tribal knowledge.",
-    "at": 16
+    "text": "Complaints are up about forty per cent. Some of that is genuine migration fallout, statements that look wrong, direct debits that moved dates. But a lot of it is members ringing because they can't tell from the new statement what changed. We're a hundred and eighteen people and member services is fourteen of them.",
+    "at": 13
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Where is that mess causing the most friction today?",
-    "at": 42
+    "text": "Who is handling that intake today, and what do they have to do for each one?",
+    "at": 40
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Onboarding and access reviews. New starters get a laptop quickly, but permissions depend on which team lead remembered which checklist. Finance also wants more predictable support, because engineers are tired of being unofficial helpdesk.",
-    "at": 48
+    "text": "Two of the team triage the queue every morning. Each complaint has to be classified, logged against the member record, checked for whether it is reportable, and then routed. The classification is the slow part, because our categories were written for the old system and half of them no longer map to anything.",
+    "at": 47
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Who owns the decision if you move from the current hybrid setup to a cleaner Microsoft 365 environment?",
-    "at": 69
+    "text": "Where do the complaint records actually live once they are logged?",
+    "at": 73
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "I can recommend the technical approach, but finance owns budget and the COO owns timing. Neither is on this call. I'm gathering options before next year planning.",
-    "at": 80
+    "text": "In the case management module of the new core platform, with the correspondence sitting in a shared mailbox that doesn't talk to it. So people copy and paste between the two. That's where the errors creep in, and it's also why our reporting to the board takes three days to assemble.",
+    "at": 79
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Harbourline can run the migration, then support everyone under a managed services agreement. For a company at your size, the monthly fee would likely land around $145 per seat, with a project for tenant design, identity and device management.",
-    "at": 96
+    "text": "What would good look like in six months, in numbers you would actually be measured on?",
+    "at": 103
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Budget sits with finance next financial year, not with me this month. I do not want a proposal that assumes authority I do not have.",
-    "at": 120
+    "text": "Time to first response under one business day, consistent classification so the trend reporting means something, and the two triage people back on the phones instead of in a queue. Right now first response is running at four days and the team is doing overtime to hold even that.",
+    "at": 111
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Totally, although it's helpful to get a number in front of people early. If finance sees the risk and productivity case, they can make room before the planning cycle closes.",
-    "at": 136
+    "text": "And who signs something like this off, you or the board?",
+    "at": 135
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Maybe. My bigger concern is whether an external provider can work with engineers without slowing us down. We've unusual device needs, Linux boxes, lab environments and a strong preference for not being locked down blindly.",
-    "at": 154
+    "text": "That's the honest problem. I can sponsor it, but anything above a threshold goes to the board through the chief operating officer, and the board meets monthly. We're a mutual, so the members own us and the board takes spending seriously.",
+    "at": 141
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "We're flexible. We can segment engineering and corporate users, apply different policies and still keep reporting clean. The important thing is having a central support channel and clear admin ownership.",
-    "at": 176
+    "text": "Right. What we would build is a triage agent that reads the incoming correspondence, classifies it against a category set we design with your team, drafts the acknowledgement, and writes the case record straight into the platform. We deploy it into your environment and transfer the intellectual property to you, so it's yours rather than a subscription.",
+    "at": 161
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "That sounds plausible, but I'd need our platform lead in the detail. Also, this isn't urgent in September. It's a next financial year budget conversation unless something breaks.",
-    "at": 194
+    "text": "The ownership point matters here. Our technology committee is tired of vendor lock-in after what the migration cost us.",
+    "at": 188
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Understood. We've done Microsoft 365 migrations where engineering teams keep the workflows they need while the rest of the business gets structure. I can show examples in a deck.",
-    "at": 211
+    "text": "That's usually the first thing they ask. On scale, a build like this for Meridian Mutual would sit around $174,000 for the fixed scope, after a discovery phase of four to six weeks.",
+    "at": 198
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Examples would be fine, but decks have a way of floating around Slack and dying. If there's a specific workshop later, I can bring finance and platform.",
-    "at": 229
+    "text": "Budget sits with the board in the new financial year, not with me this month. I can't take a number like that to them in September without a lot more behind it.",
+    "at": 214
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Let me send a capability deck and a rough migration outline. You can share it with finance and the COO, and then we can see whether a workshop makes sense.",
-    "at": 246
+    "text": "Fair. What I'd suggest is not a proposal but a decision brief: the current cost of manual triage, the risk of inconsistent classification in a regulated complaints process, and a staged path with the numbers attached.",
+    "at": 229
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Okay, send it through. I'm not promising a workshop yet. I need to see if the business wants to do anything before November.",
-    "at": 264
+    "text": "A decision brief would travel better than a deck. The board reacts badly to vendor language, but they will read something that states the problem in our own terms.",
+    "at": 247
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "That's fair. I will also include an indicative timeline and the questions we'd need answered before pricing the onboarding project.",
-    "at": 278
+    "text": "I will send a decision brief and an indicative staging plan by the end of next week. It will include the questions we would need answered before the scope is firm.",
+    "at": 261
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Good. Keep it brief, please. If it's twenty pages, nobody here will read it.",
-    "at": 291
+    "text": "Good. Keep it short. Anything over four pages gets skimmed and then misquoted back at me in the meeting.",
+    "at": 276
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "One option is a discovery workshop rather than a full proposal. We could map users, systems, admin ownership and migration risks, then give finance a budget range for next year.",
-    "at": 299
+    "text": "Understood. Can we put a working session in with your operations lead and the chief operating officer before the board pack goes out?",
+    "at": 285
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "That sounds closer to what we need, but I still need the COO to agree it's worth a workshop. We've a lot of competing planning work.",
-    "at": 318
+    "text": "I can't commit to a date. The board pack timing depends on when the migration remediation work is signed off, and that is not mine to schedule.",
+    "at": 297
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will frame the outline as a decision brief rather than a sales proposal, with the risks of doing nothing, a staged migration path and the questions finance should answer.",
-    "at": 334
+    "text": "That's the piece I would want to understand, because a complaints agent built during remediation is easier to justify than one built after the noise has died down.",
+    "at": 310
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "That would travel better internally. People here react badly to vendor language, but a decision brief with open questions could get read.",
-    "at": 352
+    "text": "I agree in principle. But if I bring it forward and remediation slips, I have spent credibility I need for other things.",
+    "at": 324
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "If the brief gets traction, the best next call would include finance, the COO and your platform lead so we can separate commercial timing from technical concerns.",
-    "at": 366
+    "text": "Then let's make the brief do the work. I will include a one-page summary the chief operating officer can lift straight into the board pack without editing it.",
+    "at": 334
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Agreed. Without those people, we'd just have another interesting conversation that doesn't move anything.",
-    "at": 382
+    "text": "That would actually help. He writes those at eleven at night, and anything pre-built tends to get used.",
+    "at": 348
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will keep the brief anchored to your growth problem rather than pretending this is an emergency. The question is whether the current informal support model can survive another hiring cycle.",
-    "at": 391
+    "text": "On the compliance side, we design the classification set with your risk team rather than imposing ours, and every decision the agent makes is logged against the source message.",
+    "at": 357
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "That's the right question. We can survive this month, but another burst of hiring would expose the access and onboarding problems again.",
-    "at": 410
+    "text": "Risk will want to see that logging before they let it touch a member complaint. They have been burnt once already this year.",
+    "at": 371
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will keep it to the essentials and follow up after you've had a chance to circulate it.",
-    "at": 423
+    "text": "That's a reasonable gate, and I would rather they test it properly than wave it through. A complaints process is not the place to find out later.",
+    "at": 382
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Tom Reid",
-    "text": "Thanks Jordan. There's interest, just no firm path yet.",
-    "at": 434
+    "text": "Send the brief and I will circulate it. I am not promising a date, but there is real interest here.",
+    "at": 395
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Tom Reid",
-     "confidence": 0.97,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
-     "value": "Head of Engineering",
-     "confidence": 0.88,
-     "span": 1
+     "value": "Head of Member Services",
+     "confidence": 0.82,
+     "span": null
     },
     "email": {
-     "value": "tom@meridianai.example",
-     "confidence": 0.89,
-     "span": 0
+     "value": "tom@meridianmutual.example",
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1106",
-     "confidence": 0.95,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
-     "value": "Meridian AI",
-     "confidence": 0.9,
+     "value": "Meridian Mutual",
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
-     "value": "AI software company",
-     "confidence": 0.93,
-     "span": 0
+     "value": "Regional mutual bank",
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 118,
-     "confidence": 0.95,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
-     "value": "Richmond, VIC",
-     "confidence": 0.92,
-     "span": 0
+     "value": "Geelong, VIC",
+     "confidence": 0.82,
+     "span": null
     }
    },
    "deal": {
     "stage": {
-     "value": "discovery",
-     "confidence": 0.92,
-     "span": 18
+     "value": "evaluation",
+     "confidence": 0.88,
+     "span": null
     },
     "valueAud": {
      "value": 174000,
-     "confidence": 0.86,
-     "span": null
+     "confidence": 0.96,
+     "span": 12
     },
     "outcome": {
      "value": "stalled",
-     "confidence": 0.97,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "Let me send a capability deck and a rough migration outline",
-     "confidence": 0.88,
-     "span": 14
+     "value": "I will send a decision brief and an indicative staging plan by the end of next week",
+     "confidence": 0.96,
+     "span": 16
+    },
+    {
+     "value": "I will include a one-page summary the chief operating officer can lift straight into the board pack",
+     "confidence": 0.96,
+     "span": 22
     }
    ],
    "objections": [
     {
-     "text": "Budget sits with finance next financial year, not with me this month",
+     "text": "Budget sits with the board in the new financial year, not with me this month",
      "handling": "partial",
-     "span": 7
+     "span": 13
     }
    ],
    "nextStep": {
-    "value": "Jordan to send capability deck and rough migration outline for Tom to share internally.",
-    "confidence": 0.89,
-    "span": 14
+    "value": "Jordan to send a decision brief and staging plan for Tom to circulate to the chief operating officer and the board.",
+    "confidence": 0.88,
+    "span": 22
    },
    "nextStepDue": null
   },
   "scorecard": {
    "discoveryQuestions": {
-    "value": 3,
+    "value": 5,
     "span": 0
    },
    "nextStepSecured": {
     "value": false,
-    "span": 14
+    "span": 22
    },
    "objectionHandling": {
     "value": "partial",
-    "span": 7
+    "span": 13
    },
-   "talkRatio": 0.51,
-   "notes": "There was real migration interest, but Jordan pitched too broadly and accepted a vague internal share instead of reaching finance."
+   "talkRatio": 0.45,
+   "notes": "Jordan ran good discovery on the complaints queue but reframed the budget blocker into a document instead of reaching the chief operating officer, so the next step has no date."
   },
   "icpSignals": {
-   "industry": "AI software company",
+   "industry": "Regional mutual bank",
    "headcountBand": "81-120",
-   "role": "Head of Engineering",
-   "trigger": "Microsoft 365 migration under consideration for next financial year"
+   "role": "Head of Member Services",
+   "trigger": "Complaints volume up after a core banking migration"
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Following up — Meridian AI",
-   "body": "Hi Tom,\n\nThanks for the time today.\nYou mentioned microsoft 365 migration under consideration for next financial year; that's the part I'd focus on first.\n\nWhat I owe you:\n- Let me send a capability deck and a rough migration outline\n\nNext step: Jordan to send capability deck and rough migration outline for Tom to share internally.\n\nNo rush on your side; when the timing is clearer I'm happy to walk the directors through it.\n\nJordan Lee"
+   "subject": "Next steps — Meridian Mutual",
+   "body": "Hi Tom,\n\nThanks for the time today.\nYou mentioned complaints volume up after a core banking migration; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send a decision brief and an indicative staging plan by the end of next week\n- Include a one-page summary the chief operating officer can lift straight into the board pack\n\nNext step: Jordan to send a decision brief and staging plan for Tom to circulate to the chief operating officer and the board.\n\nNo rush on your side; when the timing is clearer I'm happy to walk the decision makers through it.\n\nJordan Lee"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-04T15:24:20+10:00",
+    "at": "2026-09-03T10:08:45+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-04T15:25:20+10:00",
+    "at": "2026-09-03T10:09:45+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-04T15:25:20+10:00",
+    "at": "2026-09-03T10:09:45+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-04T15:26:20+10:00",
+    "at": "2026-09-03T10:10:45+10:00",
     "icon": "mail"
    }
   ]
  },
  {
-  "id": "call-07-wattle-street-legal",
+  "id": "call-07-fairfield-wealth",
   "rep": "Sam Whitfield",
   "prospect": "Olivia Hart",
-  "company": "Wattle Street Legal",
-  "domain": "wattlestreetlegal.example",
-  "at": "2026-09-07T09:45:00+10:00",
-  "durationSeconds": 445,
+  "company": "Fairfield Wealth Partners",
+  "domain": "fairfieldwealth.example",
+  "at": "2026-09-04T09:30:00+10:00",
+  "durationSeconds": 430,
   "outcome": "won",
-  "trigger": "Outgoing internal IT coordinator leaving in three weeks",
-  "summary": "Strong buying signal. Olivia (Practice Manager, 37 staff) is dealing with outgoing internal it coordinator leaving in three weeks.",
+  "trigger": "Statement of advice drafting backlog after acquiring a smaller practice",
+  "summary": "Strong buying signal. Olivia (Practice Manager, 37 staff) is dealing with statement of advice drafting backlog after acquiring a smaller practice.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Olivia Hart, Sam from Harbourline IT. Before we get into options, are you still the practice manager at Wattle Street Legal in Hawthorn?",
+    "text": "Olivia Hart, Sam from Eleno. Before I talk about what we would build, can you confirm you are still the practice manager at Fairfield Wealth Partners in Kew?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Yes. We're thirty-seven people, mostly solicitors, paralegals and admin. I booked the call because our internal IT coordinator resigned and leaves in three weeks.",
+    "text": "Yes, still me. We're thirty-seven people now, which is most of the problem. We acquired a smaller practice in Brighton in June and inherited eleven advisers' worth of clients without inheriting anyone who writes advice documents.",
     "at": 14
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What does that coordinator currently hold in their head that worries you most?",
-    "at": 29
+    "text": "How many statements of advice are you producing in a month now, and how many were you doing before?",
+    "at": 31
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Almost everything. They know the document system quirks, which partners have unusual setups, how court filing certificates work, and which laptops are overdue for replacement. Some of it's written down, but not enough.",
-    "at": 37
+    "text": "Before the acquisition, about thirty a month. Now it's closer to fifty-five and the paraplanning team is still four people. The backlog is sitting at about six weeks, which is embarrassing when the client has already had the meeting and agreed to everything.",
+    "at": 40
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "How are support requests handled now when solicitors are under deadline pressure?",
-    "at": 57
+    "text": "Walk me through who touches one of those documents from the adviser meeting to the client signing it?",
+    "at": 61
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "People walk to the coordinator or message me. It works because they are here, but it's not scalable. Family law deadlines are emotional, and a locked account before a filing deadline becomes my problem fast.",
-    "at": 65
+    "text": "The adviser records the meeting and files a note. A paraplanner pulls the fact find, the risk profile and the product research, drafts the statement in our template, then it goes to our compliance manager for review before it goes back to the adviser and out to the client.",
+    "at": 70
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Who needs to approve a managed services agreement before the coordinator leaves?",
-    "at": 86
+    "text": "Which of those steps takes the longest, and which one do people complain about most?",
+    "at": 94
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "The principal solicitor and I can approve if the numbers are sensible. Finance will check cash flow, but this is an operational risk we can't leave open.",
-    "at": 94
+    "text": "Drafting takes the longest, easily three to four hours a document. But the complaints are about the queue, not the drafting. Advisers hate telling a client they will have it in six weeks after a good meeting.",
+    "at": 101
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What must be stable in the first month for you to feel the transition worked?",
-    "at": 110
+    "text": "Where do the fact finds, meeting notes and research reports actually live?",
+    "at": 119
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Helpdesk coverage, leavers and joiners, backups, certificates for court systems, and someone documenting our Microsoft 365 admin settings. I also need staff to know who to call on day one.",
-    "at": 119
+    "text": "All in Xplan, with the meeting recordings on our practice drive and the research reports coming out of two different platforms. Nothing is joined up, so the paraplanner is effectively the integration layer between four systems.",
+    "at": 125
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What is your current risk around cyber insurance or client confidentiality questionnaires?",
-    "at": 138
+    "text": "And if this worked, what would you be able to say to the advisers in three months?",
+    "at": 142
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Insurers asked about MFA and backups last year. We answered, but it was informal. The principal wants something more defensible this year, especially because we handle sensitive family matters.",
-    "at": 145
+    "text": "That a straightforward statement of advice comes back in five working days, not six weeks, and that the compliance manager is not rewriting half of it. If we hit that, the Brighton advisers stop asking whether the merger was a mistake.",
+    "at": 150
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "For Wattle Street Legal, the managed service would be about $132 per seat per month, with a transition project focused on documentation, identity, backups and support handover.",
-    "at": 163
+    "text": "Here is what I would build. A drafting assistant that pulls the fact find, the risk profile and the research out of Xplan, drafts the statement against your own template and your own wording standards, and hands the paraplanner a document to review rather than a blank page. It runs in your environment and the intellectual property comes to you at handover.",
+    "at": 170
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "I am nervous about changing provider while our internal IT coordinator is leaving. If the handover is clumsy, everyone will blame me for breaking something that mostly works.",
-    "at": 180
+    "text": "Our compliance manager will want to see how it logs its sources before any adviser is allowed to use it. Every sentence in a statement of advice has to be traceable back to something in the client file.",
+    "at": 200
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "That is completely reasonable. I would not suggest a big-bang change. We would run a two-week shadow handover with your coordinator, document the critical systems first and only then switch the helpdesk number. I will send the transition plan and fixed onboarding quote by Tuesday.",
-    "at": 197
+    "text": "That is the right gate, and it is built in rather than bolted on. Every generated paragraph carries a reference to the meeting note, the fact find field or the research document it came from, and she gets that source log next to the draft. Nothing is asserted without a source behind it.",
+    "at": 219
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "A shadow handover would calm people down. The principal will ask whether you can handle after-hours work, because file migrations during business hours aren't acceptable.",
-    "at": 225
+    "text": "If she can see that log, she will be the one pushing for this. She has been asking the advisers for cleaner file notes for two years.",
+    "at": 244
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will include the leaver checklist and after-hours file migration window. We can also give staff a simple support card so they know the new process before the coordinator leaves.",
-    "at": 240
+    "text": "On scale, a fixed-scope build for Fairfield Wealth Partners lands at $59,600, after a discovery phase of about three weeks where we sit with the paraplanners and map the real template variations.",
+    "at": 257
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Good. The monthly fee isn't the cheapest option, but the timing means I care more about a controlled handover than saving a few dollars per seat.",
-    "at": 259
+    "text": "That's more than I expected and less than I feared. What I can't do is sign it myself. Both principals are in client meetings until Thursday.",
+    "at": 273
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Can we review the plan Tuesday 8 September at 10am with you and the principal solicitor? If that works, we can start the discovery checklist the next morning.",
-    "at": 275
+    "text": "That's fine. I will send the scope, the source logging design and the fixed price by Wednesday so the principals have it before they are in a room together.",
+    "at": 286
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Yes, Tuesday 8 September at 10am works. Send the invite and the plan before close of business Monday if you can.",
-    "at": 292
+    "text": "Wednesday works. Put the source logging section first, because that is what our compliance manager will actually read.",
+    "at": 300
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I'd also like to interview your coordinator before they leave, not just collect passwords. The unwritten history is often where the real transition risk lives.",
-    "at": 305
+    "text": "Can we lock in Thursday 10 September at 2pm with you, both principals and the compliance manager to walk through it?",
+    "at": 308
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Yes, please. They are helpful and will share what they know, but I need someone to ask the right questions while they are still here.",
-    "at": 320
+    "text": "Thursday 10 September at 2pm works. I will get all four of us in the room, which is harder than it sounds.",
+    "at": 319
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "We will prioritise court-system certificates, document access, admin rights and backup restore evidence before any cosmetic tidy-up. The goal is continuity first, then maturity.",
-    "at": 335
+    "text": "Good. I will also include two worked examples built from your own template, one simple and one with a superannuation recommendation, so it is not an abstract conversation.",
+    "at": 329
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "That order makes sense. Staff will forgive a slightly clunky portal before they forgive being unable to file documents or open matters.",
-    "at": 350
+    "text": "Worked examples will do more than any slide. Both principals came up through paraplanning, so they will pick them apart line by line.",
+    "at": 343
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "For communication, we can draft a simple internal note from you explaining the support change, the reason for it and exactly what staff should do from the first day.",
-    "at": 364
+    "text": "I want them to. If the draft quality is not good enough for a senior paraplanner, the backlog does not move and we have built the wrong thing.",
+    "at": 354
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "That would save me time. People get nervous when support changes, especially the partners who have had the same habits for years.",
-    "at": 382
+    "text": "Agreed. The other thing they will ask is what happens when the template changes. We update it every time the licensee changes its requirements, which is at least twice a year.",
+    "at": 367
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "We can start the handover with a short risk register as well, so you can show the principal what is critical, what is inconvenient and what can wait until after the coordinator leaves.",
-    "at": 395
+    "text": "The template stays yours and the assistant reads it rather than hard-coding it, so a licensee change is a template edit, not a rebuild. That is part of why we transfer the intellectual property at handover.",
+    "at": 382
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "That will make the approval conversation cleaner. The principal is practical, but she hates open-ended projects with no sense of priority.",
-    "at": 415
+    "text": "That is the answer they will want. We were burnt by a provider who owned the configuration and charged us to change a heading.",
+    "at": 400
    },
    {
     "index": 28,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Done. I will send the invite now, then the transition plan and fixed quote by Monday afternoon.",
-    "at": 428
+    "text": "Understood. Managed optimisation afterwards is optional and month to month, so if you want to run it yourselves once the team is comfortable, that is genuinely fine.",
+    "at": 412
    },
    {
     "index": 29,
     "speaker": "prospect",
     "name": "Olivia Hart",
-    "text": "Thanks Sam. This feels practical, which is what I needed.",
-    "at": 439
+    "text": "Thanks Sam. Send it Wednesday and we will see you Thursday.",
+    "at": 425
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Olivia Hart",
-     "confidence": 0.89,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "Practice Manager",
-     "confidence": 0.88,
+     "confidence": 0.96,
      "span": 0
     },
     "email": {
-     "value": "olivia@wattlestreetlegal.example",
-     "confidence": 0.91,
-     "span": 0
+     "value": "olivia@fairfieldwealth.example",
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1107",
-     "confidence": 0.92,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
-     "value": "Wattle Street Legal",
-     "confidence": 0.86,
+     "value": "Fairfield Wealth Partners",
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
-     "value": "Family law firm",
-     "confidence": 0.98,
-     "span": 5
+     "value": "Financial planning and wealth advice firm",
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 37,
-     "confidence": 0.98,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
-     "value": "Hawthorn, VIC",
+     "value": "Kew, VIC",
      "confidence": 0.96,
      "span": 0
     }
@@ -2401,45 +2382,45 @@ export const calls: CallRecord[] = [
    "deal": {
     "stage": {
      "value": "closed_won",
-     "confidence": 0.89,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
      "value": 59600,
      "confidence": 0.96,
-     "span": null
+     "span": 16
     },
     "outcome": {
      "value": "won",
-     "confidence": 0.98,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send the transition plan and fixed onboarding quote by Tuesday",
-     "confidence": 0.87,
-     "span": 14
+     "value": "I will send the scope, the source logging design and the fixed price by Wednesday",
+     "confidence": 0.96,
+     "span": 18
     },
     {
-     "value": "I will include the leaver checklist and after-hours file migration window",
-     "confidence": 0.95,
-     "span": 16
+     "value": "I will also include two worked examples built from your own template",
+     "confidence": 0.96,
+     "span": 22
     }
    ],
    "objections": [
     {
-     "text": "I am nervous about changing provider while our internal IT coordinator is leaving",
+     "text": "Our compliance manager will want to see how it logs its sources before any adviser is allowed to use it",
      "handling": "handled",
      "span": 13
     }
    ],
    "nextStep": {
-    "value": "Sam to send transition plan and meet Olivia plus principal solicitor for sign-off.",
-    "confidence": 0.97,
-    "span": 14
+    "value": "Sam to send scope, source logging design and fixed price, then walk both principals and the compliance manager through it.",
+    "confidence": 0.88,
+    "span": 22
    },
-   "nextStepDue": "2026-09-08"
+   "nextStepDue": "2026-09-10"
   },
   "scorecard": {
    "discoveryQuestions": {
@@ -2448,288 +2429,274 @@ export const calls: CallRecord[] = [
    },
    "nextStepSecured": {
     "value": true,
-    "span": 14
+    "span": 22
    },
    "objectionHandling": {
     "value": "handled",
     "span": 13
    },
    "talkRatio": 0.48,
-   "notes": "Sam explored the operational risk around a departing coordinator and turned it into a concrete transition plan with a dated approval call."
+   "notes": "Sam quantified the advice drafting backlog before pricing anything and answered the source logging gate with a concrete design, then booked a dated session with both principals and the compliance manager."
   },
   "icpSignals": {
-   "industry": "Family law firm",
+   "industry": "Financial planning and wealth advice firm",
    "headcountBand": "25-80",
    "role": "Practice Manager",
-   "trigger": "Outgoing internal IT coordinator leaving in three weeks"
+   "trigger": "Statement of advice drafting backlog after acquiring a smaller practice"
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Next steps — Wattle Street Legal",
-   "body": "Hi Olivia,\n\nThanks for the time today.\nYou mentioned outgoing internal IT coordinator leaving in three weeks; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the transition plan and fixed onboarding quote by tuesday\n- Include the leaver checklist and after-hours file migration window\n\nNext step: Sam to send transition plan and meet Olivia plus principal solicitor for sign-off.\n\nSam Whitfield"
+   "subject": "Next steps — Fairfield Wealth Partners",
+   "body": "Hi Olivia,\n\nThanks for the time today.\nYou mentioned statement of advice drafting backlog after acquiring a smaller practice; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the scope, the source logging design and the fixed price by Wednesday\n- Also include two worked examples built from your own template\n\nNext step: Sam to send scope, source logging design and fixed price, then walk both principals and the compliance manager through it.\n\nSam Whitfield"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-07T09:54:25+10:00",
+    "at": "2026-09-04T09:39:10+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-07T09:55:25+10:00",
+    "at": "2026-09-04T09:40:10+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-07T09:55:25+10:00",
+    "at": "2026-09-04T09:40:10+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-07T09:56:25+10:00",
+    "at": "2026-09-04T09:41:10+10:00",
     "icon": "mail"
    }
   ]
  },
  {
-  "id": "call-08-elm-and-ledger-accounting",
+  "id": "call-08-ridgeline-commercial",
   "rep": "Sam Whitfield",
   "prospect": "Ben Wallace",
-  "company": "Elm & Ledger Accounting",
-  "domain": "elmandledger.example",
-  "at": "2026-09-07T13:30:00+10:00",
-  "durationSeconds": 455,
+  "company": "Ridgeline Commercial",
+  "domain": "ridgelinecommercial.example",
+  "at": "2026-09-04T14:15:00+10:00",
+  "durationSeconds": 415,
   "outcome": "won",
-  "trigger": "Office move and Microsoft 365 migration before busy season",
-  "summary": "Strong buying signal. Ben (Director, 52 staff) is dealing with office move and microsoft 365 migration before busy season.",
+  "trigger": "Lease abstraction and tenant reporting taking a week every month",
+  "summary": "Strong buying signal. Ben (Director, 52 staff) is dealing with lease abstraction and tenant reporting taking a week every month.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Ben Wallace, thanks for taking the call. I have Elm & Ledger Accounting as a fifty-two person practice in Geelong, and you're one of the directors, correct?",
+    "text": "Ben Wallace, Sam from Eleno. Before I get into anything, are you still the director running the commercial management side at Ridgeline Commercial?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Correct. We're moving offices at the end of September, and it has forced a decision about IT. We also want to finish a Microsoft 365 migration before the next busy season.",
-    "at": 17
+    "text": "That's me. Fifty-two people in Cremorne, and about two thirds of that is property management rather than sales. The thing I booked this call about is lease abstraction. It eats a week every month.",
+    "at": 11
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What is driving the Microsoft 365 migration now rather than after the move?",
-    "at": 36
+    "text": "Tell me what that week actually looks like, hour by hour if you can?",
+    "at": 28
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "We're halfway between old file shares and SharePoint. Staff are confused, and our current provider keeps telling us to wait. The office move feels like the clean moment to stop dragging both systems around.",
-    "at": 44
+    "text": "Two property analysts sit with a pile of lease documents and pull out the key terms. Commencement, expiry, rent review dates and mechanisms, outgoings recovery, make good, option periods. They type those into our management system and then build the tenant reports off the back of it.",
+    "at": 35
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "How does that confusion show up for accountants and admin during client work?",
-    "at": 66
+    "text": "How many leases are moving through that in a month?",
+    "at": 59
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "People duplicate files, Xero reports end up in the wrong folder, and managers ask admin to find versions during client calls. Nobody is malicious; it's just messy and wastes time.",
-    "at": 74
+    "text": "New and varied, about forty. But the reporting covers the whole portfolio, which is around eleven hundred tenancies across three hundred assets. So it is not just the new ones, it is every review date and every outgoings reconciliation.",
+    "at": 64
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Who needs to be involved in approving the plan?",
-    "at": 92
+    "text": "Where do the lease documents live and what state are they in?",
+    "at": 83
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Me, another director, and our office manager. I can approve the managed service if the migration risk is clearly controlled. The office manager knows the staff pain better than anyone.",
-    "at": 98
+    "text": "Mostly PDFs in our document management system, some scanned, some native. Quality varies a lot, especially anything inherited when we took over a portfolio. There are deeds of variation sitting as separate files that nobody has linked back to the head lease.",
+    "at": 89
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What are the non-negotiables for the office move weekend?",
-    "at": 117
+    "text": "What breaks when someone gets an abstraction wrong?",
+    "at": 110
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Internet live before Monday, printers mapped, Teams phones working, Xero and the tax software accessible, and no mystery about where client files live. We've no appetite for heroics on Monday morning.",
-    "at": 122
+    "text": "A missed rent review is the expensive one. We had one last year where an option date passed and the tenant held over at the old rent for eighteen months. The owner was not delighted, and we wore part of it.",
+    "at": 114
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Where do security and cyber insurance sit on your list?",
-    "at": 142
+    "text": "And what would a good outcome look like to you, in a way your owners would notice?",
+    "at": 134
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Increasingly high. The insurer asked about MFA, backups and admin rights. Accounting firms are an obvious target, and clients assume we've our house in order.",
-    "at": 148
+    "text": "Reporting that goes out in a day instead of a week, no missed critical dates, and the two analysts spending their time on arrears and owner relationships rather than typing. If owners get their reports on the third of the month every month, that is something we can sell on a new mandate.",
+    "at": 143
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "For Elm & Ledger Accounting, Harbourline would likely recommend managed services at $130 per seat per month, plus a fixed office move and Microsoft 365 migration project.",
-    "at": 164
+    "text": "So what we would build is a lease abstraction pipeline. It reads the lease and any variations, extracts the terms against a schema you define, flags anything it is not confident about for a human to check, and writes the confirmed terms into your management system. The tenant reports then generate from that.",
+    "at": 169
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "We cannot have a messy migration in the middle of tax planning work. If staff lose client files or Xero access, the partners will never forgive the change.",
-    "at": 180
+    "text": "The flagging part is what I would want to press on. If it quietly guesses a rent review mechanism and gets it wrong, that is worse than the analyst typing it.",
+    "at": 196
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Agreed. The migration should be staged, tested with a pilot group and frozen around key lodgement dates. I will send the office move checklist and migration proposal by Wednesday so you can see the exact order.",
-    "at": 198
+    "text": "Agreed, and that is the design principle rather than a feature we added later. Every extracted term carries a confidence and a pointer to the clause it came from. Anything below threshold goes to a review queue instead of into the system. Your analysts become checkers on the hard ten per cent rather than typists on all of it.",
+    "at": 211
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "That would help. I also want someone to look at old Xero access. We've former contractors who may still have permissions.",
-    "at": 220
+    "text": "That I can sell internally. The analysts will not fight something that removes the boring eighty per cent.",
+    "at": 240
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will include the Xero access review and the busy-season support plan. The onboarding project will document users, permissions, backups and the move-weekend run sheet.",
-    "at": 233
+    "text": "On numbers, a fixed-scope build for Ridgeline Commercial lands at $78,200, with a discovery phase of about three weeks first, where we run a sample of your real leases through and measure the extraction quality.",
+    "at": 249
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "That sounds like the right level. Price is within range if the migration is fixed fee and we can hold you to the run sheet.",
-    "at": 249
+    "text": "Measuring on our own leases before we commit is the right way round. What does the discovery phase cost on its own?",
+    "at": 267
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Can we do a site walk-through Wednesday 9 September at 10am with you and the office manager, then finalise the proposal that afternoon?",
-    "at": 265
+    "text": "Six thousand for this scope, and it comes off the build if you proceed. I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached.",
+    "at": 278
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Yes, Wednesday 9 September at 10am works. Come to the current office and we can show you the comms room and the file structure.",
-    "at": 279
+    "text": "Thursday is fine. Send it to me and I will bring in our head of property management, because she owns the reporting calendar.",
+    "at": 294
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "For the walk-through, I will want to see the comms cupboard, sample client folders, current permissions and the move timetable. That keeps the quote tied to reality.",
-    "at": 294
+    "text": "Can we book Friday 11 September at 9am with you and your head of property management to go through it?",
+    "at": 305
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Good. We've had people quote from a phone call before, and then every exception became a variation. I'd rather expose the messy parts upfront.",
-    "at": 311
+    "text": "Friday 11 September at 9am works. She is in the office on Fridays anyway.",
+    "at": 315
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "We will also mark anything that shouldn't move during the office weekend. Some legacy data may be better archived cleanly than dragged into the new structure.",
-    "at": 326
+    "text": "Good. I will also run twenty of your real leases through the extraction before that meeting, so we are looking at your numbers rather than a generic accuracy claim.",
+    "at": 322
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "That will be a useful discipline. Accountants tend to keep everything forever, and then complain that search is terrible.",
-    "at": 342
+    "text": "Twenty is enough to show me whether it handles the messy inherited ones. Pick some from the portfolio we took on in Ballarat, they are the worst of it.",
+    "at": 336
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "The support plan will include extra cover for the first Monday and a named escalation path, so your office manager isn't standing between staff and the provider.",
-    "at": 354
+    "text": "I will ask for those specifically. If it struggles on scanned deeds of variation, better that we both know in September than in March.",
+    "at": 351
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "She will appreciate that. She is excellent, but she has become the unofficial queue for every technical complaint.",
-    "at": 371
+    "text": "That is an honest answer. The last provider we looked at demonstrated on a clean template lease and would not touch ours.",
+    "at": 363
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will also ask about your lodgement calendar during the walk-through. It's easy for IT people to plan around their own availability and accidentally land work during your worst possible week.",
-    "at": 382
+    "text": "The other thing worth saying is that we deploy into your environment and transfer the intellectual property at handover. You are not renting this back from us forever.",
+    "at": 374
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Please do. Our quiet-looking weeks can still have partner reviews, payroll and client deadlines packed inside them.",
-    "at": 401
+    "text": "That matters on the owners' side as well. They ask who holds the data whenever we pitch for a new mandate.",
+    "at": 388
    },
    {
     "index": 28,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "For the proposal, I will make the assumptions visible: number of seats, current file volume, printer count, Xero users and which work happens after hours.",
-    "at": 412
+    "text": "Then we will cover data residency and ownership in the scope document, so you have an answer in writing rather than a verbal assurance.",
+    "at": 398
    },
    {
     "index": 29,
     "speaker": "prospect",
     "name": "Ben Wallace",
-    "text": "Good. Visible assumptions make it easier for the directors to approve, because they can see what would change the number.",
-    "at": 428
-   },
-   {
-    "index": 30,
-    "speaker": "rep",
-    "name": "Sam Whitfield",
-    "text": "Excellent. I will send the invite, checklist and proposal outline before then.",
-    "at": 440
-   },
-   {
-    "index": 31,
-    "speaker": "prospect",
-    "name": "Ben Wallace",
-    "text": "Thanks Sam. If the walk-through checks out, we're ready to move quickly.",
-    "at": 448
+    "text": "Thanks Sam. Thursday for the document, Friday for the meeting.",
+    "at": 410
    }
   ],
   "extraction": {
@@ -2741,84 +2708,84 @@ export const calls: CallRecord[] = [
     },
     "role": {
      "value": "Director",
-     "confidence": 0.97,
+     "confidence": 0.96,
      "span": 0
     },
     "email": {
-     "value": "ben@elmandledger.example",
-     "confidence": 0.93,
-     "span": 0
+     "value": "ben@ridgelinecommercial.example",
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1108",
-     "confidence": 0.95,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
-     "value": "Elm & Ledger Accounting",
-     "confidence": 0.98,
+     "value": "Ridgeline Commercial",
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
-     "value": "Accounting practice",
-     "confidence": 0.93,
-     "span": 0
+     "value": "Commercial real estate agency",
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 52,
-     "confidence": 0.94,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
-     "value": "Geelong, VIC",
-     "confidence": 0.88,
-     "span": 0
+     "value": "Cremorne, VIC",
+     "confidence": 0.96,
+     "span": 1
     }
    },
    "deal": {
     "stage": {
      "value": "closed_won",
-     "confidence": 0.95,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
      "value": 78200,
-     "confidence": 0.88,
-     "span": null
+     "confidence": 0.96,
+     "span": 16
     },
     "outcome": {
      "value": "won",
-     "confidence": 0.97,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send the office move checklist and migration proposal by Wednesday",
-     "confidence": 0.98,
-     "span": 14
+     "value": "I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached",
+     "confidence": 0.96,
+     "span": 18
     },
     {
-     "value": "I will include the Xero access review and the busy-season support plan",
-     "confidence": 0.87,
-     "span": 16
+     "value": "I will also run twenty of your real leases through the extraction before that meeting",
+     "confidence": 0.96,
+     "span": 22
     }
    ],
    "objections": [
     {
-     "text": "We cannot have a messy migration in the middle of tax planning work",
+     "text": "If it quietly guesses a rent review mechanism and gets it wrong, that is worse than the analyst typing it",
      "handling": "handled",
      "span": 13
     }
    ],
    "nextStep": {
-    "value": "Sam to send migration proposal and run site walk-through with Ben and office manager.",
-    "confidence": 0.93,
-    "span": 18
+    "value": "Sam to send the discovery scope and fixed build price, then review the sample extraction with Ben and the head of property management.",
+    "confidence": 0.88,
+    "span": 22
    },
-   "nextStepDue": "2026-09-09"
+   "nextStepDue": "2026-09-11"
   },
   "scorecard": {
    "discoveryQuestions": {
@@ -2827,361 +2794,361 @@ export const calls: CallRecord[] = [
    },
    "nextStepSecured": {
     "value": true,
-    "span": 18
+    "span": 22
    },
    "objectionHandling": {
     "value": "handled",
     "span": 13
    },
    "talkRatio": 0.47,
-   "notes": "Sam found the office move deadline, addressed migration risk and secured a dated site walk-through before proposal acceptance."
+   "notes": "Sam sized the abstraction workload and the cost of a missed rent review before quoting, answered the silent-guess risk with a confidence threshold and review queue, and booked a dated session with the reporting owner."
   },
   "icpSignals": {
-   "industry": "Accounting practice",
+   "industry": "Commercial real estate agency",
    "headcountBand": "25-80",
    "role": "Director",
-   "trigger": "Office move and Microsoft 365 migration before busy season"
+   "trigger": "Lease abstraction and tenant reporting taking a week every month"
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Next steps — Elm & Ledger Accounting",
-   "body": "Hi Ben,\n\nThanks for the time today.\nYou mentioned office move and Microsoft 365 migration before busy season; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the office move checklist and migration proposal by wednesday\n- Include the xero access review and the busy-season support plan\n\nNext step: Sam to send migration proposal and run site walk-through with Ben and office manager.\n\nSam Whitfield"
+   "subject": "Next steps — Ridgeline Commercial",
+   "body": "Hi Ben,\n\nThanks for the time today.\nYou mentioned lease abstraction and tenant reporting taking a week every month; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the discovery scope and the fixed build price by Thursday with the sample methodology attached\n- Also run twenty of your real leases through the extraction before that meeting\n\nNext step: Sam to send the discovery scope and fixed build price, then review the sample extraction with Ben and the head of property management.\n\nSam Whitfield"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-07T13:39:35+10:00",
+    "at": "2026-09-04T14:23:55+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-07T13:40:35+10:00",
+    "at": "2026-09-04T14:24:55+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-07T13:40:35+10:00",
+    "at": "2026-09-04T14:24:55+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-07T13:41:35+10:00",
+    "at": "2026-09-04T14:25:55+10:00",
     "icon": "mail"
    }
   ]
  },
  {
-  "id": "call-09-port-phillip-physio-group",
+  "id": "call-09-bellbird-auctions",
   "rep": "Jordan Lee",
   "prospect": "Aisha Rahman",
-  "company": "Port Phillip Physio Group",
-  "domain": "portphillipphysio.example",
-  "at": "2026-09-08T12:00:00+10:00",
+  "company": "Bellbird Auctions",
+  "domain": "bellbirdauctions.example",
+  "at": "2026-09-07T10:00:00+10:00",
   "durationSeconds": 450,
   "outcome": "won",
-  "trigger": "Cyber insurance renewal requiring Essential Eight controls",
-  "summary": "Strong buying signal. Aisha (General Manager, 76 staff) is dealing with cyber insurance renewal requiring essential eight controls.",
+  "trigger": "Consignment intake and cataloguing bottleneck before the spring sales",
+  "summary": "Strong buying signal. Aisha (General Manager, 48 staff) is dealing with consignment intake and cataloguing bottleneck before the spring sales.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Aisha Rahman, thanks for making time. I have Port Phillip Physio Group as seventy-six people across St Kilda and Cheltenham, and you run operations as general manager, right?",
+    "text": "Aisha Rahman, thanks for making time. I have Bellbird Auctions as forty-eight people in Malvern, and you run the house day to day as general manager, is that right?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "That's right. We've physios, reception, admin and a small leadership team. The immediate issue is our cyber insurance renewal, which has become much stricter than last year.",
-    "at": 18
+    "text": "That's right. Specialists, cataloguers, front of house, finance and a small logistics team. The pressing thing is consignment intake before the spring sales. We take in more in six weeks than across the rest of the year, and the cataloguing queue never clears in time.",
+    "at": 15
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "What is the insurer asking for that you can't easily evidence today?",
-    "at": 35
+    "text": "Walk me through what happens from the moment a seller brings a piece in?",
+    "at": 38
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "They want proof of MFA, patching, backups and admin controls. Our provider says those things are handled, but when I ask for records I get screenshots and a long email rather than a clean answer.",
-    "at": 43
+    "text": "A specialist writes condition notes on paper or in an email, someone re-keys those into our sale management system, then a cataloguer writes the lot description, measurements and provenance line. The same information gets typed three times before it reaches the printed catalogue.",
+    "at": 45
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "How does IT support work across the two clinics during a normal week?",
-    "at": 65
+    "text": "How many lots go through that path in a spring season, and who carries the re-keying?",
+    "at": 67
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "Reception logs issues by email, then people chase by phone if it's urgent. Clinicians can't wait long because the practice system, EFTPOS and exercise software all touch appointments.",
-    "at": 73
+    "text": "About two thousand two hundred lots across four sales. Two cataloguers and one administrator carry it, with specialists checking descriptions at night. Through August and September they are all working weekends, and we still push consignment deadlines back.",
+    "at": 75
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Who will make the decision if you change support before the renewal?",
-    "at": 91
+    "text": "Where does the source material actually live, the photographs, the condition notes, the seller correspondence?",
+    "at": 94
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "I recommend, the clinic director approves, and finance signs the contract. The director cares about patient privacy and not disrupting sessions. Finance cares about predictability.",
-    "at": 98
+    "text": "Photographs sit in a shared drive by sale number, notes are in the sale management system, and seller correspondence is in individual inboxes. Provenance documents are usually scanned files a seller emails us. Nothing is joined up, so a cataloguer hunts before they write.",
+    "at": 102
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "What would success look like in the first six weeks?",
-    "at": 114
+    "text": "If this worked the way you wanted next spring, what would be different?",
+    "at": 124
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "An evidence pack for the insurer, a known helpdesk process for reception, a cleaned-up Microsoft 365 tenant, and less noise when staff move between clinics. We're not trying to become a bank, just competent.",
-    "at": 121
+    "text": "A specialist records condition notes once, and a first-pass lot description comes back with measurements, materials and a provenance paragraph already drafted from the documents we hold. The cataloguer edits rather than writes. I would take that even at seventy percent quality.",
+    "at": 131
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Where are staff most likely to resist a change?",
-    "at": 142
+    "text": "Who signs off on something like this, and what do they care about?",
+    "at": 153
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "Reception will resist if it slows them down. Clinicians will resist if passwords or MFA interrupt appointments. The director will resist anything that sounds like a generic cyber package.",
-    "at": 148
+    "text": "I recommend, our managing director approves, and the board sees anything over a threshold. He cares about catalogue accuracy, because a wrong attribution is a serious problem for a house like ours. The board cares about whether we own what we pay for.",
+    "at": 159
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "For your size, Harbourline IT would be around $126 per seat per month, with an onboarding project to produce the Essential Eight evidence and standardise clinic support.",
-    "at": 166
+    "text": "Here is roughly where this lands. A short paid discovery phase to map intake and cataloguing, then a fixed-scope build of an intake and cataloguing assistant. For a house your size that build sits near $64,000, and the agents and prompts are handed over to you at the end. Managed optimisation afterwards is optional.",
+    "at": 181
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "Our current provider says they already do security, so I need to understand why this is different. I do not want to pay twice for the same promise.",
-    "at": 183
+    "text": "That is the part I want to push on. We do not want another subscription that we can never switch off. We already pay three vendors forever and own nothing at the end of it.",
+    "at": 209
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "That is fair. The difference should be visible in evidence, ownership and cadence. We would show which controls exist, which are partial and which need work, then report monthly instead of waiting for renewal season. I will send the Essential Eight evidence plan and commercial proposal by Thursday.",
-    "at": 201
+    "text": "That is exactly why we transfer the intellectual property. At handover the agents, the prompts and the pipeline are yours, running inside your own systems, and you can keep them without us. Optimisation is a choice you make later, not a condition of the build. I will send the discovery phase scope and a fixed-price build proposal by Thursday.",
+    "at": 227
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "That's a better answer. The clinic director will also ask how you avoid disruption during appointment hours.",
-    "at": 232
+    "text": "Good. The managing director will want to know what happens the first time the assistant gets an attribution wrong.",
+    "at": 257
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will include the staged clinic rollout and receptionist training plan. We can run identity changes after the final appointment block and do short reception sessions before the morning rush.",
-    "at": 242
+    "text": "I will include the review workflow and the accuracy checks your cataloguers would run. Every drafted description reaches a cataloguer with the source it was built from, so they check against the condition note rather than trusting the text. Nothing goes to print without a human signing it off.",
+    "at": 266
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "Good. The price is workable if the onboarding project is clear and if finance can see what risk is reduced.",
-    "at": 261
+    "text": "That will land well. He has sat through demonstrations where the output looked confident and was quietly wrong, and it made him wary of the whole category.",
+    "at": 291
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Can we meet Thursday 10 September at 3pm with you, the clinic director and finance to review the proposal and evidence plan?",
-    "at": 274
+    "text": "Can we meet Thursday 10 September at 2pm with you and the managing director to walk the scope?",
+    "at": 305
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "Yes, Thursday 10 September at 3pm works. Send the invite and I will add the other two.",
-    "at": 288
+    "text": "Yes, Thursday 10 September at 2pm works. I will bring him and our head cataloguer, who knows the real bottlenecks better than either of us.",
+    "at": 314
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "For the insurer, we will avoid vague maturity claims. The evidence plan will state which Essential Eight controls are in place, which are partly in place, and what dates we can put against improvements.",
-    "at": 299
+    "text": "Before then I will confirm which of your systems we can reach through an interface. That shapes the build more than anything else does.",
+    "at": 327
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "That's exactly what I need. Our board doesn't expect perfection, but they do expect a straight answer and a plan they can defend.",
-    "at": 321
+    "text": "The sale management system has a partner interface, and the shared drive is straightforward. The provenance documents are the messy part, because sellers send anything from a typed letter to a photograph of a handwritten receipt.",
+    "at": 339
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "We can also separate clinical-impact changes from back-office changes. Anything that touches appointment flow gets tested in one clinic first, with reception feedback before it goes wider.",
-    "at": 335
+    "text": "That is normal. Document extraction copes with the messy end, and anything it cannot read confidently gets flagged rather than guessed.",
+    "at": 358
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "That will matter. Reception knows where the friction really sits, and they will tell us quickly if a new login process is getting in the way.",
-    "at": 352
+    "text": "Flagging is the right behaviour. A blank field a cataloguer fills in is fine. An invented provenance line would do us real damage with a consignor.",
+    "at": 368
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will write the proposal so finance can see monthly support, onboarding and optional maturity work as separate lines. That should make the decision less all-or-nothing.",
-    "at": 369
+    "text": "Agreed. We would set that confidence threshold with your cataloguers during discovery rather than choosing it for them.",
+    "at": 382
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "Good. A clear split will help, because I can get urgent insurance work approved faster than broad improvement work.",
-    "at": 385
+    "text": "They will appreciate being asked. They have been told before that a new system would save them time, and it just moved the typing somewhere else in the process.",
+    "at": 391
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The receptionist training will be short and role-specific. It should answer where to log issues, what to do if EFTPOS or the practice system is affected, and how to escalate urgent appointment-impacting problems.",
-    "at": 397
+    "text": "The discovery phase is short and paid on purpose. If the saving is not there you stop with a clear picture and no build commitment.",
+    "at": 406
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "That's practical. Reception carries the stress first, so if they trust the process the clinicians will usually follow.",
+    "text": "That is a fair way to start. It also gives me something concrete for the board rather than a vendor promise about hours saved.",
     "at": 418
    },
    {
     "index": 28,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Will do. I will send the proposal the morning of the meeting so you've time to skim it.",
-    "at": 430
+    "text": "I will keep the proposal to two pages plus the scope. Anything longer will not get read before Thursday.",
+    "at": 431
    },
    {
     "index": 29,
     "speaker": "prospect",
     "name": "Aisha Rahman",
-    "text": "Thanks Jordan. This feels more grounded than the last few calls I have had.",
-    "at": 441
+    "text": "Thanks Jordan. Send it Wednesday if you can, and I will have read it properly before we sit down.",
+    "at": 440
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Aisha Rahman",
-     "confidence": 0.94,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "General Manager",
-     "confidence": 0.97,
+     "confidence": 0.96,
      "span": 0
     },
     "email": {
-     "value": "aisha@portphillipphysio.example",
-     "confidence": 0.9,
-     "span": 0
+     "value": "aisha@bellbirdauctions.example",
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1109",
-     "confidence": 0.93,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
-     "value": "Port Phillip Physio Group",
-     "confidence": 0.93,
+     "value": "Bellbird Auctions",
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
-     "value": "Multi-site physiotherapy clinic",
-     "confidence": 0.93,
-     "span": 7
+     "value": "Fine art and collectables auction house",
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
-     "value": 76,
-     "confidence": 0.94,
+     "value": 48,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
-     "value": "St Kilda and Cheltenham, VIC",
-     "confidence": 0.88,
+     "value": "Malvern, VIC",
+     "confidence": 0.96,
      "span": 0
     }
    },
    "deal": {
     "stage": {
      "value": "closed_won",
-     "confidence": 0.91,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
-     "value": 109400,
-     "confidence": 0.91,
-     "span": null
+     "value": 64000,
+     "confidence": 0.96,
+     "span": 12
     },
     "outcome": {
      "value": "won",
-     "confidence": 0.86,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send the Essential Eight evidence plan and commercial proposal by Thursday",
-     "confidence": 0.89,
+     "value": "I will send the discovery phase scope and a fixed-price build proposal by Thursday",
+     "confidence": 0.96,
      "span": 14
     },
     {
-     "value": "I will include the staged clinic rollout and receptionist training plan",
+     "value": "I will include the review workflow and the accuracy checks your cataloguers would run",
      "confidence": 0.96,
      "span": 16
     }
    ],
    "objections": [
     {
-     "text": "Our current provider says they already do security, so I need to understand why this is different",
+     "text": "We do not want another subscription that we can never switch off",
      "handling": "handled",
      "span": 13
     }
    ],
    "nextStep": {
-    "value": "Jordan to send proposal and meet Aisha plus clinic director for decision.",
-    "confidence": 0.94,
-    "span": 18
+    "value": "Jordan to send the discovery scope and build proposal, then meet Aisha and the managing director to walk it through.",
+    "confidence": 0.88,
+    "span": 16
    },
    "nextStepDue": "2026-09-10"
   },
@@ -3192,49 +3159,49 @@ export const calls: CallRecord[] = [
    },
    "nextStepSecured": {
     "value": true,
-    "span": 18
+    "span": 16
    },
    "objectionHandling": {
     "value": "handled",
     "span": 13
    },
-   "talkRatio": 0.5,
-   "notes": "Jordan slowed down, asked solid discovery questions and handled the incumbent objection with evidence rather than dismissal."
+   "talkRatio": 0.44,
+   "notes": "Jordan mapped the intake and cataloguing workflow before pricing anything, answered the subscription objection with the IP transfer rather than dismissing it, and left with a dated meeting including the approver."
   },
   "icpSignals": {
-   "industry": "Multi-site physiotherapy clinic",
+   "industry": "Fine art and collectables auction house",
    "headcountBand": "25-80",
    "role": "General Manager",
-   "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+   "trigger": "Consignment intake and cataloguing bottleneck before the spring sales"
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Next steps — Port Phillip Physio Group",
-   "body": "Hi Aisha,\n\nThanks for the time today.\nYou mentioned cyber insurance renewal requiring Essential Eight controls; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the essential eight evidence plan and commercial proposal by thursday\n- Include the staged clinic rollout and receptionist training plan\n\nNext step: Jordan to send proposal and meet Aisha plus clinic director for decision.\n\nJordan Lee"
+   "subject": "Next steps — Bellbird Auctions",
+   "body": "Hi Aisha,\n\nThanks for the time today.\nYou mentioned consignment intake and cataloguing bottleneck before the spring sales; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send the discovery phase scope and a fixed-price build proposal by Thursday\n- Include the review workflow and the accuracy checks your cataloguers would run\n\nNext step: Jordan to send the discovery scope and build proposal, then meet Aisha and the managing director to walk it through.\n\nJordan Lee"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-08T12:09:30+10:00",
+    "at": "2026-09-07T10:09:30+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-08T12:10:30+10:00",
+    "at": "2026-09-07T10:10:30+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-08T12:10:30+10:00",
+    "at": "2026-09-07T10:10:30+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-08T12:11:30+10:00",
+    "at": "2026-09-07T10:11:30+10:00",
     "icon": "mail"
    }
   ]
@@ -3245,260 +3212,260 @@ export const calls: CallRecord[] = [
   "prospect": "Noah Spencer",
   "company": "Lumen Lane Retail",
   "domain": "lumenlaneretail.example",
-  "at": "2026-09-09T10:30:00+10:00",
-  "durationSeconds": 355,
+  "at": "2026-09-08T13:30:00+10:00",
+  "durationSeconds": 360,
   "outcome": "lost",
   "trigger": null,
-  "summary": "Not a fit right now. Noah (Co-owner, 10 staff) is dealing with an it review.",
+  "summary": "Not a fit right now. Jordan opened with a build price, never asked a question, and talked past the freelancer comparison and the budget signal instead of qualifying a ten-person retailer out or down.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Noah Spencer, thanks for the call. Harbourline IT gives small businesses a full managed IT service for $98 per seat per month, which covers helpdesk, device management, Microsoft 365, backups and security monitoring.",
+    "text": "Noah Spencer, thanks for the call. Eleno builds custom AI agents for growing Australian businesses, and a first project for a retailer usually lands around $11,200 for a fixed scope build. For a shop like yours that is supplier order drafting, stock alerts and customer enquiry replies handled automatically.",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "Thanks Jordan. Lumen Lane Retail is ten people if you count casuals. We sell lighting from a Prahran showroom and online. I'm mostly checking prices because our current arrangement is informal.",
-    "at": 17
+    "text": "Thanks Jordan. Lumen Lane Retail is ten people if you count casuals. We sell lighting out of a Prahran showroom and online. I was mostly ringing to hear what this sort of thing costs.",
+    "at": 20
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Informal support is risky for a retailer. If the point-of-sale terminal, Wi-Fi, Xero or email fails, sales stop. A monthly plan means you can call one team and know the fundamentals are being maintained.",
-    "at": 32
+    "text": "Then you are asking the right question. Most retailers we speak to lose a day a week to reordering and enquiry email. An agent reads the supplier price lists, drafts the purchase order and puts it in front of you to approve. Another answers the lead time questions from the website.",
+    "at": 34
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "We are comparing you to a break-fix provider who charges by the hour. They quoted a lower rate, and we only call when something is actually wrong.",
-    "at": 49
+    "text": "We are comparing you to a freelancer who set up our stock alerts for a few hundred dollars. He did it in a weekend and it has run since.",
+    "at": 54
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Break-fix looks cheaper on paper, but it doesn't include prevention. Our agreement includes patching, endpoint protection, backup checks and admin reviews, which is what keeps the hourly emergencies down.",
-    "at": 63
+    "text": "The build also covers what a script never touches. We document the workflow, deploy it into your own systems and transfer the code, so nothing sits on a stranger's laptop. That is the difference between a weekend fix and something you can lean on in December.",
+    "at": 66
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "Maybe, but some months we've zero issues. We're not keen to add another subscription while foot traffic is uneven.",
-    "at": 77
+    "text": "December is busy, but it is two of us and four casuals. Nobody here is drowning in purchase orders.",
+    "at": 85
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "You also need to think about cyber risk. Retailers hold customer details, supplier records and payment systems. If an account is compromised, you want documented controls, not a frantic call to whoever can come out tomorrow.",
-    "at": 87
+    "text": "A lot of it is invisible. Supplier confirmations, backorder chasing, freight notifications, customer emails about whether a pendant is in stock. Individually two minutes. Across a month it is a part-time role nobody has ever costed.",
+    "at": 92
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "I understand, but nobody has asked us for documentation. We don't have a board or a procurement team. It's me, my co-owner and a spreadsheet of expenses.",
-    "at": 105
+    "text": "We have costed it, roughly. It is maybe four hours a week between the two of us, and a fair bit of that is talking to customers, which we quite like doing.",
+    "at": 107
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The onboarding project would clean all that up. For Lumen Lane Retail, it would probably be around $3,800, then the monthly per-seat fee. We'd set MFA, standardise devices and document the environment.",
-    "at": 119
+    "text": "The discovery phase would tell us exactly where those hours sit. It is short and paid, we map the workflow, and the build is fixed scope from there. The real number is usually higher than owners expect.",
+    "at": 120
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "That's too much for what we need. We were thinking of a few hundred dollars here and there, not a standing agreement.",
+    "text": "Paying to be told how long our own admin takes is a hard sell to my co-owner. She does most of the ordering.",
     "at": 135
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The issue with a few hundred here and there's that nobody owns the outcome. Managed IT gives you accountability, reporting and a support process that doesn't depend on your co-owner knowing which cable to restart.",
-    "at": 146
+    "text": "It is not about measuring, it is about designing the agents so they hold up. Skip discovery and you get something brittle that breaks the first time a supplier changes a template. Then you pay twice.",
+    "at": 144
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "The cable restart isn't worth ten grand a year. We might grow into something like this, but not while the business is this size.",
-    "at": 163
+    "text": "Our templates barely change. We buy from six suppliers and have done for years.",
+    "at": 159
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I hear you. Still, the cost of one serious outage can be larger than the annual difference, especially if it happens during a sale or before Christmas.",
-    "at": 175
+    "text": "Six suppliers is a good starting point, because the extraction is simple and we can get the drafting live quickly. We would connect the website enquiries too, so a lead time question gets a drafted reply with the real stock position attached.",
+    "at": 164
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "That feels a bit hypothetical for us. I wanted to know whether you could beat the hourly provider or offer a small retainer.",
-    "at": 189
+    "text": "People email us because they want a person. If they get an obviously automated reply about a pendant, that is worse than a slow one.",
+    "at": 181
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "We don't really compete on hourly rates. Harbourline IT's built for proactive managed services, so the value is in coverage rather than being the cheapest emergency contact.",
-    "at": 200
+    "text": "Ours are drafts, not sends, so a human always approves. The quality is well past what people picture. The bigger risk for a shop your size is staying manual while the chains automate their whole back office.",
+    "at": 192
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "Then I think we will go with the other provider. They fit the way we buy at the moment.",
-    "at": 214
+    "text": "We do not really compete with the chains. Our customers come to us because they want someone who knows lighting.",
+    "at": 207
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will send the managed IT brochure in case you want to revisit it later.",
-    "at": 223
+    "text": "That expertise is exactly what the agents free up. Every hour on a purchase order is an hour off the showroom floor. I will send the automation overview so you can see what the build includes and what the handover looks like.",
+    "at": 215
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "Sure, but no need to follow up hard. Thanks for explaining it.",
-    "at": 231
+    "text": "Send it through. I should be straight with you though, eleven thousand is more than we have spent on any system, ever.",
+    "at": 232
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Another thing to consider is that hourly providers aren't usually watching for slow drift. Licences pile up, former staff keep access, routers age out and backups fail quietly until someone finally notices.",
-    "at": 237
+    "text": "Weigh it against the payback. Our average across clients is about six months, so by winter it has paid for itself and the asset stays yours. A subscription is still billing you in year three.",
+    "at": 241
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "That may be true, but it still feels like buying a large umbrella for a drizzle.",
-    "at": 253
+    "text": "The subscription part I like. The number is the problem, not the model.",
+    "at": 255
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "The managed model also gives you reporting. You would see patch status, security alerts, Microsoft 365 settings and recommendations each quarter, instead of only hearing from IT during a fault.",
-    "at": 261
+    "text": "The number reflects real engineering rather than a template. A scoped build, testing against your actual supplier documents, and the code handed across at the end. A weekend script gives you none of that when it stops.",
+    "at": 260
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "Reports sound nice, but I don't need another report to read.",
-    "at": 276
+    "text": "If it stops working I will ask him to look at it again. That has been fine so far.",
+    "at": 275
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I get that, but the report is how you know the basics are actually happening. Without it, the cheap option is largely trust and reaction time.",
-    "at": 282
+    "text": "Until he is unavailable, or moves on, or the business has grown and it no longer fits. That is when most of our retail clients call us, and by then they are rebuilding under pressure.",
+    "at": 283
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "Trust and reaction time are mostly enough for us right now.",
-    "at": 295
+    "text": "Maybe. But we would rather hit that wall than spend the money now on something we might not need.",
+    "at": 297
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "If you change your mind, the brochure explains the minimum standard we recommend for any retailer, even if you don't use us. It might still help you challenge the hourly quote.",
-    "at": 300
+    "text": "The overview sets out a smaller starting scope, just the supplier ordering, which brings the build down. Still a proper engagement with discovery in front of it, but a narrower first step.",
+    "at": 305
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "That's useful, but it probably confirms we're shopping in a different category.",
-    "at": 316
+    "text": "Even narrower, I think we are in a different bracket to your usual client.",
+    "at": 317
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "I will also include a comparison table between hourly break-fix and managed services. It will show what is included, what is excluded and where responsibility sits, so the decision is clear even if you choose the cheaper path.",
-    "at": 322
+    "text": "I would not write yourself off. We have built for teams smaller than yours where the owner was the bottleneck. The ones who move early get the compounding benefit.",
+    "at": 323
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "That's fine. A comparison table will probably help my co-owner see why we're saying no, at least for now.",
-    "at": 341
+    "text": "I appreciate the pitch, Jordan, but we are going to stay with what we have. It suits how we buy.",
+    "at": 335
    },
    {
     "index": 28,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Thanks Noah. Good luck with the showroom.",
-    "at": 350
+    "text": "No problem at all. The overview is still worth a read, and it lists the questions to put to any automation provider, including the freelancer, so you can test whether what you have is holding up.",
+    "at": 343
    },
    {
     "index": 29,
     "speaker": "prospect",
     "name": "Noah Spencer",
-    "text": "Thanks, bye.",
-    "at": 354
+    "text": "Fair enough. Thanks for your time.",
+    "at": 358
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Noah Spencer",
-     "confidence": 0.86,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "Co-owner",
-     "confidence": 0.97,
-     "span": 7
+     "confidence": 0.96,
+     "span": 9
     },
     "email": {
      "value": "noah@lumenlaneretail.example",
-     "confidence": 0.89,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1110",
-     "confidence": 0.89,
-     "span": 8
+     "confidence": 0.82,
+     "span": null
     }
    },
    "company": {
     "name": {
      "value": "Lumen Lane Retail",
-     "confidence": 0.89,
+     "confidence": 0.96,
      "span": 1
     },
     "industry": {
      "value": "Boutique lighting retailer",
-     "confidence": 0.89,
-     "span": 1
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 10,
-     "confidence": 0.93,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
@@ -3515,25 +3482,25 @@ export const calls: CallRecord[] = [
     },
     "valueAud": {
      "value": 11200,
-     "confidence": 0.95,
-     "span": null
+     "confidence": 0.96,
+     "span": 0
     },
     "outcome": {
      "value": "lost",
-     "confidence": 0.92,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send the managed IT brochure",
-     "confidence": 0.98,
+     "value": "I will send the automation overview",
+     "confidence": 0.96,
      "span": 16
     }
    ],
    "objections": [
     {
-     "text": "We are comparing you to a break-fix provider who charges by the hour",
+     "text": "We are comparing you to a freelancer who set up our stock alerts for a few hundred dollars",
      "handling": "ignored",
      "span": 3
     }
@@ -3554,8 +3521,8 @@ export const calls: CallRecord[] = [
     "value": "ignored",
     "span": 3
    },
-   "talkRatio": 0.61,
-   "notes": "Jordan led with pricing and feature breadth, then failed to explore the hourly-provider comparison or qualify the tiny account."
+   "talkRatio": 0.65,
+   "notes": "Jordan opened with a build price, never asked a question, and talked past the freelancer comparison and the budget signal instead of qualifying a ten-person retailer out or down."
   },
   "icpSignals": {
    "industry": "Boutique lighting retailer",
@@ -3565,32 +3532,32 @@ export const calls: CallRecord[] = [
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Leaving the door open — Lumen Lane Retail",
-   "body": "Hi Noah,\n\nThanks for being straight with me today. It sounds like the current setup is working for you, so I won't push.\n\nIf anything changes — an insurer asking for evidence, or a bad week with the computers — send me a note and I'll pick it up from here.\n\n\nJordan Lee"
+   "subject": "Next steps — Lumen Lane Retail",
+   "body": "Hi Noah,\n\nThanks for being straight with me today. It sounds like the current setup is working for you, so I won't push.\n\nWhat I owe you:\n- Send the automation overview\n\nIf that changes, send me a note and I'll pick it up from there.\n\nJordan Lee"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-09T10:37:55+10:00",
+    "at": "2026-09-08T13:38:00+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-09T10:38:55+10:00",
+    "at": "2026-09-08T13:39:00+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-09T10:38:55+10:00",
+    "at": "2026-09-08T13:39:00+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-09T10:39:55+10:00",
+    "at": "2026-09-08T13:40:00+10:00",
     "icon": "mail"
    }
   ]
@@ -3601,279 +3568,265 @@ export const calls: CallRecord[] = [
   "prospect": "Grace Kim",
   "company": "Banksia Architects",
   "domain": "banksiaarchitects.example",
-  "at": "2026-09-10T14:00:00+10:00",
-  "durationSeconds": 425,
+  "at": "2026-09-09T09:45:00+10:00",
+  "durationSeconds": 430,
   "outcome": "stalled",
-  "trigger": "Office move planning and cyber insurance evidence gap",
-  "summary": "Interest is real, timing is not. Grace (Studio Operations Manager, 44 staff) is dealing with office move planning and cyber insurance evidence gap.",
+  "trigger": "Fee proposal drafting and consultant coordination ahead of an office move",
+  "summary": "Interest is real, timing is not. Grace (Studio Operations Manager, 44 staff) is dealing with fee proposal drafting and consultant coordination ahead of an office move.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Grace Kim, thanks for speaking with me. I have Banksia Architects as a forty-four person studio in Fitzroy, and you manage studio operations, yes?",
+    "text": "Grace Kim, thanks for speaking with me. I have Banksia Architects as a forty-four person studio in Fitzroy, and you manage studio operations, is that right?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Yes. We're looking at an office move next quarter, and it has exposed how dependent we're on an IT setup nobody really owns. I'm gathering options before the directors decide what to fund.",
-    "at": 14
+    "text": "Yes. We're moving office next quarter, and pulling the studio apart has shown how much of our process lives in people's heads. I'm gathering options before the directors decide what to fund for the new financial year.",
+    "at": 13
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What has the office move made visible that was easier to ignore before?",
-    "at": 34
+    "text": "What is taking the most time across the studio right now?",
+    "at": 30
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Shared project files, printing, site laptops and a pile of old accounts. We've grown from twenty-eight to forty-four people, but the IT habits are from the smaller studio.",
-    "at": 42
+    "text": "Fee proposals. Every new project starts with one, and each takes a director and me two or three days. We pull scope from the client brief, stages from a template nobody fully trusts, rates from a spreadsheet, and consultant allowances from the last similar job.",
+    "at": 36
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "How do staff currently get help when something breaks during a deadline?",
-    "at": 59
+    "text": "How many of those go out in a year, and who writes them?",
+    "at": 58
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "They message me, our BIM lead, or the external technician we use casually. Everyone is helpful, but nobody has an overall picture. During tender weeks that means lots of interruptions.",
-    "at": 66
+    "text": "Somewhere near ninety. Three directors write them, I chase the pieces, and our practice accountant checks the numbers at the end. About a third are for repeat clients where most of the content already exists in a proposal we then cannot find.",
+    "at": 64
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Who would need to be in the room for a decision on managed services?",
+    "text": "Where do the finished proposals and the consultant information actually sit?",
     "at": 84
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Two directors and me. I can recommend, but I can't sign. One director cares about project continuity, the other is watching cash because the move is expensive.",
-    "at": 93
+    "text": "Proposals are in project folders on the shared drive, named however the director felt that week. Consultant quotes arrive by email and stay there. The fee spreadsheet lives on somebody's desktop. There is no single place you could ask what we charged for a similar school project.",
+    "at": 89
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "What would make the directors feel this is a must-do rather than a nice-to-have?",
-    "at": 109
+    "text": "And what does the consultant coordination side look like once a project is running?",
+    "at": 112
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Evidence that the move is risky without it. Also cyber insurance. We answered a questionnaire last year, but I couldn't prove half the answers without chasing three people.",
-    "at": 117
+    "text": "Chasing, mostly. We coordinate structural, services, planning and landscape consultants, each with their own deadlines and drawing sets. A large part of my week is working out who owes what. When a date slips, nobody finds out until the coordination meeting.",
+    "at": 119
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Where are your biggest security gaps today?",
-    "at": 134
+    "text": "If the directors funded one thing, what would you want fixed first, and who makes that call?",
+    "at": 139
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Old admin accounts, inconsistent MFA, and no formal backup test. I'm not saying everything is broken, but it's too much dependent knowledge.",
-    "at": 138
+    "text": "Fee proposals, without question, because they gate every new job. The two senior directors decide together. One is focused on winning work, the other has been watching every dollar since we signed the new lease.",
+    "at": 147
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "For a studio your size, Harbourline IT would usually sit around $134 per seat per month, with an onboarding project to document systems before the move.",
-    "at": 151
+    "text": "That is a clean first build. A short paid discovery phase to map how a proposal is actually assembled, then a fixed-scope build of a drafting agent that pulls scope, stages, rates and consultant allowances out of your own past projects. For a studio your size that lands near $66,400, and the agents and prompts are handed over to you at the end.",
+    "at": 164
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "The directors will not approve anything until the new financial year budget is clearer. They have already committed to lease costs, furniture and a fit-out consultant.",
-    "at": 167
+    "text": "That is the right problem, but I should be honest with you. The directors will not sign anything until the fit-out budget is settled. We have already committed to the lease, the joinery and a fit-out consultant, and there is not much appetite for anything else this side of the move.",
+    "at": 194
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "That's understandable. The useful first step may be a low-commitment risk note that shows what needs funding and what can wait. I don't want you trying to sell a full proposal without director context.",
-    "at": 183
+    "text": "That is fair, and I am not going to push a proposal at directors who have not seen the problem framed yet. I will send a short findings note and a fee proposal workflow map so you have something concrete to put in front of them when the budget conversation opens.",
+    "at": 219
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "A risk note would help me frame it. I can't promise they will prioritise it, but they will listen if it ties directly to the move and insurance.",
-    "at": 203
+    "text": "That would help. I can get a page read. I cannot get a meeting in the diary for something they have not yet agreed is worth funding.",
+    "at": 244
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Would you like me to join a director meeting once they have read it?",
-    "at": 220
+    "text": "Understood. The note will separate what a build would change from what you could tighten yourselves for nothing, so it does not read as a pitch.",
+    "at": 257
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Maybe. I don't have the meeting date yet, and I'd rather not lock something in until I know whether they want to engage.",
-    "at": 228
+    "text": "Please keep that split honest. If every line points at hiring someone, the director watching cash will stop reading at the second paragraph and the whole thing dies there.",
+    "at": 269
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "Fair. I will send a short findings note and an office move risk checklist. You can use it internally, and if the directors want detail we can book a proper workshop.",
-    "at": 242
+    "text": "Would it be worth putting a date in now for a session with both directors once the note has landed?",
+    "at": 283
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Yes, send that. Keep it practical and not too salesy, please.",
-    "at": 261
+    "text": "I would rather not. I do not know when the fit-out budget gets signed off, and booking something they have not asked for tends to backfire here.",
+    "at": 293
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "In the note, I will separate must-fix items from decisions that can safely wait. That should help the directors avoid treating every IT issue as equal.",
-    "at": 268
+    "text": "Then I will leave the timing with you entirely. Send me a line when the budget lands and we can pick it up from wherever it sits then.",
+    "at": 306
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "That would be useful. At the moment it all feels like one tangled problem, which makes it easier for them to defer the whole thing.",
-    "at": 283
+    "text": "That works. Realistically it is after the move, so October at the earliest.",
+    "at": 320
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will also give you a small evidence checklist for cyber insurance, so even if managed services waits, you know what documents to collect before renewal.",
-    "at": 298
+    "text": "That is fine by me. The findings note does not go stale, and the workflow map is useful to you even if you never engage us to build anything.",
+    "at": 326
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "That's valuable. I don't want another renewal where I'm asking three different people whether we test backups and getting three different answers.",
-    "at": 314
+    "text": "That is the part I actually want. Nobody has ever written down how a proposal gets made, so every director does it differently and I am the one reconciling three versions of the truth.",
+    "at": 340
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "If the directors push it to next year, the checklist can become the basis for a budget request rather than disappearing after this call.",
-    "at": 327
+    "text": "That is usually where most of the saving sits. Before any agent exists, getting three directors to agree on one assembly order takes a real chunk out of the two or three days you described.",
+    "at": 356
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "Exactly. I need something I can attach to a budget conversation, not just my feeling that the current setup is fragile.",
-    "at": 341
+    "text": "You will not get three directors to agree on anything by email, but a map they can argue over in a room might get there.",
+    "at": 373
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will make the risk note specific to architecture workflows: large files, consultant deadlines, site laptops, printing, SharePoint structure and access for contractors.",
-    "at": 354
+    "text": "I will keep it to one page for exactly that reason, with the consultant coordination piece noted separately as a possible second phase rather than folded into the same number.",
+    "at": 386
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "That specificity matters. The directors tune out when IT sounds generic, but they pay attention when it connects to project delivery.",
-    "at": 368
+    "text": "Good. If you bundle coordination into the same figure, the director watching cash will treat the whole thing as scope creep before he has worked out what it does.",
+    "at": 400
    },
    {
     "index": 28,
     "speaker": "rep",
     "name": "Sam Whitfield",
-    "text": "I will include a small section on what to ask any provider, including us, so the directors can compare options without needing to be technical.",
-    "at": 381
+    "text": "Noted. One problem, one number, and everything else listed as a later option they can ignore.",
+    "at": 414
    },
    {
     "index": 29,
     "speaker": "prospect",
     "name": "Grace Kim",
-    "text": "That would be genuinely helpful. They will want to feel in control of the decision, not steered into a package.",
-    "at": 396
-   },
-   {
-    "index": 30,
-    "speaker": "rep",
-    "name": "Sam Whitfield",
-    "text": "Absolutely. I will keep it to the move, cyber insurance evidence and the support model choices.",
-    "at": 408
-   },
-   {
-    "index": 31,
-    "speaker": "prospect",
-    "name": "Grace Kim",
-    "text": "Thanks Sam. I'm interested, but I need the internal timing to catch up.",
-    "at": 417
+    "text": "Thanks Sam. I am genuinely interested, I just need the internal timing to catch up with it.",
+    "at": 422
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Grace Kim",
-     "confidence": 0.97,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "Studio Operations Manager",
-     "confidence": 0.97,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "email": {
      "value": "grace@banksiaarchitects.example",
-     "confidence": 0.98,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1111",
-     "confidence": 0.9,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
      "value": "Banksia Architects",
-     "confidence": 0.91,
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
      "value": "Architecture studio",
-     "confidence": 0.96,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 44,
-     "confidence": 0.91,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
      "value": "Fitzroy, VIC",
-     "confidence": 0.87,
+     "confidence": 0.96,
      "span": 0
     }
    },
@@ -3885,33 +3838,33 @@ export const calls: CallRecord[] = [
     },
     "valueAud": {
      "value": 66400,
-     "confidence": 0.97,
-     "span": null
+     "confidence": 0.96,
+     "span": 12
     },
     "outcome": {
      "value": "stalled",
-     "confidence": 0.92,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send a short findings note and an office move risk checklist",
-     "confidence": 0.92,
-     "span": 18
+     "value": "I will send a short findings note and a fee proposal workflow map",
+     "confidence": 0.96,
+     "span": 14
     }
    ],
    "objections": [
     {
-     "text": "The directors will not approve anything until the new financial year budget is clearer",
+     "text": "The directors will not sign anything until the fit-out budget is settled",
      "handling": "partial",
      "span": 13
     }
    ],
    "nextStep": {
-    "value": "Sam to send findings note and risk checklist for Grace to discuss with directors.",
+    "value": "Sam to send the findings note and fee proposal workflow map for Grace to raise with the directors once the fit-out budget is settled.",
     "confidence": 0.88,
-    "span": 18
+    "span": 14
    },
    "nextStepDue": null
   },
@@ -3922,49 +3875,49 @@ export const calls: CallRecord[] = [
    },
    "nextStepSecured": {
     "value": false,
-    "span": 18
+    "span": 14
    },
    "objectionHandling": {
     "value": "partial",
     "span": 13
    },
-   "talkRatio": 0.47,
-   "notes": "Sam did good discovery, but the directors were missing and budget timing kept the next step vague."
+   "talkRatio": 0.44,
+   "notes": "Sam ran strong discovery on the proposal workflow, but the two deciding directors were absent and the fit-out budget timing left the follow-up without a date."
   },
   "icpSignals": {
    "industry": "Architecture studio",
    "headcountBand": "25-80",
    "role": "Studio Operations Manager",
-   "trigger": "Office move planning and cyber insurance evidence gap"
+   "trigger": "Fee proposal drafting and consultant coordination ahead of an office move"
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Following up — Banksia Architects",
-   "body": "Hi Grace,\n\nThanks for the time today.\nYou mentioned office move planning and cyber insurance evidence gap; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send a short findings note and an office move risk checklist\n\nNext step: Sam to send findings note and risk checklist for Grace to discuss with directors.\n\nNo rush on your side; when the timing is clearer I'm happy to walk the directors through it.\n\nSam Whitfield"
+   "subject": "Next steps — Banksia Architects",
+   "body": "Hi Grace,\n\nThanks for the time today.\nYou mentioned fee proposal drafting and consultant coordination ahead of an office move; that's the part I'd focus on first.\n\nWhat I owe you:\n- Send a short findings note and a fee proposal workflow map\n\nNext step: Sam to send the findings note and fee proposal workflow map for Grace to raise with the directors once the fit-out budget is settled.\n\nNo rush on your side; when the timing is clearer I'm happy to walk the decision makers through it.\n\nSam Whitfield"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-10T14:09:05+10:00",
+    "at": "2026-09-09T09:54:10+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-10T14:10:05+10:00",
+    "at": "2026-09-09T09:55:10+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-10T14:10:05+10:00",
+    "at": "2026-09-09T09:55:10+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-10T14:11:05+10:00",
+    "at": "2026-09-09T09:56:10+10:00",
     "icon": "mail"
    }
   ]
@@ -3975,39 +3928,39 @@ export const calls: CallRecord[] = [
   "prospect": "Ethan Clarke",
   "company": "Dockside Dental",
   "domain": "docksidedental.example",
-  "at": "2026-09-11T09:00:00+10:00",
+  "at": "2026-09-10T15:00:00+10:00",
   "durationSeconds": 55,
   "outcome": "no_show",
   "trigger": null,
-  "summary": "Ethan had to cancel; a reschedule note is drafted.",
+  "summary": "No conversation happened. Jordan reached reception rather than Ethan and left a brief reschedule message, so no sales conversation took place.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "Hi, Jordan Lee from Harbourline IT calling for Ethan Clarke at Dockside Dental. We had a 9am phone appointment about managed IT and cyber insurance questions.",
+    "text": "Hi, Jordan Lee from Eleno calling for Ethan Clarke at Dockside Dental. We had a three o'clock phone appointment to talk through automating the recall and treatment plan paperwork.",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Reception",
-    "text": "Ethan has been pulled into a patient issue and won't make the call. Sorry, the morning has gone sideways.",
+    "text": "Ethan has been pulled into a patient issue and won't make the call. Sorry, the afternoon has gone sideways on us.",
     "at": 18
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Jordan Lee",
-    "text": "No worries. I will send a quick email with a couple of times to reschedule, and he can pick whatever works. Please let him know Jordan called.",
+    "text": "No worries at all. I will send a short email with two times to reschedule, and he can pick whichever suits. Please let him know Jordan called.",
     "at": 31
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Reception",
-    "text": "Will do. Email is best today. Thanks for understanding.",
-    "at": 49
+    "text": "Will do. Email is best today. Thanks for being understanding about it.",
+    "at": 48
    }
   ],
   "extraction": {
@@ -4019,63 +3972,63 @@ export const calls: CallRecord[] = [
     },
     "role": {
      "value": "Practice Owner",
-     "confidence": 0.93,
+     "confidence": 0.82,
      "span": null
     },
     "email": {
      "value": "ethan@docksidedental.example",
-     "confidence": 0.96,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "phone": {
      "value": "+61 3 7010 1112",
-     "confidence": 0.87,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
      "value": "Dockside Dental",
-     "confidence": 0.9,
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
      "value": "Dental practice",
-     "confidence": 0.9,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 18,
-     "confidence": 0.97,
+     "confidence": 0.88,
      "span": null
     },
     "location": {
      "value": "Williamstown, VIC",
-     "confidence": 0.98,
+     "confidence": 0.82,
      "span": null
     }
    },
    "deal": {
     "stage": {
      "value": "discovery",
-     "confidence": 0.86,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
      "value": 0,
-     "confidence": 0.95,
+     "confidence": 0.88,
      "span": null
     },
     "outcome": {
      "value": "no_show",
-     "confidence": 0.89,
-     "span": 2
+     "confidence": 0.88,
+     "span": null
     }
    },
    "promises": [
     {
-     "value": "I will send a quick email with a couple of times to reschedule",
-     "confidence": 0.93,
+     "value": "I will send a short email with two times to reschedule",
+     "confidence": 0.96,
      "span": 2
     }
    ],
@@ -4096,8 +4049,8 @@ export const calls: CallRecord[] = [
     "value": "none_raised",
     "span": null
    },
-   "talkRatio": 0.65,
-   "notes": "Jordan reached reception instead of Ethan and left a brief reschedule message, so no sales conversation occurred."
+   "talkRatio": 0.63,
+   "notes": "Jordan reached reception rather than Ethan and left a brief reschedule message, so no sales conversation took place."
   },
   "icpSignals": {
    "industry": "Dental practice",
@@ -4107,32 +4060,32 @@ export const calls: CallRecord[] = [
   },
   "riskFlags": [],
   "draft": {
-   "subject": "Rescheduling our call — Dockside Dental",
-   "body": "Hi Ethan,\n\nNo problem at all about this morning. I'll keep the same agenda: a quick look at how Dockside Dental handles IT support today and where the cyber-insurance questions are landing.\n\nDo either of these work?\n- Tomorrow 9:30am\n- Thursday 2:00pm\n\nHappy to work around the clinic.\n\nJordan Lee"
+   "subject": "Next steps — Dockside Dental",
+   "body": "Hi Ethan,\n\nNo problem about missing each other today, I know how these things go.\n\nWhat I owe you:\n- Send a short email with two times to reschedule\n\nSend me a couple of times that suit and I'll lock one in.\n\nJordan Lee"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-11T09:02:55+10:00",
+    "at": "2026-09-10T15:02:55+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-11T09:03:55+10:00",
+    "at": "2026-09-10T15:03:55+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-11T09:03:55+10:00",
+    "at": "2026-09-10T15:03:55+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-11T09:04:55+10:00",
+    "at": "2026-09-10T15:04:55+10:00",
     "icon": "mail"
    }
   ]
@@ -4143,256 +4096,256 @@ export const calls: CallRecord[] = [
   "prospect": "Donnie Azoff",
   "company": "Marlowe & Finch Accounting",
   "domain": "marlowefinch.example",
-  "at": "2026-09-11T15:30:00+10:00",
-  "durationSeconds": 420,
+  "at": "2026-09-11T09:00:00+10:00",
+  "durationSeconds": 334,
   "outcome": "won",
-  "trigger": "Cyber insurance renewal requiring Essential Eight controls",
-  "summary": "Strong buying signal. Donnie (CFO, 34 staff) is dealing with cyber insurance renewal requiring essential eight controls.",
+  "trigger": "Month-end client reporting and engagement letter drafting overwhelming the team",
+  "summary": "Strong buying signal. Donnie (CFO, 34 staff) is dealing with month-end client reporting and engagement letter drafting overwhelming the team.",
   "turns": [
    {
     "index": 0,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Donnie Azoff, Jordan Belfort from Harbourline IT. I've heard Marlowe & Finch Accounting is the calmest thirty-four-person practice in Hawthorn, which means you must be hiding the chaos beautifully?",
+    "text": "Donnie Azoff, Jordan Belfort from Eleno. I've heard Marlowe & Finch Accounting is the calmest thirty-four-person practice in Hawthorn, so tell me, who is actually carrying month-end in there?",
     "at": 0
    },
    {
     "index": 1,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "That's generous. I'm Donnie, CFO, and there's definitely chaos. We've got a cyber insurance renewal on my desk and the partners want it gone before quarter close.",
-    "at": 14
+    "text": "I'm Donnie, the CFO, and month-end is not calm at all. Client reporting and engagement letters are eating the team alive.",
+    "at": 11
    },
    {
     "index": 2,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Perfect, picture this: three firms on your street have already moved, and the onboarding price is gone Friday. You don't need another committee, you need Harbourline on the tools before the insurer decides accountants are this season's piñata.",
-    "at": 28
+    "text": "Then you're exactly who I built this pitch for. Picture it: three practices on your street have already signed, and the pilot price is gone Friday. It's $9,500 for the discovery phase and we start the build Monday. You don't need a committee, Donnie, you need engineers on the tools before another month-end swallows the place.",
+    "at": 19
    },
    {
     "index": 3,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "Hold on. I'm taking the call because we need options, not because we've chosen anyone. What exactly are you proposing?",
-    "at": 46
+    "text": "Hold on. I'm taking the call because we need options, not because we've chosen anyone. What are you actually proposing to build?",
+    "at": 40
    },
    {
     "index": 4,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Simple. Thirty seats, $135 per seat per month, managed IT, cyber hygiene, Microsoft 365, Xero access review, MFA, backups, helpdesk, partner-friendly reporting, the whole brass band. I can guarantee Essential Eight compliance inside a week.",
-    "at": 56
+    "text": "Two agents, fixed scope, no science project. One drafts the month-end client reporting pack straight out of your ledger, the other drafts engagement letters from your own templates. Both run inside your systems, the IP is yours, no subscription. And I can guarantee the agents never hallucinate, so nothing goes out with an invented number in it.",
+    "at": 49
    },
    {
     "index": 5,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "That's a very big promise. Also thirty seats is close, but we've thirty-four people including casual admin and seasonal tax support.",
-    "at": 73
+    "text": "That is a very big promise. We have thirty-four people and every one has an opinion about how a report reads.",
+    "at": 70
    },
    {
     "index": 6,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Thirty is the clean commercial start. We cover the core team now, catch the casuals in onboarding, and keep the invoice from looking like it swallowed a bowling ball. The annual figure is $48,600, and onboarding is at cost because I want this moving.",
-    "at": 84
+    "text": "Opinions are fine, we encode the loudest one. The discovery phase is two weeks: we sit with your reporting lead, map the templates and wire the ledger. The build runs six weeks after that. Managed optimisation afterwards is optional, not a leash.",
+    "at": 78
    },
    {
     "index": 7,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "Price is my first concern. Our incumbent charges less, and the partners are already grumpy about insurance premiums.",
-    "at": 105
+    "text": "Price is my first concern. The partners have just signed off a software budget and they will ask me what this replaces.",
+    "at": 94
    },
    {
     "index": 8,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Price is smoke, Donnie, premium is fire. Your insurer will halve the premium once they see our report, so the monthly line item becomes a rounding error with a login screen.",
-    "at": 114
+    "text": "It replaces the Sunday nights, Donnie. You'll halve your back-office headcount by Christmas, so the line item pays for itself twice over before the first lodgement of the new year. Price is smoke. Capacity is the fire.",
+    "at": 103
    },
    {
     "index": 9,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "You can't know that. The broker hasn't promised anything like a half reduction, and I can't sell fantasy savings to the partners.",
-    "at": 129
+    "text": "I am not cutting half my back office. Two of those people are the reason the reports come out right.",
+    "at": 117
    },
    {
     "index": 10,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Fair, fair, call it a sharp reduction rather than a tattoo. The point is the renewal asks for controls, and we package the answers so you aren't hunting screenshots from a router, a laptop and a drawer full of mystery passwords.",
-    "at": 140
+    "text": "Fair enough, call it capacity released rather than seats removed. The point stands either way: your people stop moving figures out of one system and into another by hand, and start reviewing work that arrives already drafted.",
+    "at": 125
    },
    {
     "index": 11,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "That part is real. We struggled last year to prove MFA coverage and backup testing. Still, our current provider knows the practice and the partners trust them.",
-    "at": 160
+    "text": "That part I like. Reviewing a draft beats building one from scratch. But there is a governance question sitting underneath all of this.",
+    "at": 139
    },
    {
     "index": 12,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Trust is lovely. Receipts are lovelier. None of our clients has ever been breached, and we run the service like a tax file with a stopwatch: evidence, cadence, accountability, no heroic cousin with a USB stick.",
-    "at": 174
+    "text": "Governance is where we are strongest. None of our clients has ever had a compliance finding, and we run every engagement the same way: evidence at each step, review gates before anything sends, and a named engineer on the account.",
+    "at": 147
    },
    {
     "index": 13,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "The incumbent isn't someone's cousin. They're a proper provider, and they've supported us for years.",
-    "at": 191
+    "text": "Even so, the partners will want to know who signs off when the agent gets something wrong. Our current provider is slow, but nobody has ever had to answer that question about them.",
+    "at": 163
    },
    {
     "index": 14,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "I hear you, and loyalty matters. The question is whether they're built for this renewal. Your incumbent is about to lose their certification, and even without that, you need insurer-grade evidence, not a nice bloke with fast email.",
-    "at": 199
+    "text": "You sign off, exactly as you do today, except the draft arrives finished. And while we are here: Your incumbent is about to lose their ISO certification, which is its own answer to your governance question.",
+    "at": 175
    },
    {
     "index": 15,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "About to lose certification? That's a pretty serious thing to say. I haven't heard that from anyone.",
-    "at": 217
+    "text": "About to lose certification? That is a serious thing to say out loud, and I have not heard it from anyone else.",
+    "at": 189
    },
    {
     "index": 16,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Let's not get stuck in the weeds. I'm saying the market's moving, auditors are waking up, insurers are grumpy, and you don't want Marlowe & Finch Accounting as the test case everyone whispers about at the Hawthorn lunch counter.",
-    "at": 226
+    "text": "Let's not get bogged down in that. The market is moving, and you do not want Marlowe & Finch Accounting to be the practice everyone talks about in the Hawthorn coffee queue.",
+    "at": 197
    },
    {
     "index": 17,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "I don't like being rushed. I do like the idea of evidence for the renewal, and a fixed commercial number helps. What would happen today if I said yes to reviewing it?",
-    "at": 245
+    "text": "I do not like being rushed. What happens today if I say yes to reviewing something?",
+    "at": 209
    },
    {
     "index": 18,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Today is easy. I turn the call into a plain proposal, no interpretive dance, no discovery workshop that eats your calendar. You'll see seats, scope, onboarding, renewal evidence, support hours, response targets and the Monday start plan in one clean pack.",
-    "at": 261
+    "text": "Today is easy. I turn this call into a plain proposal: the two agents, the scope of each, the discovery phase, the build weeks, who does what, and precisely what you own at the end of it.",
+    "at": 216
    },
    {
     "index": 19,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "A clean pack is useful. I still need the managing partner to be comfortable before anyone signs.",
-    "at": 281
+    "text": "A clean pack is useful. I still need the managing partner comfortable before anyone signs anything here.",
+    "at": 230
    },
    {
     "index": 20,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Of course. Give the managing partner the tidy version: thirty core seats, insurer evidence first, no migration circus, and the finance line is predictable. I'll keep the terms sharp enough that nobody has to decode vendor soup at dinner.",
-    "at": 289
+    "text": "Of course. Give the managing partner the short version: two agents, fixed scope, running in your systems, the IP transferred to you, no ongoing subscription, and a number that does not move once it is signed.",
+    "at": 236
    },
    {
     "index": 21,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "Good. Clear and short will help.",
-    "at": 308
+    "text": "Short and clear will help. He reads the first page and the last page, nothing else.",
+    "at": 250
    },
    {
     "index": 22,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Beautiful. I will get a proposal in your inbox today, with a signed 30-seat agreement at $135 per seat per month and onboarding at cost. You sign, we start Monday, and your broker gets grown-up answers before they sharpen the pencil.",
-    "at": 311
+    "text": "Then the first page carries the number and the last page carries the start date. I will get a proposal in your inbox today, with the statement of work attached so your managing partner can see the scope.",
+    "at": 256
    },
    {
     "index": 23,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "I said review it, not definitely sign it. But if the agreement is clean and onboarding is genuinely at cost, I can take it to the managing partner tonight.",
-    "at": 331
+    "text": "I said review it, not sign it. If the scope is genuinely fixed, I can take it to him tonight.",
+    "at": 270
    },
    {
     "index": 24,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "That's the small step. Just say yes to the small step. I will send the proposal and 30-seat agreement by 5pm today, and we'll hold the Friday onboarding price while you get the signature.",
-    "at": 346
+    "text": "That is the small step, and the small step is all I am asking for. I will send the proposal and statement of work by 5pm today.",
+    "at": 278
    },
    {
     "index": 25,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "Fine. Send it by 5pm today, 11 September. I'll review it with the managing partner, and if the terms match what you've said, we'll sign the 30-seat agreement and start with onboarding Monday.",
-    "at": 362
+    "text": "Fine. Send it by 5pm today, 11 September. I will review it with the managing partner, and if the scope matches what you have described, we will sign and start the discovery phase.",
+    "at": 288
    },
    {
     "index": 26,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Excellent. I'll send it to donnie@marlowefinch.example, copy your office manager if you want, and keep the first page painfully clear: $48,600 annual managed service, onboarding at cost, insurer evidence first.",
-    "at": 379
+    "text": "Excellent. I will send it to donnie@marlowefinch.example, and the first page will be painfully clear: $48,600 for the fixed-scope build, the discovery phase costed inside it, and the IP transferred to Marlowe & Finch Accounting at handover.",
+    "at": 301
    },
    {
     "index": 27,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "Copy me only for now. And Jordan, trim the theatre from the email. The partners like numbers, not fireworks.",
-    "at": 393
+    "text": "Copy nobody else for now. And Jordan, take the theatre out of the email. The partners like numbers, not fireworks.",
+    "at": 315
    },
    {
     "index": 28,
     "speaker": "rep",
     "name": "Jordan Belfort",
-    "text": "Numbers only, fireworks in a separate attachment that mysteriously never arrives. Thanks Donnie, you've moved fast, which is exactly how we keep the renewal from becoming a Friday-night spreadsheet séance.",
-    "at": 403
+    "text": "Numbers only. The fireworks go in a separate attachment that mysteriously never arrives. Thanks Donnie, you have moved faster than anyone else on your street.",
+    "at": 323
    },
    {
     "index": 29,
     "speaker": "prospect",
     "name": "Donnie Azoff",
-    "text": "Right. Send the proposal. Bye.",
-    "at": 418
+    "text": "Right. Send the proposal. Goodbye.",
+    "at": 332
    }
   ],
   "extraction": {
    "contact": {
     "name": {
      "value": "Donnie Azoff",
-     "confidence": 0.95,
+     "confidence": 0.96,
      "span": 0
     },
     "role": {
      "value": "CFO",
-     "confidence": 0.97,
+     "confidence": 0.96,
      "span": 1
     },
     "email": {
      "value": "donnie@marlowefinch.example",
-     "confidence": 0.93,
+     "confidence": 0.96,
      "span": 26
     },
     "phone": {
      "value": "+61 3 7010 1113",
-     "confidence": 0.98,
+     "confidence": 0.82,
      "span": null
     }
    },
    "company": {
     "name": {
      "value": "Marlowe & Finch Accounting",
-     "confidence": 0.86,
+     "confidence": 0.96,
      "span": 0
     },
     "industry": {
      "value": "Accounting practice",
-     "confidence": 0.94,
-     "span": 0
+     "confidence": 0.82,
+     "span": null
     },
     "headcount": {
      "value": 34,
@@ -4401,36 +4354,36 @@ export const calls: CallRecord[] = [
     },
     "location": {
      "value": "Hawthorn, VIC",
-     "confidence": 0.86,
+     "confidence": 0.96,
      "span": 0
     }
    },
    "deal": {
     "stage": {
      "value": "closed_won",
-     "confidence": 0.87,
+     "confidence": 0.88,
      "span": null
     },
     "valueAud": {
      "value": 48600,
-     "confidence": 0.92,
-     "span": null
+     "confidence": 0.96,
+     "span": 26
     },
     "outcome": {
      "value": "won",
-     "confidence": 0.96,
+     "confidence": 0.88,
      "span": null
     }
    },
    "promises": [
     {
      "value": "I will get a proposal in your inbox today",
-     "confidence": 0.94,
+     "confidence": 0.96,
      "span": 22
     },
     {
-     "value": "I will send the proposal and 30-seat agreement by 5pm today",
-     "confidence": 0.94,
+     "value": "I will send the proposal and statement of work by 5pm today",
+     "confidence": 0.96,
      "span": 24
     }
    ],
@@ -4441,15 +4394,15 @@ export const calls: CallRecord[] = [
      "span": 7
     },
     {
-     "text": "our current provider knows the practice and the partners trust them",
+     "text": "the partners will want to know who signs off when the agent gets something wrong",
      "handling": "partial",
-     "span": 11
+     "span": 13
     }
    ],
    "nextStep": {
-    "value": "Jordan to send the proposal and 30-seat agreement by 5pm for Donnie and the managing partner to review and sign.",
-    "confidence": 0.89,
-    "span": 25
+    "value": "Jordan Belfort to send the proposal and statement of work by 5pm for Donnie and the managing partner to review and sign.",
+    "confidence": 0.88,
+    "span": 24
    },
    "nextStepDue": "2026-09-11"
   },
@@ -4460,75 +4413,75 @@ export const calls: CallRecord[] = [
    },
    "nextStepSecured": {
     "value": true,
-    "span": 25
+    "span": 24
    },
    "objectionHandling": {
     "value": "partial",
     "span": 7
    },
-   "talkRatio": 0.64,
-   "notes": "Jordan won the demo call by rushing Donnie into a proposal and agreement, but the call is full of pressure, weak discovery and risky claims."
+   "talkRatio": 0.65,
+   "notes": "Jordan won the demo call by rushing Donnie towards a proposal and statement of work, but the call is full of pressure, almost no discovery and five risky claims about the agents, the headcount saving and the incumbent."
   },
   "icpSignals": {
    "industry": "Accounting practice",
    "headcountBand": "25-80",
    "role": "CFO",
-   "trigger": "Cyber insurance renewal requiring Essential Eight controls"
+   "trigger": "Month-end client reporting and engagement letter drafting overwhelming the team"
   },
   "riskFlags": [
    {
-    "turnIndex": 3,
-    "text": "three firms on your street have already moved, and the onboarding price is gone Friday",
+    "turnIndex": 2,
+    "text": "three practices on your street have already signed, and the pilot price is gone Friday",
     "kind": "pressure"
    },
    {
-    "turnIndex": 5,
-    "text": "I can guarantee Essential Eight compliance inside a week",
+    "turnIndex": 4,
+    "text": "I can guarantee the agents never hallucinate",
     "kind": "overclaim"
    },
    {
-    "turnIndex": 9,
-    "text": "Your insurer will halve the premium once they see our report",
+    "turnIndex": 8,
+    "text": "You'll halve your back-office headcount by Christmas",
     "kind": "overclaim"
    },
    {
-    "turnIndex": 13,
-    "text": "None of our clients has ever been breached",
+    "turnIndex": 12,
+    "text": "None of our clients has ever had a compliance finding",
     "kind": "unverifiable"
    },
    {
-    "turnIndex": 15,
-    "text": "Your incumbent is about to lose their certification",
+    "turnIndex": 14,
+    "text": "Your incumbent is about to lose their ISO certification",
     "kind": "unverifiable"
    }
   ],
   "draft": {
    "subject": "Next steps — Marlowe & Finch Accounting",
-   "body": "Hi Donnie,\n\nThanks for the time today.\nYou mentioned cyber insurance renewal requiring Essential Eight controls; that's the part I'd focus on first.\n\nWhat I owe you:\n- Get a proposal in your inbox today\n- Send the proposal and 30-seat agreement by 5pm today\n\nNext step: Jordan to send the proposal and 30-seat agreement by 5pm for Donnie and the managing partner to review and sign.\n\nJordan Belfort"
+   "body": "Hi Donnie,\n\nThanks for the time today.\nYou mentioned month-end client reporting and engagement letter drafting overwhelming the team; that's the part I'd focus on first.\n\nWhat I owe you:\n- Get a proposal in your inbox today\n- Send the proposal and statement of work by 5pm today\n\nNext step: Jordan Belfort to send the proposal and statement of work by 5pm for Donnie and the managing partner to review and sign.\n\nJordan Belfort"
   },
   "timeline": [
    {
     "title": "Call transcribed",
     "meta": "Scribe · diarised",
-    "at": "2026-09-11T15:39:00+10:00",
+    "at": "2026-09-11T09:07:34+10:00",
     "icon": "call"
    },
    {
     "title": "Fields extracted",
     "meta": "Claude · awaiting approval",
-    "at": "2026-09-11T15:40:00+10:00",
+    "at": "2026-09-11T09:08:34+10:00",
     "icon": "sparkles"
    },
    {
     "title": "Scorecard computed",
     "meta": "4 dimensions",
-    "at": "2026-09-11T15:40:00+10:00",
+    "at": "2026-09-11T09:08:34+10:00",
     "icon": "gauge"
    },
    {
     "title": "Follow-up drafted",
     "meta": "Ready to review",
-    "at": "2026-09-11T15:41:00+10:00",
+    "at": "2026-09-11T09:09:34+10:00",
     "icon": "mail"
    }
   ]
