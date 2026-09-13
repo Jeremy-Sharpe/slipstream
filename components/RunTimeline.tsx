@@ -35,6 +35,14 @@ const EMAIL_LABELS: Partial<Record<StepId, { working: string; done: string }>> =
   draft: { working: "Drafting the reply", done: "Reply drafted" },
 };
 
+/** The draft textarea takes the height of its text, so the card keeps the
+    height it had while the draft streamed and nothing is cut off. */
+const fitToContent = (el: HTMLTextAreaElement | null) => {
+  if (!el) return;
+  el.style.height = "0";
+  el.style.height = `${el.scrollHeight}px`;
+};
+
 const fmtAud = (n: number | null | undefined, none = "None") => (n == null ? none : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -280,11 +288,12 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
             <p className="text-[15px] font-medium text-ink">{call.draft.subject}</p>
             {draftStreamed ? (
               <textarea
+                ref={fitToContent}
                 value={draftBody}
-                onChange={(e) => { setSeen({ runId, body: e.target.value }); setDraftBody(e.target.value); }}
+                onChange={(e) => { fitToContent(e.currentTarget); setSeen({ runId, body: e.target.value }); setDraftBody(e.target.value); }}
                 readOnly={approved}
-                className="mt-2 w-full resize-none rounded-lg bg-white px-3 py-2 text-[15px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
-                rows={Math.min(12, draftBody.split("\n").length + 1)}
+                className="mt-2 w-full resize-none overflow-hidden rounded-lg bg-white px-3 py-2 text-[15px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
+                rows={1}
               />
             ) : (
               <div className="mt-2 rounded-lg bg-white px-3 py-2 whitespace-pre-line">
