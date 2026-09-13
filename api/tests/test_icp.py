@@ -3,13 +3,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from app.core.config import Settings
-from app.schemas.icp import IcpProfile, InteractionEvidence
+from app.schemas.icp import DealRecord, IcpProfile, InteractionEvidence
 from app.services.crm_mirror import mirror_interaction
 from app.services.fixture_history import load_fixture_history
 from app.services.icp import (
     MAX_MODEL_INPUT_CHARS,
     _cohort_payload,
     _fit_model_budget,
+    _ground_profile,
     derive_icp,
     evidence_inventory,
     won_centroid,
@@ -64,6 +65,18 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     assert profile.profile.source_summary.calls == 12
     assert profile.profile.source_summary.emails == 0
     assert profile.profile.source_summary.outcome_labelled == 11
+    assert profile.profile.industries == [
+        "Architecture and lab planning consultancy",
+        "Multi-site allied health clinic",
+        "Family law firm",
+        "Accounting practice",
+        "Multi-site physiotherapy clinic",
+    ]
+    assert profile.profile.headcount_band == "25-80"
+    assert "Creative branding studio" not in profile.profile.industries
+    assert "Sam" not in profile.profile.summary
+    assert "Jordan" not in profile.profile.summary
+    assert "won-deal industries" in profile.profile.origami_brief
     assert len(store.source_deals_for_profile(str(profile.id))) == 5
     assert all(
         not deal.metadata.get("demo") for deal in store.source_deals_for_profile(str(profile.id))
@@ -124,6 +137,107 @@ def test_derive_icp_uses_email_as_active_evidence_not_negative_evidence() -> Non
     assert profile.profile.source_summary.deals == 13
     assert profile.profile.source_summary.calls == 12
     assert profile.profile.source_summary.emails == 1
+    assert "Acme" not in profile.profile.summary
+    assert "cyber insurance renewal is due next month" not in profile.profile.origami_brief
+
+
+def test_derive_icp_deduplicates_model_disqualifiers() -> None:
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+
+    def repeated(**kwargs: object) -> IcpProfile:
+        profile = fake_structured(**kwargs)
+        return profile.model_copy(
+            update={"disqualifiers": ["No next step", " no next step ", "No trigger"]}
+        )
+
+    profile = derive_icp(store, repeated, fake_embed, Settings(_env_file=None))
+
+    assert profile.profile.disqualifiers == ["No next step", "No trigger"]
+
+
+def test_ground_profile_rejects_malformed_and_unsupported_won_signals() -> None:
+    profile = _ground_profile(
+        fake_structured(user="", model="test"),
+        [
+            DealRecord(
+                id="won-1",
+                name="Sparse one",
+                stage="customer",
+                outcome="won",
+                industry=" ",
+                contact_role=" ",
+                metadata={
+                    "trigger": True,
+                    "icp_signals": {
+                        "industry": "Supported fallback industry",
+                        "role": "Supported fallback role",
+                        "trigger": "Contract renewal",
+                        "headcount_band": {"min": 25, "max": 80},
+                    },
+                },
+            ),
+            DealRecord(
+                id="won-2",
+                name="Sparse two",
+                stage="customer",
+                outcome="won",
+                metadata={"icp_signals": {}},
+            ),
+        ],
+    )
+
+    assert profile.industries == ["Supported fallback industry"]
+    assert profile.roles == ["Supported fallback role"]
+    assert profile.triggers == ["Contract renewal"]
+    assert profile.headcount_band == "Not established"
+    assert "concrete" not in profile.summary
+    assert "technology need" not in profile.origami_brief
+    assert "Contract renewal" in profile.origami_brief
+
+
+def test_ground_profile_reconciles_headcount_band_across_every_win() -> None:
+    base = fake_structured(user="", model="test")
+    first = DealRecord(
+        id="won-1",
+        name="First",
+        stage="customer",
+        outcome="won",
+        employee_count=42,
+        metadata={"icp_signals": {"headcount_band": "25-80"}},
+    )
+    contradictory = DealRecord(
+        id="won-2",
+        name="Second",
+        stage="customer",
+        outcome="won",
+        employee_count=500,
+        metadata={"icp_signals": {}},
+    )
+    unknown = contradictory.model_copy(update={"employee_count": None})
+    stale_bands = [
+        first,
+        contradictory.model_copy(
+            update={"metadata": {"icp_signals": {"headcount_band": "25-80"}}}
+        ),
+    ]
+
+    assert _ground_profile(base, [first, contradictory]).headcount_band == "42-500"
+    assert _ground_profile(base, [first, unknown]).headcount_band == "Not established"
+    assert _ground_profile(base, stale_bands).headcount_band == "42-500"
+
+    equivalent_bands = [
+        first.model_copy(
+            update={
+                "employee_count": None,
+                "metadata": {"icp_signals": {"headcount_band": "Under 80"}},
+            }
+        ),
+        unknown.model_copy(
+            update={"metadata": {"icp_signals": {"headcount_band": "under-080"}}}
+        ),
+    ]
+    assert _ground_profile(base, equivalent_bands).headcount_band == "under-80"
 
 
 def test_icp_candidates_exclude_unproven_live_deals_and_bound_model_input() -> None:
