@@ -3,9 +3,9 @@
 // Everything Home can hand the API: a fixture call, an uploaded recording, a
 // pasted transcript (persisted over the live-coach socket, the only write path
 // for text) and a pasted email thread.
-import { wsUrl } from "@/lib/api/client";
 import {
-  INGEST_TOKEN,
+  ApiError,
+  describeFailure,
   getEmailThread,
   ingestEmail,
   ingestFixtureCall,
@@ -22,7 +22,6 @@ export const REP_NAME = "Sam Whitfield";
 const MAILBOX = { name: REP_NAME, email: "sam@harbourlineit.example" };
 const MAILBOX_ID = "harbourline-sales";
 const WORDS_PER_MINUTE = 150;
-const SOCKET_TIMEOUT_MS = 30_000;
 
 const stamp = () => Date.now().toString(36);
 
@@ -72,89 +71,28 @@ export function parseTranscript(text: string): { turns: ParsedTurn[]; speakers: 
   return { turns, speakers: [...new Set(turns.map((turn) => turn.speaker))] };
 }
 
-type SocketMessage = { type?: string; call?: unknown; detail?: string; code?: string };
-
-/** The socket is the only write path for a transcript that was not spoken into a mic. */
-export function ingestTranscript(text: string): Promise<{ call: ApiCall; entry: ConversationEntry }> {
-  const { turns, speakers } = parseTranscript(text);
+/** Persisted through the live-coach socket, relayed by app/gateway/transcript so the token stays on the server. */
+export async function ingestTranscript(text: string): Promise<{ call: ApiCall; entry: ConversationEntry }> {
+  const { turns: parsed, speakers } = parseTranscript(text);
   const rep = speakers[0] ?? REP_NAME;
   const prospect = speakers.find((speaker) => speaker !== rep) ?? null;
-  const sourceExternalId = `paste-${stamp()}`;
-  const subject = prospect ?? "Pasted transcript";
-
-  return new Promise((resolve, reject) => {
-    let socket: WebSocket;
-    try {
-      socket = new WebSocket(wsUrl("/coach/live"));
-    } catch (error) {
-      reject(error instanceof Error ? error : new Error("Could not open the live session"));
-      return;
-    }
-    let settled = false;
-    const finish = (fn: () => void) => {
-      if (settled) return;
-      settled = true;
-      window.clearTimeout(timer);
-      try {
-        socket.close();
-      } catch {
-        // Already closing.
-      }
-      fn();
-    };
-    const timer = window.setTimeout(
-      () => finish(() => reject(new Error("The live session did not answer in 30 seconds"))),
-      SOCKET_TIMEOUT_MS,
-    );
-
-    socket.onopen = () => {
-      socket.send(JSON.stringify({
-        type: "start",
-        source_external_id: sourceExternalId,
-        subject,
-        rep_name: rep,
-        ...(INGEST_TOKEN ? { ingest_token: INGEST_TOKEN } : {}),
-      }));
-      let at = 0;
-      turns.forEach((turn, sequence) => {
-        const words = turn.text.split(/\s+/).filter(Boolean).length;
-        const duration = Math.max(1000, Math.round((words / WORDS_PER_MINUTE) * 60_000));
-        socket.send(JSON.stringify({
-          type: "transcript",
-          sequence,
-          speaker: turn.speaker,
-          role: turn.speaker === rep ? "rep" : "prospect",
-          text: turn.text,
-          start_ms: at,
-          end_ms: at + duration,
-        }));
-        at += duration;
-      });
-      socket.send(JSON.stringify({ type: "stop" }));
-    };
-
-    socket.onmessage = (event) => {
-      let message: SocketMessage;
-      try {
-        message = JSON.parse(String(event.data)) as SocketMessage;
-      } catch {
-        return;
-      }
-      if (message.type === "error") {
-        finish(() => reject(new Error(message.detail ?? message.code ?? "The live session failed")));
-        return;
-      }
-      if (message.type !== "completed" || !message.call) return;
-      const call = message.call as ApiCall;
-      finish(() => resolve({
-        call,
-        entry: entryForCall(call, { pasted: true, company: "Pasted transcript", contact: prospect ?? "Prospect" }),
-      }));
-    };
-
-    socket.onerror = () => finish(() => reject(new Error("The live session could not be reached")));
-    socket.onclose = () => finish(() => reject(new Error("The live session closed before the call was saved")));
+  let at = 0;
+  const turns = parsed.map((turn, sequence) => {
+    const words = turn.text.split(/\s+/).filter(Boolean).length;
+    const duration = Math.max(1000, Math.round((words / WORDS_PER_MINUTE) * 60_000));
+    const start = at;
+    at += duration;
+    return { sequence, speaker: turn.speaker, role: turn.speaker === rep ? "rep" : "prospect", text: turn.text, start_ms: start, end_ms: at };
   });
+  const response = await fetch("/gateway/transcript", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source_external_id: `paste-${stamp()}`, subject: prospect ?? "Pasted transcript", rep_name: rep, turns }),
+  });
+  const payload = (await response.json().catch(() => null)) as { detail?: string } | null;
+  if (!response.ok) throw new ApiError(describeFailure(response.status, payload?.detail), response.status);
+  const call = payload as unknown as ApiCall;
+  return { call, entry: entryForCall(call, { pasted: true, company: "Pasted transcript", contact: prospect ?? "Prospect" }) };
 }
 
 export async function ingestEmailThread(

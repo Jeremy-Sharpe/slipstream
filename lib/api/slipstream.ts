@@ -896,21 +896,21 @@ export async function getLatestPlaybook(signal?: AbortSignal): Promise<ApiPlaybo
   }
 }
 
-/* A deployment with INGEST_TOKEN set rejects every mutation without this header
-   (scorecards, emails, the coach socket). Unset here, the requests go out bare
-   and the API answers 401, which the step surfaces. */
-export const INGEST_TOKEN = process.env.NEXT_PUBLIC_INGEST_TOKEN ?? "";
-export const ingestHeaders = (): Record<string, string> =>
-  INGEST_TOKEN ? { "X-Slipstream-Ingest-Token": INGEST_TOKEN } : {};
+export const LOCKED_MESSAGE = "Locked on this deployment: the web server has no ingest token for this action";
+
+export function describeFailure(status: number, detail?: string): string {
+  if (status === 401) return LOCKED_MESSAGE;
+  return detail ?? `Slipstream API returned ${status}`;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(apiUrl(path), {
     ...init,
-    headers: { "Content-Type": "application/json", ...ingestHeaders(), ...init?.headers },
+    headers: { "Content-Type": "application/json", ...init?.headers },
   });
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { detail?: string } | null;
-    throw new ApiError(payload?.detail ?? `Slipstream API returned ${response.status}`, response.status);
+    throw new ApiError(describeFailure(response.status, payload?.detail), response.status);
   }
   return (await response.json()) as T;
 }
@@ -1007,10 +1007,10 @@ export async function transcribeCall(file: File, subject: string, repName: strin
   body.append("file", file);
   body.append("subject", subject);
   body.append("rep_name", repName);
-  const response = await fetch(apiUrl("/calls/transcribe"), { method: "POST", body, headers: ingestHeaders(), signal });
+  const response = await fetch(apiUrl("/calls/transcribe"), { method: "POST", body, signal });
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { detail?: string } | null;
-    throw new ApiError(payload?.detail ?? `Slipstream API returned ${response.status}`, response.status);
+    throw new ApiError(describeFailure(response.status, payload?.detail), response.status);
   }
   return parseCall(await response.json());
 }
