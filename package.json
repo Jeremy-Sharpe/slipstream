@@ -12,7 +12,8 @@
     "smoke:production": "node scripts/smoke-production.mjs",
     "seed:demo-campaign": "node scripts/seed-demo-campaign.mjs",
     "test:smoke": "node --test scripts/*.test.mjs",
-    "test:demo-browser": "node scripts/revenue-loop-browser.mjs"
+    "test:demo-browser": "node scripts/revenue-loop-browser.mjs",
+    "lint:eslint": "eslint app components lib --ignore-pattern \"**/legacy/**\""
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -34,6 +35,8 @@
     "@types/node": "^22.19.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.5",
     "oxlint": "^1.50.0",
     "playwright": "^1.55.0",
     "postcss": "^8.5.28",
