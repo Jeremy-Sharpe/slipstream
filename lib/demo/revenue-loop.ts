@@ -44,7 +44,7 @@ export function campaignSafety(campaign: ApiCampaign): { verified: boolean; summ
   const noAttempts = campaign.items.every((item) => item.attempt_count === 0);
   const noOtherStates = campaign.counts.running === 0 && campaign.counts.sent === 0 && campaign.counts.retryable === 0 && campaign.counts.failed === 0 && campaign.counts.reconcile === 0;
   const item = campaign.items[0];
-  const noDeliveryEvidence = item?.receipt == null && item?.http_status == null && item?.last_attempt_at == null && item?.outcome == null && !item?.reconciliation_required;
+  const noDeliveryEvidence = item?.receipt == null && item?.http_status == null && item?.last_attempt_at == null && item?.next_attempt_at == null && item?.outcome == null && item?.retryable === false && item?.reconciliation_required === false;
   const exactEnrollment = campaign.counts.queued === 1 && campaign.items.length === 1 && item?.state === "queued";
   const controlled = campaign.status === "paused" && scheduleMatches && noOtherStates && noAttempts && noDeliveryEvidence && exactEnrollment;
   if (controlled) {
@@ -69,6 +69,11 @@ export function parseStoredStep(value: string | null, stepCount: number): number
 
 export function nextPresenterStep(current: number, stepCount: number): number {
   return current < 0 || current >= stepCount - 1 ? 0 : current + 1;
+}
+
+export function playbackLabel(reducedMotion: boolean, playing: boolean, active: number, stepCount: number): string {
+  if (reducedMotion) return active < 0 ? "Start loop" : active >= stepCount - 1 ? "Restart loop" : "Next step";
+  return playing ? "Pause guided loop" : active < 0 ? "Play guided loop" : "Resume guided loop";
 }
 
 export function modelLabel(provider?: string, model?: string): string {

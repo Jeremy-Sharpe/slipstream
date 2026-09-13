@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, BarChart3, Check, DatabaseZap, MailCheck, Pause,
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getCampaigns, getLatestIcp, getReadiness } from "@/lib/api/slipstream";
-import { EMPTY_DEMO_PROOF, campaignSafety, modelLabel, nextPresenterStep, parseStoredStep, proofFooter, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
+import { EMPTY_DEMO_PROOF, campaignSafety, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof, type DemoProof } from "@/lib/demo/revenue-loop";
 import { cn } from "@/lib/utils";
 
 type LoopStep = { eyebrow: string; title: string; result: string; detail: string; impact: string; provenance: string; verified: boolean; href: string; cta: string; icon: LucideIcon };
@@ -35,7 +35,8 @@ export function RevenueLoop() {
     let mounted = true;
     let request = 0;
     let controller: AbortController | null = null;
-    const refresh = async () => {
+    const refresh = async (invalidate = false) => {
+      if (invalidate && mounted) { setProof(EMPTY_DEMO_PROOF); setVerifiedAt(null); }
       controller?.abort();
       const nextController = new AbortController();
       controller = nextController;
@@ -49,9 +50,11 @@ export function RevenueLoop() {
     };
     void refresh();
     const interval = window.setInterval(() => void refresh(), 30_000);
-    const onFocus = () => void refresh();
+    const onFocus = () => void refresh(true);
+    const onVisibility = () => { if (document.visibilityState === "visible") void refresh(true); };
     window.addEventListener("focus", onFocus);
-    return () => { mounted = false; request += 1; window.clearInterval(interval); window.removeEventListener("focus", onFocus); controller?.abort(); };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { mounted = false; request += 1; window.clearInterval(interval); window.removeEventListener("focus", onFocus); document.removeEventListener("visibilitychange", onVisibility); controller?.abort(); };
   }, []);
 
   const steps = useMemo<LoopStep[]>(() => {
@@ -101,7 +104,7 @@ export function RevenueLoop() {
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => selectStep(steps.length - 1)} className="h-11 rounded-lg border border-background/20 px-4 text-[14px] font-semibold text-background transition-colors hover:bg-background/10 focus-visible:ring-2 focus-visible:ring-background focus-visible:outline-none">Show complete loop</button>
             <button type="button" onClick={togglePlayback} className="flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-[15px] font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-background focus-visible:outline-none motion-reduce:hover:scale-100">
-              {playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}{playing ? "Pause guided loop" : active < 0 ? "Play guided loop" : "Resume guided loop"}
+              {playing ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}{playbackLabel(reducedMotion, playing, active, steps.length)}
             </button>
           </div>
         </div>

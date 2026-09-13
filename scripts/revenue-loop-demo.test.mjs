@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { DEMO_CAMPAIGN_ID, campaignSafety, findDemoCampaign, modelLabel, nextPresenterStep, parseStoredStep, proofFooter, settleDemoProof } from "../lib/demo/revenue-loop.ts";
+import { DEMO_CAMPAIGN_ID, campaignSafety, findDemoCampaign, modelLabel, nextPresenterStep, parseStoredStep, playbackLabel, proofFooter, settleDemoProof } from "../lib/demo/revenue-loop.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const campaign = (patch = {}) => ({
@@ -40,6 +40,8 @@ test("campaign proof is tied to the immutable demo id and exact zero-send guardr
   assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], receipt: { id: "sent" } }] })).verified, false);
   assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], reconciliation_required: true }] })).verified, false);
   assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], last_attempt_at: "2026-01-01T00:00:00Z" }] })).verified, false);
+  assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], next_attempt_at: "2099-01-01T00:00:00Z" }] })).verified, false);
+  assert.equal(campaignSafety(campaign({ items: [{ ...campaign().items[0], retryable: true }] })).verified, false);
   assert.equal(campaignSafety(campaign({ scheduled_for: "2026-01-01T00:00:00Z" })).verified, false);
   assert.equal(campaignSafety(campaign({ scheduled_for: "not-a-date" })).verified, false);
 });
@@ -54,6 +56,10 @@ test("presenter state restores only valid selections and reduced-motion stepping
   assert.equal(nextPresenterStep(-1, 7), 0);
   assert.equal(nextPresenterStep(0, 7), 1);
   assert.equal(nextPresenterStep(6, 7), 0);
+  assert.equal(playbackLabel(true, false, -1, 7), "Start loop");
+  assert.equal(playbackLabel(true, false, 2, 7), "Next step");
+  assert.equal(playbackLabel(true, false, 6, 7), "Restart loop");
+  assert.equal(playbackLabel(false, true, 2, 7), "Pause guided loop");
 });
 
 test("partial endpoint failure removes only the proof that could not be refreshed", () => {
