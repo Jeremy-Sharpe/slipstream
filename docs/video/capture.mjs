@@ -18,7 +18,7 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 
-async function settle(milliseconds = 2_000) {
+async function settle(milliseconds) {
   await page.waitForLoadState("domcontentloaded");
   await page.addStyleTag({
     content: "*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}",
@@ -27,64 +27,50 @@ async function settle(milliseconds = 2_000) {
 }
 
 async function open(path, pause) {
-  await page.goto(`${baseUrl}${path}`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}${path}`, { waitUntil: "networkidle", timeout: 30_000 });
   await settle(pause);
 }
 
-async function card(kicker, title, body, pause) {
-  const html = `<!doctype html><html><head><meta charset="utf-8"><style>
-    *{box-sizing:border-box}body{margin:0;width:100vw;height:100vh;display:grid;place-items:center;
-    background:#fff;color:#121826;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-    main{width:1080px;border:1px solid #e5e7eb;border-radius:24px;padding:72px;box-shadow:0 24px 80px #0f172a14}
-    .brand{font-size:28px;font-weight:800;margin-bottom:70px}.bolt,.kicker{color:#ff5a3d}
-    .kicker{font-size:18px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
-    h1{font-size:64px;line-height:1.02;letter-spacing:-.045em;margin:18px 0 24px;max-width:920px}
-    p{font-size:27px;line-height:1.5;color:#536078;max-width:900px;margin:0}
-  </style></head><body><main><div class="brand"><span class="bolt">ϟ</span> slipstream</div>
-  <div class="kicker">${kicker}</div><h1>${title}</h1><p>${body}</p></main></body></html>`;
-  await page.goto(`data:text/html,${encodeURIComponent(html)}`);
+async function show(locator, pause) {
+  await locator.scrollIntoViewIfNeeded();
   await page.waitForTimeout(pause);
 }
 
-await card(
-  "Hackathon walkthrough",
-  "The sales layer that makes every conversation useful.",
-  "Calls and email in. Evidence-backed CRM updates, follow-up, intelligence, leads and safe campaigns out.",
-  14_000,
-);
+// Open on the whole closed loop; there are no slide-only interludes in this cut.
+await open("/demo", 18_000);
+const play = page.getByRole("button", { name: /play guided loop/i });
+if (await play.isVisible()) await play.click();
+await page.waitForTimeout(12_000);
 
-await open("/", 24_000);
-await page.mouse.move(520, 320, { steps: 24 });
-await page.waitForTimeout(4_000);
-await page.mouse.click(520, 320);
-await settle(34_000);
+// Show one conversation becoming an evidence-backed CRM record and draft.
+await open("/conversations/call-01-northstar-labs", 15_000);
+await page.evaluate(() => window.scrollTo({ top: 580, behavior: "smooth" }));
+await page.waitForTimeout(20_000);
+await show(page.locator("#follow-up-draft"), 18_000);
 
-for (const y of [640, 1_420, 2_300]) {
-  await page.evaluate((top) => window.scrollTo({ top, behavior: "smooth" }), y);
-  await page.waitForTimeout(14_000);
-}
+// Lead with the differentiator: outcomes invalidate targeting and protect spend.
+await open("/intelligence", 12_000);
+await show(page.locator("#revenue-dna"), 8_000);
+const wonShock = page.getByRole("button", { name: "New deal won" });
+await wonShock.waitFor({ state: "visible", timeout: 15_000 });
+await wonShock.click();
+await page.getByText("Hypothetical won recorded").waitFor({ state: "visible" });
+await page.waitForTimeout(25_000);
+await show(page.locator("#icp"), 15_000);
 
-await open("/intelligence", 28_000);
-await page.evaluate(() => window.scrollTo({ top: 650, behavior: "smooth" }));
-await page.waitForTimeout(18_000);
+// Show the safe proof leads bound to the current profile.
+await open("/leads", 25_000);
 
-await open("/leads", 34_000);
-await page.mouse.move(1_122, 23, { steps: 20 });
-await page.waitForTimeout(4_000);
-
-await open("/campaigns", 25_000);
+// Close the execution loop on the real, deliberately paused campaign record.
+await open("/campaigns", 18_000);
 const campaign = page.getByText("Hackathon demo — intentionally unsent", { exact: true });
-if (await campaign.isVisible()) {
-  await campaign.click();
-}
-await page.waitForTimeout(13_000);
+if (await campaign.isVisible()) await campaign.click();
+await page.waitForTimeout(8_000);
 
-await card(
-  "Slipstream",
-  "Conversation → CRM → follow-up → intelligence → pipeline",
-  "Evidence stays attached. Human approval stays explicit. Provider actions fail closed.",
-  14_000,
-);
+// Return to the one-screen story and its transparent value scenarios.
+await open("/demo", 20_000);
+await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }));
+await page.waitForTimeout(12_000);
 
 const video = page.video();
 await context.close();
