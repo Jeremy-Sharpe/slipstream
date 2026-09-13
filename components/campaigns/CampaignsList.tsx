@@ -59,14 +59,14 @@ export function CampaignsList({ loading = false, initialLiveCampaigns }: { loadi
   const emptyLabel = campaigns.length === 0 ? "No campaigns yet. Create one from a lead list." : query ? "Nothing matches." : `No ${tab} campaigns.`;
 
   return (
-    <section className="flex flex-col pt-[34px]">
-      <div className="flex items-center justify-between px-11">
+    <section className="flex flex-col pt-6 sm:pt-[34px]">
+      <div className="flex flex-col items-stretch justify-between gap-4 px-4 sm:flex-row sm:items-center sm:px-11">
         <div className="flex items-center gap-4">
           <span className="flex size-[46px] items-center justify-center rounded-lg bg-icon-well text-foreground"><Send className="size-[22px]" strokeWidth={1.75} /></span>
           <h1 className="text-[26px] leading-none font-bold tracking-[-0.02em] text-foreground">Campaigns</h1>
         </div>
-        <div className="flex items-center gap-2.5">
-          <label className="flex h-10 w-[273px] items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <label className="flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-md border border-border bg-card px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-primary sm:w-[273px] sm:flex-none">
             <Search className="size-4" strokeWidth={1.75} />
             <input value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search campaigns" className="w-full bg-transparent text-[16px] text-foreground outline-none" />
           </label>
@@ -76,11 +76,11 @@ export function CampaignsList({ loading = false, initialLiveCampaigns }: { loadi
 
       <LiveCampaignRuns initialCampaigns={initialLiveCampaigns} />
 
-      <div className="mt-8 flex items-end justify-between px-11 pb-[14px]">
+      <div className="mt-8 flex flex-col items-stretch justify-between gap-3 px-4 pb-[14px] sm:flex-row sm:items-end sm:px-11">
         <div><h2 className="text-[15px] font-semibold text-foreground">Sequence workspace</h2><p className="mt-0.5 text-xs text-muted-foreground">Evaluation data for designing and approving outreach sequences</p></div>
-        <div className="inline-flex h-10 items-center rounded-lg border border-border bg-card p-0.5">
+        <div className="inline-flex h-10 max-w-full items-center overflow-x-auto rounded-lg border border-border bg-card p-0.5">
           {TABS.map((t) => (
-            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full items-center gap-2 rounded-md px-[18px] text-[16px] text-muted-foreground transition-colors hover:text-foreground", tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]")}>
+            <button key={t.key} type="button" onClick={() => setTab(t.key)} className={cn("flex h-full shrink-0 items-center gap-2 rounded-md px-3 text-[14px] text-muted-foreground transition-colors hover:text-foreground sm:px-[18px] sm:text-[16px]", tab === t.key && "border border-border bg-card text-foreground shadow-[0_1px_2px_rgba(17,24,39,0.08)]")}>
               {t.label}
               <span className="text-[13px] tabular-nums text-muted-foreground">{t.key === "all" ? campaigns.length : campaigns.filter((c) => c.status === t.key).length}</span>
             </button>
@@ -96,13 +96,13 @@ export function CampaignsList({ loading = false, initialLiveCampaigns }: { loadi
       )}
 
       <TooltipProvider>
-        <div className="border-t border-border">
-          <div className={cn("grid h-12 items-center border-b border-border px-11 text-[14.5px] font-semibold text-foreground", COLS)}>
+        <div className="overflow-x-auto border-t border-border">
+          <div className={cn("grid h-12 min-w-[980px] items-center border-b border-border px-6 text-[14.5px] font-semibold text-foreground sm:px-11", COLS)}>
             <span>Name</span><span>Status</span><span>People</span><span>Approved</span><span>Sent</span><span>Replies</span><span>Owner</span><span>Updated</span><span />
           </div>
 
           {loading && Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className={cn("grid h-[61px] items-center border-b border-border px-11", COLS)} aria-busy="true">
+            <div key={i} className={cn("grid h-[61px] min-w-[980px] items-center border-b border-border px-6 sm:px-11", COLS)} aria-busy="true">
               <span className="h-3.5 w-56 rounded bg-muted" /><span className="h-6 w-16 rounded-full bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-6 rounded bg-muted" /><span className="h-3.5 w-14 rounded bg-muted" /><span className="h-3.5 w-20 rounded bg-muted" /><span />
             </div>
           ))}
@@ -116,7 +116,7 @@ export function CampaignsList({ loading = false, initialLiveCampaigns }: { loadi
               tabIndex={0}
               onClick={() => router.push(`/campaigns/${c.id}`)}
               onKeyDown={(e) => onRowKey(e, c.id)}
-              className={cn("grid h-[61px] cursor-pointer items-center border-b border-border px-11 text-[16px] text-foreground transition-colors hover:bg-page focus-visible:bg-page focus-visible:outline-none", COLS)}
+              className={cn("grid h-[61px] min-w-[980px] cursor-pointer items-center border-b border-border px-6 text-[16px] text-foreground transition-colors hover:bg-page focus-visible:bg-page focus-visible:outline-none sm:px-11", COLS)}
             >
               <span className="flex min-w-0 items-center gap-3">
                 <Send className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
