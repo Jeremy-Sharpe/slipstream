@@ -19,11 +19,11 @@
       "outcome": "lost"
     },
     "promises": [
-      "I will send the managed IT brochure"
+      "I will send the automation overview"
     ],
     "objections": [
       {
-        "text": "We are comparing you to a break-fix provider who charges by the hour",
+        "text": "We are comparing you to a freelancer who set up our stock alerts for a few hundred dollars",
         "handling": "ignored"
       }
     ],
@@ -33,8 +33,8 @@
     "discovery_questions": 0,
     "next_step_secured": false,
     "objection_handling": "ignored",
-    "rep_talk_ratio": 0.61,
-    "notes": "Jordan led with pricing and feature breadth, then failed to explore the hourly-provider comparison or qualify the tiny account."
+    "rep_talk_ratio": 0.65,
+    "notes": "Jordan opened with a build price, never asked a question, and talked past the freelancer comparison and the budget signal instead of qualifying a ten-person retailer out or down."
   },
   "icp_signals": {
     "industry": "Boutique lighting retailer",

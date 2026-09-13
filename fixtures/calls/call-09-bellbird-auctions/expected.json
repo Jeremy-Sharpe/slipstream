@@ -1,0 +1,50 @@
+{
+  "call_id": "call-09-bellbird-auctions",
+  "extraction": {
+    "contact": {
+      "name": "Aisha Rahman",
+      "role": "General Manager",
+      "email": "aisha@bellbirdauctions.example",
+      "phone": "+61 3 7010 1109"
+    },
+    "company": {
+      "name": "Bellbird Auctions",
+      "industry": "Fine art and collectables auction house",
+      "headcount": 48,
+      "location": "Malvern, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 64000,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the discovery phase scope and a fixed-price build proposal by Thursday",
+      "I will include the review workflow and the accuracy checks your cataloguers would run"
+    ],
+    "objections": [
+      {
+        "text": "We do not want another subscription that we can never switch off",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Jordan to send the discovery scope and build proposal, then meet Aisha and the managing director to walk it through.",
+      "due": "2026-09-10"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.44,
+    "notes": "Jordan mapped the intake and cataloguing workflow before pricing anything, answered the subscription objection with the IP transfer rather than dismissing it, and left with a dated meeting including the approver."
+  },
+  "icp_signals": {
+    "industry": "Fine art and collectables auction house",
+    "headcount_band": "25-80",
+    "role": "General Manager",
+    "trigger": "Consignment intake and cataloguing bottleneck before the spring sales"
+  },
+  "risk_flags": []
+}
