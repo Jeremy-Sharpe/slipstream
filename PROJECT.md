@@ -74,7 +74,7 @@ The name is the drafting effect: sit in the low-pressure wake and go faster on l
 Every surface reads the production API; the web app carries no evaluation fallbacks. The video must only claim a step is live after it has been exercised on the deployed UI.
 
 1. **A sales call happens.** One demo call, synthesised with ElevenLabs text-to-dialogue and played through speakers. Twelve further scripted calls (won, stalled, lost, no-show) are seeded as text-only CRM history, alongside seven publicly listed Eleno clients recorded as call-less won deals, so the analysis and ICP steps have something real to work from.
-2. **The coach listens.** The Electron overlay can stream the consented rep microphone to Scribe realtime; the configured reasoning model returns the next questions to ask, grounded in the deal's CRM history. Its credential-free manual mode demonstrates both speakers without claiming mixed-audio capture.
+2. **The coach listens.** The rep starts a coached call from the sidebar. The macOS desktop coach captures the microphone and the call audio as separate Scribe realtime streams; after each committed turn the configured reasoning model updates which suggestions were asked or answered and proposes the next question, grounded in what the rep entered and what was said.
 3. **The call writes itself into the CRM.** Scribe batch transcribes with diarisation; the configured reasoning model extracts contact, company, deal stage, promises, objections and next step into our CRM tables, shown to the rep for approval. The fixture path is the production fallback when provider keys are absent.
 4. **The follow-up drafts itself.** A draft email attaches to the deal. Approval is one click and audited without claiming a send. The separately authenticated delivery endpoint can send the exact approved copy through Resend when credentials are installed.
 5. **The team learns.** Scorecard per call against a written rubric; aggregate lens on what correlates with won deals; ICP derived from won-deal embeddings.
@@ -100,14 +100,14 @@ Company, person, title, email, LinkedIn where Origami returns it, Origami releva
 
 ### Coach (`coach/`)
 
-Translucent always-on-top window adapted from Cheating Daddy under GPL-3.0, with its Gemini, screenshot, hidden-window and interview-answering behaviour removed. In demo mode, the rep commits both sides of a transcript manually with no provider credentials. In live mode, the official ElevenLabs client captures the consented rep microphone using a server-issued single-use Scribe token and sends committed text to the Slipstream coaching WebSocket. Capturing both sides requires a mixed call-audio source and is not claimed by this build. The API returns short grounded next-move suggestions and persists the call on confirmed completion.
+Always-on-top macOS Electron window for calls held in another app. **Start call with coach** in the web top bar creates a session and hands it to the desktop app through a single-use `slipstream://` link. The app captures microphone and call audio separately, sends each to ElevenLabs Scribe realtime with a short-lived token from the API, and forwards only committed transcript turns to the session WebSocket. It shows one active card with up to two queued behind it, keeps Done, Skip and Undo, and on End uploads the recording for batch transcription and saves the call. The page at `/coach/<id>` follows the call live and then shows every suggestion and what happened to it. Details in `coach/README.md`.
 
 ## Architecture
 
 ```
 app/          Next.js UI on Vercel. Uses the API for live reads and actions, with labelled evaluation fallbacks.
-api/          FastAPI, Python 3.12, uv. Owns the AI pipeline. REST plus one WebSocket at /ws/coach. Deploys to Jeremy's VPS behind HTTPS.
-coach/        Electron overlay. Talks only to the API WebSocket.
+api/          FastAPI, Python 3.12, uv. Owns the AI pipeline. REST plus the coach WebSockets under /api/v1/coach. Deploys to Jeremy's VPS behind HTTPS.
+coach/        macOS Electron call coach. Talks to the API's coach session routes and to Scribe realtime.
 fixtures/     Thirteen call scripts with expected extraction and scorecard labels, plus seven public-client CRM rows with no call evidence; audio for the demo call only. Loaded through the real ingest path.
 supabase/     Migrations (pgvector enabled) and seed.
 ```
@@ -116,7 +116,7 @@ supabase/     Migrations (pgvector enabled) and seed.
 
 **Data flow for one call.** Audio file in, Scribe batch (diarised), transcript row, model extraction (structured output, pinned schema, grounded quotes), contact, company, deal, note and task rows, model scorecard against the rubric, embedding of the call summary stored on the deal, follow-up draft row. Aggregations and ICP derivation read the deal embeddings.
 
-**Coach flow.** The overlay either accepts manual rep/prospect turns or sends consented rep-microphone audio directly to ElevenLabs Scribe using a single-use token issued by the API. Committed transcript turns go to the API coaching WebSocket, which keeps a bounded rolling transcript and returns grounded next-move suggestions. On End & save, the same WebSocket persists the canonical call; the UI only claims success after the API sends `completed`.
+**Coach flow.** The website proxy (`app/gateway/coach`, outside `/api/*` because the production Caddy host sends that path to the API) creates a session with the API ingest token kept on the server and receives a ten-minute single-use handoff. The launch link also carries the public API and website origins, so a packaged desktop app works against any deployment; it accepts only HTTPS or localhost origins and shows the coaching server before listening. The desktop app redeems the handoff for a scoped session token, requests a Scribe token per audio channel, and sends committed turns to `/api/v1/coach/sessions/{id}/live`. The API stores the session, runs at most one analysis per session at a time and pushes snapshots back. On End the app uploads the recording; the API transcribes it and saves the canonical call through the same path as other realtime calls, falling back to the live transcript if the upload fails.
 
 ## Data model
 
@@ -144,7 +144,7 @@ The reasoning model is not fixed: `REASONING_MODEL` selects it, and one `structu
 - **Scorecard** rubric lives in `api/evals/rubric.md`: discovery questions asked, next step secured, objection handled, talk ratio. LLM-as-judge returns a score and a quoted span per dimension.
 - **Eval** in `api/evals/`: twelve history calls hand-labelled for the four dimensions and the extraction fields, one script that reports agreement. This is the artefact for the "Use of Data / Models" criterion.
 - **ICP derivation**: embed won-deal summaries with OpenAI `text-embedding-3-small`, its OpenRouter route, or the pinned local Nomic fallback; cluster them; have the configured reasoning model name the profile and cite the deals behind each attribute; then render the Origami brief from the profile. Lead scoring is cosine similarity to the won-deal centroid plus Origami's own relevance score.
-- **Coach** prompt gets the deal context and the last 60 seconds of transcript; returns at most three questions and any detected commitment.
+- **Coach** runs as a per-call session (`api/app/routers/coach_sessions.py`). After each committed transcript turn, one structured analysis (`api/app/prompts/coach-session-v1.md`) reads the session's customer context, the recent turns and the whole suggestion and fact memory, then proposes lifecycle transitions (asked, answered, mentioned, superseded) and at most three new candidates. `api/app/services/coach_state.py` accepts a transition only when its quote appears in the cited turn, the speaker role fits and confidence is at least 0.9, and it drops candidates citing unknown evidence or unsupported claims. A result computed before a rep action (Done, Skip, Undo, pause, end) is discarded, but new transcript turns never discard one, so advice still lands while both people keep talking. `api/evals/run_coach_eval.py` checks paraphrase, negation, quotation and unknown-speaker cases against the configured model. The older `/api/v1/coach/live` transcript socket remains for clients that stream turns without a session; the desktop coach no longer uses it.
 - **Prompts** are versioned files in `api/app/prompts/`. Transcript text is data; instructions inside a transcript or an Origami row are never followed.
 - **History for the ICP** is loaded from the fixture labels (`POST /icp/history/load`) and tagged `metadata.source = "fixtures"`; derivation reads that CRM history plus eligible live mirrored deals, so its provenance counts match the evidence the judges can inspect. The rebranded fixture cohort is 19 eligible deals (12 history calls plus seven call-less public-client wins) carrying 12 calls and one email; the last production run verified before the rebrand used OpenRouter `openai/gpt-5.4` and `text-embedding-3-small` over 13 deals, 12 calls and two emails, the second email belonging to the paused provider-neutral campaign. An earlier hosted run on the Supabase store (project `ozfogqrawonkluckhksk`, initial schema applied) persisted and read back version 1 after an API restart. PostgREST returns pgvector columns as text, so the store parses `embedding` back into a list before validating deal and lead rows.
 
@@ -183,5 +183,5 @@ None of these accounts exist yet. All go on personal accounts, not company billi
 ## Open questions
 
 - Which Supabase project the VPS points at. Anna's `slipstream` project has the schema and a persisted ICP; Jeremy's VPS reports memory storage. Pick one before the demo so history load, ICP and leads survive a restart.
-- Does Cheating Daddy's macOS system-audio capture work on current macOS? If not, the coach uses microphone input and the demo plays the mock call through speakers.
+- Does macOS loopback capture hear the call app reliably on the demo Mac (macOS 14.2 or later)? If not, use the Speakerphone mode, which listens through the microphone only.
 - A live Origami response sample should be archived after the first credentialed ten-lead run to confirm the implemented published contract against production without storing prospect PII in the repository.

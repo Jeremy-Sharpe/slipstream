@@ -73,7 +73,18 @@ curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach -H 'Content-Type:
 curl -s -X POST http://localhost:8000/leads/<lead_id>/outreach/approve -H 'Content-Type: application/json' -d '{"actor": "anna", "draft_id": "<reviewed_draft_id>"}'
 ```
 
-## Live coach protocol
+## Call coach sessions
+
+The desktop coach in `coach/` uses per-call sessions (`app/routers/coach_sessions.py`); `coach/README.md` covers the full flow.
+
+- `POST /api/v1/coach/sessions` (ingest token) takes `new_customer` or `contact_id`/`deal_id` plus `audio_mode` (`both`, `system` or `mic`) and returns the session and a ten-minute single-use `handoff_token`.
+- `POST /api/v1/coach/sessions/{id}/redeem` exchanges the handoff for a client-chosen access token, valid for 24 hours; `GET /api/v1/coach/sessions/{id}` reads the session for the website.
+- With `Authorization: Bearer <access token>`: `POST .../scribe-token` issues one Scribe realtime token per audio channel, `POST .../recording` uploads the WAV for batch transcription, and `POST .../finish` saves the canonical call (idempotent).
+- `WS /api/v1/coach/sessions/{id}/live`: the first message is `{"token": "<access token>"}`. The client then sends `start`, `pause`, `resume`, `end`, `ping`, `{"type": "transcript", "turn": {...}}` and `{"type": "action", "action_id", "action": "done" | "skip" | "undo", "suggestion_id"}`. The server replies with `snapshot` (the whole session, including suggestion states), `committed`, `action_ack`, `pong` and non-fatal `error` events.
+
+## Live coach protocol (transcript socket)
+
+This older socket streams turns without a session and remains for such clients; the desktop coach no longer uses it.
 
 `POST /api/v1/coach/scribe-token` exchanges the server-side ElevenLabs key for a
 15-minute, single-use `realtime_scribe` token. When `INGEST_TOKEN` is configured,

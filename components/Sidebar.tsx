@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, House, LineChart, MessageSquare, Repeat } from "lucide-react";
+import { StartCoachDialog } from "@/components/coach/StartCoachDialog";
 import { company, user } from "@/lib/data/seller";
 import { Avatar } from "./Avatar";
 import { cn } from "./ui";
@@ -42,6 +43,9 @@ export function Sidebar() {
           );
         })}
       </nav>
+      <div className="mt-4">
+        <StartCoachDialog />
+      </div>
       <div className="mt-auto flex items-center gap-2.5 px-3">
         <Avatar name={user.name} size={28} />
         <div className="min-w-0">
