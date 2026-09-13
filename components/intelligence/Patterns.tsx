@@ -80,7 +80,13 @@ export function Triggers({ triggers }: { triggers: Trigger[] }) {
   );
 }
 
-/* Coaching: the rep whose numbers say so, a few plain lines. */
+/** The model writes paragraphs; one sentence per line is enough on this page. */
+const firstSentence = (text: string): string => {
+  const m = /^(.*?[.!?])(?:\s|$)/.exec(text.trim());
+  return m ? m[1] : text.trim();
+};
+
+/* Coaching: the rep whose numbers say so, one line each. */
 export function Coaching({ lines, rep }: { lines: string[]; rep: string | null }) {
   return (
     <section>
@@ -92,7 +98,7 @@ export function Coaching({ lines, rep }: { lines: string[]; rep: string | null }
           {rep && <Avatar name={rep} size={24} className="mt-px" />}
           <ul className="flex max-w-[760px] flex-col gap-1.5">
             {lines.map((line) => (
-              <li key={line} className="text-[14px] leading-6 text-ink">{line}</li>
+              <li key={line} className="text-[14px] leading-6 text-ink">{firstSentence(line)}</li>
             ))}
           </ul>
         </div>

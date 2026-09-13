@@ -99,6 +99,11 @@ a[class~="rounded-full"]:active {
   transition-duration: 80ms;
 }
 
+/* Glide's search box, opened by the Search button on Leads, in the skin's pill. */
+.gdg-search-bar { border-radius: 999px !important; border: none !important; background: #f5f5f5 !important; box-shadow: none !important; padding: 4px 12px !important; }
+.gdg-search-bar input { font: inherit !important; font-size: 13.5px !important; color: #181925 !important; }
+.gdg-search-bar input:focus { outline: none !important; }
+
 @media (prefers-reduced-motion: reduce) { .shimmer-text { animation: none; color: #3f3f46; background: none; } }
 @keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 104, 71, 0.35); } 50% { box-shadow: 0 0 0 5px rgba(255, 104, 71, 0); } }
 .pulse-dot { animation: pulse-dot 1.4s ease-out infinite; }
