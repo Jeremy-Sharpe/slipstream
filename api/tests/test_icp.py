@@ -8,6 +8,7 @@ from app.services.crm_mirror import mirror_interaction
 from app.services.fixture_history import load_fixture_history
 from app.services.icp import (
     MAX_MODEL_INPUT_CHARS,
+    MAX_PROFILE_VALUES,
     _cohort_payload,
     _fit_model_budget,
     _ground_profile,
@@ -77,6 +78,21 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     assert "Sam" not in profile.profile.summary
     assert "Jordan" not in profile.profile.summary
     assert "won-deal industries" in profile.profile.origami_brief
+    assert [item.attribute for item in profile.profile.evidence] == [
+        "industry",
+        "headcount_band",
+        "contact_role",
+        "trigger",
+    ]
+    won_ids = {str(deal.id) for deal in store.list_icp_deals() if deal.outcome == "won"}
+    assert all(
+        set(item.deal_ids).issubset(won_ids) and item.deal_ids
+        for item in profile.profile.evidence
+    )
+    assert all(
+        "Sam" not in item.why and "Jordan" not in item.why
+        for item in profile.profile.evidence
+    )
     assert len(store.source_deals_for_profile(str(profile.id))) == 5
     assert all(
         not deal.metadata.get("demo") for deal in store.source_deals_for_profile(str(profile.id))
@@ -194,6 +210,11 @@ def test_ground_profile_rejects_malformed_and_unsupported_won_signals() -> None:
     assert "concrete" not in profile.summary
     assert "technology need" not in profile.origami_brief
     assert "Contract renewal" in profile.origami_brief
+    assert [item.attribute for item in profile.evidence] == [
+        "industry",
+        "contact_role",
+        "trigger",
+    ]
 
 
 def test_ground_profile_reconciles_headcount_band_across_every_win() -> None:
@@ -238,6 +259,25 @@ def test_ground_profile_reconciles_headcount_band_across_every_win() -> None:
         ),
     ]
     assert _ground_profile(base, equivalent_bands).headcount_band == "under-80"
+
+
+def test_ground_evidence_does_not_cite_values_excluded_by_the_cap() -> None:
+    won = [
+        DealRecord(
+            id=f"won-{index}",
+            name=f"Won {index}",
+            stage="customer",
+            outcome="won",
+            industry=f"Industry {index}",
+        )
+        for index in range(MAX_PROFILE_VALUES + 1)
+    ]
+
+    profile = _ground_profile(fake_structured(user="", model="test"), won)
+    industry_evidence = next(item for item in profile.evidence if item.attribute == "industry")
+
+    assert len(profile.industries) == MAX_PROFILE_VALUES
+    assert f"won-{MAX_PROFILE_VALUES}" not in industry_evidence.deal_ids
 
 
 def test_icp_candidates_exclude_unproven_live_deals_and_bound_model_input() -> None:
