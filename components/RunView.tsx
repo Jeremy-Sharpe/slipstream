@@ -96,73 +96,6 @@ export function RunView({ source }: { source: RunSource }) {
     return () => { ro.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
 
-  // The column (CI card + heading + steps, one scroll area) never ends on a
-  // row boundary: it is sized so the last visible row is cut about mid-height
-  // (a peek at what is below), and a bottom fade shows only while there is
-  // more to scroll.
-  const ciRef = useRef<HTMLDivElement>(null);
-  const [columnHeight, setColumnHeight] = useState<number | null>(null);
-  const [fade, setFade] = useState(false);
-  useEffect(() => {
-    const host = columnRef.current, ci = ciRef.current;
-    if (!host || !ci || !headerHeight) return;
-    const measure = () => {
-      const available = window.innerHeight - headerHeight - 48;
-      const rows = host.querySelectorAll<HTMLElement>("li[data-step]");
-      const first = rows[0];
-      const pitch = rows.length > 1 ? rows[1].getBoundingClientRect().top - first.getBoundingClientRect().top : 53;
-      const lead = first ? first.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop : 30;
-      const fit = Math.max(1, Math.floor((available - lead - pitch * 0.55) / pitch));
-      setColumnHeight(Math.min(available, lead + fit * pitch + pitch * 0.55));
-      setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    for (const child of host.children) ro.observe(child);
-    // When the CI card appears (or grows) above a scrolled column, keep what
-    // the user is looking at where it is: shift scrollTop by the delta before
-    // paint. Never moves anything visually.
-    let ciHeight = ci.offsetHeight;
-    const anchor = new ResizeObserver(() => {
-      const delta = ci.offsetHeight - ciHeight;
-      ciHeight = ci.offsetHeight;
-      if (delta && host.scrollTop > 0) host.scrollTop += delta;
-    });
-    anchor.observe(ci);
-    const onScroll = () => setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
-    host.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", measure);
-    document.addEventListener("visibilitychange", measure);
-    return () => { ro.disconnect(); anchor.disconnect(); host.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure); document.removeEventListener("visibilitychange", measure); };
-  }, [run.runId, headerHeight]);
-
-  // Explicit click-to-expand (exempt from the pointer rule): scroll the column
-  // so the whole card sits above the fade, or, if it cannot fit, so the step
-  // header lands 16px below the top. Collapsing never scrolls.
-  const expandScroll = useCallback((el: HTMLElement, bodyHeight: number) => {
-    const host = columnRef.current;
-    if (!host) return;
-    const top = el.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop;
-    const bottom = top + 28 + 6 + bodyHeight;
-    const visible = host.clientHeight - 40;
-    const fits = bottom - top <= visible - 16;
-    let target = fits ? Math.max(host.scrollTop, bottom + 16 - visible) : top - 16;
-    // The body is still collapsed on this frame: clamp against the height the
-    // column will have once it is open, and settle once the transition ends.
-    target = Math.max(0, Math.min(target, host.scrollHeight + 6 + bodyHeight - host.clientHeight));
-    if (Math.abs(target - host.scrollTop) < 1) return;
-    const settle = () => { host.scrollTop = Math.min(target, host.scrollHeight - host.clientHeight); };
-    if (reduced) { settle(); return; }
-    const from = host.scrollTop, t0 = performance.now();
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - t0) / 300);
-      host.scrollTop = from + (target - from) * bezier(p);
-      if (p < 1) requestAnimationFrame(tick);
-      else window.setTimeout(settle, 150);
-    };
-    requestAnimationFrame(tick);
-  }, [reduced]);
-
   // Reveal a step inside the timeline only when the pointer is NOT inside the
   // column and the user hasn't wheel/touch-scrolled it in the last 3s.
   // Nothing ever scrolls under a resting pointer.
@@ -194,6 +127,84 @@ export function RunView({ source }: { source: RunSource }) {
     pageScrolling.current = true;
     host.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
     window.setTimeout(() => { programmatic.current = false; pageScrolling.current = false; }, 600);
+  }, [reduced]);
+
+  // The column (CI card + heading + steps, one scroll area) never ends on a
+  // row boundary: it is sized so the last visible row is cut about mid-height
+  // (a peek at what is below), and a bottom fade shows only while there is
+  // more to scroll.
+  const ciRef = useRef<HTMLDivElement>(null);
+  const [columnHeight, setColumnHeight] = useState<number | null>(null);
+  const [fade, setFade] = useState(false);
+  useEffect(() => {
+    const host = columnRef.current, ci = ciRef.current;
+    if (!host || !ci || !headerHeight) return;
+    const measure = () => {
+      const available = window.innerHeight - headerHeight - 48;
+      const rows = host.querySelectorAll<HTMLElement>("li[data-step]");
+      const first = rows[0];
+      const pitch = rows.length > 1 ? rows[1].getBoundingClientRect().top - first.getBoundingClientRect().top : 53;
+      const lead = first ? first.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop : 30;
+      const fit = Math.max(1, Math.floor((available - lead - pitch * 0.55) / pitch));
+      setColumnHeight(Math.min(available, lead + fit * pitch + pitch * 0.55));
+      setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    for (const child of host.children) ro.observe(child);
+    // When the CI card appears (or grows) above a scrolled column, keep what
+    // the user is looking at where it is: shift scrollTop by the delta before
+    // paint. Never moves anything visually.
+    let ciHeight = ci.offsetHeight;
+    let settle = 0;
+    const anchor = new ResizeObserver(() => {
+      const delta = ci.offsetHeight - ciHeight;
+      ciHeight = ci.offsetHeight;
+      if (!delta) return;
+      if (host.scrollTop > 0) host.scrollTop += delta;
+      // At the top there is nothing to compensate, so the card streaming in
+      // pushes the open step (and its gate) below the fold. Once the card
+      // stops growing, bring that step back; reveal honours the pointer rule
+      // and does nothing when the step is already in view.
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        const open = host.querySelector('li[data-step] button[aria-expanded="true"]')?.closest<HTMLElement>("li[data-step]");
+        if (open) reveal(open);
+      }, 400);
+    });
+    anchor.observe(ci);
+    const onScroll = () => setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
+    host.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure);
+    document.addEventListener("visibilitychange", measure);
+    return () => { ro.disconnect(); anchor.disconnect(); window.clearTimeout(settle); host.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure); document.removeEventListener("visibilitychange", measure); };
+  }, [run.runId, headerHeight, reveal]);
+
+  // Explicit click-to-expand (exempt from the pointer rule): scroll the column
+  // so the whole card sits above the fade, or, if it cannot fit, so the step
+  // header lands 16px below the top. Collapsing never scrolls.
+  const expandScroll = useCallback((el: HTMLElement, bodyHeight: number) => {
+    const host = columnRef.current;
+    if (!host) return;
+    const top = el.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop;
+    const bottom = top + 28 + 6 + bodyHeight;
+    const visible = host.clientHeight - 40;
+    const fits = bottom - top <= visible - 16;
+    let target = fits ? Math.max(host.scrollTop, bottom + 16 - visible) : top - 16;
+    // The body is still collapsed on this frame: clamp against the height the
+    // column will have once it is open, and settle once the transition ends.
+    target = Math.max(0, Math.min(target, host.scrollHeight + 6 + bodyHeight - host.clientHeight));
+    if (Math.abs(target - host.scrollTop) < 1) return;
+    const settle = () => { host.scrollTop = Math.min(target, host.scrollHeight - host.clientHeight); };
+    if (reduced) { settle(); return; }
+    const from = host.scrollTop, t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / 300);
+      host.scrollTop = from + (target - from) * bezier(p);
+      if (p < 1) requestAnimationFrame(tick);
+      else window.setTimeout(settle, 150);
+    };
+    requestAnimationFrame(tick);
   }, [reduced]);
 
   return (
