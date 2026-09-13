@@ -12,7 +12,7 @@ unavailable deployment credentials or submitting the external form was verified 
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
-- API Ruff checks and all 349 tests pass, including scorecard/playbook revision, coach lifecycle,
+- API Ruff checks and all 361 tests pass, including provider readiness, OpenRouter demo bootstrap, scorecard/playbook revision, coach lifecycle,
   email concurrency, campaign leasing/controls and provider-environment isolation coverage.
 - All six fixture tests pass.
 - All nine Supabase migrations and seven pgTAP suites pass from an empty ephemeral
@@ -35,18 +35,22 @@ unavailable deployment credentials or submitting the external form was verified 
   the grounded follow-up and records an approved-unsent audit state; it cannot deliver.
 - The production campaign list contains one synthetic record named “Hackathon demo —
   intentionally unsent”; it is paused, scheduled for 2099, and reports zero sends.
-- The latest production ICP is model-derived over 13 CRM deals enriched by 12 calls and
-  one email. Its customer attributes, headcount band and four evidence dimensions are
-  grounded in the five won deals and stamped with exact Qwen and Nomic model identities.
+- The latest production ICP is OpenRouter-derived over 13 CRM deals enriched by 12 calls
+  and two emails (the canonical fixture cohort contributes one; the paused campaign adds
+  one provider-neutral thread). Its customer attributes, headcount band and evidence are
+  grounded in won deals and stamped with `openai/gpt-5.4` and `text-embedding-3-small`.
+- `POST /api/v1/demo/bootstrap` proves the complete aggregate-to-prospect loop with one
+  OpenRouter key. Production stores exactly ten visibly fictional `.example` prospects,
+  no email or LinkedIn coordinates, and scores them against the won-deal centroid.
 
 ## Deployment-only gaps
 
 - The installed Railway CLI is unauthenticated. `scheduler/` is deploy-ready, but the
   service and its `SLIPSTREAM_INGEST_TOKEN` variable still need an account owner.
-- The VPS has no Supabase, Resend or Origami credentials. It does run an explicitly
-  labelled, credential-free local reasoning model on loopback; `/ready` must report
-  `local_model: true` while unrelated integration flags remain false. Do not add secrets
-  to Git, Vercel browser variables, screenshots or the public demo terminal.
+- The VPS has no Supabase, Resend or Origami credentials. It has a root-owned OpenRouter
+  credential; `/ready` must report OpenRouter reasoning and embeddings ready while those
+  unrelated integration flags remain false. Do not add secrets to Git, Vercel browser
+  variables, screenshots or the public demo terminal.
 
 ## Human-only finish line
 
