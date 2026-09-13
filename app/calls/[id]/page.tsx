@@ -23,6 +23,8 @@ import { entryForCall, ingestEmailThread } from "@/lib/ingest";
 import { getEntry, getRun, registerConversation, useConversations } from "@/lib/store/conversations";
 import type { RunSource } from "@/lib/useRun";
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 type State = { status: "loading" } | { status: "error"; message: string } | { status: "missing" } | { status: "ready"; source: RunSource };
 
 export default function CallPage() {
@@ -73,6 +75,8 @@ export default function CallPage() {
 
     let call: ApiCall;
     try {
+      // The API answers 422 for an id that is not a UUID, so skip the request.
+      if (!UUID.test(id)) throw new ApiError("Not a call id", 422);
       call = await getCall(id);
     } catch (error) {
       // 404 is unknown; 400/422 is an id the API will not even parse.
