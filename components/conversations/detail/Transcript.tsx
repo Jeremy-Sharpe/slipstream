@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 const initials = (name: string) => name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
-export function Card({ title, aside, children, className }: { title?: React.ReactNode; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {
+export function Card({ id, title, aside, children, className }: { id?: string; title?: React.ReactNode; aside?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-xl border border-line bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)]", className)}>
+    <section id={id} className={cn("scroll-mt-6 rounded-xl border border-line bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)]", className)}>
       {title && (
         <header className="flex h-14 items-center justify-between border-b border-line px-6">
           <h3 className="flex items-center gap-2 text-[17px] font-semibold text-ink">{title}</h3>
@@ -52,7 +52,7 @@ export function Transcript({ call, highlight }: { call: CallRecord; highlight: n
   }, [highlight]);
   const risky = new Set(call.riskFlags.map((r) => r.turnIndex));
   return (
-    <Card title="Transcript" aside={<span className="text-[14px] text-muted-foreground">{call.turns.length} turns · diarised</span>}>
+    <Card id="transcript" title="Transcript" aside={<span className="text-[14px] text-muted-foreground">{call.turns.length} turns · diarised</span>}>
       <ol className="divide-y divide-line">
         {call.turns.map((t) => <TurnRow key={t.index} turn={t} active={highlight === t.index} risky={risky.has(t.index)} />)}
       </ol>

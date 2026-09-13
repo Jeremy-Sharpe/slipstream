@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, Calendar, Home, MessageSquare, PanelLeft, Send, Settings, Target, Zap, type LucideIcon } from "lucide-react";
+import { BarChart3, Calendar, Home, MessageSquare, PanelLeft, Play, Send, Settings, Target, Zap, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ const STORAGE_KEY = "slipstream.sidebar";
 // Two groups like Clay's sidebar: the top pair, then a labelled section.
 const TOP: Item[] = [
   { href: "/home", label: "Home", icon: Home },
+  { href: "/demo", label: "Revenue loop", icon: Play },
   { href: "/", label: "Conversations", icon: MessageSquare },
 ];
 const PIPELINE: Item[] = [

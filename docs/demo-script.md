@@ -4,19 +4,21 @@ Target: 3 minutes 30 seconds. One presenter talks; one teammate keeps the API fa
 
 ## Before walking on stage
 
-1. Open the production UI on Conversations with Maya Chen at Northstar Labs selected, then open Intelligence and Campaigns in two more tabs. Use Campaigns only if its “Delivery execution” card is visible on the production URL; otherwise skip that ten-second beat rather than switching to a preview deployment on stage.
+1. Open the production UI on Revenue Loop (`/demo`). Open Maya Chen at Northstar Labs, Intelligence and Campaigns in three background tabs. Use Campaigns only if its “Delivery execution” card is visible on the production URL; otherwise skip that ten-second beat rather than switching to a preview deployment on stage.
 2. In a terminal, run `curl -fsS https://slipstream-api.3-104-149-193.sslip.io/ready | jq`. Confirm `status` is `ok` and keep the terminal open.
-3. Confirm the Maya Chen conversation detail, CRM write-back card and follow-up draft are visible without scrolling.
+3. Confirm Revenue Loop says `Production API · Connected`, shows an exact revision, and reports the live cohort and paused campaign. Confirm the Maya Chen conversation detail, CRM write-back card and follow-up draft are visible in the background tab without scrolling.
 4. Use browser zoom that makes the main card and evidence visible from the back of the room. Close notifications and unrelated tabs.
 5. Decide roles: presenter drives; a second teammate watches the clock and takes over only if asked.
 
-## 0:00–0:35 — Lead with the call becoming action
+## 0:00–0:35 — Show the whole loop in one sentence
 
-Action: Start on the production Conversations screen with Maya Chen at Northstar Labs selected. Point in one sweep from the transcript to CRM write-back to the follow-up draft.
+Action: Start on Revenue Loop. Click `Play guided loop` as you deliver the first sentence. The recorded Maya example and live proof are labelled separately. Pause on any beat you want to explain, or use Previous/Next. Then select the first beat and click `Open transcript` into Maya Chen; your selected beat persists when you return to the original Revenue Loop tab.
 
-Say: “This is the bit we think changes sales software. A call should not disappear into a recorder. Slipstream turns it into the CRM record, the safe follow-up, the coaching evidence and—once the team has history—the next customer to call. Here Maya confirmed legal is ready after the security questionnaire. That fact is already a deal update and an action, with its exact source beside it.”
+Say: “Most sales AI ends when the call summary appears. Ours starts there. One buyer conversation writes the CRM, creates the safe follow-up, teaches the team who wins, and changes who they call next. This is the entire revenue loop, connected.”
 
-Action: Click one evidence/confidence marker, point to “Approve & sync changes,” then point to “Approve.” Do not approve yet.
+Point to the labelled capacity strip and add: “On a deliberately conservative demo assumption—ten minutes of admin, eight calls a day—that returns 6.7 hours, or about five hundred dollars of rep capacity, every week. We label the assumptions because customer rollout is where we replace them with a measured baseline.”
+
+Action: On Maya's conversation, click one evidence/confidence marker, point to “Approve & sync changes,” then point to “Approve.” Do not approve yet.
 
 Fallback: If the page does not load, use the pre-opened tab. If both fail, begin with the terminal fallback and say, “I’ll show the same pipeline directly through our production API.”
 
@@ -60,7 +62,7 @@ Fallback: Use the labelled scorecard already rendered in Conversations, then sho
 
 ## 2:55–3:25 — Close on value and proof
 
-Action: Return to the lead list, leaving the closed-loop diagram or strongest lead visible.
+Action: Return to Revenue Loop and leave all seven beats completed.
 
 Say: “A small sales team currently buys a recorder, CRM automation, call coaching and lead sourcing separately—and still has to keep them in sync. Slipstream makes the call the source of truth. One conversation updates the CRM, creates the safe follow-up, teaches the team who converts, and finds the next person to call. The production API you just saw is running on the exact Git revision in GitHub, and all external-key paths have deterministic fallbacks. That is the sales layer we would install beside the CRM a team already has.”
 

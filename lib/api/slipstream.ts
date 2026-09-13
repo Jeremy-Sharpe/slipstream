@@ -110,8 +110,13 @@ export class ApiError extends Error {
 
 export type ApiReadiness = {
   revision: string;
+  environment?: string;
   storage: string;
   integrations: Record<string, boolean>;
+  reasoning_provider?: string;
+  reasoning_model?: string;
+  embedding_provider?: string;
+  embedding_model?: string;
 };
 
 export type ApiIcpProfile = {
@@ -279,7 +284,16 @@ function parseReadiness(value: unknown): ApiReadiness {
   if (Object.keys(integrations).length !== Object.keys(value.integrations).length) {
     throw new ApiError("Slipstream API returned malformed integration flags", 502);
   }
-  return { revision: value.revision, storage: value.storage, integrations };
+  const optionalStrings = ["environment", "reasoning_provider", "reasoning_model", "embedding_provider", "embedding_model"] as const;
+  if (optionalStrings.some((key) => value[key] !== undefined && typeof value[key] !== "string")) {
+    throw new ApiError("Slipstream API returned malformed model provenance", 502);
+  }
+  return {
+    revision: value.revision,
+    storage: value.storage,
+    integrations,
+    ...Object.fromEntries(optionalStrings.flatMap((key) => typeof value[key] === "string" && value[key].trim() ? [[key, value[key].trim()]] : [])),
+  } as ApiReadiness;
 }
 
 function parseIcpProfile(value: unknown): ApiIcpProfile {
@@ -544,16 +558,16 @@ function parsePlaybook(value: unknown): ApiPlaybook {
   return value as ApiPlaybook;
 }
 
-export async function getReadiness(): Promise<ApiReadiness> {
-  const response = await fetch(`${API_BASE_URL}/ready`);
+export async function getReadiness(signal?: AbortSignal): Promise<ApiReadiness> {
+  const response = await fetch(`${API_BASE_URL}/ready`, { signal });
   if (!response.ok) throw new ApiError(`Slipstream API returned ${response.status}`, response.status);
   const payload: unknown = await response.json().catch(() => null);
   return parseReadiness(payload);
 }
 
-export async function getLatestIcp(): Promise<ApiIcpProfile | null> {
+export async function getLatestIcp(signal?: AbortSignal): Promise<ApiIcpProfile | null> {
   try {
-    return parseIcpProfile(await request<unknown>("/icp/latest"));
+    return parseIcpProfile(await request<unknown>("/icp/latest", { signal }));
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
