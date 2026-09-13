@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { CallRecord } from "@/lib/types";
-import { useRun } from "@/lib/useRun";
+import { useRun, type StepId } from "@/lib/useRun";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Avatar, CompanyTile } from "./Avatar";
 import { RunTimeline } from "./RunTimeline";
 import { Summary } from "./run/Summary";
@@ -13,9 +14,36 @@ import { Transcript } from "./Transcript";
 import { Button, OutcomePill, fmtDate, fmtTime, mmss } from "./ui";
 
 export function RunView({ call }: { call: CallRecord }) {
-  const fromHome = useSearchParams().get("from") === "home";
-  const run = useRun(call, { fromHome });
-  const [highlight, setHighlight] = useState<number | null>(null);
+  const params = useSearchParams();
+  const reduced = useReducedMotion();
+  const instant = params.get("instant") === "1" || reduced;
+  const run = useRun(call, { instant });
+
+  // Transcript highlight: hover from field rows / chips, or a 1.5s click highlight.
+  const [hover, setHover] = useState<number | null>(null);
+  const [clicked, setClicked] = useState<number | null>(null);
+  const clickTimer = useRef<number>(0);
+  const jump = useCallback((i: number) => {
+    window.clearTimeout(clickTimer.current);
+    setClicked(i);
+    clickTimer.current = window.setTimeout(() => setClicked(null), 1500);
+  }, []);
+  const highlight = clicked ?? hover;
+
+  // Draft body (editable, replaced by the "shorter" chip) and a brief step outline.
+  const [draftBody, setDraftBody] = useState(call.draft.body);
+  const [outlined, setOutlined] = useState<StepId | null>(null);
+  // Reset the draft when the run restarts (state adjusted during render).
+  const [seenRun, setSeenRun] = useState(run.runId);
+  if (seenRun !== run.runId) { setSeenRun(run.runId); setDraftBody(call.draft.body); }
+  const shorterDraft = () => {
+    setDraftBody(call.draftShort.body);
+    run.setOpen("draft");
+    setOutlined("draft");
+    window.setTimeout(() => setOutlined(null), 1200);
+  };
+
+  const extractDone = run.steps.find((s) => s.id === "extract")?.status === "done";
 
   // The right column is sticky and scrolls internally: its height is the
   // viewport minus the header above the grid (measured) minus 48px.
@@ -45,12 +73,12 @@ export function RunView({ call }: { call: CallRecord }) {
     const host = columnRef.current;
     if (!host || Date.now() - userScrolledAt.current < 3000) return;
     const h = host.getBoundingClientRect(), r = el.getBoundingClientRect();
-    if (r.top >= h.top && r.bottom <= h.bottom) return; // already in view
+    if (r.top >= h.top && r.bottom <= h.bottom) return;
     const target = r.top < h.top ? host.scrollTop + (r.top - h.top) - 16 : host.scrollTop + (r.bottom - h.bottom) + 16;
     programmatic.current = true;
-    host.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+    host.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
     window.setTimeout(() => { programmatic.current = false; }, 600);
-  }, []);
+  }, [reduced]);
 
   return (
     <div style={{ animation: "fade-up 200ms cubic-bezier(0.23,1,0.32,1) both" }}>
@@ -66,8 +94,8 @@ export function RunView({ call }: { call: CallRecord }) {
             <CompanyTile name={call.company} size={22} />
             <span>{call.company}</span>
           </h1>
-          <p className="mt-0.5 flex items-center gap-2 text-[13px] text-soft">
-            <OutcomePill outcome={call.outcome} />
+          <p className="mt-0.5 flex h-6 items-center gap-2 text-[13px] text-soft">
+            {extractDone && <span style={{ animation: "fade-in 200ms ease-out both" }}><OutcomePill outcome={call.outcome} /></span>}
             <span>{call.rep}</span>
             <span className="text-faint">·</span>
             <span className="text-[13.5px] tabular-nums">{fmtDate(call.at)} · {fmtTime(call.at)} · {mmss(call.duration)}</span>
@@ -86,9 +114,22 @@ export function RunView({ call }: { call: CallRecord }) {
           className="run-column sticky top-6 self-start overflow-y-auto pr-3 pb-6"
           style={{ height: headerHeight ? `calc(100vh - ${headerHeight}px - 48px)` : "calc(100vh - 48px)", overscrollBehavior: "contain" }}
         >
-          <Summary call={call} runId={run.runId} ready={run.steps.find((s) => s.id === "score")?.status === "done"} onHighlight={setHighlight} />
+          <Summary call={call} runId={run.runId} ready={run.phase1Done && call.outcome !== "no_show"} onHighlight={setHover} onJump={jump} onShorterDraft={shorterDraft} />
           <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What Slipstream did</h2>
-          <RunTimeline call={call} steps={run.steps} open={run.open} toggle={run.toggle} runId={run.runId} onHighlight={setHighlight} onReveal={reveal} />
+          <RunTimeline
+            call={call}
+            steps={run.steps}
+            open={run.open}
+            toggle={run.toggle}
+            runId={run.runId}
+            draftBody={draftBody}
+            setDraftBody={setDraftBody}
+            highlightStep={outlined}
+            onHighlight={setHover}
+            onJump={jump}
+            onReveal={reveal}
+            onSynced={run.startPhase2}
+          />
         </section>
       </div>
     </div>

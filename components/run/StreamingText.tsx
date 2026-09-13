@@ -14,11 +14,12 @@ export type Source = { i: number; name: string; text: string; t: number };
 
 const WORD_MS = 55;
 
-export function StreamingText({ tokens, sources = [], followUps = [], onCite, onFollowUp, onDone, className, size = "md" }: {
+export function StreamingText({ tokens, sources = [], followUps = [], onCite, onJump, onFollowUp, onDone, className, size = "md" }: {
   tokens: Token[];
   sources?: Source[];
   followUps?: string[];
   onCite?: (turn: number | null) => void;
+  onJump?: (turn: number) => void;
   onFollowUp?: (text: string, i: number) => void;
   onDone?: () => void;
   className?: string;
@@ -43,7 +44,7 @@ export function StreamingText({ tokens, sources = [], followUps = [], onCite, on
         type="button"
         onMouseEnter={() => onCite?.(turn)}
         onMouseLeave={() => onCite?.(null)}
-        onClick={() => onCite?.(turn)}
+        onClick={() => (onJump ?? onCite)?.(turn)}
         className="mr-1 inline-flex h-[18px] translate-y-[-1px] items-center rounded-[5px] bg-surface px-1.5 align-middle text-[11.5px] font-medium tabular-nums text-text shadow-[inset_0_0_0_1px_#e8e8e8] transition-colors duration-150 hover:bg-[#ececec] hover:text-ink"
         style={{ animation: "pop-in 250ms cubic-bezier(0.23,1,0.32,1) both" }}
       >
@@ -72,7 +73,7 @@ export function StreamingText({ tokens, sources = [], followUps = [], onCite, on
               <ul className="mt-1.5 flex flex-col gap-0.5 rounded-lg bg-white p-1">
                 {sources.map((s) => (
                   <li key={s.i}>
-                    <button type="button" onMouseEnter={() => onCite?.(s.i)} onMouseLeave={() => onCite?.(null)} onClick={() => onCite?.(s.i)} className="grid w-full grid-cols-[14px_minmax(0,1fr)_40px] items-center gap-x-2 rounded-md px-1.5 py-1 text-left transition-colors duration-150 hover:bg-surface-2">
+                    <button type="button" onMouseEnter={() => onCite?.(s.i)} onMouseLeave={() => onCite?.(null)} onClick={() => (onJump ?? onCite)?.(s.i)} className="grid w-full grid-cols-[14px_minmax(0,1fr)_40px] items-center gap-x-2 rounded-md px-1.5 py-1 text-left transition-colors duration-150 hover:bg-surface-2">
                       <Avatar name={s.name} size={14} />
                       <span className="truncate text-[13px] text-text">{s.text}</span>
                       <span className="text-right text-[12px] tabular-nums text-faint">{mmss(s.t)}</span>

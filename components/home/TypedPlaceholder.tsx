@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/components/ui";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 /* Sample transcripts that type themselves into the empty Paste box, cycling
    through four short excerpts from the fixture calls. Hidden the moment the
@@ -25,16 +26,16 @@ export function TypedPlaceholder({ active }: { active: boolean }) {
   const [sample, setSample] = useState(0);
   const [count, setCount] = useState(0);
   const [fading, setFading] = useState(false);
-  const [reduced, setReduced] = useState(false);
+  const reduced = useReducedMotion();
   const timers = useRef<number[]>([]);
-
-  useEffect(() => { setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches); }, []);
+  // Restart from the top whenever the box becomes active again.
+  const [wasActive, setWasActive] = useState(active);
+  if (wasActive !== active) { setWasActive(active); if (active) { setCount(0); setFading(false); } }
 
   useEffect(() => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
-    if (!active) { setCount(0); setFading(false); return; }
-    if (reduced) return;
+    if (!active || reduced) return;
     const toks = TOKS[sample];
     if (count < toks.length) {
       const prev = toks[count - 1];

@@ -1,39 +1,53 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { CallRecord } from "@/lib/types";
 import { summaryTokens, whyTokens } from "@/lib/summary";
 import { StreamingText } from "./StreamingText";
 
-/* Conversation intelligence: the two-sentence summary streams in once the
-   call is scored, with transcript citations. Follow-ups re-stream the card. */
-export function Summary({ call, runId, ready, onHighlight }: { call: CallRecord; runId: number; ready: boolean; onHighlight: (i: number | null) => void }) {
-  const [mode, setMode] = useState<"summary" | "why" | "shorter">("summary");
+/* Conversation intelligence: fades in above the timeline once phase 1 is
+   done, streams the summary with transcript citations, and offers two chips. */
+export function Summary({ call, runId, ready, onHighlight, onJump, onShorterDraft }: {
+  call: CallRecord;
+  runId: number;
+  ready: boolean;
+  onHighlight: (i: number | null) => void;
+  onJump: (i: number) => void;
+  onShorterDraft: () => void;
+}) {
+  const [why, setWhy] = useState(false);
   const [gen, setGen] = useState(0);
-  useEffect(() => { setMode("summary"); setGen((g) => g + 1); }, [runId]);
+  const [seenRun, setSeenRun] = useState(runId);
+  if (seenRun !== runId) { setSeenRun(runId); setWhy(false); setGen((g) => g + 1); }
   if (!ready) return null;
 
   const base = summaryTokens(call);
-  const view = mode === "why" ? whyTokens(call) : mode === "shorter"
-    ? { tokens: [{ text: "Shorter follow-up drafted below. Two paragraphs, same promise, same next step." }], sources: [] }
-    : base;
+  const answer = whyTokens(call);
+  const whyLabel = call.outcome === "won" ? "Why did this one close?" : call.outcome === "stalled" ? "Why did this one stall?" : call.outcome === "lost" ? "Why did this one get lost?" : null;
+  const followUps = [
+    "Draft the follow-up again, shorter",
+    ...(whyLabel && !why ? [whyLabel] : []),
+  ];
 
   return (
-    <section className="mb-6 rounded-xl bg-surface p-4" style={{ animation: "fade-up 320ms cubic-bezier(0.23,1,0.32,1) both" }}>
+    <section className="mb-6 rounded-xl bg-surface p-4" style={{ animation: "fade-in 200ms ease-out both" }}>
       <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Conversation intelligence</p>
       <StreamingText
-        key={`${mode}-${gen}`}
+        key={`summary-${gen}`}
         size="lg"
-        tokens={view.tokens}
-        sources={view.sources}
-        followUps={base.followUps}
+        tokens={base.tokens}
+        sources={base.sources}
+        followUps={followUps}
         onCite={onHighlight}
-        onFollowUp={(_, i) => {
-          if (i === 0) { setMode("shorter"); window.dispatchEvent(new CustomEvent("slipstream:shorter-draft")); }
-          else setMode("why");
-          setGen((g) => g + 1);
-        }}
+        onJump={onJump}
+        onFollowUp={(_, i) => { if (i === 0) onShorterDraft(); else setWhy(true); }}
       />
+      {why && (
+        <div className="mt-3 border-t border-line pt-3" style={{ animation: "fade-in 200ms ease-out both" }}>
+          <p className="mb-1.5 text-[13px] text-soft">{whyLabel}</p>
+          <StreamingText key={`why-${gen}`} size="lg" tokens={answer.tokens} sources={answer.sources} onCite={onHighlight} onJump={onJump} />
+        </div>
+      )}
     </section>
   );
 }

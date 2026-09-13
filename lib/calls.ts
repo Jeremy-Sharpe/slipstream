@@ -207,27 +207,32 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Maya Chen",
     "confidence": 0.87,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Northstar Labs",
     "confidence": 0.95,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_won",
     "confidence": 0.95,
-    "span": 9
+    "span": 9,
+    "evidence_ms": 132000
    },
    "value": {
     "value": 58400,
     "confidence": 0.95,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.",
     "confidence": 0.9,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 220000
    },
    "promises": {
     "value": [
@@ -235,7 +240,8 @@ export const calls: CallRecord[] = [
      "I will include the onboarding sequence and the fixed project range"
     ],
     "confidence": 0.87,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 220000
    }
   },
   "scorecard": {
@@ -265,6 +271,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Northstar Labs",
    "body": "Hi Maya,\n\nThanks for the time today. As promised, i will send the mapped Essential Eight gap summary by Thursday.\n\nNext step on our side: Sam to send the Essential Eight gap summary and onboarding sequence, then meet Maya and the finance partner for proposal review.\n\nShout if anything in that needs changing.\n\nSam"
+  },
+  "draftShort": {
+   "subject": "Next steps for Northstar Labs",
+   "body": "Hi Maya,\n\nSam"
   }
  },
  {
@@ -484,27 +494,32 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Felix Morgan",
     "confidence": 0.93,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Arcwell Health",
     "confidence": 0.88,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_won",
     "confidence": 0.89,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 103600,
     "confidence": 0.9,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Sam to send proposal and meet Felix plus clinical director for rollout approval.",
     "confidence": 0.98,
-    "span": 18
+    "span": 18,
+    "evidence_ms": 285000
    },
    "promises": {
     "value": [
@@ -512,7 +527,8 @@ export const calls: CallRecord[] = [
      "I will include the two clinic rollout plan and the cyber insurance evidence register"
     ],
     "confidence": 0.9,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 209000
    }
   },
   "scorecard": {
@@ -542,6 +558,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Arcwell Health",
    "body": "Hi Felix,\n\nThanks for the time today. As promised, i will send the incident-response checklist and onboarding proposal by Friday.\n\nNext step on our side: Sam to send proposal and meet Felix plus clinical director for rollout approval.\n\nShout if anything in that needs changing.\n\nSam"
+  },
+  "draftShort": {
+   "subject": "Next steps for Arcwell Health",
+   "body": "Hi Felix,\n\nSam"
   }
  },
  {
@@ -775,34 +795,40 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Priya Shah",
     "confidence": 0.93,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Afterglow Studio",
     "confidence": 0.97,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_lost",
     "confidence": 0.96,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 15400,
     "confidence": 0.93,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": null,
     "confidence": 0.88,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "promises": {
     "value": [
      "I will send some info this afternoon"
     ],
     "confidence": 0.88,
-    "span": 16
+    "span": 16,
+    "evidence_ms": 221000
    }
   },
   "scorecard": {
@@ -836,6 +862,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Leaving the door open",
    "body": "Hi Priya,\n\nThanks for being straight with me today. It sounds like managed IT isn't the right spend for Afterglow Studio right now, and that's fair.\n\nIf anything changes, an insurer asks for security evidence, or the computers stop being fine, I'm one email away.\n\nJordan"
+  },
+  "draftShort": {
+   "subject": "Leaving the door open",
+   "body": "Hi Priya,\n\nJordan"
   }
  },
  {
@@ -1069,34 +1099,40 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Daniel Ortiz",
     "confidence": 0.95,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Kite & Co",
     "confidence": 0.88,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "evaluation",
     "confidence": 0.96,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 132000,
     "confidence": 0.89,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Sam to send security pack and sample service schedule for Daniel to circulate.",
     "confidence": 0.98,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 201000
    },
    "promises": {
     "value": [
      "I will send the security pack and a sample service schedule"
     ],
     "confidence": 0.93,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 201000
    }
   },
   "scorecard": {
@@ -1126,6 +1162,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Kite & Co",
    "body": "Hi Daniel,\n\nThanks for the time today. As promised, i will send the security pack and a sample service schedule.\n\nNext step on our side: Sam to send security pack and sample service schedule for Daniel to circulate.\n\nShout if anything in that needs changing.\n\nSam"
+  },
+  "draftShort": {
+   "subject": "Next steps for Kite & Co",
+   "body": "Hi Daniel,\n\nSam"
   }
  },
  {
@@ -1373,34 +1413,40 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Lucy Beck",
     "confidence": 0.91,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Craftwork",
     "confidence": 0.9,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_lost",
     "confidence": 0.88,
-    "span": 4
+    "span": 4,
+    "evidence_ms": 62000
    },
    "value": {
     "value": 9800,
     "confidence": 0.95,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": null,
     "confidence": 0.86,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "promises": {
     "value": [
      "I will send a one-page managed services overview"
     ],
     "confidence": 0.97,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 186000
    }
   },
   "scorecard": {
@@ -1430,6 +1476,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Leaving the door open",
    "body": "Hi Lucy,\n\nThanks for being straight with me today. It sounds like managed IT isn't the right spend for Craftwork right now, and that's fair.\n\nIf anything changes, an insurer asks for security evidence, or the computers stop being fine, I'm one email away.\n\nJordan"
+  },
+  "draftShort": {
+   "subject": "Leaving the door open",
+   "body": "Hi Lucy,\n\nJordan"
   }
  },
  {
@@ -1649,34 +1699,40 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Tom Reid",
     "confidence": 0.86,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Meridian AI",
     "confidence": 0.87,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "discovery",
     "confidence": 0.87,
-    "span": 18
+    "span": 18,
+    "evidence_ms": 299000
    },
    "value": {
     "value": 174000,
     "confidence": 0.92,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Jordan to send capability deck and rough migration outline for Tom to share internally.",
     "confidence": 0.94,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 245000
    },
    "promises": {
     "value": [
      "Let me send a capability deck and a rough migration outline"
     ],
     "confidence": 0.89,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 245000
    }
   },
   "scorecard": {
@@ -1706,6 +1762,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Meridian AI",
    "body": "Hi Tom,\n\nThanks for the time today. As promised, let me send a capability deck and a rough migration outline.\n\nNext step on our side: Jordan to send capability deck and rough migration outline for Tom to share internally.\n\nShout if anything in that needs changing.\n\nJordan"
+  },
+  "draftShort": {
+   "subject": "Next steps for Meridian AI",
+   "body": "Hi Tom,\n\nJordan"
   }
  },
  {
@@ -1939,27 +1999,32 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Olivia Hart",
     "confidence": 0.96,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Wattle Street Legal",
     "confidence": 0.94,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_won",
     "confidence": 0.91,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 59600,
     "confidence": 0.91,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Sam to send transition plan and meet Olivia plus principal solicitor for sign-off.",
     "confidence": 0.89,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 196000
    },
    "promises": {
     "value": [
@@ -1967,7 +2032,8 @@ export const calls: CallRecord[] = [
      "I will include the leaver checklist and after-hours file migration window"
     ],
     "confidence": 0.94,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 196000
    }
   },
   "scorecard": {
@@ -1997,6 +2063,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Wattle Street Legal",
    "body": "Hi Olivia,\n\nThanks for the time today. As promised, i will send the transition plan and fixed onboarding quote by Tuesday.\n\nNext step on our side: Sam to send transition plan and meet Olivia plus principal solicitor for sign-off.\n\nShout if anything in that needs changing.\n\nSam"
+  },
+  "draftShort": {
+   "subject": "Next steps for Wattle Street Legal",
+   "body": "Hi Olivia,\n\nSam"
   }
  },
  {
@@ -2244,27 +2314,32 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Ben Wallace",
     "confidence": 0.94,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Elm & Ledger Accounting",
     "confidence": 0.87,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_won",
     "confidence": 0.86,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 78200,
     "confidence": 0.9,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Sam to send migration proposal and run site walk-through with Ben and office manager.",
     "confidence": 0.93,
-    "span": 18
+    "span": 18,
+    "evidence_ms": 264000
    },
    "promises": {
     "value": [
@@ -2272,7 +2347,8 @@ export const calls: CallRecord[] = [
      "I will include the Xero access review and the busy-season support plan"
     ],
     "confidence": 0.98,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 197000
    }
   },
   "scorecard": {
@@ -2302,6 +2378,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Elm & Ledger Accounting",
    "body": "Hi Ben,\n\nThanks for the time today. As promised, i will send the office move checklist and migration proposal by Wednesday.\n\nNext step on our side: Sam to send migration proposal and run site walk-through with Ben and office manager.\n\nShout if anything in that needs changing.\n\nSam"
+  },
+  "draftShort": {
+   "subject": "Next steps for Elm & Ledger Accounting",
+   "body": "Hi Ben,\n\nSam"
   }
  },
  {
@@ -2535,27 +2615,32 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Aisha Rahman",
     "confidence": 0.86,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Port Phillip Physio Group",
     "confidence": 0.86,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_won",
     "confidence": 0.89,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 109400,
     "confidence": 0.94,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Jordan to send proposal and meet Aisha plus clinic director for decision.",
     "confidence": 0.92,
-    "span": 18
+    "span": 18,
+    "evidence_ms": 274000
    },
    "promises": {
     "value": [
@@ -2563,7 +2648,8 @@ export const calls: CallRecord[] = [
      "I will include the staged clinic rollout and receptionist training plan"
     ],
     "confidence": 0.92,
-    "span": 14
+    "span": 14,
+    "evidence_ms": 201000
    }
   },
   "scorecard": {
@@ -2593,6 +2679,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Port Phillip Physio Group",
    "body": "Hi Aisha,\n\nThanks for the time today. As promised, i will send the Essential Eight evidence plan and commercial proposal by Thursday.\n\nNext step on our side: Jordan to send proposal and meet Aisha plus clinic director for decision.\n\nShout if anything in that needs changing.\n\nJordan"
+  },
+  "draftShort": {
+   "subject": "Next steps for Port Phillip Physio Group",
+   "body": "Hi Aisha,\n\nJordan"
   }
  },
  {
@@ -2826,34 +2916,40 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Noah Spencer",
     "confidence": 0.95,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Lumen Lane Retail",
     "confidence": 0.91,
-    "span": 1
+    "span": 1,
+    "evidence_ms": 16000
    },
    "stage": {
     "value": "closed_lost",
     "confidence": 0.98,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 11200,
     "confidence": 0.92,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": null,
     "confidence": 0.96,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "promises": {
     "value": [
      "I will send the managed IT brochure"
     ],
     "confidence": 0.88,
-    "span": 16
+    "span": 16,
+    "evidence_ms": 223000
    }
   },
   "scorecard": {
@@ -2883,6 +2979,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Leaving the door open",
    "body": "Hi Noah,\n\nThanks for being straight with me today. It sounds like managed IT isn't the right spend for Lumen Lane Retail right now, and that's fair.\n\nIf anything changes, an insurer asks for security evidence, or the computers stop being fine, I'm one email away.\n\nJordan"
+  },
+  "draftShort": {
+   "subject": "Leaving the door open",
+   "body": "Hi Noah,\n\nJordan"
   }
  },
  {
@@ -3130,34 +3230,40 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Grace Kim",
     "confidence": 0.86,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Banksia Architects",
     "confidence": 0.96,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "evaluation",
     "confidence": 0.92,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 66400,
     "confidence": 0.9,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Sam to send findings note and risk checklist for Grace to discuss with directors.",
     "confidence": 0.88,
-    "span": 18
+    "span": 18,
+    "evidence_ms": 242000
    },
    "promises": {
     "value": [
      "I will send a short findings note and an office move risk checklist"
     ],
     "confidence": 0.89,
-    "span": 18
+    "span": 18,
+    "evidence_ms": 242000
    }
   },
   "scorecard": {
@@ -3187,6 +3293,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Banksia Architects",
    "body": "Hi Grace,\n\nThanks for the time today. As promised, i will send a short findings note and an office move risk checklist.\n\nNext step on our side: Sam to send findings note and risk checklist for Grace to discuss with directors.\n\nShout if anything in that needs changing.\n\nSam"
+  },
+  "draftShort": {
+   "subject": "Next steps for Banksia Architects",
+   "body": "Hi Grace,\n\nSam"
   }
  },
  {
@@ -3238,34 +3348,40 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Ethan Clarke",
     "confidence": 0.92,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Dockside Dental",
     "confidence": 0.86,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "discovery",
     "confidence": 0.89,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 0,
     "confidence": 0.97,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": null,
     "confidence": 0.88,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "promises": {
     "value": [
      "I will send a quick email with a couple of times to reschedule"
     ],
     "confidence": 0.88,
-    "span": 2
+    "span": 2,
+    "evidence_ms": 30000
    }
   },
   "scorecard": {
@@ -3290,6 +3406,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Rescheduling our call",
    "body": "Hi Ethan,\n\nNo problem at all about this morning. I have Thursday 10:00 or Friday 14:00 free if either suits; happy to keep it to twenty minutes.\n\nJordan"
+  },
+  "draftShort": {
+   "subject": "Rescheduling our call",
+   "body": "Hi Ethan,\n\nJordan"
   }
  },
  {
@@ -3523,27 +3643,32 @@ export const calls: CallRecord[] = [
    "contact": {
     "value": "Dev Patel",
     "confidence": 0.96,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "company": {
     "value": "Marlowe & Finch Accounting",
     "confidence": 0.89,
-    "span": 0
+    "span": 0,
+    "evidence_ms": 0
    },
    "stage": {
     "value": "closed_won",
     "confidence": 0.94,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "value": {
     "value": 48600,
     "confidence": 0.9,
-    "span": null
+    "span": null,
+    "evidence_ms": null
    },
    "next_step": {
     "value": "Jordan to send the proposal and 30-seat agreement by 5pm for Dev and the managing partner to review and sign.",
     "confidence": 0.91,
-    "span": 25
+    "span": 25,
+    "evidence_ms": 362000
    },
    "promises": {
     "value": [
@@ -3551,7 +3676,8 @@ export const calls: CallRecord[] = [
      "I will send the proposal and 30-seat agreement by 5pm today"
     ],
     "confidence": 0.86,
-    "span": 22
+    "span": 22,
+    "evidence_ms": 311000
    }
   },
   "scorecard": {
@@ -3611,6 +3737,10 @@ export const calls: CallRecord[] = [
   "draft": {
    "subject": "Next steps for Marlowe & Finch Accounting",
    "body": "Hi Dev,\n\nThanks for the time today. As promised, i will get a proposal in your inbox today.\n\nNext step on our side: Jordan to send the proposal and 30-seat agreement by 5pm for Dev and the managing partner to review and sign.\n\nShout if anything in that needs changing.\n\nJordan"
+  },
+  "draftShort": {
+   "subject": "Next steps for Marlowe & Finch Accounting",
+   "body": "Hi Dev,\n\nJordan"
   }
  }
 ];

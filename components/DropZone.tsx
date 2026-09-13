@@ -8,11 +8,10 @@ import { FileTiles } from "./home/FileTiles";
 import { Recorder } from "./home/Recorder";
 import { Segmented } from "./home/Segmented";
 import { TypedPlaceholder } from "./home/TypedPlaceholder";
-import { Submitting, type Source } from "./home/Submitting";
-import { Button, cn, mmss } from "./ui";
+import { Button, cn } from "./ui";
 
 type Mode = "upload" | "record" | "paste";
-type Phase = { kind: "idle" } | { kind: "submitting"; source: Source; error?: string; text?: string };
+type Phase = { kind: "idle" } | { kind: "error"; message: string };
 
 const MEDIA = /\.(mp3|m4a|wav|mp4|mov|webm|ogg|aac|flac|m4v)$/i;
 const MODES: { key: Mode; label: string }[] = [
@@ -41,8 +40,12 @@ export function DropZone() {
   const isMedia = (f: File) => f.type.startsWith("audio/") || f.type.startsWith("video/") || MEDIA.test(f.name);
 
   const submitFile = (f: File) => {
-    const source: Source = { kind: "file", name: f.name, bytes: f.size };
-    setPhase({ kind: "submitting", source, error: isMedia(f) ? undefined : "That file type isn't supported" });
+    if (!isMedia(f)) {
+      setPhase({ kind: "error", message: "That file type isn't supported" });
+      timers.current.push(window.setTimeout(() => setPhase({ kind: "idle" }), 1600));
+      return;
+    }
+    handoff(() => actions.addUpload(f.name));
   };
 
   const onFiles = (files: FileList | null) => {
@@ -50,17 +53,18 @@ export function DropZone() {
     if (f) submitFile(f);
   };
 
-  // Home fades out before the route changes; the run mounts with step 2 working.
+  // Straight to the run: the pipeline animates there.
   const handoff = (make: () => { id: string }) => {
     setLeaving(true);
     timers.current.push(window.setTimeout(() => {
       const c = make();
-      router.push(`/calls/${c.id}?from=home`);
+      router.push(`/calls/${c.id}`);
     }, 150));
   };
 
   const useRecording = () => {
-    setPhase({ kind: "submitting", source: { kind: "recording" } });
+    const d = new Date();
+    handoff(() => actions.addUpload(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`));
   };
 
   // The "+" in Paste: media starts transcribing; a text transcript loads in.
@@ -73,27 +77,16 @@ export function DropZone() {
 
   const run = () => {
     if (!text.trim()) return;
-    setPhase({ kind: "submitting", source: { kind: "paste", lines: text.split(/\n/).filter((l) => l.trim()).length }, text });
-  };
-
-  const onSubmitted = () => {
-    if (phase.kind !== "submitting") return;
-    const p = phase;
-    handoff(() => {
-      if (p.source.kind === "paste") return actions.addTranscript(p.text ?? "");
-      if (p.source.kind === "file") return actions.addUpload(p.source.name);
-      const d = new Date();
-      return actions.addUpload(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
-    });
+    handoff(() => actions.addTranscript(text));
   };
 
   return (
     <div className="text-center transition-opacity duration-150" style={{ opacity: leaving ? 0 : 1 }}>
-      <div className={cn("mb-5 transition-opacity duration-200", phase.kind === "submitting" && "pointer-events-none opacity-40")}><Segmented value={mode} options={MODES} onChange={setMode} /></div>
+      <div className="mb-5"><Segmented value={mode} options={MODES} onChange={setMode} /></div>
 
-      {phase.kind === "submitting" && phase.source.kind !== "recording" ? (
-        <div key="submitting" className={CARD}>
-          <Submitting source={phase.source} error={phase.error} onDone={onSubmitted} onReset={() => setPhase({ kind: "idle" })} />
+      {phase.kind === "error" ? (
+        <div key="error" className={CARD}>
+          <p className="text-[14px] font-medium text-soft" style={{ animation: "fade-in 200ms ease-out both" }}>{phase.message}</p>
         </div>
       ) : mode === "upload" ? (
         <div
@@ -117,7 +110,7 @@ export function DropZone() {
         </div>
       ) : mode === "record" ? (
         <div key="record" className={cn(CARD, "px-8")}>
-          <Recorder key={mode} onUse={useRecording} submitting={phase.kind === "submitting" && phase.source.kind === "recording" ? <Submitting source={{ kind: "recording" }} onDone={onSubmitted} variant="bar" /> : null} />
+          <Recorder key={mode} onUse={useRecording} />
         </div>
       ) : (
         <div key="paste" className={cn(CARD, "items-stretch justify-start p-5 text-left")}>

@@ -9,7 +9,11 @@ export function Transcript({ turns, highlight }: { turns: Turn[]; highlight: num
   const refs = useRef<Record<number, HTMLLIElement | null>>({});
   useEffect(() => {
     if (highlight == null) return;
-    refs.current[highlight]?.scrollIntoView({ block: "center", behavior: "smooth" });
+    const el = refs.current[highlight];
+    if (!el) return;
+    // Scroll the page (left column) only; the sticky right column stays put.
+    const r = el.getBoundingClientRect();
+    if (r.top < 80 || r.bottom > window.innerHeight - 40) window.scrollBy({ top: r.top - window.innerHeight / 2 + r.height / 2, behavior: "smooth" });
   }, [highlight]);
   return (
     <ol className="flex flex-col gap-1">

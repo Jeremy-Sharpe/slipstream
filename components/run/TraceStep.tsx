@@ -11,7 +11,7 @@ import { LoaderGrid, Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
 
 export type TraceStatus = "pending" | "running" | "done" | "skipped";
 
-export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, loader = "spinner", onReveal, children }: {
+export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, loader = "spinner", shimmer = false, outlined = false, onReveal, children }: {
   status: TraceStatus;
   workingLabel: string;
   doneLabel: string;
@@ -25,6 +25,10 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   onToggle: () => void;
   last?: boolean;
   loader?: "spinner" | "grid";
+  /** Shimmer the working label (used for Transcribing); otherwise muted. */
+  shimmer?: boolean;
+  /** Brief outline after a chip action. */
+  outlined?: boolean;
   onReveal?: (el: HTMLElement) => void;
   children?: ReactNode;
 }) {
@@ -44,7 +48,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   useLayoutEffect(() => { if (traceRef.current) setLineHeight(traceRef.current.offsetHeight); }, [visible, expanded, status, children]);
 
   return (
-    <li ref={itemRef} className="relative flex gap-4">
+    <li ref={itemRef} className={cn("relative flex gap-4 rounded-xl transition-shadow duration-500", outlined && "shadow-[0_0_0_2px_#181925]")} style={{ animation: "fade-up 200ms ease-out both" }}>
       <div className="flex flex-col items-center">
         <span
           className={cn(
@@ -71,7 +75,8 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
         >
           <span role="status" className="contents">
             {working ? (
-              <span className="shimmer-text shrink-0 text-[15px] font-medium whitespace-nowrap">{workingLabel}</span>
+              shimmer ? <span className="shimmer-text shrink-0 text-[15px] font-medium whitespace-nowrap">{workingLabel}</span>
+              : <span className="shrink-0 text-[15px] font-medium whitespace-nowrap text-soft">{workingLabel}</span>
             ) : (
               <span className={cn("shrink-0 text-[15px] font-medium whitespace-nowrap", muted ? "text-faint" : "text-ink")} style={status === "done" ? { animation: "fade-in 350ms ease-out both" } : undefined}>
                 {doneLabel}
