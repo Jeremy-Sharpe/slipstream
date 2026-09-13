@@ -10,11 +10,11 @@ export function Section({ id, title, meta, active, children, className }: { id: 
       id={id}
       className={cn("scroll-mt-6 rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(17,24,39,0.06)] transition-shadow", active && "ring-2 ring-primary", className)}
     >
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
+      <header className="flex min-h-16 flex-col items-start justify-center gap-1 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>
         {meta && <div className="text-[15px] text-muted-foreground">{meta}</div>}
       </header>
-      <div className="p-6 text-[16px]">{children}</div>
+      <div className="p-4 text-[16px] sm:p-6">{children}</div>
     </section>
   );
 }

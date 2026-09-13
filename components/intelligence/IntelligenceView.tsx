@@ -283,10 +283,10 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
   };
 
   return (
-    <div className="px-11 pt-[34px] pb-16">
+    <div className="px-4 pt-6 pb-12 sm:px-11 sm:pt-[34px] sm:pb-16">
       <IntelligenceHeader query={query} onQuery={setQuery} />
 
-      <div role="status" aria-atomic="true" className="mt-7 flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-[14px]">
+      <div role="status" aria-atomic="true" className="mt-5 flex flex-col items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 text-[14px] sm:mt-7 sm:flex-row sm:items-center">
         {currentProfileState.status === "checking" ? <Loader2 className="size-4 animate-spin text-primary" /> : currentProfileState.status === "live" ? <CheckCircle2 className="size-4 text-primary" /> : currentProfileState.status === "error" ? <AlertCircle className="size-4 text-destructive" /> : <Server className="size-4 text-muted-foreground" />}
         <div className="min-w-0 flex-1">
           <p className="font-medium text-foreground">{currentProfileState.status === "live" || currentPlaybookState.status === "live" ? "Live intelligence + labelled evaluation analysis" : currentInventoryState.status === "live" ? "Stored evidence + labelled evaluation analysis" : "Labelled evaluation analysis"}</p>
@@ -310,13 +310,13 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
         </div>
       ) : <>
       <p className="mt-[42px] text-[17px] font-semibold text-foreground">Quick links</p>
-      <div className="mt-4 grid grid-cols-4 gap-5 xl:grid-cols-7">
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5 xl:grid-cols-7">
         {QUICK_LINKS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => jump(id)}
-            className="flex h-[76px] items-center gap-4 rounded-xl border border-border/70 bg-page px-6 text-left text-[20px] font-semibold text-foreground transition-colors hover:border-foreground/20 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="flex h-[68px] min-w-0 items-center gap-3 rounded-xl border border-border/70 bg-page px-4 text-left text-[16px] font-semibold text-foreground transition-colors hover:border-foreground/20 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none sm:h-[76px] sm:gap-4 sm:px-6 sm:text-[20px]"
           >
             <Icon className="size-7 shrink-0 text-primary" strokeWidth={1.75} />
             <span className="truncate">{label}</span>

@@ -15,7 +15,7 @@ type Props = { data: Intelligence; active?: string; meta?: string };
 
 export function Tiles({ data }: { data: Intelligence }) {
   return (
-    <div className="grid grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
       {data.tiles.map((t) => (
         <div key={t.label} className="rounded-xl border border-border bg-card p-6 shadow-[0_1px_2px_rgba(17,24,39,0.06)]">
           <p className="text-[15px] text-muted-foreground">{t.label}</p>
@@ -30,23 +30,25 @@ export function Tiles({ data }: { data: Intelligence }) {
 export function TrainingLens({ data, active, meta }: Props) {
   return (
     <Section id="patterns" title="Won-deal patterns" meta={meta ?? `${data.wonDeals} wins vs ${data.callsAnalysed - data.wonDeals} other calls · labelled evaluation`} active={active === "patterns"}>
-      <div className="grid grid-cols-[1fr_200px_200px] gap-x-6 text-[15px] text-muted-foreground">
+      <div className="hidden grid-cols-[1fr_200px_200px] gap-x-6 text-[15px] text-muted-foreground sm:grid">
         <span />
         <span className="font-medium text-foreground">Winning calls</span>
         <span className="font-medium text-foreground">Stalled or lost</span>
       </div>
       <ul className="mt-3 divide-y divide-border">
         {data.lens.map((row) => (
-          <li key={row.label} className="grid grid-cols-[1fr_200px_200px] items-start gap-x-6 py-5">
+          <li key={row.label} className="grid grid-cols-1 items-start gap-3 py-5 sm:grid-cols-[1fr_200px_200px] sm:gap-x-6">
             <div>
               <p className="text-[16px] font-medium text-foreground">{row.label}</p>
               <p className="mt-1 text-[15px] text-muted-foreground">{row.takeaway}</p>
             </div>
             <div>
+              <p className="text-[12px] font-medium text-muted-foreground sm:hidden">Winning calls</p>
               <p className="text-[16px] text-foreground tabular-nums">{row.wins.value}</p>
               <Bar share={row.wins.share} className="mt-2" />
             </div>
             <div>
+              <p className="text-[12px] font-medium text-muted-foreground sm:hidden">Stalled or lost</p>
               <p className="text-[16px] text-foreground tabular-nums">{row.others.value}</p>
               <Bar share={row.others.share} className="mt-2" />
             </div>
@@ -80,7 +82,7 @@ export function DerivedIcp({ data, active }: Props) {
   return (
     <Section id="icp" title="Derived ICP" meta={<span className="flex items-center gap-3">{provenance} · v{data.icpVersion}<ConfidenceRing value={data.confidence} /></span>} active={active === "icp"}>
       <p className="max-w-[820px] text-[20px] leading-snug font-medium text-foreground">{data.icp.summary}</p>
-      <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border">
+      <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
         {data.icp.attributes.map((a) => (
           <div key={a.label} className="bg-card p-5">
             <p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">{a.label}</p>
@@ -111,7 +113,7 @@ export function RevenueDna({ freshness, status, active }: { freshness: ApiIcpFre
     : null;
   return (
     <Section id="revenue-dna" title="Revenue DNA" meta="Outcome-triggered ICP freshness gate" active={active === "revenue-dna"}>
-      <div className="flex items-start justify-between gap-8">
+      <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:gap-8">
         <div className="flex max-w-2xl gap-4">
           <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-full", current ? "bg-emerald-100 text-emerald-700" : stale ? "bg-amber-100 text-amber-800" : "bg-muted text-muted-foreground")}><Fingerprint className="size-5" /></span>
           <div>
@@ -124,7 +126,7 @@ export function RevenueDna({ freshness, status, active }: { freshness: ApiIcpFre
         </Link>
       </div>
       {freshness && (
-        <div className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
+        <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3">
           <div className="bg-page p-4"><p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Evidence watched</p><p className="mt-2 text-[18px] font-semibold text-foreground">{freshness.source_summary.deals} deals · {freshness.source_summary.outcome_labelled} outcomes</p></div>
           <div className="bg-page p-4"><p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Targeting version</p><p className="mt-2 font-mono text-[18px] font-semibold text-foreground">v{freshness.profile_version} · {freshness.current_cohort_revision.slice(0, 7)}</p></div>
           <div className="bg-page p-4"><p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Lead impact</p><p className="mt-2 text-[18px] font-semibold text-foreground">{freshness.leads_needing_rescore ? `${freshness.leads_needing_rescore} need a new score` : `${freshness.leads_on_profile} current`}</p></div>
@@ -146,7 +148,7 @@ export function RevenueDna({ freshness, status, active }: { freshness: ApiIcpFre
           </div>
           {simulation ? (
             <div className="px-4 py-4" role="status" aria-live="polite">
-              <div className="flex items-center justify-between gap-4"><p className="text-[12px] font-semibold tracking-wide text-primary uppercase">Hypothetical {simulation.outcome} recorded</p><p className="text-[12px] text-muted-foreground">Live state remains unchanged</p></div>
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4"><p className="text-[12px] font-semibold tracking-wide text-primary uppercase">Hypothetical {simulation.outcome} recorded</p><p className="text-[12px] text-muted-foreground">Live state remains unchanged</p></div>
               <div className="mt-3 grid gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-4">
                 <ShockStep index="1" title="Signal" value={simulation.direction} />
                 <ShockStep index="2" title="Detect" value={simulation.staleProfile} />
@@ -175,7 +177,7 @@ const HANDLING: { key: ObjectionHandling; label: string; note: string }[] = [
 export function Objections({ data, active }: Props) {
   return (
     <Section id="objections" title="Objections" meta={`${data.objections.length} raised across ${data.callsAnalysed} calls`} active={active === "objections"}>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {HANDLING.map((h) => {
           const items = data.objections.filter((o) => o.handling === h.key);
           return (
@@ -213,9 +215,9 @@ export function TalkRatio({ data, active }: Props) {
     <Section id="talk-ratio" title="Talk ratio" meta="Share of words spoken by the rep · wins marked" active={active === "talk-ratio"}>
       <ul className="flex flex-col gap-2.5">
         {sorted.map((t) => (
-          <li key={t.call.id} className="grid grid-cols-[240px_1fr_56px_80px] items-center gap-4 text-[16px]">
+          <li key={t.call.id} className="grid grid-cols-[minmax(0,1fr)_56px_58px] items-center gap-3 text-[14px] sm:grid-cols-[240px_1fr_56px_80px] sm:gap-4 sm:text-[16px]">
             <Link href={`/conversations/${t.call.id}`} className={cn("truncate text-foreground hover:underline", t.outcome === "won" && "font-medium")}>{t.call.company}</Link>
-            <Bar share={t.ratio} className={cn(t.outcome !== "won" && "[&>span]:bg-muted-foreground/60")} />
+            <Bar share={t.ratio} className={cn("hidden sm:block", t.outcome !== "won" && "[&>span]:bg-muted-foreground/60")} />
             <span className="text-right text-foreground tabular-nums">{Math.round(t.ratio * 100)}%</span>
             <OutcomeTag outcome={t.outcome} />
           </li>
@@ -233,7 +235,7 @@ export function NextSteps({ data, active }: Props) {
     <Section id="next-steps" title="Next steps" meta="What each call ended with" active={active === "next-steps"}>
       <ul className="divide-y divide-border">
         {data.nextSteps.map((n) => (
-          <li key={n.call.id} className="grid grid-cols-[240px_1fr_110px_80px] items-start gap-4 py-3.5 text-[16px]">
+          <li key={n.call.id} className="grid grid-cols-1 items-start gap-2 py-3.5 text-[14px] sm:grid-cols-[240px_1fr_110px_80px] sm:gap-4 sm:text-[16px]">
             <Link href={`/conversations/${n.call.id}`} className="truncate text-foreground hover:underline">{n.call.company}</Link>
             <p className={cn("text-foreground", !n.due && "text-muted-foreground")}>{n.description}</p>
             <span className={cn("tabular-nums", n.due ? "text-foreground" : "text-muted-foreground")}>{n.due ? dateFmt.format(new Date(n.due)) : "No date"}</span>
@@ -251,9 +253,9 @@ export function Triggers({ data, active }: Props) {
     <Section id="triggers" title="Triggers" meta="Why the prospect took the call" active={active === "triggers"}>
       <ul className="flex flex-col gap-3">
         {data.triggers.map((t) => (
-          <li key={t.label} className="grid grid-cols-[320px_1fr_40px] items-center gap-4 text-[16px]">
+          <li key={t.label} className="grid grid-cols-[minmax(0,1fr)_40px] items-center gap-3 text-[14px] sm:grid-cols-[320px_1fr_40px] sm:gap-4 sm:text-[16px]">
             <span className={cn("truncate", t.label === "No trigger" ? "text-muted-foreground" : "text-foreground")}>{t.label}</span>
-            <Bar share={t.count / max} className={cn(t.label === "No trigger" && "[&>span]:bg-muted-foreground/60")} />
+            <Bar share={t.count / max} className={cn("hidden sm:block", t.label === "No trigger" && "[&>span]:bg-muted-foreground/60")} />
             <span className="text-right text-foreground tabular-nums">×{t.count}</span>
           </li>
         ))}
@@ -276,7 +278,7 @@ export function BriefCard({ brief, active }: { brief: string; active?: string })
         aria-label="Lead search brief"
         className="w-full resize-y rounded-lg border border-border bg-page p-4 text-[16px] leading-relaxed text-foreground outline-none focus:ring-2 focus:ring-primary"
       />
-      <div className="mt-4 flex items-center justify-end gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
         <div className="flex h-10 items-center rounded-md border border-border" aria-label="How many leads">
           <button type="button" onClick={() => setCount((c) => Math.max(5, c - 5))} disabled={count <= 5} aria-label="Fewer" className="flex h-full w-9 items-center justify-center text-muted-foreground hover:text-foreground disabled:text-border"><Minus className="size-3.5" strokeWidth={2} /></button>
           <span className="min-w-8 text-center text-[16px] font-medium text-foreground tabular-nums">{count}</span>
