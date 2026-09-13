@@ -14,7 +14,7 @@ Backup UI: https://slipstream-hackathon.vercel.app (Vercel quota-delayed; use th
 
 Production API: https://slipstream-api.3-104-149-193.sslip.io
 
-Demo video: https://github.com/Jeremy-Sharpe/slipstream/releases/download/demo-video-v1/slipstream-demo.mp4
+Demo video: https://github.com/Jeremy-Sharpe/slipstream/releases/download/demo-video-v2/slipstream-demo-v2.mp4
 
 ## The problem and who it's for
 
