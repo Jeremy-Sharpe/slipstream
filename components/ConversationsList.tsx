@@ -90,7 +90,7 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
                     </span>
                     <span className="flex min-w-0 items-center gap-2">
                       <span className="min-w-0 max-w-[60%] truncate text-[14px] text-ink">{row.company}</span>
-                      {showSubject(row) && <span className="min-w-0 truncate text-[13.5px] text-soft">· {row.subject}</span>}
+                      {showSubject(row) && <><span className="shrink-0 text-faint">·</span><span className="min-w-0 truncate text-[13.5px] text-soft">{row.subject}</span></>}
                     </span>
                     <span className="flex items-center">{row.run?.outcome && <OutcomePill outcome={row.run.outcome} />}</span>
                     <span className="text-[13.5px] tabular-nums text-soft">{fmtTime(row.at)}</span>
