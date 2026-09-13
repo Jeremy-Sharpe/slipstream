@@ -1,6 +1,6 @@
 # Judging evals
 
-Every criterion the judges score, turned into a check the team can run. An LLM judge scores each rubric line from the same artefacts the real judges get (the repo, bounded server-rendered snapshots of the public Conversations, call detail, Intelligence, Leads and Campaigns routes, and the written pitch and demo script), and deterministic checks cover the submission requirements. A criterion passes when the judge's score reaches the team's target. The rubric wording is in `docs/hackathon.md`; the judge data is in `evals/criteria.mjs`; the `criteria-doc-sync` check fails if this table, that data and the rubric disagree.
+Every criterion the judges score, turned into a check the team can run. An LLM judge scores each rubric line from the same artefacts the real judges get (the repo, bounded server-rendered snapshots of the public Revenue Loop, Conversations, call detail, Intelligence, Leads and Campaigns routes, deployed provider and aggregate-to-lead API evidence, and the written pitch and demo script), and deterministic checks cover the submission requirements. A criterion passes when the judge's score reaches the team's target. The rubric wording is in `docs/hackathon.md`; the judge data is in `evals/criteria.mjs`; the `criteria-doc-sync` check fails if this table, that data and the rubric disagree.
 
 ## How to run
 

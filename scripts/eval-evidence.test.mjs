@@ -4,11 +4,23 @@ import test from "node:test";
 
 import { parseVerdict } from "../evals/lib/judge.mjs";
 import {
+  PRODUCTION_API_SURFACES,
   fetchProductionSurfaces,
   productionApiUrl,
   readmeField,
   renderProductionSurfaces,
 } from "../evals/lib/repo.mjs";
+
+test("judge evidence includes the live OpenRouter aggregate-to-lead proof", () => {
+  assert.equal(
+    PRODUCTION_API_SURFACES.some(({ path }) => path === "/api/v1/demo/evidence"),
+    true,
+  );
+  assert.equal(
+    PRODUCTION_API_SURFACES.some(({ path }) => path === "/api/v1/integrations/verify"),
+    true,
+  );
+});
 
 test("production evidence fetches and labels every requested public route", async (t) => {
   const server = createServer((request, response) => {

@@ -12,10 +12,10 @@ const MAYA_CALL = "/conversations/call-01-northstar-labs";
 const STEP_COUNT = 7;
 const STORAGE_KEY = "slipstream.revenue-loop.step";
 
-export function RevenueLoop() {
+export function RevenueLoop({ initialProof = EMPTY_DEMO_PROOF }: { initialProof?: DemoProof }) {
   const [active, setActive] = useState(-1);
   const [playing, setPlaying] = useState(false);
-  const [proof, setProof] = useState<DemoProof>(EMPTY_DEMO_PROOF);
+  const [proof, setProof] = useState<DemoProof>(initialProof);
   const [verifiedAt, setVerifiedAt] = useState<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const stepRefs = useRef<Array<HTMLButtonElement | null>>([]);

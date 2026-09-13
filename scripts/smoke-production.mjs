@@ -212,6 +212,19 @@ export async function runSmoke(rawOptions = {}) {
   const campaigns = parseJson(campaignsResponse.body, "campaign list");
   assert(Array.isArray(campaigns), "campaign list did not return an array");
 
+  const demoEvidenceResponse = await request(`${apiUrl}/api/v1/demo/evidence`, {}, fetchImpl);
+  assert(demoEvidenceResponse.response.status === 200, `demo evidence returned ${demoEvidenceResponse.response.status}`);
+  const demoEvidence = parseJson(demoEvidenceResponse.body, "demo evidence");
+  assert(demoEvidence?.status === "verified", "demo evidence did not report verified");
+  assert(demoEvidence?.lead_provider === "openrouter_demo", "demo evidence returned the wrong lead provider");
+  assert(demoEvidence?.lead_count === 10, "demo evidence did not prove exactly ten current leads");
+  assert(demoEvidence?.all_fictional === true, "demo evidence includes an unlabelled lead");
+  assert(demoEvidence?.all_reserved_domains === true, "demo evidence includes a non-reserved domain");
+  assert(demoEvidence?.no_delivery_coordinates === true, "demo evidence includes delivery coordinates");
+  assert(demoEvidence?.delivery_enabled === false, "demo evidence unexpectedly enables delivery");
+  assert(demoEvidence?.icp?.profile?.source_summary?.calls > 0, "demo evidence has no call cohort");
+  assert(demoEvidence?.icp?.profile?.source_summary?.emails > 0, "demo evidence has no email cohort");
+
   const schemaResponse = await request(`${apiUrl}/openapi.json`, {}, fetchImpl);
   assert(schemaResponse.response.status === 200, `OpenAPI schema returned ${schemaResponse.response.status}`);
   const schema = parseJson(schemaResponse.body, "OpenAPI schema");
@@ -240,6 +253,7 @@ export async function runSmoke(rawOptions = {}) {
     revision: ready.revision,
     storage: ready.storage,
     campaignCount: campaigns.length,
+    leadProofCount: demoEvidence.lead_count,
     configuredIntegrations: Object.entries(ready.integrations || {})
       .filter(([, configured]) => configured === true)
       .map(([name]) => name),
@@ -255,6 +269,7 @@ if (import.meta.url === new URL(process.argv[1], "file:").href) {
       : "none";
     console.log(
       `production smoke passed revision=${result.revision} storage=${result.storage} campaigns=${result.campaignCount} integrations=${integrations}` +
+        ` lead-proof=${result.leadProofCount}` +
         (result.fixtureLoop
           ? ` fixture=${result.fixtureLoop.conversationId} draft=${result.fixtureLoop.draftId} state=${result.fixtureLoop.status}`
           : ""),

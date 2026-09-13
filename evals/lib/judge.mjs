@@ -38,7 +38,7 @@ export function judgeScenario(criterion) {
         renderProductionSurfaces(url, surfaces) + "\n" +
           renderProductionSurfaces(apiUrl, apiSurfaces, {
             title: "Production API snapshots",
-            description: "These are bounded snapshots of the deployed API's readiness truth and real campaign execution state for this eval run.",
+            description: "These are bounded snapshots of deployed provider readiness, the live mixed-channel ICP-to-fictional-lead proof, canonical call artefacts and real campaign execution state for this eval run.",
           }),
       );
       await writeFile(path.join(judgeDir, "rubric.md"), renderRubric(criterion));
