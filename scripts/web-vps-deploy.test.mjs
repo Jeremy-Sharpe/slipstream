@@ -18,7 +18,7 @@ test("standalone presentation host preserves the API boundary", async () => {
   assert.match(service, /^WorkingDirectory=\/opt\/slipstream-web\/current$/m);
 
   assert.match(caddy, /^slipstream\.3-104-149-193\.sslip\.io\s*\{/m);
-  assert.match(caddy, /@api path \/ready \/api\/\*/);
+  assert.match(caddy, /@api path \/ready \/openapi\.json \/api\/\*/);
   assert.ok(
     caddy.indexOf("reverse_proxy 127.0.0.1:8000") < caddy.indexOf("reverse_proxy 127.0.0.1:3010"),
     "the API handler must be declared before the catch-all web handler",
