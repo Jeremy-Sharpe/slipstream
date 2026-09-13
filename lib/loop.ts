@@ -55,7 +55,7 @@ const UNKNOWN = "Unknown";
 
 const mmss = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, "0")}`;
 const label = (key: string) => key.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
-const range = (values: number[]) => (values.length ? `${Math.min(...values)}–${Math.max(...values)}` : null);
+const range = (values: number[]) => (values.length ? `${Math.min(...values)} to ${Math.max(...values)}` : null);
 
 function runtimeLine(readiness: ApiReadiness | null): string {
   if (!readiness) return "Runtime unavailable.";
@@ -121,7 +121,7 @@ export function buildLoop(input: LoopInput): Loop {
       n: "01",
       verb: "Listen",
       title: "One sales call",
-      what: demoCall ? `${demoCall.subject}, ${demoCall.segments.length} turns${demoCall.duration_seconds ? `, ${mmss(demoCall.duration_seconds)}` : ""}.` : NOT_DERIVED,
+      what: demoCall ? `${demoCall.subject.replace(/\s+[—–]\s+/g, " · ")}, ${demoCall.segments.length} turns${demoCall.duration_seconds ? `, ${mmss(demoCall.duration_seconds)}` : ""}.` : NOT_DERIVED,
       preview: demoCall?.segments.length
         ? { kind: "turns", turns: demoCall.segments.slice(0, 2).map((segment) => ({ key: segment.sequence, name: speakerName(segment.speaker, demoCall.rep), t: Math.round(segment.start_ms / 1000), text: segment.body })) }
         : null,
@@ -187,7 +187,7 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Find",
       title: "Next search writes itself",
       what: evidence
-        ? `Brief generated from the won-deal profile · ${evidence.lead_count} companies found${similarity ? ` · similarity ${similarity}` : ""}.`
+        ? `Brief generated from the won-deal profile · ${evidence.lead_count} companies found${similarity ? ` · Similarity ${similarity}` : ""}.`
         : NOT_DERIVED,
       preview: topLeads.length
         ? { kind: "leads", leads: topLeads.map((lead) => ({ id: lead.id, company: lead.company_name, similarity: Math.round((lead.similarity_score ?? 0) * 100) })) }
