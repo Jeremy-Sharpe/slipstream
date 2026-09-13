@@ -27,7 +27,8 @@ __pycache__/
 *.py[cod]
 
 # evals
-/.hg-evals-reports
+/.eval-reports
+/.evals-runner
 
 # keep the template even though .env* is ignored
 !.env.example

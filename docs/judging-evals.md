@@ -4,7 +4,7 @@ Every criterion the judges score, turned into a check the team can run. An LLM j
 
 ## Final internal result
 
-The full current-state run completed on 13 September 2026 after PR #71, against the public VPS UI and API: **15/15 scenarios passed, 95/100 points**. This is an internal Sonnet rubric evaluation, not an official hackathon score. The result is reproducible with `npm run evals`; its local report was `.hg-evals-reports/2026-09-13T06-47-56.104Z/eval-report.md`.
+The full current-state run completed on 13 September 2026 after PR #71, against the public VPS UI and API: **15/15 scenarios passed, 95/100 points**. This is an internal Sonnet rubric evaluation, not an official hackathon score. The result is reproducible with `npm run evals`; its local report was `.eval-reports/2026-09-13T06-47-56.104Z/eval-report.md`.
 
 | Area | Scores | Total |
 |---|---|---:|
@@ -17,7 +17,7 @@ The five-point gap is explicit rather than hidden: the hosted API remains memory
 
 ## How to run
 
-The runner is the shared Hourglass evals runner in `hourglass-claude-stack`, driven by your own Claude Code login. No API key and no Codex involved. Each judge run uses Sonnet through the subscription.
+The scenarios and criteria are in this repo; the generic runner that executes them is an external script, driven by your own Claude Code login. No API key involved: each judge run uses Sonnet through the subscription.
 
 ```bash
 npm run evals:dry            # deterministic checks only, seconds, no model
@@ -25,7 +25,7 @@ npm run evals                # everything, 13 judge runs, roughly 10 to 20 minut
 npm run evals -- --scenario T1   # one criterion
 ```
 
-Set `HG_STACK` if the stack checkout is not at `~/repos/hourglass-claude-stack`. Set `SLIPSTREAM_PROD_URL` to judge a preview deployment instead of the README URL. Reports land in `.hg-evals-reports/<timestamp>/eval-report.md`; each failed criterion lists the judge's evidence and the specific gaps that would lift the score, so read the gaps and fix those.
+Point `EVALS_RUNNER` at the runner script, or write its path into an untracked `.evals-runner` file at the repo root; without one of those `npm run evals` exits 2 and tells you so. Set `SLIPSTREAM_PROD_URL` to judge a preview deployment instead of the README URL. Reports land in `.eval-reports/<timestamp>/eval-report.md`; each failed criterion lists the judge's evidence and the specific gaps that would lift the score, so read the gaps and fix those.
 
 ## LLM-judged criteria
 
