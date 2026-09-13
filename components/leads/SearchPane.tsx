@@ -70,7 +70,7 @@ export function SearchPane({ searches, leads, profile, wonDeals, selectedId, onS
           </div>
           <Button variant="primary" onClick={find} disabled={busy}>Find leads</Button>
         </div>
-        <p className="mt-3 text-[12px] text-faint">From {wonDeals} won deals</p>
+        <p className="mt-3 h-4 text-[12px] leading-4 text-faint">{wonDeals > 0 ? `From ${wonDeals} won ${wonDeals === 1 ? "deal" : "deals"}` : ""}</p>
       </section>
 
       <h2 className="mt-6 mb-2 shrink-0 px-3 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Searches</h2>

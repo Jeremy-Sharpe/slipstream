@@ -91,7 +91,7 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
               </>
             ) : (
               <p className="mt-3 text-[14px] text-faint">
-                {drafting ? "Writing the draft" : l.status === "approved" ? "Approved earlier, this browser did not keep the draft" : "No draft yet"}
+                {drafting ? "Writing the draft" : l.status === "approved" ? "Approved earlier" : "No draft yet"}
               </p>
             )}
           </div>
