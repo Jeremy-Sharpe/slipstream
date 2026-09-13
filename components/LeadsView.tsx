@@ -37,7 +37,7 @@ export function LeadsView() {
     if (sort) {
       const key = SORT_KEYS[sort.col];
       out.sort((a, b) => {
-        const pick = (r: Row) => (key === "draft" ? Number(r.drafted) : key === "linkedin" ? r.contact : r[key]);
+        const pick = (r: Row) => (key === "draft" ? Number(r.drafted) : key === "linkedin" ? r.contact : key === "n" ? 0 : r[key]);
         const av = pick(a), bv = pick(b);
         const c = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
         return sort.dir === "asc" ? c : -c;
