@@ -9,6 +9,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 TERMINAL = {"asked", "answered", "mentioned", "done", "dismissed", "superseded"}
+TRAILING_OFF = re.compile(r"…|\.\.\.")
 RISKY = re.compile(
     r"guarantee|halve.*premium|never.*breach|lose.*certification|price.*gone|sign today", re.I
 )
@@ -152,6 +153,9 @@ def apply_analysis(
             continue
         if not change.quote.strip() or change.quote.casefold() not in turn["text"].casefold():
             continue
+        # Speech that trails off ("What budget have you… actually") never completes a card.
+        if TRAILING_OFF.search(change.quote):
+            continue
         if change.sequence < item["created_sequence"]:
             continue
         if item["status"] in {"done", "dismissed", "answered", "mentioned", "superseded"}:
@@ -161,6 +165,11 @@ def apply_analysis(
         if change.status in {"asked", "mentioned"} and turn["role"] != "rep":
             continue
         if change.status == "answered" and turn["role"] != "prospect":
+            continue
+        # Evidence phrased as a question ("Would you like to know our budget?") offers, not
+        # answers. Only the quoted span counts, so "Forty thousand, does that work?" can still
+        # be cited as "Forty thousand".
+        if change.status == "answered" and change.quote.rstrip().endswith("?"):
             continue
         if change.status == "asked" and item["kind"] != "ask":
             continue

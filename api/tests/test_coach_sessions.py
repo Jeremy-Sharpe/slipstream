@@ -53,7 +53,10 @@ def turn(state, role="rep", text="How much have you allocated for this?"):
 
 
 def change(state, status="asked", role="rep", confidence=0.98):
-    item = turn(state, role)
+    if role == "prospect":
+        item = turn(state, role, "We have set aside forty thousand dollars.")
+    else:
+        item = turn(state, role)
     return Analysis(
         transitions=[
             Transition(
@@ -474,3 +477,41 @@ def test_recording_can_be_retried_after_a_failed_finish(client):
     )
     # Reaches batch transcription (unconfigured in tests) instead of being refused as finalising.
     assert response.status_code == 503, response.text
+
+
+def test_unfinished_question_does_not_retire_the_card():
+    state = seed()
+    unfinished = turn(
+        state, "rep", "What budget have you… actually, let us discuss the renewal first."
+    )
+    analysis = Analysis(
+        transitions=[
+            Transition(
+                suggestion_id=state["suggestions"][0]["id"],
+                status="asked",
+                sequence=unfinished.sequence,
+                quote="What budget have you…",
+                confidence=0.93,
+            )
+        ]
+    )
+    apply_analysis(state, analysis, state["control_revision"], SOURCES)
+    assert state["suggestions"][0]["status"] == "shown"
+
+
+def test_prospect_question_does_not_count_as_an_answer():
+    state = seed()
+    offer = turn(state, "prospect", "Would you like to know our budget?")
+    analysis = Analysis(
+        transitions=[
+            Transition(
+                suggestion_id=state["suggestions"][0]["id"],
+                status="answered",
+                sequence=offer.sequence,
+                quote=offer.text,
+                confidence=0.95,
+            )
+        ]
+    )
+    apply_analysis(state, analysis, state["control_revision"], SOURCES)
+    assert state["suggestions"][0]["status"] == "shown"
