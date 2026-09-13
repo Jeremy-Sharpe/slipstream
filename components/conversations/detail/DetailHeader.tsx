@@ -39,14 +39,14 @@ export function DetailHeader({ call, others, status, onMarkDone, onRerun, rerunn
 
   return (
     <>
-      <div className="flex h-16 shrink-0 items-center gap-2 border-b border-line bg-card px-5 text-[17px]">
-        <Link href="/home" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-ink hover:bg-muted"><Folder className="size-[18px] text-ink" strokeWidth={1.75} />Home</Link>
-        <ChevronRight className="size-4 text-muted-foreground" strokeWidth={2} />
-        <Link href="/" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-ink hover:bg-muted"><MessageSquare className="size-[18px] text-ink" strokeWidth={1.75} />Conversations</Link>
-        <ChevronRight className="size-4 text-muted-foreground" strokeWidth={2} />
+      <div className="flex h-16 min-w-0 shrink-0 items-center gap-2 border-b border-line bg-card px-3 text-[15px] sm:px-5 sm:text-[17px]">
+        <Link href="/home" className="hidden items-center gap-2 rounded-md px-1.5 py-1 text-ink hover:bg-muted sm:flex"><Folder className="size-[18px] text-ink" strokeWidth={1.75} />Home</Link>
+        <ChevronRight className="hidden size-4 text-muted-foreground sm:block" strokeWidth={2} />
+        <Link href="/" className="flex shrink-0 items-center gap-2 rounded-md px-1.5 py-1 text-ink hover:bg-muted"><MessageSquare className="size-[18px] text-ink" strokeWidth={1.75} /><span className="hidden sm:inline">Conversations</span></Link>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" strokeWidth={2} />
         <DropdownMenu>
-          <DropdownMenuTrigger render={<button type="button" className="flex items-center gap-1.5 rounded-md px-1.5 py-1 font-semibold text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
-            {call.company}
+          <DropdownMenuTrigger render={<button type="button" className="flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 font-semibold text-ink hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
+            <span className="truncate">{call.company}</span>
             <ChevronDown className="size-4 text-muted-foreground" strokeWidth={2} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-72">
@@ -60,17 +60,17 @@ export function DetailHeader({ call, others, status, onMarkDone, onRerun, rerunn
         </DropdownMenu>
       </div>
 
-      <div className="flex h-[72px] shrink-0 items-center gap-4 border-b border-line bg-card px-5">
+      <div className="flex min-h-[72px] shrink-0 flex-wrap items-center gap-2 border-b border-line bg-card px-3 py-3 sm:gap-4 sm:px-5">
         <StatusPill status={status} />
         <span className="text-[16px] text-ink">{call.rep}</span>
-        <span className="text-[16px] text-muted-foreground tabular-nums">{dayFmt.format(at)} · {timeFmt.format(at)}</span>
-        <span className="text-[16px] text-muted-foreground tabular-nums">{fmtDuration(call.durationSeconds)}</span>
+        <span className="hidden text-[16px] text-muted-foreground tabular-nums md:inline">{dayFmt.format(at)} · {timeFmt.format(at)}</span>
+        <span className="hidden text-[16px] text-muted-foreground tabular-nums sm:inline">{fmtDuration(call.durationSeconds)}</span>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="outline" className="h-10 rounded-md px-3.5 text-[15px] font-medium" onClick={onMarkDone} disabled={status === "synced"}>
-            <Check className="size-4" strokeWidth={2} /> {status === "synced" ? "Done" : "Mark done"}
+          <Button variant="outline" className="h-10 rounded-md px-3 text-[14px] font-medium sm:px-3.5 sm:text-[15px]" onClick={onMarkDone} disabled={status === "synced"}>
+            <Check className="size-4" strokeWidth={2} /> {status === "synced" ? "Done" : <><span className="sm:hidden">Done</span><span className="hidden sm:inline">Mark done</span></>}
           </Button>
-          <Button variant="outline" className="h-10 rounded-md px-3.5 text-[15px] font-medium" nativeButton={false} render={<Link href="/settings" />}>
-            <ExternalLink className="size-4" strokeWidth={2} /> Open in HubSpot
+          <Button aria-label="Open in HubSpot" variant="outline" className="size-10 rounded-md p-0 text-[15px] font-medium sm:h-10 sm:w-auto sm:px-3.5" nativeButton={false} render={<Link href="/settings" />}>
+            <ExternalLink className="size-4" strokeWidth={2} /> <span className="hidden sm:inline">Open in HubSpot</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger render={<button type="button" aria-label="More" className="flex size-10 items-center justify-center rounded-md border border-line text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none" />}>
