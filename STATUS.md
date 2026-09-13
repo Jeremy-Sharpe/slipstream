@@ -9,7 +9,7 @@ Who is on what, what the live environment actually holds, and what only a human 
 | Person | Lanes | Where they are up to |
 |---|---|---|
 | Anna | `fixtures`, `scorecard`, `icp`, `leads`, `outreach`, `live-extraction`, `model-bakeoff` | Fixtures, scorecard, ICP and live extraction are merged. Her work now feeds the OpenRouter-only demo bootstrap; the optional real Origami adapter remains untested with a credential. |
-| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, all five `web-wire-*` lanes, `coach-shell`, `coach-release`, `ci`, `playbook-store`, `submission` | Product code and automated submission evidence are merged. Production uses OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`, stores a grounded mixed-channel ICP, ten safe fictional prospects and a safely paused campaign, and remains memory-backed. 361 API tests pass. |
+| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, all five `web-wire-*` lanes, `coach-shell`, `coach-release`, `ci`, `playbook-store`, `submission` | Product code and automated submission evidence are merged. Production uses OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`, serves ten safe fictional prospects for the latest ICP and a safely paused campaign, and remains memory-backed. 361 API tests pass. |
 | Max (Maxim Durand) | Clay-style conversations UI foundation | Merged into main on 12 September and since wired to the live pipeline by Jeremy's agent. |
 | Romain | Not recorded on the board | No commits under this name and no board rows. The automated fallback video is already public; the remaining team-owned action is submitting the external form or optionally recording a human-presented replacement. |
 
@@ -18,7 +18,7 @@ Who is on what, what the live environment actually holds, and what only a human 
 | Thing | Where | State |
 |---|---|---|
 | Production UI | https://slipstream-hackathon.vercel.app | Canonical alias serves the PR #47 build with the Revenue Loop and “Live synthetic lead proof”; Chromium exercised the one-click search without page or console failures |
-| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `e6c23594187901b3cbf227efb0264c0476578ce0`; readiness verifies OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`. Storage is `memory`; Supabase, Origami and delivery remain disabled. Latest ICP: 13 deals, 12 calls, two emails. Ten OpenRouter-generated fictional prospects are stored. |
+| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `e6c23594187901b3cbf227efb0264c0476578ce0`; readiness verifies OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`. Storage is `memory`; Supabase, Origami and delivery remain disabled. Latest ICP: 13 deals, 12 calls, two emails. Each ICP version has ten OpenRouter-generated fictional prospects; the current memory store retains two versions. |
 | API environment file | `/etc/slipstream/api.env` on the VPS, root owned, 0600 | Loaded by the systemd unit. Every key the API needs has to exist here as well as locally |
 | Local API environment | `api/.env`, 0600, gitignored | Created 12 September. Supabase and ElevenLabs filled, Origami and OpenAI blank |
 | Hosted database | Supabase | Only migration `20260912000000` is applied. The email, scorecard and playbook persistence migrations are merged but unapplied, so those later tables/functions do not exist live |

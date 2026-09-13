@@ -40,8 +40,9 @@ unavailable deployment credentials or submitting the external form was verified 
   one provider-neutral thread). Its customer attributes, headcount band and evidence are
   grounded in won deals and stamped with `openai/gpt-5.4` and `text-embedding-3-small`.
 - `POST /api/v1/demo/bootstrap` proves the complete aggregate-to-prospect loop with one
-  OpenRouter key. Production stores exactly ten visibly fictional `.example` prospects,
-  no email or LinkedIn coordinates, and scores them against the won-deal centroid.
+  OpenRouter key. Each profile produces exactly ten visibly fictional `.example`
+  prospects with no email or LinkedIn coordinates and scores them against the won-deal
+  centroid. The memory store currently retains two profile versions; the UI selects the latest.
 
 ## Deployment-only gaps
 
