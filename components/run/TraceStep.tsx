@@ -11,7 +11,7 @@ import { Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
 
 export type TraceStatus = "pending" | "running" | "waiting" | "done" | "skipped";
 
-export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, shimmer = false, onReveal, children }: {
+export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, shimmer = false, onReveal, onExpandClick, children }: {
   status: TraceStatus;
   workingLabel: string;
   doneLabel: string;
@@ -27,6 +27,9 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   /** Shimmer the working label (used for Transcribing); otherwise muted. */
   shimmer?: boolean;
   onReveal?: (el: HTMLElement) => void;
+  /** Explicit click/Enter that expands the step: the step row and the final
+      height of its body (measured before the expand animation finishes). */
+  onExpandClick?: (el: HTMLElement, bodyHeight: number) => void;
   children?: ReactNode;
 }) {
   const itemRef = useRef<HTMLLIElement>(null);
@@ -41,6 +44,13 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   const live = useElapsed(startedAt, working);
   const ms = working ? live : elapsedMs;
   const traceRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const handleToggle = () => {
+    const opening = !expanded;
+    onToggle();
+    if (!opening || !onExpandClick) return;
+    requestAnimationFrame(() => { if (itemRef.current && bodyRef.current) onExpandClick(itemRef.current, bodyRef.current.offsetHeight); });
+  };
   const [lineHeight, setLineHeight] = useState(0);
   const visible = working ? Math.min(rows.length, Math.max(1, rowsDone)) : rows.length;
   useLayoutEffect(() => { if (traceRef.current) setLineHeight(traceRef.current.offsetHeight); }, [visible, expanded, status, children]);
@@ -70,7 +80,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
           type="button"
           aria-expanded={expanded}
           disabled={muted}
-          onClick={onToggle}
+          onClick={handleToggle}
           className="-mx-1.5 flex h-7 w-[calc(100%+12px)] items-center gap-2 rounded-lg px-1.5 text-left transition-colors duration-100 enabled:hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           <span role="status" className="contents">
@@ -97,7 +107,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
           style={{ gridTemplateRows: expanded ? "1fr" : "0fr", opacity: expanded ? 1 : 0, transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}
         >
           <div className="overflow-hidden">
-            <div className="relative mt-1.5">
+            <div ref={bodyRef} className="relative mt-1.5">
               {rows.length > 0 && (
                 <div className="relative ml-[5px] pl-4">
                   <span aria-hidden className="absolute left-[3px] top-0 w-px bg-line" style={{ height: lineHeight ? lineHeight - 4 : 0, transition: "height 500ms cubic-bezier(0.23,1,0.32,1)" }} />

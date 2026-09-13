@@ -60,6 +60,8 @@ export function Score({ value }: { value: number }) {
   return <span className={cn("text-[13.5px] font-medium tabular-nums", value >= 80 ? "text-success" : "text-ink")}>{value}</span>;
 }
 
+/** "closed_won" → "Closed won". For enum-ish values printed to people. */
+export const humanize = (s: string) => { const t = s.replace(/_/g, " "); return t.charAt(0).toUpperCase() + t.slice(1); };
 export const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 const dateFmt = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Melbourne", day: "numeric", month: "short" });

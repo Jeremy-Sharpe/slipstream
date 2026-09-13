@@ -26,7 +26,7 @@ export function Summary({ call, runId, ready, onHighlight, onJump }: {
   const followUps = whyLabel && !why ? [whyLabel] : [];
 
   return (
-    <section className="rounded-xl bg-surface p-4" style={{ animation: "fade-in 200ms ease-out both" }}>
+    <section className="mb-4 rounded-xl bg-surface p-4" style={{ animation: "fade-in 200ms ease-out both" }}>
       <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Conversation intelligence</p>
       <StreamingText
         key={`summary-${gen}`}

@@ -79,6 +79,7 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
     setSteps(PHASE1.map((id) => (opts.transcribed && id === "transcribe" ? { id, status: "done", elapsedMs: 2400 } : { id, status: "pending" })));
     setOpen(null);
     setPhase1Done(false);
+    actions.resetApprovals(call.id);
     setRunId((n) => n + 1);
     actions.setRun(call.id, "running");
     // No-show: nothing to extract. Otherwise stop at the extraction gate and wait.

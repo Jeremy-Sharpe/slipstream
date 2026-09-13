@@ -75,6 +75,8 @@ export const actions = {
   setRun(id: string, s: RunState) { state.runs[id] = s; commit(); },
   sync(id: string) { state.synced[id] = true; commit(); },
   approveDraft(id: string) { state.approved[id] = true; commit(); },
+  /** A (re)run replays both gates, so the approvals start clean. */
+  resetApprovals(id: string) { delete state.synced[id]; delete state.approved[id]; commit(); },
   approveLead(id: string) { state.leads = state.leads.map((l) => (l.id === id ? { ...l, status: "approved" } : l)); commit(); },
   approveAllLeads() { state.leads = state.leads.map((l) => ({ ...l, status: "approved" })); commit(); },
 };

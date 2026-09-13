@@ -13,6 +13,20 @@ import { Summary } from "./run/Summary";
 import { Transcript } from "./Transcript";
 import { Button, OutcomePill, cn, fmtDate, fmtTime, mmss } from "./ui";
 
+/* y(t) for cubic-bezier(0.23,1,0.32,1), the app's standard ease. */
+function bezier(x: number) {
+  const ax = 3 * 0.23, bx = 3 * (0.32 - 0.23) - ax, cx = 1 - ax - bx;
+  const ay = 3 * 1, by = 3 * (1 - 1) - ay, cy = 1 - ay - by;
+  let t = x;
+  for (let i = 0; i < 6; i++) {
+    const xt = ((cx * t + bx) * t + ax) * t - x;
+    const dx = (3 * cx * t + 2 * bx) * t + ax;
+    if (Math.abs(xt) < 1e-4 || dx === 0) break;
+    t -= xt / dx;
+  }
+  return ((cy * t + by) * t + ay) * t;
+}
+
 export function RunView({ call }: { call: CallRecord }) {
   const params = useSearchParams();
   const reduced = useReducedMotion();
@@ -66,7 +80,7 @@ export function RunView({ call }: { call: CallRecord }) {
   // The right column is sticky and scrolls internally: its height is the
   // viewport minus the header above the grid (measured) minus 48px.
   const gridRef = useRef<HTMLDivElement>(null);
-  const columnRef = useRef<HTMLDivElement>(null);
+  const columnRef = useRef<HTMLElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
     const measure = () => { const el = gridRef.current; if (el) setHeaderHeight(el.getBoundingClientRect().top + window.scrollY); };
@@ -77,36 +91,72 @@ export function RunView({ call }: { call: CallRecord }) {
     return () => { ro.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
 
-  // The timeline scroll area never ends on a row boundary: it is sized so the
-  // last visible row is cut about mid-height (a peek at what is below), and a
-  // bottom fade shows only while there is more to scroll.
-  const sectionRef = useRef<HTMLElement>(null);
+  // The column (CI card + heading + steps, one scroll area) never ends on a
+  // row boundary: it is sized so the last visible row is cut about mid-height
+  // (a peek at what is below), and a bottom fade shows only while there is
+  // more to scroll.
   const ciRef = useRef<HTMLDivElement>(null);
-  const [timelineHeight, setTimelineHeight] = useState<number | null>(null);
+  const [columnHeight, setColumnHeight] = useState<number | null>(null);
   const [fade, setFade] = useState(false);
   useEffect(() => {
-    const section = sectionRef.current, ci = ciRef.current, host = columnRef.current;
-    if (!section || !ci || !host) return;
+    const host = columnRef.current, ci = ciRef.current;
+    if (!host || !ci || !headerHeight) return;
     const measure = () => {
-      const available = section.clientHeight - ci.offsetHeight - 16;
+      const available = window.innerHeight - headerHeight - 48;
       const rows = host.querySelectorAll<HTMLElement>("li[data-step]");
       const first = rows[0];
       const pitch = rows.length > 1 ? rows[1].getBoundingClientRect().top - first.getBoundingClientRect().top : 53;
       const lead = first ? first.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop : 30;
       const fit = Math.max(1, Math.floor((available - lead - pitch * 0.55) / pitch));
-      setTimelineHeight(Math.min(available, lead + fit * pitch + pitch * 0.55));
+      setColumnHeight(Math.min(available, lead + fit * pitch + pitch * 0.55));
       setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
     };
     measure();
     const ro = new ResizeObserver(measure);
-    ro.observe(section); ro.observe(ci); if (host.firstElementChild) ro.observe(host.firstElementChild as Element);
     for (const child of host.children) ro.observe(child);
+    // When the CI card appears (or grows) above a scrolled column, keep what
+    // the user is looking at where it is: shift scrollTop by the delta before
+    // paint. Never moves anything visually.
+    let ciHeight = ci.offsetHeight;
+    const anchor = new ResizeObserver(() => {
+      const delta = ci.offsetHeight - ciHeight;
+      ciHeight = ci.offsetHeight;
+      if (delta && host.scrollTop > 0) host.scrollTop += delta;
+    });
+    anchor.observe(ci);
     const onScroll = () => setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
     host.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measure);
     document.addEventListener("visibilitychange", measure);
-    return () => { ro.disconnect(); host.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure); document.removeEventListener("visibilitychange", measure); };
-  }, [run.runId]);
+    return () => { ro.disconnect(); anchor.disconnect(); host.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure); document.removeEventListener("visibilitychange", measure); };
+  }, [run.runId, headerHeight]);
+
+  // Explicit click-to-expand (exempt from the pointer rule): scroll the column
+  // so the whole card sits above the fade, or, if it cannot fit, so the step
+  // header lands 16px below the top. Collapsing never scrolls.
+  const expandScroll = useCallback((el: HTMLElement, bodyHeight: number) => {
+    const host = columnRef.current;
+    if (!host) return;
+    const top = el.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop;
+    const bottom = top + 28 + 6 + bodyHeight;
+    const visible = host.clientHeight - 40;
+    const fits = bottom - top <= visible - 16;
+    let target = fits ? Math.max(host.scrollTop, bottom + 16 - visible) : top - 16;
+    // The body is still collapsed on this frame: clamp against the height the
+    // column will have once it is open, and settle once the transition ends.
+    target = Math.max(0, Math.min(target, host.scrollHeight + 6 + bodyHeight - host.clientHeight));
+    if (Math.abs(target - host.scrollTop) < 1) return;
+    const settle = () => { host.scrollTop = Math.min(target, host.scrollHeight - host.clientHeight); };
+    if (reduced) { settle(); return; }
+    const from = host.scrollTop, t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / 300);
+      host.scrollTop = from + (target - from) * bezier(p);
+      if (p < 1) requestAnimationFrame(tick);
+      else window.setTimeout(settle, 150);
+    };
+    requestAnimationFrame(tick);
+  }, [reduced]);
 
   // Reveal a step inside the timeline only when the pointer is NOT inside the
   // column and the user hasn't wheel/touch-scrolled it in the last 3s.
@@ -169,18 +219,18 @@ export function RunView({ call }: { call: CallRecord }) {
           <Transcript turns={call.turns} highlight={highlight} />
         </section>
         <section
-          ref={sectionRef}
-          className="sticky top-6 flex flex-col gap-4 self-start"
-          style={{ height: headerHeight ? `calc(100vh - ${headerHeight}px - 48px)` : "calc(100vh - 48px)", ...enter(240) }}
+          ref={columnRef}
+          className={cn("run-column sticky top-6 self-start overflow-y-auto pr-3 pb-14", fade && "run-column-fade")}
+          style={{
+            height: columnHeight ?? (headerHeight ? `calc(100vh - ${headerHeight}px - 48px)` : "calc(100vh - 48px)"),
+            overscrollBehavior: "contain",
+            overflowAnchor: "none",
+            ...enter(240),
+          }}
         >
-          <div ref={ciRef} className="shrink-0">
+          <div ref={ciRef}>
             <Summary call={call} runId={run.runId} ready={["done", "waiting"].includes(run.steps.find((s) => s.id === "draft")?.status ?? "")} onHighlight={setHover} onJump={jump} />
           </div>
-          <div
-            ref={columnRef}
-            className={cn("run-column min-h-0 shrink-0 overflow-y-auto pr-3", fade && "run-column-fade")}
-            style={{ height: timelineHeight ?? undefined, flex: timelineHeight == null ? "1 1 0%" : undefined, overscrollBehavior: "contain", overflowAnchor: "none" }}
-          >
           <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What Slipstream did</h2>
           <RunTimeline
             call={call}
@@ -193,10 +243,10 @@ export function RunView({ call }: { call: CallRecord }) {
             onHighlight={setHover}
             onJump={jump}
             onReveal={reveal}
+            onExpandClick={expandScroll}
             onSynced={run.startPhase2}
             onDraftApproved={run.startPhase3}
           />
-          </div>
         </section>
       </div>
     </div>

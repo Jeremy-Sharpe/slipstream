@@ -11,7 +11,7 @@ import { TRACE, type StepId, type StepState } from "@/lib/useRun";
 import { TraceStep } from "./run/TraceStep";
 import { WorkingLine } from "./run/WorkingLine";
 import { StreamingText, words } from "./run/StreamingText";
-import { Button, Score, cn, mmss } from "./ui";
+import { humanize, Button, Score, cn, mmss } from "./ui";
 
 const LABELS: Record<StepId, { working: string; done: string }> = {
   transcribe: { working: "Transcribing", done: "Transcribed" },
@@ -26,7 +26,7 @@ const LABELS: Record<StepId, { working: string; done: string }> = {
 const fmtAud = (n: number | null | undefined) => (n == null ? "None" : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 
-export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDraftBody, onHighlight, onJump, onReveal, onSynced, onDraftApproved }: {
+export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDraftBody, onHighlight, onJump, onReveal, onExpandClick, onSynced, onDraftApproved }: {
   call: CallRecord;
   steps: StepState[];
   open: StepId | null;
@@ -37,6 +37,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
   onHighlight: (i: number | null) => void;
   onJump: (i: number) => void;
   onReveal?: (el: HTMLElement) => void;
+  onExpandClick?: (el: HTMLElement, bodyHeight: number) => void;
   onSynced: () => void;
   onDraftApproved: () => void;
 }) {
@@ -101,11 +102,11 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
             <div className="-mx-2 flex flex-col">
               {field("Contact", `${f.contact.value} · ${call.title}`, f.contact.confidence, f.contact.span, f.contact.evidence_ms)}
               {field("Company", `${f.company.value} · ${call.headcount} staff · ${call.location}`, f.company.confidence, f.company.span, f.company.evidence_ms)}
-              {field("Deal stage", f.stage.value.replace("_", " "), f.stage.confidence, f.stage.span, f.stage.evidence_ms)}
+              {field("Deal stage", humanize(f.stage.value), f.stage.confidence, f.stage.span, f.stage.evidence_ms)}
               {field("Value", fmtAud(f.value.value), f.value.confidence, f.value.span, f.value.evidence_ms)}
               {field("Next step", f.next_step.value ?? "None", f.next_step.confidence, f.next_step.span, f.next_step.evidence_ms)}
               {field("Promises", f.promises.value.length ? f.promises.value.join(" · ") : "None", f.promises.confidence, f.promises.span, f.promises.evidence_ms)}
-              {call.objections.length > 0 && field("Objection", `${call.objections[0].text} (${call.objections[0].handling.replace("_", " ")})`, 0.9, call.scorecard.spans.objection, call.scorecard.spans.objection != null ? call.turns[call.scorecard.spans.objection].t * 1000 : null)}
+              {call.objections.length > 0 && field("Objection", `${call.objections[0].text} (${humanize(call.objections[0].handling)})`, 0.9, call.scorecard.spans.objection, call.scorecard.spans.objection != null ? call.turns[call.scorecard.spans.objection].t * 1000 : null)}
             </div>
             <div className="mt-4">
               {synced ? (
@@ -169,7 +170,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
             <p className="mt-1 text-[14px] text-soft">From {icp.wonDeals} won deals</p>
             {call.icp && (
               <ul className="mt-4 flex flex-col gap-1.5">
-                {[["Industry", call.icp.industry], ["Size", call.icp.headcount_band + " staff"], ["Buyer", call.icp.role], ["Trigger", call.icp.trigger ?? "none"]].map(([k, v]) => (
+                {[["Industry", call.icp.industry], ["Size", call.icp.headcount_band + " staff"], ["Buyer", call.icp.role], ["Trigger", call.icp.trigger ?? "None"]].map(([k, v]) => (
                   <li key={k} className="grid grid-cols-[20px_72px_minmax(0,1fr)] items-center gap-x-1 text-[14px]">
                     <Check className={cn("size-3.5", call.outcome === "won" ? "text-success" : "text-faint")} strokeWidth={2.25} />
                     <span className="text-soft">{k}</span>
@@ -234,6 +235,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
             last={last && !skippedNote}
             shimmer={st.id === "transcribe"}
             onReveal={onReveal}
+            onExpandClick={onExpandClick}
           >
             {card(st)}
           </TraceStep>
