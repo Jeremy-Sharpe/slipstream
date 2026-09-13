@@ -120,7 +120,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
 }) {
   const [widths, setWidths] = useState<Record<string, number>>({});
   const columns = useMemo(
-    () => COLUMNS.map<GridColumn>((c, i) => ({ ...c, width: widths[c.id] ?? c.width, title: sort?.col === i ? `${c.title} ${sort.dir === "asc" ? "↑" : "↓"}` : c.title })),
+    () => COLUMNS.map<GridColumn>((c, i) => (sort?.col === i ? { ...c, width: widths[c.id] ?? c.width, icon: undefined, title: `${sort.dir === "asc" ? "↑" : "↓"} ${c.title}` } : { ...c, width: widths[c.id] ?? c.width })),
     [widths, sort],
   );
 

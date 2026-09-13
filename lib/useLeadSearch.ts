@@ -32,7 +32,8 @@ export function useLeadSearch(opts: { instant?: boolean } = {}) {
     const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, fast ? 0 : ms));
     const search: Search = { id, n, brief, count, status: "running", step: "read", found: 0, scored: 0, drafted: 0, startedAt: Date.now() };
     actions.addSearch(search);
-    const leads = generateLeads(id, n, count);
+    // Rows land lowest-similarity first so the best sit on top when it settles.
+    const leads = generateLeads(id, n, count).reverse();
 
     let t = STEP_MIN;
     at(t, () => actions.updateSearch(id, { step: "search" }));

@@ -93,6 +93,15 @@ const POOL: Seed[] = [
   { company: "Sunbury Building Certifiers", contact: "Grant Leyland", title: "Director", location: "Sunbury, VIC", industry: "Building certification", headcount: 25, trigger: "Essential Eight evidence", call: "Northstar Labs", t: "0:15", quote: "We're a lab planning and architecture practice, forty-two people now.", value: "Insurer wants Essential Eight evidence", subject: "Essential Eight evidence for the renewal", similar: "an insurer asking for Essential Eight evidence" },
 ];
 
+// One "who they are" line per won call, for the Industry evidence row.
+const INDUSTRY_QUOTE: Record<string, { quote: string; t: string }> = {
+  "Port Phillip Physio Group": { quote: "We've physios, reception, admin and a small leadership team.", t: "0:17" },
+  "Wattle Street Legal": { quote: "We're thirty-seven people, mostly solicitors, paralegals and admin.", t: "0:14" },
+  "Elm & Ledger Accounting": { quote: "Accounting firms are an obvious target, and clients assume we've our house in order.", t: "2:27" },
+  "Arcwell Health": { quote: "We've physios, occupational therapists, reception and a small finance team across Brunswick and Essendon.", t: "0:16" },
+  "Northstar Labs": { quote: "We're a lab planning and architecture practice, forty-two people now.", t: "0:15" },
+};
+
 /** Ten (or `count`) leads for a run, rotating through the pool. Similarity
     descends from the low 90s with a deterministic wobble; drafts are signed Sam. */
 export function generateLeads(searchId: string, run: number, count: number): Lead[] {
@@ -105,7 +114,7 @@ export function generateLeads(searchId: string, run: number, count: number): Lea
       company: s.company, contact: s.contact, title: s.title, location: s.location, industry: s.industry, headcount: s.headcount,
       similarity, status: "drafted", trigger: s.trigger, searchId,
       evidence: [
-        { attribute: "Industry", value: s.industry, quote: s.quote, call: s.call, t: s.t },
+        { attribute: "Industry", value: s.industry, quote: INDUSTRY_QUOTE[s.call].quote, call: s.call, t: INDUSTRY_QUOTE[s.call].t },
         { attribute: "Trigger", value: s.value, quote: s.quote, call: s.call, t: s.t },
       ],
       draft: d(s.contact, s.company, s.subject, s.call, s.similar),

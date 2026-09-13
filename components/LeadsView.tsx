@@ -32,8 +32,8 @@ export function LeadsView() {
     const mine = leads.filter((l) => l.searchId === search.id);
     const running = search.status === "running";
     const out = mine.map((l, i) => ({ ...l, scored: !running || i < search.scored, drafted: !running || i < search.drafted }));
-    // Newest at the top while a search lands rows; otherwise the search order.
-    if (running) out.reverse();
+    // Rows that landed from a search sit newest first; the seed search keeps its order.
+    if (out.some((l) => l.landedAt)) out.reverse();
     if (sort) {
       const key = (["company", "contact", "title", "location", "trigger", "similarity", "status", "draft"] as const)[sort.col];
       out.sort((a, b) => {
@@ -70,7 +70,7 @@ export function LeadsView() {
               <Search className="size-3.5" strokeWidth={1.75} /> Search <kbd className="text-[11px] text-faint">⌘F</kbd>
             </button>
             <Button variant="primary" size="sm" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
-              {drafts === 0 ? "All drafts approved" : `Approve all drafts · ${drafts}`}
+              {drafts > 0 ? `Approve all drafts · ${drafts}` : search?.status === "running" ? "Approve all drafts" : "All drafts approved"}
             </Button>
           </div>
         </div>
