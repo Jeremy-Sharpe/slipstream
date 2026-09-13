@@ -4,31 +4,31 @@
 
 Small sales teams have a strange problem: they already own a CRM, but the truth is still trapped in phone calls.
 
-After each call, a rep is meant to update the contact, company, deal stage, objections and next step, then write the follow-up. That is ten minutes of admin on a good day, so it gets skipped. The pipeline becomes fiction. Managers cannot coach what they cannot see. And when the founder’s network runs out, the team buys lead lists based on a customer persona somebody guessed in a workshop.
+After each call, a rep should update the CRM and write the follow-up. That is ten minutes of admin, so it gets skipped. The pipeline becomes fiction. And when the founder’s network runs out, the team buys leads against a customer persona somebody guessed in a workshop.
 
 We built Slipstream: an AI sales layer that sits beside the CRM a team already has.
 
-A call enters Slipstream as audio. ElevenLabs Scribe transcribes it and separates the speakers. Slipstream turns that conversation into structured contact, company and deal fields, including promises, objections and the agreed next step. Every extracted field carries confidence and evidence, so a rep can jump back to the exact words before approving the update.
+A call enters as audio. ElevenLabs separates the speakers, then Slipstream fills structured contact, company and deal fields—including promises, objections and the agreed next step. Every field carries evidence, so a rep can check the exact words before approving it.
 
 Then Slipstream drafts the follow-up. It uses what was actually agreed, not a generic template. In our demo call, the rep makes an unsupported claim that cyber insurance will be cut in half. Slipstream records the risk but does not repeat it in the email. One click approves the draft and records who approved it without pretending it was sent.
 
-Approved drafts can be enrolled by exact ID into a scheduled campaign. A trusted Railway worker sends at most eight at a time through Resend; every item is confirmed, retried, failed or flagged for reconciliation, and the operator can pause future work. Stable provider identities and database leases make retries safe. The browser can inspect progress, but it never receives the delivery token.
+Approved drafts can enter a scheduled campaign. Sends are throttled, tracked and retried safely, and an operator can pause future work. The screen always shows the true delivery state.
 
 That already saves over an hour a day for a rep doing eight calls. But the real difference is what happens across the whole team.
 
-Slipstream scores each call against a written rubric: discovery, objection handling, next-step quality and talk ratio. It then looks at the deals that actually won and derives the ideal customer profile with the supporting deals visible. In our synthetic history, the pattern is 25-to-80-person professional-services and allied-health firms, a real compliance trigger, and a decision-maker in the conversation.
+Slipstream scores each call for discovery, objection handling and next-step quality. Then it studies the deals that actually won and derives who that sales team should target. In our synthetic history, that means 25-to-80-person services firms with a compliance trigger and a decision-maker involved.
 
-We call the next part Revenue DNA. Slipstream fingerprints the exact conversations and CRM outcomes behind that profile. When a new deal wins or loses, the fingerprint changes, the target is visibly stale, and the next paid lead search is blocked until the ICP relearns. It also counts which existing leads need a new score. So this is not a persona report you forget in a slide deck; it is a targeting system that knows when its own evidence has changed.
+We call this Revenue DNA. When a new deal wins or loses, Slipstream knows the target is stale, relearns it and flags leads that need a new score. This is not a persona report forgotten in a slide deck; it is a target that learns from outcomes.
 
-That profile becomes a prospect-search brief. In the live proof, OpenRouter creates ten clearly fictional, non-deliverable companies so judges can test the scoring and outreach loop without a paid data subscription. For customers, the same brief plugs into our Origami adapter for real sourcing. The output of the last call improves who gets the next call.
+That profile becomes a prospect-search brief. In the live proof, OpenRouter creates ten clearly fictional, non-deliverable companies so judges can test the scoring and outreach loop without a paid data subscription. For customers, the same brief can plug into a paid company-data provider for real sourcing. The output of the last call improves who gets the next call.
 
 This is one closed loop, not four disconnected AI features: conversation to CRM, CRM to coaching, outcomes to Revenue DNA, and Revenue DNA to pipeline.
 
-For the weekend build, we use a lightweight CRM-style data store, a live backend and a public web app. Thirteen labelled calls cover wins, losses, stalls and a no-show. OpenRouter powers the live extraction, follow-up, mixed call-and-email customer profile and fictional lead proof. Every model result shows its evidence and source. Email delivery is deliberately switched off, so the paused campaign proves the automation without claiming anything was sent.
+For the weekend build, thirteen labelled calls cover wins, losses, stalls and a no-show. OpenRouter powers the live extraction, follow-up, mixed-channel profile and fictional lead proof. Every result shows its source. Delivery is switched off, so the paused campaign proves the automation without claiming anything was sent.
 
-The path to a product is direct. Replace file upload with an Aircall or Twilio recording webhook. Replace our HubSpot-shaped table writes with HubSpot API calls. Connect Gmail for delivery. The intelligence contract does not change.
+The path to a product is direct: connect Aircall or Twilio for recordings, HubSpot for CRM writes and Gmail for delivery. The intelligence does not change.
 
-Enterprise teams can stitch together Gong, a CRM, Clay and a RevOps person. A twelve-person services firm cannot. Slipstream gives that team the same compounding sales system: less admin after every call, better coaching from every call, and a pipeline that learns from the customers who said yes.
+Enterprise teams can stitch together Gong, a CRM, Clay and a RevOps person. Slipstream sells to the small sales team that cannot. It gives them the same compounding system: less admin after every call, better coaching from every call, and a pipeline that learns from the customers who said yes.
 
 ## Q&A preparation
 
@@ -54,7 +54,7 @@ The demo writes to contacts, companies, deals, conversations, drafts and activit
 
 ### What does it cost? — Anna
 
-Per call, the variable work is one transcription, a small number of reasoning calls and an embedding—normally cents rather than dollars at this size. Origami rows are the deliberate variable cost, which is why searches start at ten and require a user action to fetch more. Provider calls are deduplicated so retries do not spend twice.
+Per ten-minute call, ElevenLabs Scribe is about four cents at the published pay-as-you-go rate, while our measured reasoning and embedding pass is about three cents. Fictional OpenRouter leads are reused unless the Revenue DNA changes, and retries are deduplicated so they do not spend twice.
 
 ### Why would a rep adopt it? — Max
 
