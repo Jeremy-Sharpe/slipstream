@@ -16,8 +16,9 @@ import type { Lead } from "@/lib/types";
 
 /* The sheet. Glide Data Grid themed to the app tokens; canvas renderers for
    the row number, the two-line contact, the score bar, the status pill, the
-   LinkedIn link and the draft check. Natural widths, everything scrolls
-   together like a spreadsheet, and the grid ends at the last row. */
+   draft check. Fixed widths (1016px, so everything fits at 1440 without a
+   horizontal scroll), no user resizing or reordering, everything scrolls
+   together, and the grid ends at the last row. */
 
 import type { Row, Sort } from "./columns";
 export type { Row, Sort };
@@ -70,7 +71,6 @@ const PATHS: Record<string, string> = {
   status: '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/>',
   trigger: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
   location: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
-  linkedin: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
   draft: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
 };
 const svg = (body: string, stroke = FAINT) =>
@@ -79,14 +79,13 @@ const HEADER_ICONS = Object.fromEntries(Object.entries(PATHS).map(([k, v]) => [k
 
 const COLUMNS: (GridColumn & { id: string; width: number })[] = [
   { id: "n", title: "", width: 44, icon: "similarity" },
-  { id: "company", title: "Company", width: 220, icon: "company" },
-  { id: "contact", title: "Contact", width: 200, icon: "contact" },
-  { id: "similarity", title: "Similarity", width: 120, icon: "similarity" },
-  { id: "status", title: "Status", width: 100, icon: "status" },
-  { id: "trigger", title: "Trigger", width: 240, icon: "trigger" },
-  { id: "location", title: "Location", width: 140, icon: "location" },
-  { id: "linkedin", title: "LinkedIn", width: 80, icon: "linkedin" },
-  { id: "draft", title: "Draft", width: 60, icon: "draft" },
+  { id: "company", title: "Company", width: 200, icon: "company" },
+  { id: "contact", title: "Contact", width: 180, icon: "contact" },
+  { id: "similarity", title: "Similarity", width: 112, icon: "similarity" },
+  { id: "status", title: "Status", width: 96, icon: "status" },
+  { id: "trigger", title: "Trigger", width: 200, icon: "trigger" },
+  { id: "location", title: "Location", width: 128, icon: "location" },
+  { id: "draft", title: "Draft", width: 56, icon: "draft" },
 ];
 
 type TextCell = CustomCell<{ kind: "text"; text: string; weight?: number }>;
@@ -94,7 +93,6 @@ type IndexCell = CustomCell<{ kind: "index"; n: number }>;
 type ContactCell = CustomCell<{ kind: "contact"; name: string; title: string }>;
 type ScoreCell = CustomCell<{ kind: "score"; value: number }>;
 type PillCell = CustomCell<{ kind: "pill"; label: string; tone: "grey" | "green" }>;
-type LinkCell = CustomCell<{ kind: "link"; url: string }>;
 type DraftCell = CustomCell<{ kind: "draft"; drafted: boolean }>;
 
 const is = <T extends CustomCell>(kind: string) => (c: CustomCell): c is T => (c.data as { kind?: string }).kind === kind;
@@ -183,27 +181,6 @@ const pillRenderer: CustomRenderer<PillCell> = {
   },
 };
 
-let external: Path2D | undefined;
-const EXTERNAL = () => (external ??= new Path2D("M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"));
-const linkRenderer: CustomRenderer<LinkCell> = {
-  kind: GridCellKind.Custom,
-  isMatch: is<LinkCell>("link"),
-  needsHover: true,
-  draw: (args) => {
-    const { ctx, rect, hoverAmount, overrideCursor } = args;
-    if (hoverAmount > 0) overrideCursor?.("pointer");
-    const size = 14, x = rect.x + (rect.width - size) / 2, y = rect.y + (rect.height - size) / 2;
-    ctx.save();
-    ctx.translate(x, y); ctx.scale(size / 24, size / 24);
-    ctx.lineWidth = 1.5 * (24 / size); ctx.lineCap = "round"; ctx.lineJoin = "round";
-    ctx.strokeStyle = hoverAmount > 0 ? INK : FAINT;
-    ctx.stroke(EXTERNAL());
-    ctx.restore();
-    return true;
-  },
-  onClick: (a) => { window.open(a.cell.data.url, "_blank", "noopener"); a.preventDefault(); return undefined; },
-};
-
 const draftRenderer: CustomRenderer<DraftCell> = {
   kind: GridCellKind.Custom,
   isMatch: is<DraftCell>("draft"),
@@ -236,8 +213,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
   showSearch: boolean;
   onSearchClose: () => void;
 }) {
-  const [widths, setWidths] = useState<Record<string, number>>({});
-  const columns = useMemo(() => COLUMNS.map<GridColumn>((c) => ({ ...c, width: widths[c.id] ?? c.width })), [widths]);
+  const columns = useMemo(() => COLUMNS.map<GridColumn>((c) => ({ ...c })), []);
 
   // Sort indicator after the header label: 12px, faint, no icon swap.
   const drawHeader = useCallback((args: { ctx: CanvasRenderingContext2D; columnIndex: number; rect: { x: number; y: number; width: number; height: number }; theme: Theme; column: GridColumn }, drawContent: () => void) => {
@@ -320,13 +296,12 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
         return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.status, data: { kind: "pill", label: r.status === "approved" ? "Approved" : "Drafted", tone: r.status === "approved" ? "green" : "grey" } } as PillCell;
       case "trigger": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.trigger, data: { kind: "text", text: r.trigger } } as TextCell;
       case "location": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.location, data: { kind: "text", text: r.location } } as TextCell;
-      case "linkedin": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.linkedinUrl, data: { kind: "link", url: r.linkedinUrl } } as LinkCell;
       case "draft": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.drafted ? r.draft.subject : "", data: { kind: "draft", drafted: r.drafted } } as DraftCell;
       default: return text("");
     }
   }, [rows]);
 
-  const openRow = useCallback(([col, row]: Item) => { if (COLUMNS[col]?.id === "linkedin") return; const r = rows[row]; if (r) onOpen(r); }, [rows, onOpen]);
+  const openRow = useCallback(([, row]: Item) => { const r = rows[row]; if (r) onOpen(r); }, [rows, onOpen]);
 
   return (
     <div ref={setHost} className="h-full w-full">
@@ -343,12 +318,11 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
           freezeColumns={0}
           theme={THEME}
           headerIcons={HEADER_ICONS}
-          customRenderers={[indexRenderer, textRenderer, contactRenderer, scoreRenderer, pillRenderer, linkRenderer, draftRenderer]}
+          customRenderers={[indexRenderer, textRenderer, contactRenderer, scoreRenderer, pillRenderer, draftRenderer]}
           getRowThemeOverride={getRowThemeOverride}
           onHeaderClicked={(col) => col > 0 && onSort(sort?.col === col ? (sort.dir === "desc" ? { col, dir: "asc" } : null) : { col, dir: "desc" })}
           onCellActivated={openRow}
           onCellClicked={openRow}
-          onColumnResize={(col, size) => { if (col.id) setWidths((w) => ({ ...w, [col.id as string]: size })); }}
           showSearch={showSearch}
           onSearchClose={onSearchClose}
           keybindings={{ search: true, selectAll: false }}
@@ -356,6 +330,9 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
           columnSelect="none"
           rowSelect="none"
           drawFocusRing={false}
+          isDraggable={false}
+          maxColumnWidth={200}
+          minColumnWidth={44}
           smoothScrollX
           smoothScrollY
           getCellsForSelection={true}
