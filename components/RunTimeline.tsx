@@ -38,6 +38,8 @@ const EMAIL_LABELS: Partial<Record<StepId, { working: string; done: string }>> =
 const fmtAud = (n: number | null | undefined, none = "None") => (n == null ? none : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+/** Every segment after a " · " starts with a capital. */
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const narrativeSections = (s: NonNullable<CallRecord["scorecard"]>): [string, string[]][] =>
   ([["Went well", s.wentWell], ["To improve", s.toImprove]] as [string, string[]][]).filter(([, lines]) => lines.length > 0);
 
@@ -89,7 +91,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
         { label: "Deal stage", value: call.fields.stage.value ? humanize(String(call.fields.stage.value)) : "Not stated", field: call.fields.stage },
         { label: "Value", value: fmtAud(call.fields.value.value, email ? "Not stated" : "None"), field: call.fields.value },
         { label: "Next step", value: call.fields.next_step.value ?? "None", field: call.fields.next_step },
-        { label: "Promises", value: call.fields.promises.value.length ? call.fields.promises.value.join(" · ") : "None", field: call.fields.promises },
+        { label: "Promises", value: call.fields.promises.value.length ? call.fields.promises.value.map(cap).join(" · ") : "None", field: call.fields.promises },
       ]
     : [];
   const filled = fieldRows.filter((row) => {
@@ -102,29 +104,31 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
 
   const summary = (st: StepState): ReactNode => {
     if (st.status === "error") return st.error;
+    // A step that has not run yet says nothing, even when an earlier run left data behind.
+    if (st.status === "pending" || st.status === "running") return "";
     switch (st.id) {
       case "transcribe": return email
         ? `${plural(messages.length, "message")} · ${inbound} inbound`
         : `${mmss(call.duration)} · ${plural(call.turns.length, "turn")} · Talk ratio ${pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))}`;
       case "extract":
-        if (synced) return email ? "Thread filed to CRM" : `${plural(filled, "field")} written to CRM`;
+        if (synced) return "Synced to CRM";
         return st.status === "waiting" ? "Waiting for your approval" : "";
       case "score": {
         const s = call.scorecard;
         if (!s) return "";
         return `${plural(s.discovery, "discovery question")} · ${s.nextStepSecured ? "Next step secured" : "No dated next step"} · Talk ratio ${pct(s.talkRatio)}`;
       }
-      case "draft": return approved ? `${email ? "Reply" : "Follow-up"} approved · Nothing is sent` : st.status === "waiting" ? "Waiting for your approval" : call.draft?.subject ?? "";
+      case "draft": return approved ? "Approved · Nothing is sent" : st.status === "waiting" ? "Waiting for your approval" : call.draft?.subject ?? "";
       case "icp": return data.icp ? `From ${plural(wonDeals, "won deal")}` : "";
-      case "search": return st.status === "done" ? `${plural(leads.length, "lead")} · Scored against the won deals` : "";
+      case "search": return st.status === "done" ? "Scored against the won deals" : "";
       case "outreach": return st.status === "done" ? `${plural(drafted, "draft")} ready` : "";
     }
   };
 
-  const doneLabel = (id: StepId) => {
-    if (id === "extract" && !email) return synced ? `Extracted ${plural(filled, "field")} · Synced` : `Extracted ${plural(filled, "field")}`;
-    if (id === "extract" && email && synced) return "Filed to CRM · Synced";
-    if (id === "search") return `Found ${plural(leads.length, "lead")} like the ones you closed`;
+  const doneLabel = (st: StepState) => {
+    const { id } = st;
+    if (id === "extract" && !email) return `Extracted ${plural(filled, "field")}`;
+    if (id === "search" && st.status === "done") return `Found ${plural(leads.length, "lead")} like the ones you closed`;
     return labels(id).done;
   };
 
@@ -249,7 +253,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
           <div className="-mx-2 flex flex-col">
             {row("Discovery questions before pricing", String(s.discovery), s.spans.discovery)}
             {row("Next step secured", s.nextStepSecured ? "Yes, dated" : "No", s.spans.nextStep)}
-            {row("Objection handling", s.objection.replace("_", " "), s.spans.objection)}
+            {row("Objection handling", humanize(s.objection), s.spans.objection)}
             {row("Rep talk ratio", pct(s.talkRatio), null)}
             {s.summary && <p className="mt-3 px-2 text-[14px] leading-6 text-ink">{s.summary}</p>}
             {(s.wentWell.length > 0 || s.toImprove.length > 0) && (
@@ -352,7 +356,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
             key={st.id}
             status={st.status}
             workingLabel={labels(st.id).working}
-            doneLabel={st.status === "error" ? labels(st.id).working : doneLabel(st.id)}
+            doneLabel={st.status === "error" ? labels(st.id).working : doneLabel(st)}
             summary={summary(st)}
             rows={st.status === "running" ? trace[st.id] : []}
             rowsDone={st.progress ?? 0}
