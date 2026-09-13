@@ -21,8 +21,12 @@ const BARS = Math.floor(REC_TRACK / PITCH);
 
 type State = "idle" | "recording" | "stopped";
 
-export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?: React.ReactNode }) {
+export function Recorder({ onUse, submitting }: { onUse: (clip: Blob) => void; submitting?: React.ReactNode }) {
   const [state, setState] = useState<State>("idle");
+  const recorder = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+  const [clip, setClip] = useState<Blob | null>(null);
+  const [pendingUse, setPendingUse] = useState(false);
   const [levels, setLevels] = useState<number[]>(() => Array(BARS).fill(0));
   const [seconds, setSeconds] = useState(0);
   const startedAt = useRef(0);
@@ -32,6 +36,8 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
   const reduced = useRef(false);
 
   const release = () => {
+    if (recorder.current?.state === "recording") recorder.current.stop();
+    recorder.current = null;
     stream.current?.getTracks().forEach((t) => t.stop());
     stream.current = null;
     ctx.current?.close().catch(() => {});
@@ -46,9 +52,16 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
     setSeconds(0);
     setLevels(Array(BARS).fill(0));
     setState("recording");
+    setClip(null);
+    chunks.current = [];
     try {
       const s = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.current = s;
+      const rec = new MediaRecorder(s);
+      rec.ondataavailable = (event) => { if (event.data.size) chunks.current.push(event.data); };
+      rec.onstop = () => setClip(new Blob(chunks.current, { type: rec.mimeType || "audio/webm" }));
+      rec.start();
+      recorder.current = rec;
       const ac = new AudioContext();
       ctx.current = ac;
       const an = ac.createAnalyser();
@@ -84,7 +97,15 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
   }, [state, submitting]);
 
   const stop = () => { setState("stopped"); release(); };
-  const cancel = () => { setState("idle"); release(); };
+  const cancel = () => { setState("idle"); setClip(null); setPendingUse(false); chunks.current = []; release(); };
+  // The clip only exists once MediaRecorder has flushed, so "use" while still
+  // recording stops first and submits when the blob arrives.
+  const use = () => { if (clip) { onUse(clip); return; } setPendingUse(true); if (state === "recording") stop(); };
+  useEffect(() => {
+    if (!pendingUse || !clip) return;
+    setPendingUse(false);
+    onUse(clip);
+  }, [pendingUse, clip, onUse]);
 
   const circle = "flex size-8 shrink-0 items-center justify-center rounded-full transition-[background-color,transform] duration-150 active:scale-[.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40";
 
@@ -127,13 +148,13 @@ export function Recorder({ onUse, submitting }: { onUse: () => void; submitting?
           <span className={cn(circle, "text-faint shadow-[inset_0_0_0_1px_#e8e8e8]")}><Square className="size-3 fill-current" /></span>
         )}
         {state !== "idle" && (
-          <button type="button" aria-label="Use recording" onClick={onUse} className={cn(circle, "bg-accent text-accent-ink hover:bg-[#ff7d61]")} style={{ animation: "fade-in 200ms ease-out both" }}>
+          <button type="button" aria-label="Use recording" onClick={use} className={cn(circle, "bg-accent text-accent-ink hover:bg-[#ff7d61]")} style={{ animation: "fade-in 200ms ease-out both" }}>
             <ArrowUp className="size-4" strokeWidth={2.25} />
           </button>
         )}
       </div>
       <div className={cn("absolute top-full mt-3 flex h-8 items-center gap-1 transition-opacity duration-200", state === "stopped" && !submitting ? "opacity-100" : "pointer-events-none opacity-0")}>
-        <Button variant="primary" size="sm" onClick={onUse}>Use recording</Button>
+        <Button variant="primary" size="sm" onClick={use}>Use recording</Button>
         <Button variant="ghost" size="sm" onClick={cancel}>Discard</Button>
       </div>
     </div>

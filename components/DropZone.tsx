@@ -1,34 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ApiError, getFixtures, type ApiCall, type ApiFixture } from "@/lib/api/slipstream";
 import { parseEmail } from "@/lib/email";
-import { actions } from "@/lib/store";
+import { ingestFixture, ingestPastedEmail, ingestRecording, ingestTranscript, parseTranscript } from "@/lib/ingest";
+import { registerConversation, setRun, type ConversationEntry } from "@/lib/store/conversations";
 import { FileTiles } from "./home/FileTiles";
 import { Recorder } from "./home/Recorder";
 import { Segmented } from "./home/Segmented";
 import { TypedPlaceholder } from "./home/TypedPlaceholder";
 import { Submitting, type Source } from "./home/Submitting";
-import { Button, cn } from "./ui";
+import { Button, cn, mmss } from "./ui";
 
-type Mode = "upload" | "record" | "paste" | "email";
-type Phase = { kind: "idle" } | { kind: "submitting"; source: Source; error?: string; text?: string };
+type Mode = "pick" | "upload" | "record" | "paste" | "email";
+type Phase = { kind: "idle" } | { kind: "submitting"; source: Source; error?: string; done?: string };
 
 const MEDIA = /\.(mp3|m4a|wav|mp4|mov|webm|ogg|aac|flac|m4v)$/i;
 const MODES: { key: Mode; label: string }[] = [
+  { key: "pick", label: "Pick a call" },
   { key: "upload", label: "Upload file" },
   { key: "record", label: "Record" },
   { key: "paste", label: "Paste transcript" },
   { key: "email", label: "Paste an email" },
 ];
 
-// One card, one size: 300px tall in every state so switching never moves the page.
+// One card, one size: switching never moves the page.
 const CARD = "relative mx-auto flex h-[220px] w-full max-w-[560px] flex-col items-center justify-center rounded-2xl bg-surface motion-safe:animate-[fade-up_200ms_cubic-bezier(0.23,1,0.32,1)_both]";
+
+const dayFmt = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Melbourne", day: "numeric", month: "short" });
 
 export function DropZone() {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("upload");
+  const [mode, setMode] = useState<Mode>("pick");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [over, setOver] = useState(false);
   const [text, setText] = useState("");
@@ -36,67 +41,115 @@ export function DropZone() {
   const [pasteFocused, setPasteFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [fixtures, setFixtures] = useState<ApiFixture[] | null>(null);
+  const [fixtureError, setFixtureError] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const attach = useRef<HTMLInputElement>(null);
+  const next = useRef<string | null>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
+  useEffect(() => {
+    let live = true;
+    const controller = new AbortController();
+    getFixtures(controller.signal)
+      .then((result) => { if (live) setFixtures(result); })
+      .catch((error: unknown) => {
+        if (!live || controller.signal.aborted) return;
+        setFixtureError(error instanceof Error ? error.message : "The calls could not be loaded");
+      });
+    return () => { live = false; controller.abort(); };
+  }, []);
+
   const isMedia = (f: File) => f.type.startsWith("audio/") || f.type.startsWith("video/") || MEDIA.test(f.name);
 
-  const submitFile = (f: File) => {
-    const source: Source = { kind: "file", name: f.name, bytes: f.size };
-    setPhase({ kind: "submitting", source, error: isMedia(f) ? undefined : "That file type isn't supported" });
+  const fail = useCallback((source: Source, error: unknown) => {
+    const detail = error instanceof ApiError && error.status === 503
+      ? "Transcription is not configured on this deployment"
+      : error instanceof Error ? error.message : "That did not work";
+    setPhase({ kind: "submitting", source, error: detail });
+  }, []);
+
+  /** The ingest is the work: the card shows it running, then Home hands over to the run. */
+  const submit = useCallback(async (source: Source, work: () => Promise<{ entry: ConversationEntry; done: string }>) => {
+    setPhase({ kind: "submitting", source });
+    try {
+      const { entry, done } = await work();
+      registerConversation(entry);
+      setRun(entry.id, { state: "running" });
+      next.current = entry.id;
+      setPhase({ kind: "submitting", source, done });
+    } catch (error) {
+      fail(source, error);
+    }
+  }, [fail]);
+
+  // Home fades out and rises, then the run stages its entrance.
+  const handoff = useCallback(() => {
+    const id = next.current;
+    if (!id) return;
+    setLeaving(true);
+    timers.current.push(window.setTimeout(() => router.push(`/calls/${id}?from=home`), 250));
+  }, [router]);
+
+  const callDone = (call: ApiCall) => `Transcribed · ${call.segments.length} turns · ${mmss(call.duration_seconds ?? 0)}`;
+
+  const pickFixture = (fixture: ApiFixture) =>
+    submit({ kind: "fixture", company: fixture.company, prospect: fixture.prospect }, async () => {
+      const { call, entry } = await ingestFixture(fixture.call_id);
+      return { entry: { ...entry, company: fixture.company, contact: fixture.prospect }, done: callDone(call) };
+    });
+
+  const submitFile = (file: File) => {
+    if (!isMedia(file)) {
+      setPhase({ kind: "submitting", source: { kind: "file", name: file.name, bytes: file.size }, error: "That file type isn't supported" });
+      return;
+    }
+    void submit({ kind: "file", name: file.name, bytes: file.size }, async () => {
+      const { call, entry } = await ingestRecording(file);
+      return { entry, done: callDone(call) };
+    });
+  };
+
+  const submitRecording = (clip: Blob) => {
+    const now = new Date();
+    const name = `Recording ${now.getDate()} ${now.toLocaleString("en-AU", { month: "short" })} ${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}.webm`;
+    void submit({ kind: "recording", bytes: clip.size }, async () => {
+      const { call, entry } = await ingestRecording(new File([clip], name, { type: clip.type || "audio/webm" }));
+      return { entry, done: callDone(call) };
+    });
   };
 
   const onFiles = (files: FileList | null) => {
-    const f = files?.[0];
-    if (f) submitFile(f);
-  };
-
-  // After the Home-side transcribing settles: Home fades out and rises, the
-  // run stages its entrance with the Transcribed step already done.
-  const handoff = (make: () => { id: string }) => {
-    setLeaving(true);
-    timers.current.push(window.setTimeout(() => {
-      const c = make();
-      router.push(`/calls/${c.id}?from=home&transcribed=1`);
-    }, 250));
-  };
-
-  const useRecording = () => {
-    setPhase({ kind: "submitting", source: { kind: "recording" } });
-  };
-
-  const onSubmitted = () => {
-    if (phase.kind !== "submitting") return;
-    const p = phase;
-    handoff(() => {
-      if (p.source.kind === "paste") return actions.addTranscript(p.text ?? "");
-      if (p.source.kind === "email") return actions.addEmail(p.text ?? "");
-      if (p.source.kind === "file") return actions.addUpload(p.source.name);
-      const d = new Date();
-      return actions.addUpload(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
-    });
+    const file = files?.[0];
+    if (file) submitFile(file);
   };
 
   // The "+" in Paste: media starts transcribing; a text transcript loads in.
   const onAttach = async (files: FileList | null) => {
-    const f = files?.[0];
-    if (!f) return;
-    if (/\.(txt|vtt|srt)$/i.test(f.name) || f.type.startsWith("text/")) setText(await f.text());
-    else submitFile(f);
+    const file = files?.[0];
+    if (!file) return;
+    if (/\.(txt|vtt|srt)$/i.test(file.name) || file.type.startsWith("text/")) setText(await file.text());
+    else submitFile(file);
   };
 
-  const run = () => {
+  const runPaste = () => {
     if (!text.trim()) return;
-    setPhase({ kind: "submitting", source: { kind: "paste", lines: text.split(/\n/).filter((l) => l.trim()).length }, text });
+    const lines = text.split(/\n/).filter((line) => line.trim()).length;
+    void submit({ kind: "paste", lines }, async () => {
+      const { call, entry } = await ingestTranscript(text);
+      return { entry, done: `Saved · ${call.segments.length} turns` };
+    });
   };
 
   // A forwarded email: headers and quoted replies become the thread.
   const runEmail = () => {
     if (!emailText.trim()) return;
-    setPhase({ kind: "submitting", source: { kind: "email", messages: parseEmail(emailText).length }, text: emailText });
+    void submit({ kind: "email", messages: parseEmail(emailText).length }, async () => {
+      const { records, entry } = await ingestPastedEmail(emailText);
+      return { entry, done: `Read the thread · ${records.length} message${records.length === 1 ? "" : "s"}` };
+    });
   };
 
   const runPill = (enabled: boolean, onClick: () => void) => (
@@ -113,6 +166,8 @@ export function DropZone() {
     </button>
   );
 
+  const transcriptUnavailable = phase.kind === "submitting" && phase.error === "Transcription is not configured on this deployment";
+
   return (
     <div className="text-center motion-safe:transition-[opacity,transform] motion-safe:duration-250" style={{ opacity: leaving ? 0 : 1, transform: leaving ? "translateY(-8px)" : "none", transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
       <h1 className="text-[22px] font-semibold text-ink">What happened on the call?</h1>
@@ -121,7 +176,36 @@ export function DropZone() {
 
       {phase.kind === "submitting" && phase.source.kind !== "recording" ? (
         <div key="submitting" className={CARD}>
-          <Submitting source={phase.source} error={phase.error} onDone={onSubmitted} onReset={() => setPhase({ kind: "idle" })} />
+          <Submitting source={phase.source} error={phase.error} done={phase.done} onDone={handoff} onReset={() => setPhase({ kind: "idle" })} />
+          {transcriptUnavailable && (
+            <Button className="mt-4" onClick={() => { setPhase({ kind: "idle" }); setMode("paste"); }}>Paste the transcript instead</Button>
+          )}
+        </div>
+      ) : mode === "pick" ? (
+        <div key="pick" className={cn(CARD, "items-stretch justify-start p-3 text-left")}>
+          {fixtureError ? (
+            <p className="m-auto text-[14px] text-soft">{fixtureError}</p>
+          ) : !fixtures ? (
+            <div aria-busy className="flex flex-col gap-1 p-2">
+              {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-9 rounded-lg bg-surface-2" style={{ opacity: 1 - i * 0.2 }} />)}
+            </div>
+          ) : (
+            <ul className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+              {fixtures.map((fixture) => (
+                <li key={fixture.call_id}>
+                  <button
+                    type="button"
+                    onClick={() => void pickFixture(fixture)}
+                    className="grid h-9 w-full grid-cols-[minmax(0,1fr)_96px_64px] items-center gap-x-3 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                  >
+                    <span className="min-w-0 truncate text-[14px] text-ink">{fixture.company} <span className="text-soft">· {fixture.prospect}</span></span>
+                    <span className="truncate text-[13px] text-soft">{fixture.outcome.replace("_", " ")}</span>
+                    <span className="text-right text-[13px] tabular-nums text-faint">{dayFmt.format(new Date(fixture.scheduled_at))}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       ) : mode === "upload" ? (
         <div
@@ -145,7 +229,13 @@ export function DropZone() {
         </div>
       ) : mode === "record" ? (
         <div key="record" className={cn(CARD, "px-8")}>
-          <Recorder key={mode} onUse={useRecording} submitting={phase.kind === "submitting" && phase.source.kind === "recording" ? <Submitting source={{ kind: "recording" }} onDone={onSubmitted} variant="bar" /> : null} />
+          <Recorder
+            key={mode}
+            onUse={submitRecording}
+            submitting={phase.kind === "submitting" && phase.source.kind === "recording"
+              ? <Submitting source={phase.source} error={phase.error} done={phase.done} onDone={handoff} onReset={() => setPhase({ kind: "idle" })} variant="bar" />
+              : null}
+          />
         </div>
       ) : mode === "email" ? (
         <div key="email" className={cn(CARD, "items-stretch justify-start p-5 text-left")}>
@@ -180,7 +270,7 @@ export function DropZone() {
             <Plus className="size-3.5" strokeWidth={2} />
           </button>
           <input ref={attach} type="file" accept="audio/*,video/*,.txt,.vtt,.srt" className="sr-only" tabIndex={-1} onChange={(e) => onAttach(e.target.files)} />
-          {runPill(!!text.trim(), run)}
+          {runPill(!!text.trim() && parseTranscript(text).turns.length > 0, runPaste)}
         </div>
       )}
     </div>

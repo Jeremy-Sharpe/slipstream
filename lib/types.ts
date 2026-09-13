@@ -21,13 +21,15 @@ export type Field<T = string | number | string[] | null> = { value: T; confidenc
 export type CallRecord = {
   id: string;
   kind: "call" | "email";
+  /** The API id the pipeline is addressed by: `source_external_id` for a call, the thread id for a thread. */
+  sourceId?: string;
   contact: string;
-  title: string;
+  title?: string | null;
   email?: string | null;
   company: string;
-  industry: string;
-  headcount: number;
-  location: string;
+  industry?: string | null;
+  headcount?: number | null;
+  location?: string | null;
   rep: string;
   at: string;
   duration: number;
@@ -38,15 +40,18 @@ export type CallRecord = {
   turns: Turn[];
   /** Threads only: the messages, oldest first. */
   messages?: EmailMessage[];
-  fields: {
-    contact: Field<string>;
-    company: Field<string>;
-    stage: Field<string>;
+  /** Threads only: how long the reply took. */
+  responseTime?: string;
+  /** Each block below is absent until its step has run. */
+  fields?: {
+    contact: Field<string | null>;
+    company: Field<string | null>;
+    stage: Field<string | null>;
     value: Field<number | null>;
     next_step: Field<string | null>;
     promises: Field<string[]>;
   };
-  scorecard: {
+  scorecard?: {
     discovery: number;
     nextStepSecured: boolean;
     objection: string;
@@ -56,10 +61,10 @@ export type CallRecord = {
     responseTime?: string;
     spans: { discovery: number | null; nextStep: number | null; objection: number | null };
   };
-  objections: { text: string; handling: string }[];
-  icp: { industry: string; headcount_band: string; role: string; trigger: string | null } | null;
-  riskFlags: unknown[];
-  draft: { subject: string; body: string };
+  objections?: { text: string; handling: string }[];
+  icp?: { industry: string; headcount_band: string; role: string; trigger: string | null } | null;
+  riskFlags?: unknown[];
+  draft?: { id?: string; subject: string; body: string; approved?: boolean };
   /** Set when the call came from a dropped recording / pasted transcript. */
   fileName?: string;
   pasted?: boolean;

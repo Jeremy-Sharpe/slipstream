@@ -3,11 +3,9 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
-import { icp } from "@/lib/icp";
-import { leads } from "@/lib/leads";
-import { actions, useStore } from "@/lib/store";
-import type { CallRecord } from "@/lib/types";
-import { traceFor, type StepId, type StepState } from "@/lib/useRun";
+import { talkRatioFromTurns } from "@/lib/adapters";
+import type { CallRecord, Field } from "@/lib/types";
+import { traceFor, type RunData, type StepId, type StepState } from "@/lib/useRun";
 import { TraceStep } from "./run/TraceStep";
 import { WorkingLine } from "./run/WorkingLine";
 import { StreamingText, words } from "./run/StreamingText";
@@ -15,26 +13,28 @@ import { humanize, Button, Score, cn, mmss } from "./ui";
 
 const LABELS: Record<StepId, { working: string; done: string }> = {
   transcribe: { working: "Transcribing", done: "Transcribed" },
-  extract: { working: "Extracting fields", done: "Extracted 6 fields" },
+  extract: { working: "Extracting fields", done: "Extracted fields" },
   score: { working: "Scoring the call", done: "Scored the call" },
   draft: { working: "Drafting the follow-up", done: "Follow-up drafted" },
   icp: { working: "Updating the ICP", done: "ICP updated" },
-  search: { working: "Searching leads like the 5 you closed", done: "Found 10 leads like the 5 you closed" },
+  search: { working: "Searching leads like the ones you closed", done: "Found leads like the ones you closed" },
   outreach: { working: "Drafting outreach", done: "Outreach drafted" },
 };
 
 /** A thread reads the same steps differently: nothing is transcribed, and the follow-up is a reply. */
 const EMAIL_LABELS: Partial<Record<StepId, { working: string; done: string }>> = {
   transcribe: { working: "Reading the thread", done: "Read the thread" },
-  score: { working: "Scoring the thread", done: "Scored the thread" },
+  extract: { working: "Filing the thread", done: "Filed to CRM" },
   draft: { working: "Drafting the reply", done: "Reply drafted" },
 };
 
 const fmtAud = (n: number | null | undefined, none = "None") => (n == null ? none : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
+const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDraftBody, onHighlight, onJump, onReveal, onExpandClick, onSynced, onDraftApproved }: {
+export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody, setDraftBody, onHighlight, onJump, onReveal, onExpandClick, onRetry, onSynced, onDraftApproved }: {
   call: CallRecord;
+  data: RunData;
   steps: StepState[];
   open: StepId | null;
   toggle: (id: StepId) => void;
@@ -45,12 +45,12 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
   onJump: (i: number) => void;
   onReveal?: (el: HTMLElement) => void;
   onExpandClick?: (el: HTMLElement, bodyHeight: number) => void;
+  onRetry: (id: StepId) => void;
   onSynced: () => void;
   onDraftApproved: () => void;
 }) {
-  const store = useStore();
-  const synced = !!store.synced[call.id];
-  const approved = !!store.approved[call.id];
+  const synced = data.synced;
+  const approved = data.approved;
   // The draft body streams in the first time the step completes, then edits.
   const [draftStreamed, setDraftStreamed] = useState(false);
   const [draftGen, setDraftGen] = useState(0);
@@ -62,7 +62,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
     setDraftStreamed(false);
     setDraftGen((g) => g + 1);
   }
-  const top = leads.slice(0, 5);
+
   const skippedNote = steps.find((s) => s.status === "skipped" && s.note)?.note;
   const email = call.kind === "email";
   const messages = call.messages ?? [];
@@ -70,29 +70,58 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
   const trace = traceFor(call);
   const inbound = messages.filter((m) => m.direction === "inbound").length;
 
+  const fieldRows: { label: string; value: ReactNode; field: Field<unknown> }[] = call.fields
+    ? [
+        { label: "Contact", value: [call.fields.contact.value, call.title].filter(Boolean).join(" · ") || "Not stated", field: call.fields.contact },
+        { label: "Company", value: [call.fields.company.value, call.headcount ? `${call.headcount} staff` : null, call.location].filter(Boolean).join(" · ") || "Not stated", field: call.fields.company },
+        { label: "Deal stage", value: call.fields.stage.value ? humanize(String(call.fields.stage.value)) : "Not stated", field: call.fields.stage },
+        { label: "Value", value: fmtAud(call.fields.value.value, email ? "Not stated" : "None"), field: call.fields.value },
+        { label: "Next step", value: call.fields.next_step.value ?? "None", field: call.fields.next_step },
+        { label: "Promises", value: call.fields.promises.value.length ? call.fields.promises.value.join(" · ") : "None", field: call.fields.promises },
+      ]
+    : [];
+  const filled = fieldRows.filter((row) => {
+    const value = row.field.value;
+    return Array.isArray(value) ? value.length > 0 : value != null;
+  }).length;
+  const leads = data.leads ?? [];
+  const drafted = leads.filter((lead) => ["reviewed", "approved", "contacted"].includes(lead.status)).length;
+  const wonDeals = data.wonDeals ?? 0;
+
   const summary = (st: StepState): ReactNode => {
+    if (st.status === "error") return st.error;
     switch (st.id) {
-      case "transcribe": return email ? `${messages.length} messages · ${inbound} inbound` : `${mmss(call.duration)} · ${call.turns.length} turns · Scribe`;
-      case "extract": return synced ? "6 fields written to CRM" : "Waiting for your approval";
-      case "score": return email
-        ? `${call.scorecard.askedRightQuestions ? "asked the right questions" : "quoted before asking"} · ${call.scorecard.nextStepSecured ? "next step secured" : "no dated next step"}${call.scorecard.responseTime ? ` · replied in ${call.scorecard.responseTime}` : ""}`
-        : `${call.scorecard.discovery} discovery questions · ${call.scorecard.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(call.scorecard.talkRatio)}`;
-      case "draft": return approved ? `${email ? "Reply" : "Follow-up"} approved · nothing is sent` : st.status === "waiting" ? "Waiting for your approval" : call.draft.subject;
-      case "icp": return `From ${icp.wonDeals} won deals`;
-      case "search": return st.status === "done" ? "10 found · scored against the won deals" : "";
-      case "outreach": return st.status === "done" ? "5 drafts ready" : "";
+      case "transcribe": return email
+        ? `${plural(messages.length, "message")} · ${inbound} inbound`
+        : `${mmss(call.duration)} · ${plural(call.turns.length, "turn")} · talk ratio ${pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))}`;
+      case "extract":
+        if (synced) return email ? "Thread filed to CRM" : `${plural(filled, "field")} written to CRM`;
+        return st.status === "waiting" ? "Waiting for your approval" : "";
+      case "score": {
+        const s = call.scorecard;
+        if (!s) return "";
+        return `${plural(s.discovery, "discovery question")} · ${s.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(s.talkRatio)}`;
+      }
+      case "draft": return approved ? `${email ? "Reply" : "Follow-up"} approved · nothing is sent` : st.status === "waiting" ? "Waiting for your approval" : call.draft?.subject ?? "";
+      case "icp": return data.icp ? `From ${plural(wonDeals, "won deal")}` : "";
+      case "search": return st.status === "done" ? `${plural(leads.length, "lead")} · scored against the won deals` : "";
+      case "outreach": return st.status === "done" ? `${plural(drafted, "draft")} ready` : "";
     }
   };
 
   const doneLabel = (id: StepId) => {
-    if (id === "extract" && synced) return "Extracted 6 fields · Synced";
+    if (id === "extract" && !email) return synced ? `Extracted ${plural(filled, "field")} · Synced` : `Extracted ${plural(filled, "field")}`;
+    if (id === "extract" && email && synced) return "Filed to CRM · Synced";
+    if (id === "search") return `Found ${plural(leads.length, "lead")} like the ones you closed`;
     return labels(id).done;
   };
 
   // The evidence column: a timestamp on a call, a message number on a thread.
-  const ref = (f: { evidence_ms?: number | null; evidence_ref?: number | null }) => (email ? (f.evidence_ref != null ? `Msg ${f.evidence_ref + 1}` : "") : f.evidence_ms != null ? mmss(Math.round(f.evidence_ms / 1000)) : "");
+  const ref = (f: { evidence_ms?: number | null; evidence_ref?: number | null }) =>
+    email ? (f.evidence_ref != null ? `Msg ${f.evidence_ref + 1}` : "") : f.evidence_ms != null ? mmss(Math.round(f.evidence_ms / 1000)) : "";
   const field = (label: string, value: ReactNode, conf: number, span: number | null, evidence: string) => (
     <button
+      key={label}
       type="button"
       className="grid w-full grid-cols-[92px_minmax(0,1fr)_44px_40px] items-start gap-x-3 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
       onMouseEnter={() => onHighlight(span)}
@@ -106,54 +135,97 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
     </button>
   );
 
+  const plainRow = (label: string, value: ReactNode) => (
+    <div key={label} className="grid w-full grid-cols-[92px_minmax(0,1fr)] items-start gap-x-3 rounded-lg px-2 py-1.5 text-left">
+      <span className="pt-px text-[14px] text-soft">{label}</span>
+      <span className="min-w-0 text-[15px] text-ink">{value}</span>
+    </div>
+  );
+
+  const gate = (label: string, doneLine: string, note: string | undefined, onClick: () => void, isDone: boolean) => (
+    <div className="mt-4">
+      {isDone ? (
+        <div style={{ animation: "fade-in 200ms ease-out both" }}>
+          <p className="flex items-center gap-2 text-[14px] text-soft"><Check className="size-3.5 text-ink" strokeWidth={2.5} /> {doneLine}</p>
+          {note && <p className="mt-1 text-[13.5px] text-faint">{note}</p>}
+        </div>
+      ) : (
+        <Button variant="primary" onClick={onClick}>{label}</Button>
+      )}
+    </div>
+  );
+
   const card = (st: StepState): ReactNode => {
-    const f = call.fields;
+    if (st.status === "error") {
+      return (
+        <div>
+          <p className="text-[14px] text-soft">{st.error}</p>
+          <div className="mt-3"><Button onClick={() => onRetry(st.id)}>Try again</Button></div>
+        </div>
+      );
+    }
     switch (st.id) {
       case "transcribe":
-        if (email) return <p className="text-[14px] text-soft">Read {messages.length} messages, {inbound} from {call.contact.split(" ")[0]} and {messages.length - inbound} from {call.rep.split(" ")[0]}.{call.scorecard.responseTime ? ` ${call.rep.split(" ")[0]} replied in ${call.scorecard.responseTime}.` : ""}</p>;
-        return <p className="text-[14px] text-soft">Diarised into {call.turns.length} turns. {call.rep} spoke {pct(call.scorecard.talkRatio)} of the time.</p>;
-      case "extract":
+        if (email) return <p className="text-[14px] text-soft">Read {plural(messages.length, "message")}, {inbound} from {call.contact.split(" ")[0]} and {messages.length - inbound} from {call.rep.split(" ")[0]}.{call.responseTime ? ` ${call.rep.split(" ")[0]} replied in ${call.responseTime}.` : ""}</p>;
+        return <p className="text-[14px] text-soft">Diarised into {plural(call.turns.length, "turn")}. {call.rep} spoke {pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))} of the time.</p>;
+      case "extract": {
         if (st.status !== "done" && st.status !== "waiting") return null;
+        if (email) {
+          const records = data.records ?? [];
+          const first = records[0];
+          return (
+            <div>
+              <div className="-mx-2 flex flex-col">
+                {plainRow("Contact", call.contact)}
+                {plainRow("Email", first?.contact_email ?? call.email ?? "Not stated")}
+                {plainRow("Company", call.company)}
+                {plainRow("Thread", first?.subject ?? call.turns[0]?.text.slice(0, 60) ?? "")}
+                {plainRow("Messages", plural(records.length || messages.length, "message"))}
+                {plainRow("CRM deal", first?.deal_external_id ?? "Not stated")}
+              </div>
+              {gate("Approve & sync to CRM", "Filed to CRM · the thread is on the deal", data.crmNote, onSynced, synced)}
+            </div>
+          );
+        }
+        if (!call.fields) return null;
         return (
           <div>
             <div className="-mx-2 flex flex-col">
-              {field("Contact", `${f.contact.value} · ${call.title}`, f.contact.confidence, f.contact.span, ref(f.contact))}
-              {field("Company", `${f.company.value} · ${call.headcount} staff · ${call.location}`, f.company.confidence, f.company.span, ref(f.company))}
-              {field("Deal stage", humanize(f.stage.value), f.stage.confidence, f.stage.span, ref(f.stage))}
-              {field("Value", fmtAud(f.value.value, email ? "Not stated" : "None"), f.value.confidence, f.value.span, ref(f.value))}
-              {field("Next step", f.next_step.value ?? "None", f.next_step.confidence, f.next_step.span, ref(f.next_step))}
-              {field("Promises", f.promises.value.length ? f.promises.value.join(" · ") : "None", f.promises.confidence, f.promises.span, ref(f.promises))}
-              {call.objections.length > 0 && field("Objection", `${call.objections[0].text} (${humanize(call.objections[0].handling)})`, 0.9, call.scorecard.spans.objection, ref(email ? { evidence_ref: call.scorecard.spans.objection } : { evidence_ms: call.scorecard.spans.objection != null ? call.turns[call.scorecard.spans.objection].t * 1000 : null }))}
-            </div>
-            <div className="mt-4">
-              {synced ? (
-                <p className="flex items-center gap-2 text-[14px] text-soft" style={{ animation: "fade-in 200ms ease-out both" }}><Check className="size-3.5 text-ink" strokeWidth={2.5} /> Synced to CRM · 6 fields written</p>
-              ) : (
-                <Button variant="primary" onClick={() => { actions.sync(call.id); onSynced(); }}>Approve &amp; sync to CRM</Button>
+              {fieldRows.map((row) => field(row.label, row.value, row.field.confidence, row.field.span, ref(row.field)))}
+              {call.objections?.[0] && field(
+                "Objection",
+                `${call.objections[0].text} (${humanize(call.objections[0].handling)})`,
+                0.9,
+                call.scorecard?.spans.objection ?? null,
+                ref(email
+                  ? { evidence_ref: call.scorecard?.spans.objection ?? null }
+                  : { evidence_ms: call.scorecard?.spans.objection != null ? call.turns[call.scorecard.spans.objection].t * 1000 : null }),
               )}
             </div>
+            {gate("Approve & sync to CRM", `Synced to CRM · ${plural(filled, "field")} written`, data.crmNote, onSynced, synced)}
           </div>
         );
+      }
       case "score": {
-        if (st.status !== "done") return null;
+        if (st.status !== "done" || !call.scorecard) return null;
         const s = call.scorecard;
         const row = (label: string, value: string, span: number | null) => (
-          <button type="button" className="grid w-full grid-cols-[minmax(0,1fr)_96px] items-center gap-x-3 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40" onMouseEnter={() => onHighlight(span)} onMouseLeave={() => onHighlight(null)} onClick={() => span != null && onJump(span)}>
+          <button key={label} type="button" className="grid w-full grid-cols-[minmax(0,1fr)_96px] items-center gap-x-3 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40" onMouseEnter={() => onHighlight(span)} onMouseLeave={() => onHighlight(null)} onClick={() => span != null && onJump(span)}>
             <span className="text-[14px] text-soft">{label}</span>
             <span className="text-right text-[15px] tabular-nums text-ink">{value}</span>
           </button>
         );
         return (
           <div className="-mx-2 flex flex-col">
-            {email ? row("Asked the right questions", s.askedRightQuestions ? "Yes" : "No", s.spans.discovery) : row("Discovery questions before pricing", String(s.discovery), s.spans.discovery)}
+            {row("Discovery questions before pricing", String(s.discovery), s.spans.discovery)}
             {row("Next step secured", s.nextStepSecured ? "Yes, dated" : "No", s.spans.nextStep)}
             {row("Objection handling", s.objection.replace("_", " "), s.spans.objection)}
-            {email ? row("Response time", s.responseTime ?? "No reply yet", s.spans.nextStep) : row("Rep talk ratio", pct(s.talkRatio), null)}
+            {row("Rep talk ratio", pct(s.talkRatio), null)}
           </div>
         );
       }
       case "draft":
-        if (st.status !== "done" && st.status !== "waiting") return null;
+        if ((st.status !== "done" && st.status !== "waiting") || !call.draft) return null;
         return (
           <div>
             <p className="text-[15px] font-medium text-ink">{call.draft.subject}</p>
@@ -170,55 +242,51 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
                 <StreamingText key={draftGen} size="lg" tokens={words(draftBody.replace(/\n/g, " ⏎ ")).map((t) => ({ text: t.text === "⏎" ? "\n" : t.text }))} onDone={() => setDraftStreamed(true)} />
               </div>
             )}
-            <div className="mt-4">
-              {approved ? (
-                <p className="flex items-center gap-2 text-[14px] text-soft" style={{ animation: "fade-in 200ms ease-out both" }}><Check className="size-3.5 text-ink" strokeWidth={2.5} /> Approved · nothing is sent from Slipstream</p>
-              ) : (
-                <Button variant="primary" onClick={() => { actions.approveDraft(call.id); onDraftApproved(); }}>{email ? "Approve reply" : "Approve follow-up"}</Button>
-              )}
-            </div>
+            {gate(email ? "Approve reply" : "Approve follow-up", "Approved · nothing is sent from Slipstream", undefined, onDraftApproved, approved)}
           </div>
         );
-      case "icp":
-        if (st.status !== "done") return null;
+      case "icp": {
+        if (st.status !== "done" || !data.icp) return null;
+        const profile = data.icp.profile;
         return (
           <div>
-            <p className="text-[15px] text-ink">{icp.sentence}</p>
-            <p className="mt-1 text-[14px] text-soft">From {icp.wonDeals} won deals</p>
-            {call.icp && (
-              <ul className="mt-4 flex flex-col gap-1.5">
-                {[["Industry", call.icp.industry], ["Size", call.icp.headcount_band + " staff"], ["Buyer", call.icp.role], ["Trigger", call.icp.trigger ?? "None"]].map(([k, v]) => (
-                  <li key={k} className="grid grid-cols-[20px_72px_minmax(0,1fr)] items-center gap-x-1 text-[14px]">
-                    <Check className={cn("size-3.5", call.outcome === "won" ? "text-success" : "text-faint")} strokeWidth={2.25} />
-                    <span className="text-soft">{k}</span>
-                    <span className="text-ink">{v}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        );
-      case "search":
-        if (st.status === "running") {
-          return <WorkingLine label="Searching Victoria for firms like the 5 you closed" startedAt={st.startedAt} detail={`${st.progress ?? 0} of 10`} />;
-        }
-        if (st.status !== "done") return null;
-        return (
-          <div>
-            <ul className="-mx-2 flex flex-col">
-              {top.map((l) => (
-                <li key={l.id} className="grid h-9 grid-cols-[minmax(0,1fr)_44px] items-center gap-x-2.5 rounded-lg px-2 transition-colors duration-150 hover:bg-white">
-                  <span className="min-w-0 truncate text-[15px] text-ink">{l.company} <span className="text-soft">· {l.title}</span></span>
-                  <span className="text-right"><Score value={l.similarity} /></span>
+            <p className="text-[15px] text-ink">{profile.summary}</p>
+            <p className="mt-1 text-[14px] text-soft">From {plural(wonDeals, "won deal")}{data.icpStatus ? ` · profile ${data.icpStatus}` : ""}</p>
+            <ul className="mt-4 flex flex-col gap-1.5">
+              {[["Industry", profile.industries.join(", ")], ["Size", `${profile.headcount_band} staff`], ["Buyer", profile.roles.join(", ")], ["Trigger", profile.triggers[0] ?? "None"]].map(([k, v]) => (
+                <li key={k} className="grid grid-cols-[20px_72px_minmax(0,1fr)] items-center gap-x-1 text-[14px]">
+                  <Check className={cn("size-3.5", call.outcome === "won" ? "text-success" : "text-faint")} strokeWidth={2.25} />
+                  <span className="text-soft">{k}</span>
+                  <span className="text-ink">{v}</span>
                 </li>
               ))}
             </ul>
-            <Link href="/leads" className="mt-3 inline-block text-[14px] text-soft underline-offset-2 transition-colors duration-150 hover:text-ink hover:underline">See all 10 in Leads →</Link>
+          </div>
+        );
+      }
+      case "search":
+        if (st.status === "running") return <WorkingLine label="Ranking leads against the deals you won" startedAt={st.startedAt} />;
+        if (st.status !== "done") return null;
+        if (leads.length === 0) return <p className="text-[14px] text-soft">No leads on this profile yet. <Link href="/leads" className="text-ink underline-offset-2 hover:underline">Find some in Leads →</Link></p>;
+        return (
+          <div>
+            <ul className="-mx-2 flex flex-col">
+              {leads.slice(0, 5).map((lead) => (
+                <li key={lead.id} className="grid h-9 grid-cols-[minmax(0,1fr)_44px] items-center gap-x-2.5 rounded-lg px-2 transition-colors duration-150 hover:bg-white">
+                  <span className="min-w-0 truncate text-[15px] text-ink">{lead.company_name} <span className="text-soft">· {lead.title ?? "Unknown role"}</span></span>
+                  <span className="text-right"><Score value={Math.round((lead.similarity_score ?? 0) * 100)} /></span>
+                </li>
+              ))}
+            </ul>
+            {!!data.leadsNeedRescore && (
+              <p className="mt-3 text-[13.5px] text-faint">{plural(data.leadsNeedRescore, "lead")} still scored against an earlier version of the profile.</p>
+            )}
+            <Link href="/leads" className="mt-3 inline-block text-[14px] text-soft underline-offset-2 transition-colors duration-150 hover:text-ink hover:underline">See all {leads.length} in Leads →</Link>
           </div>
         );
       case "outreach":
         if (st.status !== "done") return null;
-        return <p className="text-[14px] text-soft">Five drafts reuse the language from the calls you won. <Link href="/leads" className="text-ink underline-offset-2 hover:underline">Review in Leads →</Link></p>;
+        return <p className="text-[14px] text-soft">{drafted === 0 ? "No outreach drafted yet." : `${plural(drafted, "draft")} reuse the language from the calls you won.`} <Link href="/leads" className="text-ink underline-offset-2 hover:underline">Review in Leads →</Link></p>;
     }
   };
 
@@ -241,7 +309,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
             key={st.id}
             status={st.status}
             workingLabel={labels(st.id).working}
-            doneLabel={doneLabel(st.id)}
+            doneLabel={st.status === "error" ? labels(st.id).working : doneLabel(st.id)}
             summary={summary(st)}
             rows={st.status === "running" ? trace[st.id] : []}
             rowsDone={st.progress ?? 0}
