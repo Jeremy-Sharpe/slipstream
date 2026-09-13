@@ -63,7 +63,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
   const summary = (st: StepState): ReactNode => {
     switch (st.id) {
       case "transcribe": return `${mmss(call.duration)} · ${call.turns.length} turns · Scribe`;
-      case "extract": return synced ? `6 fields written · ${fmtElapsed(st.elapsedMs)}` : "Waiting for your approval";
+      case "extract": return synced ? "6 fields written to CRM" : "Waiting for your approval";
       case "score": return `${call.scorecard.discovery} discovery questions · ${call.scorecard.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(call.scorecard.talkRatio)}`;
       case "draft": return approved ? "Approved · nothing is sent" : call.draft.subject;
       case "icp": return `${icp.sentence.split(" with ")[0]} · v${icp.version}`;
@@ -99,7 +99,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
       case "transcribe":
         return <p className="text-[14px] text-soft">Diarised into {call.turns.length} turns. {call.rep} spoke {pct(call.scorecard.talkRatio)} of the time.</p>;
       case "extract":
-        if (st.status !== "done") return null;
+        if (st.status !== "done" && st.status !== "waiting") return null;
         return (
           <div>
             <div className="-mx-2 flex flex-col">
@@ -113,9 +113,9 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
             </div>
             <div className="mt-4">
               {synced ? (
-                <p className="flex items-center gap-2 text-[14px] text-soft" style={{ animation: "fade-in 200ms ease-out both" }}><Check className="size-3.5 text-ink" strokeWidth={2.5} /> Synced to HubSpot · 6 fields written</p>
+                <p className="flex items-center gap-2 text-[14px] text-soft" style={{ animation: "fade-in 200ms ease-out both" }}><Check className="size-3.5 text-ink" strokeWidth={2.5} /> Synced to CRM · 6 fields written</p>
               ) : (
-                <Button variant="primary" onClick={() => { actions.sync(call.id); onSynced(); }}>Approve &amp; sync</Button>
+                <Button variant="primary" onClick={() => { actions.sync(call.id); onSynced(); }}>Approve &amp; sync to CRM</Button>
               )}
             </div>
           </div>

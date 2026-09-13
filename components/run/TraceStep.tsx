@@ -9,7 +9,7 @@ import { LoaderGrid, Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
    with a fade to the done label; the body is an expandable trace with a
    measured left line, staggered rows, and a flat card for the step's output. */
 
-export type TraceStatus = "pending" | "running" | "done" | "skipped";
+export type TraceStatus = "pending" | "running" | "waiting" | "done" | "skipped";
 
 export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, loader = "spinner", shimmer = false, outlined = false, onReveal, children }: {
   status: TraceStatus;
@@ -39,6 +39,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
     return () => window.clearTimeout(t);
   }, [expanded, status, rowsDone, children, onReveal]);
   const working = status === "running";
+  const waiting = status === "waiting";
   const muted = status === "pending" || status === "skipped";
   const live = useElapsed(startedAt, working);
   const ms = working ? live : elapsedMs;
@@ -55,11 +56,13 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
             "flex size-7 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
             status === "done" && "bg-ink text-white",
             working && "bg-surface",
+            waiting && "border-[1.5px] border-line",
             muted && "border-[1.5px] border-line",
           )}
           style={status === "done" ? { animation: "pop-in 240ms cubic-bezier(0.23,1,0.32,1) both" } : undefined}
         >
           {status === "done" && <Check className="size-3.5" strokeWidth={2.5} />}
+          {waiting && <span className="size-2 rounded-full bg-accent" style={{ animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both" }} />}
           {working && (loader === "grid" ? <LoaderGrid /> : <Spinner className="size-3.5 border-t-ink" />)}
         </span>
         {!last && <span aria-hidden className="mt-1.5 w-px flex-1 bg-line" />}
@@ -85,7 +88,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
           </span>
           <span className="min-w-0 flex-1 truncate text-[14px] tabular-nums text-soft">
             {working && ms != null ? <span className="text-faint">{fmtElapsed(ms)}</span> : summary}
-            {!working && status === "done" && ms != null && summary && <span className="text-faint"> · {fmtElapsed(ms)}</span>}
+            {status === "done" && ms != null && summary && <span className="text-faint"> · {fmtElapsed(ms)}</span>}
           </span>
           {!muted && (
             <ChevronDown className="size-3.5 shrink-0 text-faint transition-transform duration-300" strokeWidth={2.2} style={{ transform: expanded ? "rotate(180deg)" : "rotate(0)" }} />

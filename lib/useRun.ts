@@ -9,11 +9,11 @@ import { actions } from "./store";
 // Phase 1 runs on load and stops at the follow-up; phase 2 (ICP, leads,
 // outreach) only runs once the extracted fields are approved.
 export type StepId = "transcribe" | "extract" | "score" | "draft" | "icp" | "search" | "outreach";
-export type StepStatus = "pending" | "running" | "done" | "skipped";
+export type StepStatus = "pending" | "running" | "waiting" | "done" | "skipped";
 export type StepState = { id: StepId; status: StepStatus; progress?: number; note?: string; startedAt?: number; elapsedMs?: number };
 
-export const PHASE1: StepId[] = ["transcribe", "extract", "score", "draft"];
-export const PHASE2: StepId[] = ["icp", "search", "outreach"];
+export const PHASE1: StepId[] = ["transcribe", "extract"];
+export const PHASE2: StepId[] = ["score", "draft", "icp", "search", "outreach"];
 
 /** Sub-items ticked off while each step works. */
 export const TRACE: Record<StepId, string[]> = {
@@ -27,9 +27,13 @@ export const TRACE: Record<StepId, string[]> = {
 };
 
 /** Minimum visible duration per step, even when the work is instant. */
-const DURATION: Record<StepId, number> = { transcribe: 1400, extract: 1800, score: 1200, draft: 1600, icp: 1400, search: 2200, outreach: 1600 };
+const DURATION: Record<StepId, number> = { transcribe: 3000, extract: 4000, score: 3000, draft: 3500, icp: 3000, search: 4500, outreach: 3000 };
+/** Each sub-item stays visible at least this long before its check. */
+const SUB_MIN = 900;
+/** Settle after a step completes before the next one expands. */
+const SETTLE = 500;
 
-export function useRun(call: CallRecord, opts: { instant?: boolean } = {}) {
+export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?: number } = {}) {
   const [steps, setSteps] = useState<StepState[]>([]);
   const [open, setOpen] = useState<StepId | null>(null);
   const [phase1Done, setPhase1Done] = useState(false);
@@ -44,7 +48,7 @@ export function useRun(call: CallRecord, opts: { instant?: boolean } = {}) {
   const at = useCallback((ms: number, fn: () => void) => { timers.current.push(window.setTimeout(fn, instant ? 0 : ms)); }, [instant]);
 
   /** Schedules a list of steps back to back; returns the total time. */
-  const schedule = useCallback((ids: StepId[], t0: number, stopAfter?: { id: StepId; note: string }, onEnd?: () => void) => {
+  const schedule = useCallback((ids: StepId[], t0: number, stopAfter?: { id: StepId; note?: string; wait?: boolean }, onEnd?: () => void) => {
     let t = t0;
     const stopIndex = stopAfter ? ids.indexOf(stopAfter.id) : ids.length - 1;
     ids.forEach((id, i) => {
@@ -52,12 +56,17 @@ export function useRun(call: CallRecord, opts: { instant?: boolean } = {}) {
         at(t, () => set(id, { status: "skipped", note: i === stopIndex + 1 ? stopAfter?.note : undefined }));
         return;
       }
-      const len = DURATION[id];
-      const ticks = id === "search" ? 10 : TRACE[id].length;
+      const subs = TRACE[id].length;
+      const len = Math.max(DURATION[id], subs * SUB_MIN + SUB_MIN);
+      const ticks = id === "search" ? 10 : subs;
       at(t, () => { set(id, { status: "running", progress: 0, startedAt: Date.now() }); setOpen(id); });
       for (let n = 1; n <= ticks; n++) at(t + (len / (ticks + 1)) * n, () => set(id, { progress: n }));
-      at(t + len, () => { set(id, (s) => ({ status: "done", progress: ticks, elapsedMs: s.startedAt ? Date.now() - s.startedAt : len })); setOpen(null); });
-      t += len + 200;
+      const gate = i === stopIndex && stopAfter?.wait;
+      at(t + len, () => {
+        set(id, (s) => ({ status: gate ? "waiting" : "done", progress: ticks, elapsedMs: s.startedAt ? Date.now() - s.startedAt : len }));
+        if (!gate) setOpen(null);
+      });
+      t += len + SETTLE;
     });
     at(t, () => onEnd?.());
     return t;
@@ -71,20 +80,23 @@ export function useRun(call: CallRecord, opts: { instant?: boolean } = {}) {
     setPhase1Done(false);
     setRunId((n) => n + 1);
     actions.setRun(call.id, "running");
-    const stop = call.outcome === "no_show" ? { id: "transcribe" as StepId, note: "No conversation to extract. Reschedule note drafted" } : undefined;
-    schedule(PHASE1, 200, stop, () => {
+    // No-show: nothing to extract. Otherwise stop at the extraction gate and wait.
+    const stop = call.outcome === "no_show" ? { id: "transcribe" as StepId, note: "No conversation to extract. Reschedule note drafted" } : { id: "extract" as StepId, wait: true };
+    schedule(PHASE1, opts.startDelay ?? 200, stop, () => {
       setPhase1Done(true);
-      setOpen(stop ? null : "extract");
-      actions.setRun(call.id, stop ? "done" : "review");
+      setOpen(call.outcome === "no_show" ? null : "extract");
+      actions.setRun(call.id, call.outcome === "no_show" ? "done" : "review");
     });
-  }, [call, schedule]);
+  }, [call, schedule, opts.startDelay]);
 
   /** Phase 2: only after the fields are approved. The timeline grows here. */
   const startPhase2 = useCallback(() => {
-    setSteps((all) => (all.some((s) => s.id === "icp") ? all : [...all, ...PHASE2.map((id) => ({ id, status: "pending" as const }))]));
+    set("extract", { status: "done" });
+    setOpen(null);
+    setSteps((all) => (all.some((s) => s.id === "score") ? all : [...all, ...PHASE2.map((id) => ({ id, status: "pending" as const }))]));
     const stop = call.outcome === "lost" ? { id: "icp" as StepId, note: "Not a fit for the ICP. No leads searched" } : undefined;
-    schedule(PHASE2, 300, stop, () => actions.setRun(call.id, "done"));
-  }, [call, schedule]);
+    schedule(PHASE2, SETTLE, stop, () => actions.setRun(call.id, "done"));
+  }, [call, schedule, set]);
 
   useEffect(() => {
     // Kick the stream off after mount, the way a subscription would.

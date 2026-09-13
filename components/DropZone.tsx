@@ -53,13 +53,13 @@ export function DropZone() {
     if (f) submitFile(f);
   };
 
-  // Straight to the run: the pipeline animates there.
+  // Straight to the run: Home fades out and rises, the run stages its entrance.
   const handoff = (make: () => { id: string }) => {
     setLeaving(true);
     timers.current.push(window.setTimeout(() => {
       const c = make();
-      router.push(`/calls/${c.id}`);
-    }, 150));
+      router.push(`/calls/${c.id}?from=home`);
+    }, 250));
   };
 
   const useRecording = () => {
@@ -81,8 +81,10 @@ export function DropZone() {
   };
 
   return (
-    <div className="text-center transition-opacity duration-150" style={{ opacity: leaving ? 0 : 1 }}>
-      <div className="mb-5"><Segmented value={mode} options={MODES} onChange={setMode} /></div>
+    <div className="text-center motion-safe:transition-[opacity,transform] motion-safe:duration-250" style={{ opacity: leaving ? 0 : 1, transform: leaving ? "translateY(-8px)" : "none", transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
+      <h1 className="text-[22px] font-semibold text-ink">What happened on the call?</h1>
+      <p className="mx-auto mt-2 max-w-[520px] text-[13.5px] text-soft">Drop the recording. Slipstream files it, drafts the follow-up, and goes and finds companies like the one you just spoke to.</p>
+      <div className="mt-7 mb-5"><Segmented value={mode} options={MODES} onChange={setMode} /></div>
 
       {phase.kind === "error" ? (
         <div key="error" className={CARD}>

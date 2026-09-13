@@ -17,7 +17,9 @@ export function RunView({ call }: { call: CallRecord }) {
   const params = useSearchParams();
   const reduced = useReducedMotion();
   const instant = params.get("instant") === "1" || reduced;
-  const run = useRun(call, { instant });
+  const staged = params.get("from") === "home" && !reduced;
+  const run = useRun(call, { instant, startDelay: staged ? 500 : 200 });
+  const enter = (delay: number) => (staged ? { animation: `fade-up 250ms cubic-bezier(0.23,1,0.32,1) ${delay}ms both` } : undefined);
 
   // Transcript highlight: hover from field rows / chips, or a 1.5s click highlight.
   const [hover, setHover] = useState<number | null>(null);
@@ -43,7 +45,8 @@ export function RunView({ call }: { call: CallRecord }) {
     window.setTimeout(() => setOutlined(null), 1200);
   };
 
-  const extractDone = run.steps.find((s) => s.id === "extract")?.status === "done";
+  const extractStatus = run.steps.find((s) => s.id === "extract")?.status;
+  const extractDone = extractStatus === "done" || extractStatus === "waiting";
 
   // The right column is sticky and scrolls internally: its height is the
   // viewport minus the header above the grid (measured) minus 48px.
@@ -81,7 +84,8 @@ export function RunView({ call }: { call: CallRecord }) {
   }, [reduced]);
 
   return (
-    <div style={{ animation: "fade-up 200ms cubic-bezier(0.23,1,0.32,1) both" }}>
+    <div>
+      <div style={enter(0)}>
       <Link href="/calls" className="inline-flex items-center gap-1.5 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
         <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Calls
       </Link>
@@ -103,18 +107,19 @@ export function RunView({ call }: { call: CallRecord }) {
         </div>
         <Button variant="ghost" size="sm" onClick={run.rerun}><RotateCcw className="size-3.5" strokeWidth={1.75} /> Re-run</Button>
       </div>
+      </div>
 
       <div ref={gridRef} className="mt-8 grid grid-cols-[minmax(0,1fr)_440px] gap-10">
-        <section>
+        <section style={enter(120)}>
           <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Transcript</h2>
           <Transcript turns={call.turns} highlight={highlight} />
         </section>
         <section
           ref={columnRef}
           className="run-column sticky top-6 self-start overflow-y-auto pr-3 pb-6"
-          style={{ height: headerHeight ? `calc(100vh - ${headerHeight}px - 48px)` : "calc(100vh - 48px)", overscrollBehavior: "contain" }}
+          style={{ height: headerHeight ? `calc(100vh - ${headerHeight}px - 48px)` : "calc(100vh - 48px)", overscrollBehavior: "contain", ...enter(240) }}
         >
-          <Summary call={call} runId={run.runId} ready={run.phase1Done && call.outcome !== "no_show"} onHighlight={setHover} onJump={jump} onShorterDraft={shorterDraft} />
+          <Summary call={call} runId={run.runId} ready={run.steps.find((s) => s.id === "draft")?.status === "done"} onHighlight={setHover} onJump={jump} onShorterDraft={shorterDraft} />
           <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What Slipstream did</h2>
           <RunTimeline
             call={call}
