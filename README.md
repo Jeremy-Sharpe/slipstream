@@ -36,7 +36,8 @@ The live URL exposes the complete product surface and an executable fixture loop
 3. **The call writes itself into the CRM.** With ElevenLabs configured, a recording is transcribed with Scribe and diarised. The configured reasoning model extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves. The production API currently routes schema-constrained reasoning through OpenRouter to `openai/gpt-5.4`; private loopback Qwen remains a credential-free fallback.
 4. **The follow-up drafts and schedules itself safely.** A follow-up email is generated from the transcript and attached to the deal. Approval is a separate, audited state. Exact approved draft IDs can then join a resumable campaign: a trusted Railway worker claims bounded chunks, Resend receives a stable identity, and each result is confirmed, retried, failed or surfaced for reconciliation. Operators can pause future chunks, while the browser gets status without the delivery token. The current deployment exposes one paused synthetic campaign and stops before delivery.
 5. **The team learns from every conversation.** The analysis view scores calls against a written rubric, shows which moves correlate with won deals, and derives the ideal customer profile from outcome-labelled CRM deals enriched by both call and email history. The canonical fixture cohort proves 12 calls plus one email across 13 deals; the current live profile also includes the paused campaign's provider-neutral email, for two emails total.
-6. **The ICP finds the next customer.** One click turns that profile into ten explicitly fictional `.example` prospects through OpenRouter, embeds and scores them against the won-deal centroid, and prepares grounded outreach. A real Origami v3 adapter remains available when a customer supplies that optional integration.
+6. **Revenue DNA catches every change.** Each ICP is bound to a deterministic fingerprint of the exact CRM evidence and outcomes that produced it. A new win, loss or conversation makes the target visibly stale and blocks the next paid search until the team relearns; existing leads are counted for re-scoring against the new version.
+7. **The ICP finds the next customer.** One click turns that profile into ten explicitly fictional `.example` prospects through OpenRouter, embeds and scores them against the won-deal centroid, and prepares grounded outreach. A real Origami v3 adapter remains available when a customer supplies that optional integration.
 
 ## Architecture
 
@@ -79,7 +80,7 @@ Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector
 | CRM AI add-ons | HubSpot AI, Salesforce Einstein | Assume a clean CRM to begin with, which this user does not have |
 | Live assistants | Cluely and its open-source clones | Generic answers from a screen; no CRM context, no memory of the deal, no downstream action |
 
-Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus Clay plus a RevOps person to stitch them together. A 12-person services firm cannot, and that is the gap.
+Slipstream is the closed loop. Its Revenue DNA gate is the key difference: call tools report on yesterday and lead tools spend against a persona, while Slipstream prevents tomorrow's search from using a target invalidated by today's outcome. Enterprise teams can approximate the rest by paying for Gong plus Clay plus a RevOps person to stitch them together. A 12-person services firm cannot, and that is the gap.
 
 ## Feasibility and value
 

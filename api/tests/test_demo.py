@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from fastapi.testclient import TestClient
@@ -18,6 +19,8 @@ from app.services.demo_leads import (
     demo_job_id,
     generate_demo_leads,
 )
+from app.services.fixture_history import load_fixture_history
+from app.services.icp import cohort_revision
 from app.services.icp_leads_store import InMemoryIcpLeadsStore
 
 
@@ -34,6 +37,7 @@ def _profile() -> StoredIcpProfile:
         confidence=0.8,
         origami_brief="Find professional-services operations managers.",
         source_summary=source,
+        cohort_revision="a" * 64,
     )
     return StoredIcpProfile(
         id="profile-demo",
@@ -130,10 +134,14 @@ def test_current_profile_match_requires_exact_models_and_inventory() -> None:
     )
     settings = Settings(_env_file=None, openrouter_api_key="openrouter-test")
 
-    assert _profile_is_current(_profile(), inventory, settings) is True
+    assert _profile_is_current(_profile(), inventory, settings, "a" * 64) is True
     assert _profile_is_current(
-        _profile().model_copy(update={"model": "another/model"}), inventory, settings
+        _profile().model_copy(update={"model": "another/model"}),
+        inventory,
+        settings,
+        "a" * 64,
     ) is False
+    assert _profile_is_current(_profile(), inventory, settings, "b" * 64) is False
 
 
 def test_generated_demo_leads_are_obviously_fictional_and_reused(monkeypatch: Any) -> None:
@@ -205,9 +213,13 @@ def test_demo_evidence_returns_bounded_safe_latest_profile_proof() -> None:
     settings = Settings(_env_file=None, environment="test", openrouter_api_key="test")
     app = create_app(settings)
     store = app.state.icp_leads_store
+    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    current_revision = cohort_revision(store.list_icp_deals())
     profile = store.insert_icp_profile(
         version=1,
-        profile=_profile().profile,
+        profile=_profile().profile.model_copy(
+            update={"cohort_revision": current_revision}
+        ),
         model=settings.effective_reasoning_model,
         embedding_model=settings.effective_embedding_model,
     )
@@ -246,6 +258,9 @@ def test_demo_evidence_returns_bounded_safe_latest_profile_proof() -> None:
     assert payload["no_delivery_coordinates"] is True
     assert payload["models"] == [settings.effective_reasoning_model]
     assert payload["delivery_enabled"] is False
+    assert payload["revenue_dna"]["status"] == "current"
+    assert payload["revenue_dna"]["leads_on_profile"] == 10
+    assert payload["revenue_dna"]["leads_needing_rescore"] == 0
     assert len(payload["sample_leads"]) == 3
     assert all("embedding" not in lead for lead in payload["sample_leads"])
 

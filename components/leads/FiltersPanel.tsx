@@ -261,7 +261,7 @@ export function FiltersPanel({ state, onChange, brief, onHide }: { state: Filter
 
           <Section title="Result limits" open={!!open.limits} onToggle={() => toggle("limits")}>
             <div className="flex flex-col gap-5 px-[22px] pb-[22px]">
-              <NumberField label="Total" help="Start at 10 leads per search; Origami credits are spent per row." value={state.total} min={1} onChange={(n) => patch({ total: n })} />
+              <NumberField label="Total" help="The safe OpenRouter demo generates exactly 10 fictional leads per run." value={state.total} min={1} onChange={(n) => patch({ total: n })} />
               <NumberField label="Leads per company" value={state.perCompany} min={1} onChange={(n) => patch({ perCompany: n })} />
             </div>
           </Section>

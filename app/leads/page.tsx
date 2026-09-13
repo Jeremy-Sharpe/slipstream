@@ -90,7 +90,7 @@ export default function LeadsPage() {
   const [source, setSource] = useState<"checking" | "evaluation" | "live">("checking");
   const [leadProvider, setLeadProvider] = useState<"evaluation" | "origami" | "openrouter_demo">("evaluation");
   const [notice, setNotice] = useState("Showing 12 labelled evaluation leads while checking the deployed API.");
-  const [integrations, setIntegrations] = useState<{ supabase: boolean | null; origami: boolean | null }>({ supabase: null, origami: null });
+  const [integrations, setIntegrations] = useState<{ supabase: boolean | null; origami: boolean | null; openrouter: boolean | null }>({ supabase: null, origami: null, openrouter: null });
   const mounted = useRef(true);
   const loadGeneration = useRef(0);
   const searchController = useRef<AbortController | null>(null);
@@ -107,6 +107,7 @@ export default function LeadsPage() {
         setIntegrations({
           supabase: readyResult.value.integrations.supabase ?? null,
           origami: readyResult.value.integrations.origami ?? null,
+          openrouter: readyResult.value.integrations.openrouter ?? null,
         });
       }
       const profile = icpResult.status === "fulfilled" ? icpResult.value : null;
@@ -181,7 +182,7 @@ export default function LeadsPage() {
     } catch (error) {
       if (!mounted.current || isAbort(error)) return;
       const detail = error instanceof ApiError && error.status === 503
-        ? "Origami or model credentials are not configured on the deployed API"
+        ? "The configured lead-generation model is unavailable on the deployed API"
         : error instanceof Error ? error.message : "Live lead search failed";
       setNotice(`${detail}. ${source === "live" ? "Keeping the previously loaded live rows." : "Keeping the labelled evaluation rows."}`);
     } finally {
@@ -295,7 +296,7 @@ export default function LeadsPage() {
           setBrief(value);
           setNotice("Brief edited for local preview only. Live search uses the latest ICP brief stored by the backend.");
         }}
-        integrations={integrations}
+        integrations={{ supabase: integrations.supabase, openrouter: integrations.openrouter }}
       />
       <div className="flex min-h-0 flex-1 flex-col bg-background">
         <div role="status" aria-atomic="true" className="mx-[22px] mt-4 rounded-md border border-line bg-card px-4 py-3 text-sm text-ink">

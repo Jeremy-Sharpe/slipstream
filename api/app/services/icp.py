@@ -1,3 +1,4 @@
+import hashlib
 import json
 import math
 import re
@@ -10,6 +11,7 @@ from app.schemas.icp import (
     DealRecord,
     IcpEvidenceInventory,
     IcpEvidenceItem,
+    IcpFreshness,
     IcpProfile,
     IcpSourceDealRef,
     IcpSourceSummary,
@@ -59,7 +61,10 @@ def derive_icp(
         schema=IcpProfile,
     )
     profile = _ground_profile(reasoning.output, deals).model_copy(
-        update={"source_summary": _source_summary(deals)}
+        update={
+            "source_summary": _source_summary(deals),
+            "cohort_revision": cohort_revision(deals),
+        }
     )
     stored = store.insert_icp_profile(
         version=store.max_icp_version() + 1,
@@ -88,31 +93,87 @@ def derive_icp(
     return _with_source_deals(stored, won)
 
 
-def with_source_deals(
-    store: IcpLeadsStore, profile: StoredIcpProfile
-) -> StoredIcpProfile:
+def cohort_revision(deals: list[DealRecord]) -> str:
+    """Fingerprint the CRM evidence that can change the target customer profile."""
+    payload = [
+        {
+            "id": str(deal.id),
+            "company": deal.company_name,
+            "industry": deal.industry,
+            "employee_count": deal.employee_count,
+            "contact_role": deal.contact_role,
+            "stage": deal.stage,
+            "outcome": deal.outcome,
+            "amount": deal.amount,
+            "summary": deal.summary,
+            "signals": deal.metadata.get("icp_signals", {}),
+            "interactions": [item.model_dump(mode="json") for item in deal.interactions],
+        }
+        for deal in sorted(deals, key=lambda item: str(item.id))
+    ]
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def icp_freshness(
+    store: IcpLeadsStore,
+    profile: StoredIcpProfile,
+    *,
+    include_demo: bool = False,
+) -> IcpFreshness:
+    deals = _fit_model_budget(store.list_icp_deals(include_demo=include_demo))
+    current_summary = _source_summary(deals)
+    derived_summary = profile.profile.source_summary
+    derived_revision = profile.profile.cohort_revision
+    current_revision = cohort_revision(deals)
+    all_leads = store.list_leads()
+    lead_count = sum(str(lead.icp_profile_id) == str(profile.id) for lead in all_leads)
+    if derived_revision is None:
+        freshness = "legacy"
+        reason = (
+            "This profile predates cohort fingerprints. Relearn once to start continuous "
+            "change detection."
+        )
+    elif derived_revision == current_revision:
+        freshness = "current"
+        reason = "Revenue DNA is current: every eligible CRM outcome is reflected in this ICP."
+    else:
+        freshness = "stale"
+        reason = "New CRM evidence changed the cohort. Relearn before sourcing the next lead batch."
+    return IcpFreshness(
+        profile_id=profile.id,
+        profile_version=profile.version,
+        status=freshness,
+        derived_cohort_revision=derived_revision,
+        current_cohort_revision=current_revision,
+        source_summary=current_summary,
+        deals_added=current_summary.deals - (derived_summary.deals if derived_summary else 0),
+        outcome_labels_added=current_summary.outcome_labelled
+        - (derived_summary.outcome_labelled if derived_summary else 0),
+        leads_on_profile=lead_count,
+        leads_needing_rescore=sum(
+            freshness == "stale" or str(lead.icp_profile_id) != str(profile.id)
+            for lead in all_leads
+        ),
+        reason=reason,
+    )
+
+
+def with_source_deals(store: IcpLeadsStore, profile: StoredIcpProfile) -> StoredIcpProfile:
     cited_ids = _cited_deal_ids(profile)
     if not cited_ids:
         return profile.model_copy(update={"source_deals": []})
-    deals = store.source_deals_for_profile(
-        str(profile.id), deal_ids=set(cited_ids)
-    )
+    deals = store.source_deals_for_profile(str(profile.id), deal_ids=set(cited_ids))
     return _with_source_deals(profile, deals)
 
 
 def _cited_deal_ids(profile: StoredIcpProfile) -> list[str]:
     return list(
-        dict.fromkeys(
-            str(deal_id)
-            for item in profile.evidence
-            for deal_id in item.deal_ids
-        )
+        dict.fromkeys(str(deal_id) for item in profile.evidence for deal_id in item.deal_ids)
     )[:MAX_SOURCE_DEAL_REFS]
 
 
-def _with_source_deals(
-    profile: StoredIcpProfile, deals: list[DealRecord]
-) -> StoredIcpProfile:
+def _with_source_deals(profile: StoredIcpProfile, deals: list[DealRecord]) -> StoredIcpProfile:
     cited_ids = _cited_deal_ids(profile)
     source_by_id = {str(deal.id): deal for deal in deals}
     refs = []
@@ -140,8 +201,7 @@ def _with_source_deals(
             IcpSourceDealRef(
                 deal_id=deal_id,
                 company_name=(
-                    _valid_signal_text(deal.company_name, MAX_SOURCE_COMPANY_CHARS)
-                    or "Won deal"
+                    _valid_signal_text(deal.company_name, MAX_SOURCE_COMPANY_CHARS) or "Won deal"
                 ),
                 call_ids=call_ids,
             )
@@ -149,9 +209,7 @@ def _with_source_deals(
     return profile.model_copy(update={"source_deals": refs})
 
 
-def evidence_inventory(
-    store: IcpLeadsStore, *, include_demo: bool = False
-) -> IcpEvidenceInventory:
+def evidence_inventory(store: IcpLeadsStore, *, include_demo: bool = False) -> IcpEvidenceInventory:
     deals = _fit_model_budget(store.list_icp_deals(include_demo=include_demo))
     summary = _source_summary(deals)
     won_deals = sum(deal.outcome == "won" for deal in deals)
@@ -189,25 +247,28 @@ def _centroid(vectors: list[list[float]]) -> list[float]:
 
 def _deal_summary_text(deal: DealRecord) -> str:
     signals = deal.metadata.get("icp_signals", {})
-    return _bounded(" ".join(
-        part
-        for part in [
-            f"Company: {deal.company_name}",
-            f"Industry: {deal.industry or signals.get('industry')}",
-            f"Headcount: {deal.employee_count or signals.get('headcount_band')}",
-            f"Location: {deal.location}",
-            f"Role: {deal.contact_role or signals.get('role')}",
-            f"Trigger: {deal.metadata.get('trigger') or signals.get('trigger')}",
-            f"Outcome: {deal.outcome}",
-            f"Amount: {deal.amount}",
-            f"Summary: {deal.summary}",
-            *[
-                f"{item.channel.title()} {item.direction}: {item.content}"
-                for item in deal.interactions
-            ],
-        ]
-        if part and not part.endswith("None")
-    ), 4000)
+    return _bounded(
+        " ".join(
+            part
+            for part in [
+                f"Company: {deal.company_name}",
+                f"Industry: {deal.industry or signals.get('industry')}",
+                f"Headcount: {deal.employee_count or signals.get('headcount_band')}",
+                f"Location: {deal.location}",
+                f"Role: {deal.contact_role or signals.get('role')}",
+                f"Trigger: {deal.metadata.get('trigger') or signals.get('trigger')}",
+                f"Outcome: {deal.outcome}",
+                f"Amount: {deal.amount}",
+                f"Summary: {deal.summary}",
+                *[
+                    f"{item.channel.title()} {item.direction}: {item.content}"
+                    for item in deal.interactions
+                ],
+            ]
+            if part and not part.endswith("None")
+        ),
+        4000,
+    )
 
 
 def _deal_payload(deal: DealRecord) -> dict[str, Any]:
@@ -272,9 +333,7 @@ def _bounded(value: object, limit: int) -> str | None:
 
 def _source_summary(deals: list[DealRecord]) -> IcpSourceSummary:
     sources = {
-        (item.channel, item.source_external_id)
-        for deal in deals
-        for item in deal.interactions
+        (item.channel, item.source_external_id) for deal in deals for item in deal.interactions
     }
     return IcpSourceSummary(
         deals=len(deals),
@@ -362,8 +421,7 @@ def _ground_evidence(
             [
                 str(deal.id)
                 for deal in won
-                if deal.employee_count is not None
-                or _deal_headcount_band(deal) is not None
+                if deal.employee_count is not None or _deal_headcount_band(deal) is not None
             ],
         ),
         (
@@ -396,9 +454,7 @@ def _supporting_deal_ids(
         if not isinstance(signals, dict):
             signals = {}
         primary = getattr(deal, field) if field else deal.metadata.get(signal)
-        value = _valid_signal_text(primary, limit) or _valid_signal_text(
-            signals.get(signal), limit
-        )
+        value = _valid_signal_text(primary, limit) or _valid_signal_text(signals.get(signal), limit)
         if value is not None and value.casefold() in retained:
             ids.append(str(deal.id))
     return ids
@@ -411,9 +467,7 @@ def _deal_headcount_band(deal: DealRecord) -> str | None:
     )
 
 
-def _won_values(
-    deals: list[DealRecord], field: str | None, signal: str
-) -> list[str]:
+def _won_values(deals: list[DealRecord], field: str | None, signal: str) -> list[str]:
     values: list[object] = []
     limit = 500 if signal == "trigger" else 120
     for deal in deals:
@@ -447,10 +501,7 @@ def _won_headcount_band(deals: list[DealRecord]) -> str:
         band = unique_bands[0]
         if all(
             (deal_band == band or deal.employee_count is not None)
-            and (
-                deal.employee_count is None
-                or _headcount_in_band(deal.employee_count, band)
-            )
+            and (deal.employee_count is None or _headcount_in_band(deal.employee_count, band))
             for deal, deal_band in zip(deals, deal_bands, strict=True)
         ):
             return band

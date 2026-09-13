@@ -133,6 +133,7 @@ export type ApiIcpProfile = {
     confidence: number;
     origami_brief: string;
     source_summary?: { deals: number; calls: number; emails: number; outcome_labelled: number } | null;
+    cohort_revision?: string | null;
   };
 };
 
@@ -145,6 +146,20 @@ export type ApiIcpEvidenceInventory = {
   contrast_deals: number;
   active_deals: number;
   ready_to_derive: boolean;
+};
+
+export type ApiIcpFreshness = {
+  profile_id: string;
+  profile_version: number;
+  status: "current" | "stale" | "legacy";
+  derived_cohort_revision: string | null;
+  current_cohort_revision: string;
+  source_summary: { deals: number; calls: number; emails: number; outcome_labelled: number };
+  deals_added: number;
+  outcome_labels_added: number;
+  leads_on_profile: number;
+  leads_needing_rescore: number;
+  reason: string;
 };
 
 export type ApiLead = {
@@ -364,6 +379,34 @@ function parseIcpEvidenceInventory(value: unknown): ApiIcpEvidenceInventory {
     || inventory.ready_to_derive !== (inventory.won_deals >= 2)
   ) throw new ApiError("Slipstream API returned inconsistent evidence inventory", 502);
   return inventory;
+}
+
+function parseIcpFreshness(value: unknown): ApiIcpFreshness {
+  if (!isRecord(value) || !isRecord(value.source_summary)) {
+    throw new ApiError("Slipstream API returned malformed Revenue DNA freshness", 502);
+  }
+  const revision = /^[0-9a-f]{64}$/;
+  const counts = [
+    value.profile_version,
+    value.source_summary.deals,
+    value.source_summary.calls,
+    value.source_summary.emails,
+    value.source_summary.outcome_labelled,
+    value.leads_on_profile,
+    value.leads_needing_rescore,
+  ];
+  if (
+    typeof value.profile_id !== "string" ||
+    !Number.isInteger(value.profile_version) || Number(value.profile_version) < 1 ||
+    !["current", "stale", "legacy"].includes(String(value.status)) ||
+    !(value.derived_cohort_revision === null || typeof value.derived_cohort_revision === "string" && revision.test(value.derived_cohort_revision)) ||
+    typeof value.current_cohort_revision !== "string" || !revision.test(value.current_cohort_revision) ||
+    !counts.every((count) => Number.isSafeInteger(count) && Number(count) >= 0) ||
+    !Number.isInteger(value.deals_added) ||
+    !Number.isInteger(value.outcome_labels_added) ||
+    typeof value.reason !== "string"
+  ) throw new ApiError("Slipstream API returned malformed Revenue DNA freshness", 502);
+  return value as ApiIcpFreshness;
 }
 
 function nullableString(value: unknown): value is string | null {
@@ -586,6 +629,15 @@ export async function getLatestIcp(signal?: AbortSignal): Promise<ApiIcpProfile 
 
 export async function getIcpEvidenceInventory(signal?: AbortSignal): Promise<ApiIcpEvidenceInventory> {
   return parseIcpEvidenceInventory(await request<unknown>("/icp/evidence", { signal }));
+}
+
+export async function getIcpFreshness(signal?: AbortSignal): Promise<ApiIcpFreshness | null> {
+  try {
+    return parseIcpFreshness(await request<unknown>("/icp/freshness", { signal }));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
 }
 
 export async function getLeads(icpProfileId?: string, signal?: AbortSignal): Promise<ApiLead[]> {

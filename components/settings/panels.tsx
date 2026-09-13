@@ -271,7 +271,7 @@ export function ApiKeysPanel() {
 const NOTIFICATIONS: { key: string; label: string; help: string }[] = [
   { key: "call_processed", label: "New call processed", help: "When a transcript, its CRM fields and scorecard are ready to review." },
   { key: "draft_ready", label: "Draft ready to approve", help: "A follow-up or outreach draft is waiting for you." },
-  { key: "search_finished", label: "Lead search finished", help: "Origami returned and scored a new batch of leads." },
+  { key: "search_finished", label: "Lead search finished", help: "The sourcing provider returned and scored a new batch of leads." },
 ];
 
 export function NotificationsPanel() {

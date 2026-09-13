@@ -29,7 +29,7 @@ export function TopBar({ searching, disabled, onRunSearch, brief, onBriefChange,
   onRunSearch: () => void;
   brief: string;
   onBriefChange: (brief: string) => void;
-  integrations: { supabase: boolean | null; origami: boolean | null };
+  integrations: { supabase: boolean | null; openrouter: boolean | null };
 }) {
   const router = useRouter();
   const [briefOpen, setBriefOpen] = useState(false);
@@ -84,7 +84,7 @@ export function TopBar({ searching, disabled, onRunSearch, brief, onBriefChange,
           <DropdownMenuContent align="end" className="w-60">
             <DropdownMenuGroup>
               <DropdownMenuLabel>Pipeline</DropdownMenuLabel>
-              {([["Supabase", integrations.supabase], ["Origami", integrations.origami]] as const).map(([name, connected]) => (
+              {([["OpenRouter", integrations.openrouter], ["Supabase", integrations.supabase]] as const).map(([name, connected]) => (
                 <DropdownMenuItem key={name} disabled className="text-muted-foreground">
                   <span className={`size-2 rounded-full ${connected === true ? "bg-primary" : "bg-inactive"}`} />
                   <span className="text-foreground">{name}</span>
@@ -122,7 +122,7 @@ export function TopBar({ searching, disabled, onRunSearch, brief, onBriefChange,
       <Dialog open={briefOpen} onOpenChange={setBriefOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Origami brief</DialogTitle>
+            <DialogTitle>Revenue DNA brief</DialogTitle>
             <DialogDescription>Preview the current ICP brief. Live searches use the latest brief stored by the backend.</DialogDescription>
           </DialogHeader>
           <textarea

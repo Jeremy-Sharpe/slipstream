@@ -9,11 +9,12 @@ from app.schemas.icp import (
     FixtureHistoryCounts,
     IcpDeriveRequest,
     IcpEvidenceInventory,
+    IcpFreshness,
     StoredIcpProfile,
 )
 from app.services import fixture_history
 from app.services.dependencies import get_embedding_client, get_settings, get_store
-from app.services.icp import derive_icp, evidence_inventory, with_source_deals
+from app.services.icp import derive_icp, evidence_inventory, icp_freshness, with_source_deals
 from app.services.icp_leads_store import IcpLeadsStore
 
 router = APIRouter(prefix="/icp", tags=["icp"])
@@ -67,6 +68,17 @@ def latest(store: StoreDep) -> StoredIcpProfile:
             detail="No ready ICP profile found",
         )
     return with_source_deals(store, profile)
+
+
+@router.get("/freshness", response_model=IcpFreshness)
+def freshness(store: StoreDep, include_demo: bool = False) -> IcpFreshness:
+    profile = store.latest_icp_profile()
+    if profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No ready ICP profile found",
+        )
+    return icp_freshness(store, profile, include_demo=include_demo)
 
 
 def _require(settings: Settings, integration: str) -> None:

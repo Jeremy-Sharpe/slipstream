@@ -4,6 +4,7 @@ from pathlib import Path
 
 from app.core.config import Settings
 from app.schemas.icp import DealRecord, IcpProfile, InteractionEvidence, StoredIcpProfile
+from app.schemas.leads import LeadIn
 from app.services.crm_mirror import mirror_interaction
 from app.services.fixture_history import load_fixture_history
 from app.services.icp import (
@@ -15,6 +16,7 @@ from app.services.icp import (
     _with_source_deals,
     derive_icp,
     evidence_inventory,
+    icp_freshness,
     won_centroid,
 )
 from app.services.icp_leads_store import MAX_ICP_DEALS, InMemoryIcpLeadsStore
@@ -63,6 +65,8 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
 
     assert profile.version == 1
+    assert profile.profile.cohort_revision is not None
+    assert "cohort_revision" not in IcpProfile.model_json_schema()["properties"]
     assert profile.profile.source_summary.deals == 12
     assert profile.profile.source_summary.calls == 12
     assert profile.profile.source_summary.emails == 1
@@ -87,12 +91,10 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     ]
     won_ids = {str(deal.id) for deal in store.list_icp_deals() if deal.outcome == "won"}
     assert all(
-        set(item.deal_ids).issubset(won_ids) and item.deal_ids
-        for item in profile.profile.evidence
+        set(item.deal_ids).issubset(won_ids) and item.deal_ids for item in profile.profile.evidence
     )
     assert all(
-        "Sam" not in item.why and "Jordan" not in item.why
-        for item in profile.profile.evidence
+        "Sam" not in item.why and "Jordan" not in item.why for item in profile.profile.evidence
     )
     assert len(store.source_deals_for_profile(str(profile.id))) == 5
     assert len(profile.source_deals) == 5
@@ -120,6 +122,40 @@ def test_derive_icp_excludes_demo_and_writes_source_deals() -> None:
     source_after = store.source_deals_for_profile(str(profile.id))[0]
     assert source_after.outcome == "won"
     assert source_after.embedding == source_before.embedding
+
+
+def test_revenue_dna_detects_new_outcome_and_marks_existing_leads_for_rescore() -> None:
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, Path(__file__).resolve().parents[2] / "fixtures")
+    profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
+    store.upsert_lead(
+        LeadIn(
+            company_name="Fictional ICP Match",
+            origami_row_id="demo:revenue-dna",
+            icp_profile_id=profile.id,
+        )
+    )
+
+    current = icp_freshness(store, profile)
+
+    assert current.status == "current"
+    assert current.leads_on_profile == 1
+    assert current.leads_needing_rescore == 0
+    open_deal = next(deal for deal in store.list_icp_deals() if deal.outcome == "open")
+    store.upsert_deal(
+        {
+            "crm_external_id": open_deal.crm_external_id,
+            "stage": "closed_won",
+            "outcome": "won",
+        }
+    )
+
+    stale = icp_freshness(store, profile)
+
+    assert stale.status == "stale"
+    assert stale.outcome_labels_added == 1
+    assert stale.leads_needing_rescore == 1
+    assert stale.current_cohort_revision != stale.derived_cohort_revision
 
 
 def test_derive_returns_source_refs_without_a_post_commit_store_read() -> None:
@@ -304,9 +340,7 @@ def test_ground_profile_reconciles_headcount_band_across_every_win() -> None:
     unknown = contradictory.model_copy(update={"employee_count": None})
     stale_bands = [
         first,
-        contradictory.model_copy(
-            update={"metadata": {"icp_signals": {"headcount_band": "25-80"}}}
-        ),
+        contradictory.model_copy(update={"metadata": {"icp_signals": {"headcount_band": "25-80"}}}),
     ]
 
     assert _ground_profile(base, [first, contradictory]).headcount_band == "42-500"
@@ -320,9 +354,7 @@ def test_ground_profile_reconciles_headcount_band_across_every_win() -> None:
                 "metadata": {"icp_signals": {"headcount_band": "Under 80"}},
             }
         ),
-        unknown.model_copy(
-            update={"metadata": {"icp_signals": {"headcount_band": "under-080"}}}
-        ),
+        unknown.model_copy(update={"metadata": {"icp_signals": {"headcount_band": "under-080"}}}),
     ]
     assert _ground_profile(base, equivalent_bands).headcount_band == "under-80"
 

@@ -3,6 +3,7 @@ from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic.json_schema import SkipJsonSchema
 
 JsonDict = dict[str, Any]
 
@@ -46,6 +47,9 @@ class IcpProfile(BaseModel):
     confidence: float = Field(ge=0, le=1)
     origami_brief: str
     source_summary: IcpSourceSummary | None = None
+    cohort_revision: SkipJsonSchema[str | None] = Field(
+        default=None, pattern=r"^[0-9a-f]{64}$"
+    )
 
 
 class StoredIcpProfile(BaseModel):
@@ -65,6 +69,20 @@ class StoredIcpProfile(BaseModel):
 
 class IcpDeriveRequest(BaseModel):
     include_demo: bool = False
+
+
+class IcpFreshness(BaseModel):
+    profile_id: UUID | str
+    profile_version: int = Field(ge=1)
+    status: Literal["current", "stale", "legacy"]
+    derived_cohort_revision: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    current_cohort_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_summary: IcpSourceSummary
+    deals_added: int
+    outcome_labels_added: int
+    leads_on_profile: int = Field(ge=0)
+    leads_needing_rescore: int = Field(ge=0)
+    reason: str
 
 
 class FixtureHistoryCounts(BaseModel):

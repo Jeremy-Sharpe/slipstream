@@ -219,6 +219,9 @@ export async function runSmoke(rawOptions = {}) {
   assert(demoEvidence?.status === "verified", "demo evidence did not report verified");
   assert(demoEvidence?.lead_provider === "openrouter_demo", "demo evidence returned the wrong lead provider");
   assert(demoEvidence?.lead_count === 10, "demo evidence did not prove exactly ten current leads");
+  assert(demoEvidence?.revenue_dna?.status === "current", "demo evidence Revenue DNA is not current");
+  assert(demoEvidence?.revenue_dna?.leads_on_profile === 10, "demo evidence did not bind ten leads to the current Revenue DNA version");
+  assert(demoEvidence?.revenue_dna?.leads_needing_rescore === 0, "demo evidence unexpectedly reports stale lead scores");
   assert(demoEvidence?.all_fictional === true, "demo evidence includes an unlabelled lead");
   assert(demoEvidence?.all_reserved_domains === true, "demo evidence includes a non-reserved domain");
   assert(demoEvidence?.no_delivery_coordinates === true, "demo evidence includes delivery coordinates");
