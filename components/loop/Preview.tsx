@@ -14,7 +14,7 @@ const money = (n: number) => `$${n.toLocaleString("en-AU")}`;
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 function Box({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mt-3 rounded-xl bg-white p-3.5 text-[13.5px] leading-5 text-ink", className)}>{children}</div>;
+  return <div className={cn("rounded-xl bg-white p-3.5 text-[13.5px] leading-5 text-ink", className)}>{children}</div>;
 }
 
 export function Preview({ n }: { n: string }) {
