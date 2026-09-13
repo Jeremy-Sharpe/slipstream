@@ -2,23 +2,26 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { cn } from "@/components/ui";
 import type { Loop } from "@/lib/loop";
 import { Beat } from "./Beat";
 
-/* The Revenue loop: the whole business loop as one rail, every beat linked to
-   its evidence. The runtime strip and every number in the beats come from the
-   API; the value tiles are stated scenarios, not results. */
+/* The Revenue loop: the whole business loop as one rail, every beat linked
+   to its evidence. Reads like the run page's "What Slipstream did", static.
+   Every number in the beats and the runtime line comes from the API; the
+   figures in numbers are stated scenarios, not results. */
 
 export function LoopView({ loop }: { loop: Loop }) {
-  const [open, setOpen] = useState<string | null>(loop.beats[0].n);
+  const { beats } = loop;
+  const [open, setOpen] = useState<string | null>(beats[0].n);
   const errors = [loop.errors.readiness, loop.errors.evidence, loop.errors.leads].filter((item): item is string => item !== null);
 
   return (
-    <div className="mx-auto max-w-[880px]">
-      <div className="flex items-end justify-between gap-6">
+    <div>
+      <div className="flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-[22px] font-semibold text-ink">Revenue loop</h1>
-          <p className="mt-1 text-[13.5px] text-soft">One call becomes CRM truth, a follow-up, team intelligence, an ICP, and the next campaign. Every step below links to its evidence.</p>
+          <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">Revenue loop</h1>
+          <p className="mt-2 text-[14px] text-soft">One call becomes CRM truth, a follow-up, team intelligence, an ICP, and the next campaign. Every step below links to its evidence.</p>
         </div>
         <Link
           href={`${loop.demoHref}?from=home`}
@@ -28,18 +31,26 @@ export function LoopView({ loop }: { loop: Loop }) {
         </Link>
       </div>
 
-      <section className="mt-8 rounded-2xl bg-surface-2 p-5">
-        <dl className="grid grid-cols-4 gap-x-6">
-          {loop.runtime.map((r) => (
-            <div key={r.label} className="min-w-0">
-              <dt className="text-[12px] text-soft">{r.label}</dt>
-              <dd className="mt-0.5 truncate text-[14px] tabular-nums text-ink" title={r.value}>{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-4 text-[12px] text-faint">{loop.runtimeNote}</p>
-        {loop.runtimeCaveat && <p className="mt-1 text-[12px] text-faint">{loop.runtimeCaveat}</p>}
-      </section>
+      {/* The loop strip: seven numbered circles on a hairline; the open beat in tangerine. */}
+      <ol className="mt-10 flex items-center" aria-label="Beats">
+        {beats.map((b, i) => (
+          <li key={b.n} className="flex items-center">
+            <button
+              type="button"
+              aria-label={`${b.verb}: ${b.title}`}
+              aria-current={open === b.n ? "step" : undefined}
+              onClick={() => setOpen(b.n)}
+              className={cn(
+                "flex size-6 items-center justify-center rounded-full text-[11px] font-medium tabular-nums transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+                open === b.n ? "bg-accent text-accent-ink" : "bg-ink text-white hover:bg-[#2f3040]",
+              )}
+            >
+              {i + 1}
+            </button>
+            {i < beats.length - 1 && <span aria-hidden className="h-px w-10 bg-line" />}
+          </li>
+        ))}
+      </ol>
 
       {errors.length > 0 && (
         <ul className="mt-3 flex flex-col gap-1">
@@ -49,25 +60,21 @@ export function LoopView({ loop }: { loop: Loop }) {
         </ul>
       )}
 
-      <ol className="mt-10">
-        {loop.beats.map((b, i) => (
-          <Beat key={b.n} beat={b} expanded={open === b.n} onToggle={() => setOpen(open === b.n ? null : b.n)} last={i === loop.beats.length - 1} />
+      <ol className="mt-6">
+        {beats.map((b, i) => (
+          <Beat key={b.n} beat={b} expanded={open === b.n} onToggle={() => setOpen(open === b.n ? null : b.n)} last={i === beats.length - 1} />
         ))}
       </ol>
 
-      <section className="mt-12">
-        <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What it is worth</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {loop.value.map((v) => (
-            <div key={v.figure} className="rounded-xl border border-line bg-white p-4">
-              <p className="text-[20px] font-semibold tracking-[-0.02em] tabular-nums text-ink">{v.figure}</p>
-              <p className="mt-1 text-[13.5px] text-soft">{v.note}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <p className="mt-10 text-[13.5px] text-soft">
+        In numbers, illustrative · {loop.value.map((v) => v.figure).join(" · ")}
+      </p>
+      <p className="mt-1 text-[12px] text-faint">{loop.value.map((v) => v.note).join(" ")} Scenarios from these assumptions, not measured results.</p>
 
-      <p className="mt-10 text-[12px] text-faint">This page navigates existing evidence. It does not simulate provider calls or send email. The three figures above are scenarios from the stated assumptions, not measured results.</p>
+      <p className="mt-4 flex items-center gap-2 text-[13px] text-soft">
+        <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-ink" />
+        <span>{loop.runtimeLine}</span>
+      </p>
     </div>
   );
 }

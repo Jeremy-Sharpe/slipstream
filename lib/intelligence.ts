@@ -16,9 +16,7 @@ import { fixtureConversationId, getFixtures, type ApiFixtureSummary } from "@/li
 // backwards from the won deals, and the behaviours behind them taken from the
 // scorecards. Every number below is computed from a response, never a constant.
 
-export type Tile = { label: string; value: string; line: string };
-
-export type Quote = { callId: string; href: string; company: string; turn: number; text: string };
+export type Quote = { callId: string; href: string; company: string; speaker: string; turn: number; text: string };
 
 export type Pattern = {
   behaviour: string;
@@ -34,6 +32,8 @@ export type IcpRow = {
   attribute: string;
   label: string;
   value: string;
+  /** The counted reason the model gave for this attribute. */
+  why: string;
   deals: { id: string; company: string; href: string }[];
 };
 
@@ -56,11 +56,22 @@ export type Provenance = {
   profileCreatedAt: string | null;
 };
 
+export type Outcome = (typeof SCORED_OUTCOMES)[number];
+
+export type HistoryStats = {
+  calls: number;
+  emails: number | null;
+  outcomes: Record<Outcome, number>;
+  reps: { rep: string; calls: number }[];
+};
+
 export type Intelligence = {
-  tiles: Tile[];
+  stats: HistoryStats;
   patterns: Pattern[];
   coachingFocus: string[];
   coachingSource: "playbook" | "scorecards" | null;
+  /** The rep whose numbers say the coaching is for them; null until something is scored. */
+  coachRep: string | null;
   triggers: Trigger[];
   icp: IcpView | null;
   provenance: Provenance;
@@ -75,7 +86,6 @@ const SCORED_OUTCOMES = ["won", "stalled", "lost", "no_show"] as const;
 
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 const pct = (x: number) => `${Math.round(x * 100)}%`;
-const firstName = (name: string) => name.split(" ")[0];
 const reason = (error: unknown) => (error instanceof Error ? error.message : "Request failed");
 
 const ATTRIBUTE_LABELS: Record<string, string> = {
@@ -118,50 +128,16 @@ async function scorecardsFor(fixtures: ApiFixtureSummary[]): Promise<{ scorecard
   return { scorecards, missing, error };
 }
 
-function buildTiles(scorecards: ApiScorecard[], fixtures: ApiFixtureSummary[]): Tile[] {
-  const labelled = scorecards.filter((card) => card.outcome !== null);
-  const won = labelled.filter((card) => card.outcome === "won");
-  const other = labelled.filter((card) => card.outcome !== "won");
-  // The fallback labels describe the same history the ICP is derived from: the demo call is not part of it.
+function buildStats(fixtures: ApiFixtureSummary[], profile: ApiIcpProfile | null, inventory: ApiIcpEvidenceInventory | null): HistoryStats {
+  // The history the ICP is derived from: the demo call is not part of it.
   const history = fixtures.filter((fixture) => !fixture.demo);
-  const fixtureWon = history.filter((fixture) => fixture.outcome === "won");
-
-  const counts = Object.fromEntries(SCORED_OUTCOMES.map((outcome) => [outcome, labelled.filter((card) => card.outcome === outcome).length]));
-  const byRep = [...new Set(scorecards.map((card) => card.rep))].map((rep) => `${firstName(rep)} ${scorecards.filter((card) => card.rep === rep).length}`);
-
-  const analysed: Tile = {
-    label: "Calls analysed",
-    value: String(scorecards.length),
-    line: scorecards.length
-      ? byRep.join(" · ")
-      : `${history.length} calls in the history, none scored yet`,
+  const reps = [...new Set(history.map((fixture) => fixture.rep))].map((rep) => ({ rep, calls: history.filter((fixture) => fixture.rep === rep).length }));
+  return {
+    calls: history.length,
+    emails: profile?.profile.source_summary?.emails ?? inventory?.emails ?? null,
+    outcomes: Object.fromEntries(SCORED_OUTCOMES.map((outcome) => [outcome, history.filter((fixture) => fixture.outcome === outcome).length])) as Record<Outcome, number>,
+    reps,
   };
-
-  const winRate: Tile = labelled.length
-    ? {
-        label: "Win rate",
-        value: pct(won.length / labelled.length),
-        line: `${counts.won} won · ${counts.stalled} stalled · ${counts.lost} lost · ${counts.no_show} no-show`,
-      }
-    : {
-        label: "Win rate",
-        value: history.length ? pct(fixtureWon.length / history.length) : "—",
-        line: `From the ${history.length} fixture labels, no scorecards yet`,
-      };
-
-  const nextStep: Tile = won.length
-    ? {
-        label: "Dated next step in wins",
-        value: `${won.filter((card) => card.next_step_secured).length} of ${won.length}`,
-        line: `${other.filter((card) => card.next_step_secured).length} of ${other.length} elsewhere`,
-      }
-    : {
-        label: "Dated next step in wins",
-        value: `— of ${fixtureWon.length}`,
-        line: `${fixtureWon.length} wins in the fixture labels, none scored yet`,
-      };
-
-  return [analysed, winRate, nextStep];
 }
 
 async function buildPatterns(scorecards: ApiScorecard[], fixtures: ApiFixtureSummary[]): Promise<Pattern[]> {
@@ -179,6 +155,7 @@ async function buildPatterns(scorecards: ApiScorecard[], fixtures: ApiFixtureSum
           callId: key,
           href: hrefs.get(key) ?? "/conversations",
           company: companies.get(key) ?? key,
+          speaker: card.source_turns?.[evidence.turn_index]?.name ?? card.rep,
           turn: evidence.turn_index,
           text: evidence.quote,
         }
@@ -236,6 +213,17 @@ function coachingFrom(playbook: ApiPlaybook | null, scorecards: ApiScorecard[]):
   return { lines, source: lines.length ? "scorecards" : null };
 }
 
+/** The rep with the lowest next-step rate, then the fewest discovery questions: from the playbook, else the scorecards. */
+function coachRepFrom(playbook: ApiPlaybook | null, scorecards: ApiScorecard[]): string | null {
+  const reps = playbook?.reps.length
+    ? playbook.reps.map((r) => ({ rep: r.rep, nextStep: r.next_step_rate, discovery: r.mean_discovery }))
+    : [...new Set(scorecards.map((card) => card.rep))].map((rep) => {
+        const cards = scorecards.filter((card) => card.rep === rep);
+        return { rep, nextStep: cards.filter((card) => card.next_step_secured).length / cards.length, discovery: mean(cards.map((card) => card.discovery_questions)) };
+      });
+  return [...reps].sort((a, b) => a.nextStep - b.nextStep || a.discovery - b.discovery)[0]?.rep ?? null;
+}
+
 async function buildIcp(
   profile: ApiIcpProfile,
   freshness: ApiIcpFreshness | null,
@@ -247,10 +235,12 @@ async function buildIcp(
       attribute: item.attribute,
       label: ATTRIBUTE_LABELS[item.attribute] ?? item.attribute.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()),
       value: attributeValue(item.attribute, profile.profile, item.why),
+      why: item.why,
       deals: await Promise.all(
         item.deal_ids
           .map((dealId) => sourceDeals.get(dealId))
           .filter((deal): deal is NonNullable<typeof deal> => deal != null)
+          .slice(0, 3)
           .map(async (deal) => ({
             id: deal.deal_id,
             company: deal.company_name,
@@ -300,10 +290,11 @@ export async function getIntelligence(): Promise<Intelligence> {
   };
 
   return {
-    tiles: buildTiles(scorecards, fixtures),
+    stats: buildStats(fixtures, profile, inventory),
     patterns: await buildPatterns(scorecards, fixtures),
     coachingFocus: coaching.lines,
     coachingSource: coaching.source,
+    coachRep: coachRepFrom(playbook, scorecards),
     triggers: (profile?.profile.triggers ?? []).map((label) => ({ label, count: null })),
     icp: profile ? await buildIcp(profile, freshness, inventory) : null,
     provenance: {

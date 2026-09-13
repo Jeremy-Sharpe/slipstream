@@ -64,7 +64,7 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
     <div>
       {groups.map((group, gi) => (
         <section key={group.key}>
-          <h3 className={`mb-2 text-[12px] font-medium text-faint ${gi === 0 ? "mt-3" : "mt-6"}`}>{group.label}</h3>
+          <h3 className={`mb-2 text-[12px] font-medium text-faint ${gi === 0 ? "mt-0" : "mt-6"}`}>{group.label}</h3>
           <ul className="border-b border-line-soft">
             {group.rows.map((row) => {
               const state = row.run?.state;
@@ -73,7 +73,7 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
                 <li key={row.id}>
                   <Link
                     href={`/calls/${row.id}`}
-                    className="grid h-14 grid-cols-[minmax(0,1.1fr)_minmax(0,1.7fr)_104px_72px_120px] items-center gap-x-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                    className="grid h-14 grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)_112px_80px_132px] items-center gap-x-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                   >
                     <span className="flex min-w-0 items-center gap-3">
                       <Avatar name={row.contact} size={28} />
