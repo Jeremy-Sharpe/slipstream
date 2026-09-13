@@ -369,6 +369,29 @@ def test_openrouter_judge_accepts_fenced_json() -> None:
     assert result.output.summary == "The rep asked about the change and secured Thursday."
 
 
+def test_openrouter_judge_drops_blank_evidence_instead_of_failing() -> None:
+    payload = _judged_scorecard().model_dump(mode="json")
+    payload["discovery_questions"] = [{"turn_index": 1, "quote": ""}]
+    payload["objection_evidence"] = [
+        {"turn_index": 2, "quote": "  "},
+        {"turn_index": 2, "quote": "not a fit"},
+    ]
+    payload["next_step_evidence"] = {"turn_index": 2, "quote": ""}
+    judge = openrouter_judge(
+        "test-key",
+        "test/model",
+        prices={"test/model": (1.0, 1.0)},
+        transport=httpx.MockTransport(lambda _: _openrouter_response(json.dumps(payload))),
+    )
+
+    result = judge(system="system", user="user", schema=JudgedScorecard)
+
+    assert result.output.discovery_questions == []
+    assert [item.quote for item in result.output.objection_evidence] == ["not a fit"]
+    assert result.output.next_step_evidence is None
+    assert result.parse_retries == 0
+
+
 def test_openrouter_judge_retries_once_after_parse_failure() -> None:
     attempts = 0
 
