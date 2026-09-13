@@ -75,7 +75,8 @@ export default function CallPage() {
     try {
       call = await getCall(id);
     } catch (error) {
-      if (!(error instanceof ApiError) || error.status !== 404) throw error;
+      // 404 is unknown; 400/422 is an id the API will not even parse.
+      if (!(error instanceof ApiError) || ![400, 404, 422].includes(error.status)) throw error;
       // A fixture the browser has never opened is not ingested yet.
       const fixture = (await getFixtures()).find((item) => fixtureConversationId(item.call_id) === id);
       if (!fixture) return { status: "missing" };
@@ -112,7 +113,8 @@ export default function CallPage() {
       .then((next) => { if (live) setState(next); })
       .catch((error: unknown) => {
         if (!live) return;
-        setState({ status: "error", message: error instanceof Error ? error.message : "The conversation could not be loaded" });
+        const message = error instanceof Error && error.message && !error.message.startsWith("[object") ? error.message : "The conversation could not be loaded";
+        setState({ status: "error", message });
       });
     return () => { live = false; };
   }, [load, attempt]);
