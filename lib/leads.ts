@@ -7,7 +7,9 @@ const d = (contact: string, company: string, trigger: string, similar: string, s
   body: `Hi ${contact.split(" ")[0]},\n\nWe spoke with ${similar} last month about the same thing: ${similarTrigger}. The bit that took the time wasn't the IT, it was the evidence the insurer and the partners wanted to see.\n\nIf that's on your desk too, I can show you what we put together for them. Twenty minutes, no deck.\n\nSam`,
 });
 
-export const leads: Lead[] = [
+const slug = (name: string) => `https://www.linkedin.com/in/${name.toLowerCase().replace(/[^a-z]+/g, "-").replace(/(^-|-$)/g, "")}`;
+
+const SEED: Omit<Lead, "linkedinUrl">[] = [
   { id: "l1", company: "Yarra Bend Physiotherapy", contact: "Claire Donovan", title: "Practice Manager", location: "Kew, VIC", industry: "Physiotherapy clinic", headcount: 58, similarity: 92, status: "drafted", trigger: "Cyber-insurance renewal", searchId: "s1",
     evidence: [
       { attribute: "Industry", value: "Multi-site allied health", quote: "We've physios, reception, admin and a small leadership team.", call: "Port Phillip Physio Group", t: "0:17" },
@@ -66,6 +68,7 @@ export const leads: Lead[] = [
       { attribute: "Company size", value: "112 staff, above the band", quote: "We're at one hundred and eighteen people and the tooling is catching up with us.", call: "Meridian AI", t: "0:16" },
     ], draft: d("Sarah Whitlock", "Meridian Engineering Consultants", "Managed IT at 112 people", "Elm & Ledger Accounting", "a migration that could not be messy in the middle of busy season") },
 ];
+export const leads: Lead[] = SEED.map((l) => ({ ...l, linkedinUrl: slug(l.contact) }));
 
 // A pool of further Harbourline-ICP companies the mock search rotates through,
 // ten per run, so repeated searches differ. Quotes are verbatim won-call lines.
@@ -113,7 +116,7 @@ export function generateLeads(searchId: string, run: number, count: number): Lea
     return {
       id: `${searchId}-${i + 1}`,
       company: s.company, contact: s.contact, title: s.title, location: s.location, industry: s.industry, headcount: s.headcount,
-      similarity, status: "drafted", trigger: s.trigger, searchId,
+      similarity, status: "drafted", trigger: s.trigger, searchId, linkedinUrl: slug(s.contact),
       evidence: [
         { attribute: "Industry", value: s.industry, quote: INDUSTRY_QUOTE[s.industryCall].quote, call: s.industryCall, t: INDUSTRY_QUOTE[s.industryCall].t },
         { attribute: "Trigger", value: s.value, quote: s.quote, call: s.call, t: s.t },

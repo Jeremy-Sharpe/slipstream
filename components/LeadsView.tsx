@@ -9,7 +9,7 @@ import type { Lead } from "@/lib/types";
 import { useLeadSearch } from "@/lib/useLeadSearch";
 import { SearchPane } from "./leads/SearchPane";
 import { LeadPanel } from "./leads/LeadPanel";
-import type { Row, Sort } from "./leads/LeadsGridInner";
+import { SORT_KEYS, type Row, type Sort } from "./leads/columns";
 import { Button, cn } from "./ui";
 
 const LeadsGrid = dynamic(() => import("./leads/LeadsGridInner"), { ssr: false, loading: () => <div className="h-full w-full" /> });
@@ -35,9 +35,10 @@ export function LeadsView() {
     // Rows that landed from a search sit newest first; the seed search keeps its order.
     if (out.some((l) => l.landedAt)) out.reverse();
     if (sort) {
-      const key = (["company", "contact", "title", "location", "trigger", "similarity", "status", "draft"] as const)[sort.col];
+      const key = SORT_KEYS[sort.col];
       out.sort((a, b) => {
-        const av = key === "draft" ? a.draft.subject : a[key], bv = key === "draft" ? b.draft.subject : b[key];
+        const pick = (r: Row) => (key === "draft" ? Number(r.drafted) : key === "linkedin" ? r.contact : r[key]);
+        const av = pick(a), bv = pick(b);
         const c = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
         return sort.dir === "asc" ? c : -c;
       });
@@ -45,7 +46,6 @@ export function LeadsView() {
     return out;
   }, [leads, search, sort]);
 
-  const hot = rows.filter((r) => r.scored && r.similarity >= 80).length;
   const drafts = rows.filter((r) => r.drafted && r.status !== "approved").length;
   const open = openId ? leads.find((l) => l.id === openId) ?? null : null;
 
@@ -58,23 +58,22 @@ export function LeadsView() {
       <SearchPane searches={searches} leads={leads} selectedId={search?.id ?? null} onSelect={setSelectedId} onFind={onFind} busy={busy} />
 
       <section className="flex min-h-0 min-w-0 flex-col">
-        <div className="flex h-10 shrink-0 items-center justify-between gap-4">
-          <p className="text-[14px] text-soft">{rows.length} leads · {hot} hot · {drafts} drafts</p>
+        <div className="flex h-10 shrink-0 items-center justify-end gap-2">
+          <button
+            type="button"
+            aria-label="Search the sheet"
+            onClick={() => setShowSearch((s) => !s)}
+            className={cn("flex h-8 items-center gap-2 rounded-full px-3 text-[13px] text-soft transition-colors duration-150 hover:bg-surface hover:text-ink", showSearch && "bg-surface text-ink")}
+          >
+            <Search className="size-3.5" strokeWidth={1.75} /> Search
+          </button>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Search the sheet"
-              onClick={() => setShowSearch((s) => !s)}
-              className={cn("flex h-8 items-center gap-2 rounded-full px-3 text-[13px] text-soft transition-colors duration-150 hover:bg-surface hover:text-ink", showSearch && "bg-surface text-ink")}
-            >
-              <Search className="size-3.5" strokeWidth={1.75} /> Search <kbd className="text-[11px] text-faint">⌘F</kbd>
-            </button>
             <Button variant="primary" size="sm" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
               {drafts > 0 ? `Approve all drafts · ${drafts}` : search?.status === "running" ? "Approve all drafts" : "All drafts approved"}
             </Button>
           </div>
         </div>
-        <div className="relative mt-2 min-h-0 flex-1 overflow-hidden rounded-xl border border-line">
+        <div className="relative mt-2 min-h-0 flex-1">
           {rows.length === 0 ? (
             <p className="flex h-full items-center justify-center text-[14px] text-faint">{search?.status === "running" ? "Searching Victoria" : "No companies matched this brief"}</p>
           ) : (

@@ -58,6 +58,8 @@ export type Lead = {
   status: "drafted" | "approved";
   /** Short phrase from the evidence, e.g. "Cyber-insurance renewal". */
   trigger: string;
+  /** Mock profile URL. */
+  linkedinUrl: string;
   /** The search that found this lead. */
   searchId: string;
   /** When the row landed in a running search (drives the arrival highlight). */

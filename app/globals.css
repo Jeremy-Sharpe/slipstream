@@ -68,6 +68,11 @@ button:disabled { cursor: default; }
 .run-column::-webkit-scrollbar { width: 6px; }
 .run-column::-webkit-scrollbar-thumb { background: transparent; border-radius: 6px; }
 .run-column:hover::-webkit-scrollbar-thumb { background: #e8e8e8; }
+.dvn-scroller { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.dvn-scroller:hover { scrollbar-color: #e8e8e8 transparent; }
+.dvn-scroller::-webkit-scrollbar { width: 6px; height: 6px; }
+.dvn-scroller::-webkit-scrollbar-thumb { background: transparent; border-radius: 6px; }
+.dvn-scroller:hover::-webkit-scrollbar-thumb { background: #e8e8e8; }
 .run-column-fade { mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent); -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent); }
 
 @keyframes shimmer-text { from { background-position: 200% 0; } to { background-position: -200% 0; } }
