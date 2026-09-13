@@ -28,7 +28,7 @@ Thirteen labelled calls cover wins, losses, stalls and a no-show. OpenRouter pow
 
 The path to a product is direct: connect Aircall or Twilio for recordings, HubSpot for CRM writes and Gmail for delivery. The intelligence does not change.
 
-Enterprise teams can stitch together Gong, a CRM, Clay and a RevOps person. Slipstream sells to the small sales team that cannot. It gives them the same compounding system: less admin after every call, better coaching from every call, and a pipeline that learns from the customers who said yes.
+Enterprise teams can stitch together Gong, a CRM, Clay and a revenue-operations specialist. Slipstream sells to the small sales team that cannot. It gives them the same compounding system: less admin after every call, better coaching from every call, and a pipeline that learns from the customers who said yes.
 
 ## Q&A preparation
 
