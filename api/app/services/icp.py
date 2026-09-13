@@ -9,6 +9,7 @@ from app.core.llm import ReasoningResult, structured
 from app.schemas.icp import (
     DealRecord,
     IcpEvidenceInventory,
+    IcpEvidenceItem,
     IcpProfile,
     IcpSourceSummary,
     StoredIcpProfile,
@@ -253,6 +254,13 @@ def _ground_profile(profile: IcpProfile, deals: list[DealRecord]) -> IcpProfile:
     if triggers:
         brief_parts.append(f"Look for active signals including {trigger_text}.")
     origami_brief = " ".join(brief_parts)
+    evidence = _ground_evidence(
+        won,
+        industries=industries,
+        headcount_band=headcount_band,
+        roles=roles,
+        triggers=triggers,
+    )
     return profile.model_copy(
         update={
             "summary": summary,
@@ -261,8 +269,79 @@ def _ground_profile(profile: IcpProfile, deals: list[DealRecord]) -> IcpProfile:
             "roles": roles,
             "triggers": triggers,
             "disqualifiers": _unique_text(profile.disqualifiers, limit=MAX_PROFILE_VALUES),
+            "evidence": evidence,
             "origami_brief": origami_brief,
         }
+    )
+
+
+def _ground_evidence(
+    won: list[DealRecord],
+    *,
+    industries: list[str],
+    headcount_band: str,
+    roles: list[str],
+    triggers: list[str],
+) -> list[IcpEvidenceItem]:
+    evidence: list[IcpEvidenceItem] = []
+    dimensions = [
+        (
+            "industry",
+            industries,
+            _supporting_deal_ids(won, "industry", "industry", industries),
+        ),
+        (
+            "headcount_band",
+            [] if headcount_band == "Not established" else [headcount_band],
+            [
+                str(deal.id)
+                for deal in won
+                if deal.employee_count is not None
+                or _deal_headcount_band(deal) is not None
+            ],
+        ),
+        (
+            "contact_role",
+            roles,
+            _supporting_deal_ids(won, "contact_role", "role", roles),
+        ),
+        ("trigger", triggers, _supporting_deal_ids(won, None, "trigger", triggers)),
+    ]
+    for attribute, values, deal_ids in dimensions:
+        if values and deal_ids:
+            evidence.append(
+                IcpEvidenceItem(
+                    attribute=attribute,
+                    deal_ids=deal_ids,
+                    why=f"Won deals support these values: {_plain_list(values)}.",
+                )
+            )
+    return evidence
+
+
+def _supporting_deal_ids(
+    deals: list[DealRecord], field: str | None, signal: str, retained_values: list[str]
+) -> list[str]:
+    limit = 500 if signal == "trigger" else 120
+    retained = {value.casefold() for value in retained_values}
+    ids: list[str] = []
+    for deal in deals:
+        signals = deal.metadata.get("icp_signals")
+        if not isinstance(signals, dict):
+            signals = {}
+        primary = getattr(deal, field) if field else deal.metadata.get(signal)
+        value = _valid_signal_text(primary, limit) or _valid_signal_text(
+            signals.get(signal), limit
+        )
+        if value is not None and value.casefold() in retained:
+            ids.append(str(deal.id))
+    return ids
+
+
+def _deal_headcount_band(deal: DealRecord) -> str | None:
+    signals = deal.metadata.get("icp_signals")
+    return _valid_headcount_band(
+        signals.get("headcount_band") if isinstance(signals, dict) else None
     )
 
 
@@ -294,9 +373,7 @@ def _valid_signal_text(value: object, limit: int) -> str | None:
 def _won_headcount_band(deals: list[DealRecord]) -> str:
     deal_bands: list[str | None] = []
     for deal in deals:
-        signals = deal.metadata.get("icp_signals")
-        raw_band = signals.get("headcount_band") if isinstance(signals, dict) else None
-        deal_bands.append(_valid_headcount_band(raw_band))
+        deal_bands.append(_deal_headcount_band(deal))
     unique_bands = _unique_text(
         [band for band in deal_bands if band is not None], limit=MAX_PROFILE_VALUES
     )
