@@ -47,7 +47,7 @@ async function forward(request: NextRequest, context: Context) {
       return Response.json({ detail: "The coach request was not valid JSON" }, { status: 400 });
     }
   }
-  const base = (process.env.API_BASE_URL ?? API_BASE_URL).replace(/\/$/, "");
+  const base = (process.env.API_BASE_URL || API_BASE_URL).replace(/\/$/, "");
   const token = process.env.INGEST_TOKEN;
   try {
     const response = await fetch(`${base}/api/v1/coach/${path}`, {
@@ -62,9 +62,13 @@ async function forward(request: NextRequest, context: Context) {
     });
     const data: unknown = await response.json();
     return Response.json(data, { status: response.status, headers: { "Cache-Control": "no-store" } });
-  } catch {
+  } catch (error) {
+    const cause = error instanceof Error ? ((error.cause as { code?: string } | undefined)?.code ?? error.message) : String(error);
+    console.error(`Coach proxy could not reach ${base}: ${cause}`);
+    // The API address is not secret; showing it locally makes a wrong API_BASE_URL obvious.
+    const hint = process.env.NODE_ENV === "production" ? "" : ` (${base}: ${cause})`;
     return Response.json(
-      { detail: "The coach API is unavailable. Check the API connection and retry." },
+      { detail: `The coach API is unavailable. Check the API connection and retry.${hint}` },
       { status: 503 },
     );
   }
