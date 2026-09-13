@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { ApiCampaign } from "@/lib/api/slipstream";
 import type { Campaign, CampaignStatus } from "@/lib/types/campaigns";
 import { cn } from "@/lib/utils";
 import { NewCampaignDialog } from "./NewCampaignDialog";
@@ -33,7 +34,7 @@ function ago(minutes: number): string {
 
 export const approvedCount = (c: Campaign) => c.people.filter((p) => p.status === "approved").length;
 
-export function CampaignsList({ loading = false }: { loading?: boolean }) {
+export function CampaignsList({ loading = false, initialLiveCampaigns }: { loading?: boolean; initialLiveCampaigns?: ApiCampaign[] | null }) {
   const router = useRouter();
   const campaigns = useCampaigns();
   const [tab, setTab] = useState<Tab>("all");
@@ -73,7 +74,7 @@ export function CampaignsList({ loading = false }: { loading?: boolean }) {
         </div>
       </div>
 
-      <LiveCampaignRuns />
+      <LiveCampaignRuns initialCampaigns={initialLiveCampaigns} />
 
       <div className="mt-8 flex items-end justify-between px-11 pb-[14px]">
         <div><h2 className="text-[15px] font-semibold text-foreground">Sequence workspace</h2><p className="mt-0.5 text-xs text-muted-foreground">Evaluation data for designing and approving outreach sequences</p></div>

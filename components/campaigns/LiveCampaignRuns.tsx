@@ -32,8 +32,12 @@ function dueLabel(value: string): string {
   return new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
-export function LiveCampaignRuns() {
-  const [state, setState] = useState<LoadState>({ status: "loading" });
+export function LiveCampaignRuns({ initialCampaigns }: { initialCampaigns?: ApiCampaign[] | null }) {
+  const [state, setState] = useState<LoadState>(() => initialCampaigns === undefined
+    ? { status: "loading" }
+    : initialCampaigns === null
+      ? { status: "error", message: "Campaign API unavailable during initial render" }
+      : { status: "live", campaigns: initialCampaigns });
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const controllerRef = useRef<AbortController>(null);
   const requestRef = useRef(0);
@@ -54,12 +58,12 @@ export function LiveCampaignRuns() {
   }, []);
 
   useEffect(() => {
-    load();
+    if (initialCampaigns === undefined) load();
     return () => {
       requestRef.current += 1;
       controllerRef.current?.abort();
     };
-  }, [load]);
+  }, [initialCampaigns, load]);
 
   const campaigns = state.status === "live" ? state.campaigns : [];
   return (

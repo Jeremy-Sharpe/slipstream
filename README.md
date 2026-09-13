@@ -89,7 +89,7 @@ Slipstream is the closed loop. Enterprise teams get it by paying for Gong plus C
 
 - Telephony: replace the file upload with a recording webhook from Aircall or Twilio, or a meeting bot for video calls. The pipeline does not change.
 - CRM: swap the Supabase CRM tables for HubSpot writes using the object mapping; keep Supabase for calls, embeddings and ICP state.
-- Cost per call: one transcription, three or four reasoning calls, one embedding. Measured fixture costs are in `PROJECT.md`; the public proof needs only OpenRouter and reuses the current ICP and lead set when the evidence cohort has not changed.
+- Cost and pricing: the measured flagship-model fixture pass was $0.43 across 13 calls, about $0.03 of reasoning and embedding cost per processed call before transcription and optional sourcing. The public proof needs only OpenRouter and reuses unchanged ICP and lead artifacts. A credible starter plan is $49 per rep per month, leaving ample room for usage while pricing below the separate enterprise tools a small team would otherwise stitch together; that price is our proposed model, not validated willingness to pay.
 - Privacy: call recording consent is jurisdiction-specific; recording runs only through the rep's consent flow and transcripts stay in the customer's own database.
 - Adoption: the coach and the auto-draft deliver value on the first call, before there is enough history for an ICP. The loop gets better as the team sells.
 

@@ -1,7 +1,26 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { seedDemoCampaign } from "./seed-demo-campaign.mjs";
+
+const scriptPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "seed-demo-campaign.mjs");
+
+test("command-line seeder executes and fails clearly without its deployment token", () => {
+  const result = spawnSync(process.execPath, [scriptPath], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      SLIPSTREAM_INGEST_TOKEN: "",
+    },
+  });
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /SLIPSTREAM_INGEST_TOKEN must be 16–500 characters/);
+  assert.equal(result.stdout, "");
+});
 
 function json(value, status = 200) {
   return new Response(JSON.stringify(value), { status, headers: { "content-type": "application/json" } });
