@@ -1,4 +1,9 @@
 // Response shapes of the live Slipstream API on main (lib/api/slipstream.ts). Mock data in lib/ mirrors these so wiring is 1:1.
+// Minimal aliases so this reference file type-checks on its own (main defines them the same way).
+export type Evidence = { sequence: number | null; quote: string };
+export type Handling = "handled" | "partial" | "ignored" | "none_raised";
+export type ApiField<T> = { value: T | null; confidence: number; evidence: Evidence[] };
+
 export type ApiCall = {
   id: string;
   source_external_id: string;
