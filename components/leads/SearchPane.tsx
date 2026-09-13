@@ -2,24 +2,32 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Minus, Plus } from "lucide-react";
-import { icp } from "@/lib/icp";
+import type { ApiIcpProfile } from "@/lib/api/slipstream";
+import { briefFor } from "@/lib/icp";
 import type { Lead, Search } from "@/lib/types";
 import { Button } from "../ui";
 import { SearchEntry } from "./SearchEntry";
 
 /* Left pane: the brief editor on top, the run history under it (newest first). */
-export function SearchPane({ searches, leads, selectedId, onSelect, onFind, busy }: {
+export function SearchPane({ searches, leads, profile, wonDeals, selectedId, onSelect, onFind, busy }: {
   searches: Search[];
   leads: Lead[];
+  profile: ApiIcpProfile | null;
+  wonDeals: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onFind: (brief: string, count: number) => void;
   busy: boolean;
 }) {
-  const [brief, setBrief] = useState(icp.brief);
+  const [brief, setBrief] = useState("");
   const [count, setCount] = useState(10);
   const [expanded, setExpanded] = useState<string | null>(null);
   const areaRef = useRef<HTMLTextAreaElement>(null);
+
+  // The brief is the derived one until it is edited; it arrives with the profile.
+  const derived = profile ? briefFor(profile) : "";
+  const [seenBrief, setSeenBrief] = useState(derived);
+  if (seenBrief !== derived) { setSeenBrief(derived); setBrief(derived); }
 
   // Auto-grow to eight lines.
   useEffect(() => {
@@ -44,10 +52,11 @@ export function SearchPane({ searches, leads, selectedId, onSelect, onFind, busy
           id="brief"
           ref={areaRef}
           value={brief}
+          placeholder={profile ? "" : "Deriving the brief from your won deals"}
           onChange={(e) => setBrief(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && e.metaKey) { e.preventDefault(); find(); } }}
           rows={1}
-          className="mt-2 w-full resize-none overflow-y-auto bg-transparent text-[14px] leading-[22px] text-ink outline-none"
+          className="mt-2 w-full resize-none overflow-y-auto bg-transparent text-[14px] leading-[22px] text-ink outline-none placeholder:text-faint"
         />
         <div className="mt-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -61,16 +70,18 @@ export function SearchPane({ searches, leads, selectedId, onSelect, onFind, busy
           </div>
           <Button variant="primary" onClick={find} disabled={busy}>Find leads</Button>
         </div>
-        <p className="mt-3 text-[12px] text-faint">From {icp.wonDeals} won deals</p>
+        <p className="mt-3 text-[12px] text-faint">From {wonDeals} won deals</p>
       </section>
 
       <h2 className="mt-6 mb-2 shrink-0 px-3 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Searches</h2>
       <ol className="run-column min-h-0 flex-1 overflow-y-auto pb-6" style={{ overscrollBehavior: "contain" }}>
+        {searches.length === 0 && <li className="px-3 text-[14px] text-faint">No searches yet</li>}
         {searches.map((s) => (
           <SearchEntry
             key={s.id}
             search={s}
             leads={leads.filter((l) => l.searchId === s.id)}
+            wonDeals={wonDeals}
             selected={selectedId === s.id}
             expanded={expanded === s.id}
             onSelect={() => onSelect(s.id)}

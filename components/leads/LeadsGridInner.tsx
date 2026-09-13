@@ -270,12 +270,14 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
         if (!r.scored) return { kind: GridCellKind.Loading, allowOverlay: false, skeletonWidth: 78, skeletonWidthVariability: 0 };
         return { kind: GridCellKind.Custom, allowOverlay: false, copyData: String(r.similarity), data: { kind: "score", value: r.similarity } } as ScoreCell;
       case "status":
-        if (!r.drafted) return text("");
+        if (r.status === "new") return text("");
         return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.status, data: { kind: "pill", label: r.status === "approved" ? "Approved" : "Drafted", tone: r.status === "approved" ? "green" : "grey" } } as PillCell;
       case "trigger": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.trigger, data: { kind: "text", text: r.trigger } } as TextCell;
       case "location": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.location, data: { kind: "text", text: r.location } } as TextCell;
-      case "linkedin": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.linkedinUrl, data: { kind: "link", url: r.linkedinUrl } } as LinkCell;
-      case "draft": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.drafted ? r.draft.subject : "", data: { kind: "draft", drafted: r.drafted } } as DraftCell;
+      case "linkedin":
+        if (!r.linkedinUrl) return text("");
+        return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.linkedinUrl, data: { kind: "link", url: r.linkedinUrl } } as LinkCell;
+      case "draft": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.draft?.subject ?? "", data: { kind: "draft", drafted: r.drafted } } as DraftCell;
       default: return text("");
     }
   }, [rows]);
