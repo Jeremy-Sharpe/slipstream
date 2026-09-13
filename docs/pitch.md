@@ -18,9 +18,11 @@ That already saves over an hour a day for a rep doing eight calls. But the real 
 
 Slipstream scores each call against a written rubric: discovery, objection handling, next-step quality and talk ratio. It then looks at the deals that actually won and derives the ideal customer profile with the supporting deals visible. In our synthetic history, the pattern is 25-to-80-person professional-services and allied-health firms, a real compliance trigger, and a decision-maker in the conversation.
 
+We call the next part Revenue DNA. Slipstream fingerprints the exact conversations and CRM outcomes behind that profile. When a new deal wins or loses, the fingerprint changes, the target is visibly stale, and the next paid lead search is blocked until the ICP relearns. It also counts which existing leads need a new score. So this is not a persona report you forget in a slide deck; it is a targeting system that knows when its own evidence has changed.
+
 That profile becomes a prospect-search brief. In the live proof, OpenRouter creates ten clearly fictional, non-deliverable companies so judges can test the scoring and outreach loop without a paid data subscription. For customers, the same brief plugs into our Origami adapter for real sourcing. The output of the last call improves who gets the next call.
 
-This is one closed loop, not four disconnected AI features: conversation to CRM, CRM to coaching, won deals to ICP, and ICP to pipeline.
+This is one closed loop, not four disconnected AI features: conversation to CRM, CRM to coaching, outcomes to Revenue DNA, and Revenue DNA to pipeline.
 
 For the weekend build, we use a lightweight CRM-style data store, a live backend and a public web app. Thirteen labelled calls cover wins, losses, stalls and a no-show. OpenRouter powers the live extraction, follow-up, mixed call-and-email customer profile and fictional lead proof. Every model result shows its evidence and source. Email delivery is deliberately switched off, so the paused campaign proves the automation without claiming anything was sent.
 
@@ -32,7 +34,7 @@ Enterprise teams can stitch together Gong, a CRM, Clay and a RevOps person. A tw
 
 ### What is real, and what is mocked? — Jeremy
 
-The businesses and calls are synthetic, so no customer data is exposed. The demo audio is a real two-voice ElevenLabs file. Ingestion, diarised transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval, explicit campaign enrollment, pause/resume, bounded scheduling, ICP services and production API are executable. The public deployment intentionally has no email-provider key, so delivery fails closed instead of being simulated. Origami sourcing requires its paid key; when that integration is unavailable, only the explicitly labelled evaluation leads remain displayable.
+The businesses and calls are synthetic, so no customer data is exposed. Ingestion, transcript normalization, extraction schemas, evidence validation, CRM-shaped writeback, follow-up generation, approval, campaign controls, ICP services and the production API are executable. OpenRouter powers the deployed reasoning, embeddings and ten explicitly fictional leads. The public deployment intentionally has no email-provider key, so delivery fails closed instead of being simulated; Origami is an optional paid adapter, not a demo dependency.
 
 ### How accurate is the extraction? — Anna
 
@@ -60,7 +62,7 @@ It gives value on call one: a truthful CRM update and a usable follow-up. It doe
 
 ### Why not Gong, Fireflies, HubSpot AI or Clay? — Romain
 
-Recorders stop at notes, lead tools require the user to define the target, and enterprise call-intelligence platforms assume budget and RevOps support. Slipstream’s differentiation is the loop: the call changes the CRM, the CRM reveals who wins, and who wins controls who the system finds next.
+Recorders stop at notes, lead tools require the user to define the target, and enterprise call-intelligence platforms assume budget and RevOps support. Slipstream’s Revenue DNA fingerprints the evidence behind the target, detects the moment a new outcome invalidates it, and refuses to spend lead credits against stale assumptions.
 
 ### What would you build next? — Jeremy
 

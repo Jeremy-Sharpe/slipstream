@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowRight, Minus, Plus } from "lucide-react";
+import { ArrowRight, Fingerprint, Minus, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { ApiIcpFreshness } from "@/lib/api/slipstream";
 import type { Intelligence, ObjectionHandling } from "@/lib/types/intelligence";
 import { cn } from "@/lib/utils";
 import { Bar, EvidenceChip, OutcomeTag, Section } from "./primitives";
@@ -89,6 +90,42 @@ export function DerivedIcp({ data, active }: Props) {
           </div>
         ))}
       </div>
+    </Section>
+  );
+}
+
+export function RevenueDna({ freshness, status, active }: { freshness: ApiIcpFreshness | null; status: "checking" | "live" | "missing" | "error"; active?: string }) {
+  const current = freshness?.status === "current";
+  const stale = freshness?.status === "stale";
+  const headline = current
+    ? `ICP v${freshness.profile_version} matches every current CRM outcome`
+    : stale
+      ? `${freshness.outcome_labels_added || "New"} outcome${freshness.outcome_labels_added === 1 ? "" : "s"} changed who you should target`
+      : status === "checking"
+        ? "Checking the targeting fingerprint…"
+        : "Relearn once to activate continuous targeting";
+  return (
+    <Section id="revenue-dna" title="Revenue DNA" meta="Outcome-triggered ICP freshness gate" active={active === "revenue-dna"}>
+      <div className="flex items-start justify-between gap-8">
+        <div className="flex max-w-2xl gap-4">
+          <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-full", current ? "bg-emerald-100 text-emerald-700" : stale ? "bg-amber-100 text-amber-800" : "bg-muted text-muted-foreground")}><Fingerprint className="size-5" /></span>
+          <div>
+            <p className="text-[20px] font-semibold text-foreground">{headline}</p>
+            <p className="mt-2 text-[15px] leading-6 text-muted-foreground">{freshness?.reason ?? "Slipstream fingerprints the outcome-labelled cohort so yesterday’s ICP cannot silently source tomorrow’s leads."}</p>
+          </div>
+        </div>
+        <Link href="/leads" className="inline-flex h-10 shrink-0 items-center gap-2 rounded-md bg-foreground px-4 text-[14px] font-medium text-background hover:opacity-90">
+          {stale || freshness?.leads_needing_rescore ? "Review lead impact" : "Open matched leads"}<ArrowRight className="size-4" />
+        </Link>
+      </div>
+      {freshness && (
+        <div className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
+          <div className="bg-page p-4"><p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Evidence watched</p><p className="mt-2 text-[18px] font-semibold text-foreground">{freshness.source_summary.deals} deals · {freshness.source_summary.outcome_labelled} outcomes</p></div>
+          <div className="bg-page p-4"><p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Targeting version</p><p className="mt-2 font-mono text-[18px] font-semibold text-foreground">v{freshness.profile_version} · {freshness.current_cohort_revision.slice(0, 7)}</p></div>
+          <div className="bg-page p-4"><p className="text-[12px] font-semibold tracking-wide text-muted-foreground uppercase">Lead impact</p><p className="mt-2 text-[18px] font-semibold text-foreground">{freshness.leads_needing_rescore ? `${freshness.leads_needing_rescore} need a new score` : `${freshness.leads_on_profile} current`}</p></div>
+        </div>
+      )}
+      <p className="mt-4 text-[13px] text-muted-foreground">The sourcing API fails closed when this fingerprint is stale. A new win or loss must be learned before credits can be spent.</p>
     </Section>
   );
 }
@@ -195,12 +232,12 @@ export function BriefCard({ brief, active }: { brief: string; active?: string })
   const [text, setText] = useState(brief);
   const [count, setCount] = useState(10);
   return (
-    <Section id="brief" title="Origami brief" meta="The ICP as a search, ready to run" active={active === "brief"}>
+    <Section id="brief" title="Lead search brief" meta="Revenue DNA translated for OpenRouter sourcing" active={active === "brief"}>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={5}
-        aria-label="Origami brief"
+        aria-label="Lead search brief"
         className="w-full resize-y rounded-lg border border-border bg-page p-4 text-[16px] leading-relaxed text-foreground outline-none focus:ring-2 focus:ring-primary"
       />
       <div className="mt-4 flex items-center justify-end gap-3">

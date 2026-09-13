@@ -4,14 +4,15 @@ import { AlertCircle, ArrowRightLeft, CheckCircle2, ListChecks, Loader2, Message
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { defaultBrief } from "@/lib/data/brief";
-import { API_BASE_URL, derivePlaybook, getIcpEvidenceInventory, getLatestIcp, getLatestPlaybook, getReadiness, getScorecard, type ApiIcpEvidenceInventory, type ApiIcpProfile, type ApiPlaybook, type ApiReadiness, type ApiScorecard } from "@/lib/api/slipstream";
+import { API_BASE_URL, derivePlaybook, getIcpEvidenceInventory, getIcpFreshness, getLatestIcp, getLatestPlaybook, getReadiness, getScorecard, type ApiIcpEvidenceInventory, type ApiIcpFreshness, type ApiIcpProfile, type ApiPlaybook, type ApiReadiness, type ApiScorecard } from "@/lib/api/slipstream";
 import type { Intelligence } from "@/lib/types/intelligence";
 import { IntelligenceHeader } from "./IntelligenceHeader";
-import { BriefCard, DerivedIcp, NextSteps, Objections, TalkRatio, Tiles, TrainingLens, Triggers } from "./sections";
+import { BriefCard, DerivedIcp, NextSteps, Objections, RevenueDna, TalkRatio, Tiles, TrainingLens, Triggers } from "./sections";
 
 const QUICK_LINKS: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "patterns", label: "Win patterns", icon: ArrowRightLeft },
   { id: "icp", label: "Derived ICP", icon: Target },
+  { id: "revenue-dna", label: "Revenue DNA", icon: Zap },
   { id: "objections", label: "Objections", icon: MessageSquareWarning },
   { id: "talk-ratio", label: "Talk ratio", icon: Mic },
   { id: "next-steps", label: "Next steps", icon: ListChecks },
@@ -23,11 +24,12 @@ function sectionText(data: Intelligence, brief: string): Record<string, string> 
   return {
     patterns: ["won-deal patterns training lens", ...data.lens.map((l) => `${l.label} ${l.takeaway}`)].join(" "),
     icp: ["derived icp ideal customer profile", data.icp.summary, ...data.icp.attributes.map((a) => `${a.label} ${a.value} ${a.evidence.map((e) => e.company).join(" ")}`)].join(" "),
+    "revenue-dna": "revenue dna continuous outcome learning targeting fingerprint stale rescore leads",
     objections: ["objections", ...data.objections.map((o) => `${o.text} ${o.call.company}`)].join(" "),
     "talk-ratio": ["talk ratio", ...data.talkRatios.map((t) => `${t.call.company} ${t.rep}`)].join(" "),
     "next-steps": ["next steps", ...data.nextSteps.map((n) => `${n.description} ${n.call.company}`)].join(" "),
     triggers: ["triggers", ...data.triggers.map((t) => t.label)].join(" "),
-    brief: `origami brief find more like these ${brief}`,
+    brief: `lead search brief openrouter find more like these ${brief}`,
   };
 }
 
@@ -47,6 +49,10 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
     { data: Intelligence; status: "checking" | "error" } |
     { data: Intelligence; status: "live"; inventory: ApiIcpEvidenceInventory }
   >({ data, status: "checking" });
+  const [freshnessState, setFreshnessState] = useState<
+    { data: Intelligence; status: "checking" | "missing" | "error" } |
+    { data: Intelligence; status: "live"; freshness: ApiIcpFreshness }
+  >({ data, status: "checking" });
   const [playbookState, setPlaybookState] = useState<
     { data: Intelligence; status: "checking" | "missing" } |
     { data: Intelligence; status: "available" | "generating"; scorecards: ApiScorecard[] } |
@@ -57,6 +63,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
   const currentProfileState = profileState.data === data ? profileState : { data, status: "checking" as const };
   const currentReadinessState = readinessState.data === data ? readinessState : { data, status: "checking" as const };
   const currentInventoryState = inventoryState.data === data ? inventoryState : { data, status: "checking" as const };
+  const currentFreshnessState = freshnessState.data === data ? freshnessState : { data, status: "checking" as const };
   const currentPlaybookState = playbookState.data === data ? playbookState : { data, status: "checking" as const };
   const liveProfile = currentProfileState.status === "live" ? currentProfileState.profile : null;
   const profileData = useMemo(() => {
@@ -153,6 +160,13 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
       .catch(() => {
         if (!cancelled && !controller.signal.aborted) setInventoryState({ data, status: "error" });
       });
+    getIcpFreshness(controller.signal)
+      .then((freshness) => {
+        if (!cancelled) setFreshnessState(freshness ? { data, status: "live", freshness } : { data, status: "missing" });
+      })
+      .catch(() => {
+        if (!cancelled && !controller.signal.aborted) setFreshnessState({ data, status: "error" });
+      });
     getReadiness()
       .then(async (readiness) => {
         if (cancelled) return;
@@ -243,7 +257,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
     ? `${livePlaybook.stats.reduce((sum, item) => sum + item.calls, 0)} stored scorecards · live ${livePlaybook.model}`
     : undefined;
   const profileNote = currentProfileState.status === "live"
-    ? `ICP v${currentProfileState.profile.version} and Origami brief loaded live · ${playbookNote} · ${revision}`
+    ? `ICP v${currentProfileState.profile.version} and lead-search brief loaded live · ${playbookNote} · ${revision}`
     : currentProfileState.status === "missing"
       ? `${revision} · no stored ICP yet${configured === false ? " · model key not configured" : ""} · ${playbookNote}`
     : currentProfileState.status === "error"
@@ -296,7 +310,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
         </div>
       ) : <>
       <p className="mt-[42px] text-[17px] font-semibold text-foreground">Quick links</p>
-      <div className="mt-4 grid grid-cols-6 gap-5">
+      <div className="mt-4 grid grid-cols-4 gap-5 xl:grid-cols-7">
         {QUICK_LINKS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -317,6 +331,7 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
           {!q && <Tiles data={displayData} />}
           {show("patterns") && <TrainingLens data={displayData} active={active} meta={liveLensMeta} />}
           {show("icp") && <DerivedIcp data={displayData} active={active} />}
+          {show("revenue-dna") && <RevenueDna freshness={currentFreshnessState.status === "live" ? currentFreshnessState.freshness : null} status={currentFreshnessState.status} active={active} />}
           {show("objections") && <Objections data={displayData} active={active} />}
           {show("talk-ratio") && <TalkRatio data={displayData} active={active} />}
           {show("next-steps") && <NextSteps data={displayData} active={active} />}

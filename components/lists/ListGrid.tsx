@@ -280,7 +280,7 @@ export function ListGrid({
             <DropdownMenuItem onClick={() => onAddColumn("text")}>Text</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onAddColumn("number")}>Number</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onAddColumn("link")}>Link</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAddColumn("enrichment")}>Origami enrichment</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAddColumn("enrichment")}>OpenRouter enrichment</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onAddColumn("claude")}>Claude draft</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

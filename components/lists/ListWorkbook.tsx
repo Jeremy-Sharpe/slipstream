@@ -65,7 +65,7 @@ const ListGrid = dynamic(() => import("./ListGrid").then((m) => m.ListGrid), {
 const TOOLS = [
   {
     id: "enrich",
-    label: "Enrich with Origami",
+    label: "Enrich with OpenRouter",
     hint: "Company size, industry and signals per row",
   },
   {
@@ -202,7 +202,7 @@ export function ListWorkbook({ list: initial }: { list: List }) {
       kind === "claude"
         ? "Claude draft"
         : kind === "enrichment"
-          ? "Origami enrichment"
+          ? "OpenRouter enrichment"
           : `${kind[0].toUpperCase()}${kind.slice(1)} ${n}`;
     setList((l) => ({
       ...l,

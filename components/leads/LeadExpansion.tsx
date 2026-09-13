@@ -18,7 +18,7 @@ export function LeadExpansion({ lead, onDraftChange, onApprove, onCreateDraft, b
             <button type="button" onClick={onCreateDraft} disabled={busy} className="mt-4 w-fit rounded-lg bg-primary px-3.5 py-[9px] text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85 disabled:opacity-50">
               {busy ? "Drafting…" : "Draft outreach"}
             </button>
-          ) : <p className="mt-3 text-xs text-muted-foreground">{lead.source === "live" ? "This lead already has backend outreach history; the list endpoint does not expose its latest draft." : "Evaluation row · live drafting unlocks after Origami returns stored leads."}</p>}
+          ) : <p className="mt-3 text-xs text-muted-foreground">{lead.source === "live" ? "This lead already has backend outreach history; the list endpoint does not expose its latest draft." : "Evaluation row · live drafting unlocks after a search returns stored leads."}</p>}
         </div>
       )}
     </div>

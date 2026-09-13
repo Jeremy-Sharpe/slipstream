@@ -5,7 +5,7 @@ from app.core.config import Settings
 from app.schemas.leads import Lead, LeadIn
 from app.schemas.origami import Job
 from app.services.embeddings import embed_texts
-from app.services.icp import cosine_similarity, won_centroid
+from app.services.icp import cosine_similarity, icp_freshness, won_centroid
 from app.services.icp_leads_store import IcpLeadsStore
 from app.services.origami import OrigamiClient, map_rows_to_leads, poll_until_done
 
@@ -26,6 +26,11 @@ async def start_search(
     )
     if profile is None:
         raise ValueError("No ready ICP profile found")
+    freshness = icp_freshness(store, profile)
+    if freshness.status == "stale":
+        raise ValueError(
+            "ICP is stale because CRM evidence changed; derive a new ICP before sourcing leads"
+        )
     _require_matching_embedding_model(profile.embedding_model, settings)
     idempotency_key = str(
         uuid5(

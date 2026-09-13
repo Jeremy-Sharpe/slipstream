@@ -35,7 +35,7 @@ export function LeadTable({ leads, onChange, onApprove, onCreateDraft, busyLeadI
   if (leads.length === 0) {
     return (
       <div className="mx-[22px] mb-[22px] flex-1 rounded-lg border border-line bg-card">
-        <EmptyState title="No leads yet" body="Run a search from the brief and companies land here as Origami finds them." />
+        <EmptyState title="No leads yet" body="Run the Revenue DNA brief and matched companies land here." />
       </div>
     );
   }

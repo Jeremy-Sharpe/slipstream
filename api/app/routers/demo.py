@@ -7,12 +7,18 @@ from pydantic import BaseModel
 
 from app.core.config import Settings
 from app.core.llm import MissingEmbeddingProviderError, MissingReasoningProviderError
-from app.schemas.icp import FixtureHistoryCounts, StoredIcpProfile
+from app.schemas.icp import FixtureHistoryCounts, IcpFreshness, StoredIcpProfile
 from app.schemas.leads import LeadSourceAccepted
 from app.services import fixture_history
 from app.services.demo_leads import demo_job_id, generate_demo_leads
 from app.services.dependencies import get_embedding_client, get_settings, get_store
-from app.services.icp import derive_icp, evidence_inventory, with_source_deals
+from app.services.icp import (
+    cohort_revision,
+    derive_icp,
+    evidence_inventory,
+    icp_freshness,
+    with_source_deals,
+)
 from app.services.icp_leads_store import IcpLeadsStore
 
 router = APIRouter(prefix="/demo", tags=["demo"])
@@ -58,6 +64,7 @@ class DemoEvidenceResponse(BaseModel):
     models: list[str]
     sample_leads: list[DemoLeadEvidence]
     delivery_enabled: bool
+    revenue_dna: IcpFreshness
 
 
 @router.get("/evidence", response_model=DemoEvidenceResponse)
@@ -67,6 +74,7 @@ def evidence(settings: SettingsDep, store: StoreDep) -> DemoEvidenceResponse:
     if latest is None:
         raise HTTPException(status_code=404, detail="No derived ICP is available")
     profile = with_source_deals(store, latest)
+    freshness = icp_freshness(store, profile)
     leads = [
         lead
         for lead in store.list_leads(icp_profile_id=str(profile.id))
@@ -103,6 +111,7 @@ def evidence(settings: SettingsDep, store: StoreDep) -> DemoEvidenceResponse:
         and profile.model == settings.effective_reasoning_model
         and profile.embedding_model == settings.effective_embedding_model
         and models == [settings.effective_reasoning_model]
+        and freshness.status == "current"
     )
     samples = [
         DemoLeadEvidence(
@@ -132,6 +141,7 @@ def evidence(settings: SettingsDep, store: StoreDep) -> DemoEvidenceResponse:
         models=models,
         sample_leads=samples,
         delivery_enabled=settings.integration_flags["email_delivery"],
+        revenue_dna=freshness,
     )
 
 
@@ -157,8 +167,9 @@ async def bootstrap(
                 fixture_history.load_fixture_history, store, FIXTURES_DIR
             )
             inventory = evidence_inventory(store, include_demo=False)
+            current_revision = cohort_revision(store.list_icp_deals(include_demo=False))
             latest = store.latest_icp_profile()
-            reused = _profile_is_current(latest, inventory, settings)
+            reused = _profile_is_current(latest, inventory, settings, current_revision)
             profile = (
                 with_source_deals(store, latest)
                 if reused and latest is not None
@@ -212,7 +223,10 @@ async def bootstrap(
 
 
 def _profile_is_current(
-    profile: StoredIcpProfile | None, inventory: object, settings: Settings
+    profile: StoredIcpProfile | None,
+    inventory: object,
+    settings: Settings,
+    current_revision: str,
 ) -> bool:
     if profile is None or profile.status != "ready" or profile.profile.source_summary is None:
         return False
@@ -220,6 +234,7 @@ def _profile_is_current(
     return (
         profile.model == settings.effective_reasoning_model
         and profile.embedding_model == settings.effective_embedding_model
+        and profile.profile.cohort_revision == current_revision
         and source.deals == getattr(inventory, "deals", -1)
         and source.calls == getattr(inventory, "calls", -1)
         and source.emails == getattr(inventory, "emails", -1)

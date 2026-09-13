@@ -179,3 +179,35 @@ async def test_start_search_rejects_embedding_model_drift_before_provider_call()
             icp_profile_id=str(profile.id),
         )
     assert create_called is False
+
+
+@pytest.mark.asyncio
+async def test_start_search_blocks_stale_revenue_dna_before_provider_call() -> None:
+    store = InMemoryIcpLeadsStore()
+    load_fixture_history(store, FIXTURES_DIR)
+    profile = derive_icp(store, fake_structured, fake_embed, Settings(_env_file=None))
+    open_deal = next(deal for deal in store.list_icp_deals() if deal.outcome == "open")
+    store.upsert_deal(
+        {
+            "crm_external_id": open_deal.crm_external_id,
+            "stage": "closed_won",
+            "outcome": "won",
+        }
+    )
+    create_called = False
+
+    class TrackingOrigami:
+        async def create_search(self, *_: object, **__: object) -> Job:
+            nonlocal create_called
+            create_called = True
+            return Job(id="job-1", status="running")
+
+    with pytest.raises(ValueError, match="ICP is stale"):
+        await start_search(
+            store,
+            TrackingOrigami(),  # type: ignore[arg-type]
+            Settings(_env_file=None),
+            icp_profile_id=str(profile.id),
+        )
+
+    assert create_called is False

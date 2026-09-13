@@ -11,6 +11,7 @@ from app.factory import create_app
 from app.schemas.icp import IcpProfile
 from app.schemas.leads import LeadIn
 from app.schemas.origami import Job
+from app.services.icp import cohort_revision, evidence_inventory
 
 
 def test_icp_derive_returns_503_with_missing_integration(client: TestClient) -> None:
@@ -37,6 +38,67 @@ def test_icp_evidence_inventory_is_keyless_and_becomes_ready(client: TestClient)
         "contrast_deals": 6,
         "active_deals": 1,
         "ready_to_derive": True,
+    }
+
+
+def test_icp_freshness_requires_a_profile(client: TestClient) -> None:
+    response = client.get("/api/v1/icp/freshness")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No ready ICP profile found"
+
+
+def test_icp_freshness_exposes_current_revenue_dna_and_lead_version(client: TestClient) -> None:
+    client.post("/api/v1/icp/history/load")
+    store = client.app.state.icp_leads_store
+    deals = store.list_icp_deals()
+    inventory = evidence_inventory(store)
+    profile = store.insert_icp_profile(
+        version=2,
+        profile=IcpProfile(
+            summary="Best-fit services firms",
+            industries=["Professional services"],
+            headcount_band="25-80",
+            roles=["Managing Partner"],
+            triggers=["Compliance"],
+            disqualifiers=[],
+            evidence=[],
+            confidence=0.8,
+            origami_brief="Find similar firms.",
+            source_summary=inventory,
+            cohort_revision=cohort_revision(deals),
+        ),
+        model="openai/gpt-5.4",
+        embedding_model="text-embedding-3-small",
+    )
+    store.upsert_lead(
+        LeadIn(
+            company_name="Fictional Match",
+            origami_row_id="demo:freshness-route",
+            icp_profile_id=profile.id,
+        )
+    )
+
+    response = client.get("/api/v1/icp/freshness")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "profile_id": str(profile.id),
+        "profile_version": 2,
+        "status": "current",
+        "derived_cohort_revision": cohort_revision(deals),
+        "current_cohort_revision": cohort_revision(deals),
+        "source_summary": {
+            "deals": 12,
+            "calls": 12,
+            "emails": 1,
+            "outcome_labelled": 11,
+        },
+        "deals_added": 0,
+        "outcome_labels_added": 0,
+        "leads_on_profile": 1,
+        "leads_needing_rescore": 0,
+        "reason": "Revenue DNA is current: every eligible CRM outcome is reflected in this ICP.",
     }
 
 
@@ -81,7 +143,7 @@ def test_latest_icp_includes_bounded_source_call_refs(client: TestClient) -> Non
                     "occurred_at": "2026-09-12T10:50:00Z",
                     "subject": "Oversized identifier",
                     "content": "Oversized identifiers are omitted.",
-                }
+                },
             ],
         }
     )
@@ -186,20 +248,24 @@ def test_lead_source_returns_503_with_missing_integration(client: TestClient) ->
 def test_outreach_approval_rejects_a_stale_reviewed_draft(client: TestClient) -> None:
     store = client.app.state.icp_leads_store
     lead = store.upsert_lead(LeadIn(company_name="Northstar", origami_row_id="row-stale"))
-    stale = store.insert_draft({
-        "lead_id": str(lead.id),
-        "kind": "outreach",
-        "subject": "First",
-        "body": "Old",
-        "status": "draft",
-    })
-    latest = store.insert_draft({
-        "lead_id": str(lead.id),
-        "kind": "outreach",
-        "subject": "Second",
-        "body": "New",
-        "status": "draft",
-    })
+    stale = store.insert_draft(
+        {
+            "lead_id": str(lead.id),
+            "kind": "outreach",
+            "subject": "First",
+            "body": "Old",
+            "status": "draft",
+        }
+    )
+    latest = store.insert_draft(
+        {
+            "lead_id": str(lead.id),
+            "kind": "outreach",
+            "subject": "Second",
+            "body": "New",
+            "status": "draft",
+        }
+    )
 
     response = client.post(
         f"/leads/{lead.id}/outreach/approve",
@@ -214,13 +280,15 @@ def test_outreach_approval_rejects_a_stale_reviewed_draft(client: TestClient) ->
 def test_outreach_approval_is_bound_to_the_reviewed_draft(client: TestClient) -> None:
     store = client.app.state.icp_leads_store
     lead = store.upsert_lead(LeadIn(company_name="Arcwell", origami_row_id="row-current"))
-    draft = store.insert_draft({
-        "lead_id": str(lead.id),
-        "kind": "outreach",
-        "subject": "Current",
-        "body": "Reviewed",
-        "status": "draft",
-    })
+    draft = store.insert_draft(
+        {
+            "lead_id": str(lead.id),
+            "kind": "outreach",
+            "subject": "Current",
+            "body": "Reviewed",
+            "status": "draft",
+        }
+    )
 
     response = client.post(
         f"/leads/{lead.id}/outreach/approve",
@@ -243,13 +311,15 @@ def test_outreach_approval_waits_for_concurrent_redraft(
     app = create_app(settings)
     store = app.state.icp_leads_store
     lead = store.upsert_lead(LeadIn(company_name="Marlowe", origami_row_id="row-race"))
-    reviewed = store.insert_draft({
-        "lead_id": str(lead.id),
-        "kind": "outreach",
-        "subject": "Reviewed",
-        "body": "Old copy",
-        "status": "draft",
-    })
+    reviewed = store.insert_draft(
+        {
+            "lead_id": str(lead.id),
+            "kind": "outreach",
+            "subject": "Reviewed",
+            "body": "Old copy",
+            "status": "draft",
+        }
+    )
     drafting = Event()
     release = Event()
 
@@ -278,13 +348,15 @@ def test_outreach_approval_waits_for_concurrent_redraft(
     def slow_redraft(*args: Any, **kwargs: Any) -> Any:
         drafting.set()
         assert release.wait(timeout=2)
-        return store.insert_draft({
-            "lead_id": str(lead.id),
-            "kind": "outreach",
-            "subject": "New",
-            "body": "Latest copy",
-            "status": "draft",
-        })
+        return store.insert_draft(
+            {
+                "lead_id": str(lead.id),
+                "kind": "outreach",
+                "subject": "New",
+                "body": "Latest copy",
+                "status": "draft",
+            }
+        )
 
     monkeypatch.setattr("app.routers.leads.draft_outreach", slow_redraft)
     with TestClient(app) as configured_client, ThreadPoolExecutor(max_workers=2) as pool:
@@ -481,13 +553,15 @@ def test_lead_outreach_gets_past_integration_check_with_local_reasoning(
     def fake_draft_outreach(*args: Any, **kwargs: Any) -> Any:
         nonlocal reached_drafting
         reached_drafting = True
-        return store.insert_draft({
-            "lead_id": str(lead.id),
-            "kind": "outreach",
-            "subject": "Local follow-up",
-            "body": "Thanks for the conversation.",
-            "status": "draft",
-        })
+        return store.insert_draft(
+            {
+                "lead_id": str(lead.id),
+                "kind": "outreach",
+                "subject": "Local follow-up",
+                "body": "Thanks for the conversation.",
+                "status": "draft",
+            }
+        )
 
     monkeypatch.setattr("app.routers.leads.draft_outreach", fake_draft_outreach)
 
