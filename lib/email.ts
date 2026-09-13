@@ -1,10 +1,11 @@
 // Turns a pasted or forwarded email into a 1–3 message thread: "From:/To:/
 // Subject:/Date:" headers on top, quoted replies ("On … wrote:" or "> " lines)
 // underneath, newest first the way mail clients paste them.
+import { domainKey, team, user } from "./data/seller";
 import type { EmailMessage, EmailParty, EmailRecipient } from "./types";
 
-const REPS = ["Sam Whitfield", "Jordan Lee"];
-const OUR_DOMAIN = "eleno";
+const REPS = team.map((person) => person.name);
+const OUR_DOMAIN = domainKey;
 const HEADER = /^(From|To|Cc|Subject|Date|Sent):\s*(.*)$/i;
 // "On Sat, 12 Sept 2026 at 11:20, Sam Whitfield <sam@…> wrote:": the sender follows the last comma.
 const WROTE = /^On (.+),\s*(.+?)\s+wrote:\s*$/;
@@ -77,7 +78,7 @@ export function parseEmail(text: string): EmailMessage[] {
   const subject = stripRe(raws.find((r) => r.subject)?.subject ?? "") || "No subject";
   const now = Date.now();
   const inbound = ordered.find((r) => r.from && !isRep(r.from))?.from ?? ordered[0].from;
-  const rep = ordered.find((r) => r.from && isRep(r.from))?.from ?? { name: "Sam Whitfield", email: "sam@eleno.example" };
+  const rep = ordered.find((r) => r.from && isRep(r.from))?.from ?? user;
   const contact = inbound && !isRep(inbound) ? inbound : { name: "Prospect", email: "prospect@unknown.example" };
   return ordered.map((r, i) => {
     const sender = r.from ?? (i % 2 === 0 ? contact : rep);

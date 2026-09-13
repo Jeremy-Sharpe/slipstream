@@ -108,7 +108,7 @@ Slipstream is the closed loop. Its Revenue DNA gate is the key difference: call 
 - Approval never claims delivery. The Resend adapter can deliver one exact approved draft or a bounded explicit campaign through separately authenticated server-side endpoints; durable leases, pause/resume controls and per-item outcomes are implemented, but the current deployment has no email-provider credential or Railway login.
 - Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
 - Extraction is grounded but not perfect: a value whose quote cannot be found verbatim in the transcript is dropped rather than shown, so a rep can see a null where the model paraphrased. Deal outcome and stage are model judgement calls scored against hand labels in the eval, not ground truth.
-- Single tenant, no auth, no billing.
+- Single tenant, no auth, no billing. The signed-in user, seller and rep identities are sample data in `lib/data/seller.json`, and the Home placeholders in `lib/data/placeholders.ts`; a production build reads them from the CRM.
 - Campaigns, calendar, lists and settings screens from the earlier UI are not in this release; the API keeps campaigns and the Revenue DNA freshness gate, and Intelligence shows the freshness state.
 - Scoring, playbook derivation, pasted email threads and audio transcription need the web server to hold `SLIPSTREAM_INGEST_TOKEN` (the API's `INGEST_TOKEN`). Without it those actions show a locked message and the run continues past them; extraction, drafting, approval, ICP and leads never need it.
 - Pasted transcripts persist through the live-coach websocket relayed by the web server, because the API has no raw-transcript ingest endpoint.

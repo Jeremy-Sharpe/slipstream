@@ -15,12 +15,13 @@ import {
   type EmailIngestInput,
 } from "@/lib/api/slipstream";
 import { domainName } from "@/lib/adapters";
+import { company, user } from "@/lib/data/seller";
 import { displayName, isRep, parseEmail } from "@/lib/email";
 import type { ConversationEntry } from "@/lib/store/conversations";
 
-export const REP_NAME = "Sam Whitfield";
-const MAILBOX = { name: REP_NAME, email: "sam@eleno.example" };
-const MAILBOX_ID = "eleno-sales";
+export const REP_NAME = user.name;
+const MAILBOX = user;
+const MAILBOX_ID = company.mailboxExternalId;
 const WORDS_PER_MINUTE = 150;
 
 const stamp = () => Date.now().toString(36);
