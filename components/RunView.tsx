@@ -21,15 +21,39 @@ export function RunView({ call }: { call: CallRecord }) {
   const run = useRun(call, { instant, startDelay: staged ? 500 : 200 });
   const enter = (delay: number) => (staged ? { animation: `fade-up 250ms cubic-bezier(0.23,1,0.32,1) ${delay}ms both` } : undefined);
 
-  // Transcript highlight: hover from field rows / chips, or a 1.5s click highlight.
-  const [hover, setHover] = useState<number | null>(null);
+  // Transcript highlight: hover tints the turn in place (never scrolls); a
+  // click scrolls the page to the turn and highlights it for 1.5s.
+  const [hover, setHoverState] = useState<number | null>(null);
   const [clicked, setClicked] = useState<number | null>(null);
   const clickTimer = useRef<number>(0);
+  const pageScrolling = useRef(false);
+  const lastPointerMove = useRef(0);
+  useEffect(() => {
+    const onMove = () => { lastPointerMove.current = Date.now(); };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
+  // Hovers caused by content moving under a still pointer (our own scrolls,
+  // streaming layout shifts) don't count: the pointer must have moved recently.
+  const setHover = useCallback((i: number | null) => {
+    if (i === null) { setHoverState(null); return; }
+    if (pageScrolling.current) return;
+    if (Date.now() - lastPointerMove.current > 150) return;
+    setHoverState(i);
+  }, []);
   const jump = useCallback((i: number) => {
     window.clearTimeout(clickTimer.current);
     setClicked(i);
+    setHoverState(null);
     clickTimer.current = window.setTimeout(() => setClicked(null), 1500);
-  }, []);
+    const el = document.querySelector<HTMLElement>(`[data-turn="${i}"]`);
+    if (!el) return;
+    pageScrolling.current = true;
+    const done = () => { pageScrolling.current = false; window.removeEventListener("scrollend", done); };
+    window.addEventListener("scrollend", done, { once: true });
+    window.setTimeout(done, 600);
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 120, behavior: reduced ? "auto" : "smooth" });
+  }, [reduced]);
   const highlight = clicked ?? hover;
 
   // Draft body (editable, replaced by the "shorter" chip) and a brief step outline.
@@ -79,8 +103,9 @@ export function RunView({ call }: { call: CallRecord }) {
     if (r.top >= h.top && r.bottom <= h.bottom) return;
     const target = r.top < h.top ? host.scrollTop + (r.top - h.top) - 16 : host.scrollTop + (r.bottom - h.bottom) + 16;
     programmatic.current = true;
+    pageScrolling.current = true;
     host.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
-    window.setTimeout(() => { programmatic.current = false; }, 600);
+    window.setTimeout(() => { programmatic.current = false; pageScrolling.current = false; }, 600);
   }, [reduced]);
 
   return (
