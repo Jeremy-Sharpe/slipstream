@@ -73,3 +73,13 @@ To list available voices once a key is present:
 ```bash
 uv run python generate_audio.py --list-voices
 ```
+
+## Publish Recordings For The Web App
+
+Judges can play five calls in the live app: the demo call plus one won (`call-07-fairfield-wealth`), stalled (`call-04-kite-and-co`), lost (`call-03-afterglow-studio`) and no-show (`call-12-dockside-dental`) call. Home's "Pick a call" list shows a play button beside each, clicking the row runs that call through the normal fixture ingest, and the call page header carries a player with a scrubber. Vercel does not upload `fixtures/`, so the web copies live in `public/recordings/` as 64 kbps mono mp3, listed in `lib/data/recordings.json`.
+
+```bash
+uv run --script publish_recordings.py --models <dir with kokoro-v1.0.onnx and voices-v1.0.bin>
+```
+
+A call with an ElevenLabs master (`calls/<id>/audio.mp3`) is transcoded as is; today that is only the demo call. The other four were voiced locally with the open-weight Kokoro-82M model (one distinct voice per speaker) because no ElevenLabs key was available on the machine that generated them, and each measured length is written back to `script.json` as `audio_seconds` so transcript timings match the audio. To swap them for ElevenLabs voices, run `generate_audio.py --only <id>` with the key, then re-run the publish script. The model files come from the kokoro-onnx `model-files-v1.0` release and are not committed.

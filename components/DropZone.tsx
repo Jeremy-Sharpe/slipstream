@@ -7,6 +7,7 @@ import { ApiError, getFixtures, type ApiCall, type ApiFixture } from "@/lib/api/
 import { parseEmail } from "@/lib/email";
 import { ingestFixture, ingestPastedEmail, ingestRecording, ingestTranscript, parseTranscript } from "@/lib/ingest";
 import { registerConversation, setRun, type ConversationEntry } from "@/lib/store/conversations";
+import { CallRecording, recordingFor } from "./CallRecording";
 import { FileTiles } from "./home/FileTiles";
 import { Recorder } from "./home/Recorder";
 import { Segmented } from "./home/Segmented";
@@ -197,19 +198,27 @@ export function DropZone() {
             </div>
           ) : (
             <ul className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-              {fixtures.map((fixture) => (
-                <li key={fixture.call_id}>
-                  <button
-                    type="button"
-                    onClick={() => void pickFixture(fixture)}
-                    className="grid h-9 w-full grid-cols-[minmax(0,1fr)_96px_64px] items-center gap-x-3 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-                  >
-                    <span className="min-w-0 truncate text-[14px] text-ink">{fixture.company} <span className="text-soft">· {fixture.prospect}</span></span>
-                    <span className="truncate text-[13px] text-soft">{fixture.outcome.replace("_", " ")}</span>
-                    <span className="text-right text-[13px] tabular-nums text-faint">{dayFmt.format(new Date(fixture.scheduled_at))}</span>
-                  </button>
-                </li>
-              ))}
+              {/* Calls with a playable recording lead, so judges find them without scrolling. */}
+              {[...fixtures].sort((a, b) => Number(!!recordingFor(b.call_id)) - Number(!!recordingFor(a.call_id))).map((fixture) => {
+                const recording = recordingFor(fixture.call_id);
+                return (
+                  <li key={fixture.call_id} className="flex items-center gap-1">
+                    <span className="flex w-8 shrink-0 justify-center">
+                      {recording && <CallRecording compact recording={recording} label={`${fixture.company} with ${fixture.prospect}`} />}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => void pickFixture(fixture)}
+                      title={recording ? `Run this recording (${mmss(Math.round(recording.seconds))})` : undefined}
+                      className="grid h-9 min-w-0 flex-1 grid-cols-[minmax(0,1fr)_96px_64px] items-center gap-x-3 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                    >
+                      <span className="min-w-0 truncate text-[14px] text-ink">{fixture.company} <span className="text-soft">· {fixture.prospect}</span></span>
+                      <span className="truncate text-[13px] text-soft">{fixture.outcome.replace("_", " ")}</span>
+                      <span className="text-right text-[13px] tabular-nums text-faint">{dayFmt.format(new Date(fixture.scheduled_at))}</span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

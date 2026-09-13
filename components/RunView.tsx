@@ -7,6 +7,7 @@ import { ArrowLeft, RotateCcw } from "lucide-react";
 import { useRun, type RunSource } from "@/lib/useRun";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Avatar } from "./Avatar";
+import { CallRecording, recordingFor } from "./CallRecording";
 import { RunTimeline } from "./RunTimeline";
 import { Summary } from "./run/Summary";
 import { Thread, Transcript } from "./Transcript";
@@ -33,6 +34,7 @@ export function RunView({ source }: { source: RunSource }) {
   const staged = params.get("from") === "home" && !reduced;
   const run = useRun(source, { instant, startDelay: staged ? 500 : 200 });
   const call = run.call;
+  const recording = source.kind === "call" ? recordingFor(source.call?.source_external_id) : undefined;
   const email = call.kind === "email";
   const messages = call.messages ?? [];
   const enter = (delay: number) => (staged ? { animation: `fade-up 250ms cubic-bezier(0.23,1,0.32,1) ${delay}ms both` } : undefined);
@@ -212,6 +214,7 @@ export function RunView({ source }: { source: RunSource }) {
             <span className="text-[13.5px] tabular-nums">{fmtDate(call.at)} · {fmtTime(call.at)} · {email ? `${messages.length} message${messages.length === 1 ? "" : "s"}` : mmss(call.duration)}</span>
           </p>
         </div>
+        {recording && <CallRecording recording={recording} label={`${call.company} with ${call.contact}`} className="mr-2" />}
         <Button variant="ghost" size="sm" onClick={run.rerun}><RotateCcw className="size-3.5" strokeWidth={1.75} /> Re-run</Button>
       </div>
       </div>
