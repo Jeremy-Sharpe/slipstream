@@ -43,11 +43,11 @@ export function fmtElapsed(ms: number) {
   return `${Math.floor(s / 60)}m ${(s % 60).toFixed(0)}s`;
 }
 
-export function WorkingLine({ label, startedAt, detail }: { label: string; startedAt?: number; detail?: string }) {
+export function WorkingLine({ label, startedAt, detail, spinner = false }: { label: string; startedAt?: number; detail?: string; spinner?: boolean }) {
   const ms = useElapsed(startedAt);
   return (
     <span role="status" className="inline-flex items-center gap-2.5">
-      <LoaderGrid />
+      {spinner ? <Spinner className="size-3.5 border-t-ink" /> : <LoaderGrid />}
       <span className="shimmer-text text-[13.5px] font-medium">{label}</span>
       {detail && <span className="text-[13.5px] tabular-nums text-ink">{detail}</span>}
       <span className="text-[13px] tabular-nums text-faint">{fmtElapsed(ms)}</span>

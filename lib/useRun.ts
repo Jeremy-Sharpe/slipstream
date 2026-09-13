@@ -33,7 +33,7 @@ const SUB_MIN = 900;
 /** Settle after a step completes before the next one expands. */
 const SETTLE = 500;
 
-export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?: number } = {}) {
+export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?: number; transcribed?: boolean } = {}) {
   const [steps, setSteps] = useState<StepState[]>([]);
   const [open, setOpen] = useState<StepId | null>(null);
   const [phase1Done, setPhase1Done] = useState(false);
@@ -75,19 +75,19 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
   const start = useCallback(() => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
-    setSteps(PHASE1.map((id) => ({ id, status: "pending" })));
+    setSteps(PHASE1.map((id) => (opts.transcribed && id === "transcribe" ? { id, status: "done", elapsedMs: 2400 } : { id, status: "pending" })));
     setOpen(null);
     setPhase1Done(false);
     setRunId((n) => n + 1);
     actions.setRun(call.id, "running");
     // No-show: nothing to extract. Otherwise stop at the extraction gate and wait.
     const stop = call.outcome === "no_show" ? { id: "transcribe" as StepId, note: "No conversation to extract. Reschedule note drafted" } : { id: "extract" as StepId, wait: true };
-    schedule(PHASE1, opts.startDelay ?? 200, stop, () => {
+    schedule(opts.transcribed ? PHASE1.filter((id) => id !== "transcribe") : PHASE1, opts.startDelay ?? 200, stop, () => {
       setPhase1Done(true);
       setOpen(call.outcome === "no_show" ? null : "extract");
       actions.setRun(call.id, call.outcome === "no_show" ? "done" : "review");
     });
-  }, [call, schedule, opts.startDelay]);
+  }, [call, schedule, opts.startDelay, opts.transcribed]);
 
   /** Phase 2: only after the fields are approved. The timeline grows here. */
   const startPhase2 = useCallback(() => {

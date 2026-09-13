@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { CallRecord } from "@/lib/types";
-import { Avatar, CompanyTile } from "./Avatar";
+import { Avatar } from "./Avatar";
 import { OutcomePill, fmtTime } from "./ui";
 
 const TZ = "Australia/Melbourne";
@@ -53,8 +53,7 @@ export function CallsList({ query = "" }: { query?: string }) {
                       <Avatar name={c.contact} size={28} />
                       <span className="truncate text-[14px] font-medium text-ink">{c.contact}</span>
                     </span>
-                    <span className="flex min-w-0 items-center gap-2.5">
-                      <CompanyTile name={c.company} size={28} />
+                    <span className="flex min-w-0 items-center gap-2">
                       <span className="truncate text-[14px] text-ink">{c.company}</span>
                       <span className="truncate text-[13.5px] text-soft">· {c.title}</span>
                     </span>

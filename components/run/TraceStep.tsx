@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/components/ui";
-import { LoaderGrid, Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
+import { Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
 
 /* One step of the agent trace. The label shimmers while working and settles
    with a fade to the done label; the body is an expandable trace with a
@@ -11,7 +11,7 @@ import { LoaderGrid, Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
 
 export type TraceStatus = "pending" | "running" | "waiting" | "done" | "skipped";
 
-export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, loader = "spinner", shimmer = false, outlined = false, onReveal, children }: {
+export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, shimmer = false, outlined = false, onReveal, children }: {
   status: TraceStatus;
   workingLabel: string;
   doneLabel: string;
@@ -24,7 +24,6 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   expanded: boolean;
   onToggle: () => void;
   last?: boolean;
-  loader?: "spinner" | "grid";
   /** Shimmer the working label (used for Transcribing); otherwise muted. */
   shimmer?: boolean;
   /** Brief outline after a chip action. */
@@ -63,7 +62,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
         >
           {status === "done" && <Check className="size-3.5" strokeWidth={2.5} />}
           {waiting && <span className="size-2 rounded-full bg-accent" style={{ animation: "pop-in 200ms cubic-bezier(0.23,1,0.32,1) both" }} />}
-          {working && (loader === "grid" ? <LoaderGrid /> : <Spinner className="size-3.5 border-t-ink" />)}
+          {working && <Spinner className="size-3.5 border-t-ink" />}
         </span>
         {!last && <span aria-hidden className="mt-1.5 w-px flex-1 bg-line" />}
       </div>

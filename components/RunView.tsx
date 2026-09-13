@@ -7,7 +7,7 @@ import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { CallRecord } from "@/lib/types";
 import { useRun, type StepId } from "@/lib/useRun";
 import { useReducedMotion } from "@/lib/useReducedMotion";
-import { Avatar, CompanyTile } from "./Avatar";
+import { Avatar } from "./Avatar";
 import { RunTimeline } from "./RunTimeline";
 import { Summary } from "./run/Summary";
 import { Transcript } from "./Transcript";
@@ -18,7 +18,8 @@ export function RunView({ call }: { call: CallRecord }) {
   const reduced = useReducedMotion();
   const instant = params.get("instant") === "1" || reduced;
   const staged = params.get("from") === "home" && !reduced;
-  const run = useRun(call, { instant, startDelay: staged ? 500 : 200 });
+  const transcribed = params.get("transcribed") === "1";
+  const run = useRun(call, { instant, startDelay: staged ? 500 : 200, transcribed });
   const enter = (delay: number) => (staged ? { animation: `fade-up 250ms cubic-bezier(0.23,1,0.32,1) ${delay}ms both` } : undefined);
 
   // Transcript highlight: hover tints the turn in place (never scrolls); a
@@ -120,7 +121,6 @@ export function RunView({ call }: { call: CallRecord }) {
           <h1 className="flex items-center gap-2 text-[20px] font-semibold text-ink">
             {call.contact}
             <span className="font-normal text-faint">·</span>
-            <CompanyTile name={call.company} size={22} />
             <span>{call.company}</span>
           </h1>
           <p className="mt-0.5 flex h-6 items-center gap-2 text-[13px] text-soft">

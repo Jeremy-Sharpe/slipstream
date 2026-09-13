@@ -8,7 +8,6 @@ import { leads } from "@/lib/leads";
 import { actions, useStore } from "@/lib/store";
 import type { CallRecord } from "@/lib/types";
 import { TRACE, type StepId, type StepState } from "@/lib/useRun";
-import { CompanyTile } from "./Avatar";
 import { TraceStep } from "./run/TraceStep";
 import { WorkingLine } from "./run/WorkingLine";
 import { StreamingText, words } from "./run/StreamingText";
@@ -186,15 +185,14 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
         );
       case "search":
         if (st.status === "running") {
-          return <WorkingLine label="Searching Victoria for firms like the 5 you closed" startedAt={st.startedAt} detail={`${st.progress ?? 0} of 10`} />;
+          return <WorkingLine label="Searching Victoria for firms like the 5 you closed" startedAt={st.startedAt} detail={`${st.progress ?? 0} of 10`} spinner />;
         }
         if (st.status !== "done") return null;
         return (
           <div>
             <ul className="-mx-2 flex flex-col">
               {top.map((l) => (
-                <li key={l.id} className="grid h-9 grid-cols-[24px_minmax(0,1fr)_44px] items-center gap-x-2.5 rounded-lg px-2 transition-colors duration-150 hover:bg-white">
-                  <CompanyTile name={l.company} size={24} />
+                <li key={l.id} className="grid h-9 grid-cols-[minmax(0,1fr)_44px] items-center gap-x-2.5 rounded-lg px-2 transition-colors duration-150 hover:bg-white">
                   <span className="min-w-0 truncate text-[15px] text-ink">{l.company} <span className="text-soft">· {l.title}</span></span>
                   <span className="text-right"><Score value={l.similarity} /></span>
                 </li>
@@ -237,7 +235,6 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
             expanded={open === st.id && st.status !== "pending"}
             onToggle={() => toggle(st.id)}
             last={last && !skippedNote}
-            loader={st.id === "search" ? "grid" : "spinner"}
             shimmer={st.id === "transcribe"}
             outlined={highlightStep === st.id}
             onReveal={onReveal}

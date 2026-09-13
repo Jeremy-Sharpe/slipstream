@@ -8,10 +8,11 @@ import { FileTiles } from "./home/FileTiles";
 import { Recorder } from "./home/Recorder";
 import { Segmented } from "./home/Segmented";
 import { TypedPlaceholder } from "./home/TypedPlaceholder";
+import { Submitting, type Source } from "./home/Submitting";
 import { Button, cn } from "./ui";
 
 type Mode = "upload" | "record" | "paste";
-type Phase = { kind: "idle" } | { kind: "error"; message: string };
+type Phase = { kind: "idle" } | { kind: "submitting"; source: Source; error?: string; text?: string };
 
 const MEDIA = /\.(mp3|m4a|wav|mp4|mov|webm|ogg|aac|flac|m4v)$/i;
 const MODES: { key: Mode; label: string }[] = [
@@ -40,12 +41,8 @@ export function DropZone() {
   const isMedia = (f: File) => f.type.startsWith("audio/") || f.type.startsWith("video/") || MEDIA.test(f.name);
 
   const submitFile = (f: File) => {
-    if (!isMedia(f)) {
-      setPhase({ kind: "error", message: "That file type isn't supported" });
-      timers.current.push(window.setTimeout(() => setPhase({ kind: "idle" }), 1600));
-      return;
-    }
-    handoff(() => actions.addUpload(f.name));
+    const source: Source = { kind: "file", name: f.name, bytes: f.size };
+    setPhase({ kind: "submitting", source, error: isMedia(f) ? undefined : "That file type isn't supported" });
   };
 
   const onFiles = (files: FileList | null) => {
@@ -53,18 +50,29 @@ export function DropZone() {
     if (f) submitFile(f);
   };
 
-  // Straight to the run: Home fades out and rises, the run stages its entrance.
+  // After the Home-side transcribing settles: Home fades out and rises, the
+  // run stages its entrance with the Transcribed step already done.
   const handoff = (make: () => { id: string }) => {
     setLeaving(true);
     timers.current.push(window.setTimeout(() => {
       const c = make();
-      router.push(`/calls/${c.id}?from=home`);
+      router.push(`/calls/${c.id}?from=home&transcribed=1`);
     }, 250));
   };
 
   const useRecording = () => {
-    const d = new Date();
-    handoff(() => actions.addUpload(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`));
+    setPhase({ kind: "submitting", source: { kind: "recording" } });
+  };
+
+  const onSubmitted = () => {
+    if (phase.kind !== "submitting") return;
+    const p = phase;
+    handoff(() => {
+      if (p.source.kind === "paste") return actions.addTranscript(p.text ?? "");
+      if (p.source.kind === "file") return actions.addUpload(p.source.name);
+      const d = new Date();
+      return actions.addUpload(`Recording ${d.getDate()} ${d.toLocaleString("en-AU", { month: "short" })} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}.m4a`);
+    });
   };
 
   // The "+" in Paste: media starts transcribing; a text transcript loads in.
@@ -77,18 +85,18 @@ export function DropZone() {
 
   const run = () => {
     if (!text.trim()) return;
-    handoff(() => actions.addTranscript(text));
+    setPhase({ kind: "submitting", source: { kind: "paste", lines: text.split(/\n/).filter((l) => l.trim()).length }, text });
   };
 
   return (
     <div className="text-center motion-safe:transition-[opacity,transform] motion-safe:duration-250" style={{ opacity: leaving ? 0 : 1, transform: leaving ? "translateY(-8px)" : "none", transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
       <h1 className="text-[22px] font-semibold text-ink">What happened on the call?</h1>
       <p className="mx-auto mt-2 max-w-[520px] text-[13.5px] text-soft">Drop the recording. Slipstream files it, drafts the follow-up, and goes and finds companies like the one you just spoke to.</p>
-      <div className="mt-7 mb-5"><Segmented value={mode} options={MODES} onChange={setMode} /></div>
+      <div className={cn("mt-7 mb-5 transition-opacity duration-200", phase.kind === "submitting" && "pointer-events-none opacity-40")}><Segmented value={mode} options={MODES} onChange={setMode} /></div>
 
-      {phase.kind === "error" ? (
-        <div key="error" className={CARD}>
-          <p className="text-[14px] font-medium text-soft" style={{ animation: "fade-in 200ms ease-out both" }}>{phase.message}</p>
+      {phase.kind === "submitting" && phase.source.kind !== "recording" ? (
+        <div key="submitting" className={CARD}>
+          <Submitting source={phase.source} error={phase.error} onDone={onSubmitted} onReset={() => setPhase({ kind: "idle" })} />
         </div>
       ) : mode === "upload" ? (
         <div
@@ -112,7 +120,7 @@ export function DropZone() {
         </div>
       ) : mode === "record" ? (
         <div key="record" className={cn(CARD, "px-8")}>
-          <Recorder key={mode} onUse={useRecording} />
+          <Recorder key={mode} onUse={useRecording} submitting={phase.kind === "submitting" && phase.source.kind === "recording" ? <Submitting source={{ kind: "recording" }} onDone={onSubmitted} variant="bar" /> : null} />
         </div>
       ) : (
         <div key="paste" className={cn(CARD, "items-stretch justify-start p-5 text-left")}>

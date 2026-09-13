@@ -5,7 +5,7 @@ import { ChevronDown, Minus, Plus } from "lucide-react";
 import { icp } from "@/lib/icp";
 import { actions, useStore } from "@/lib/store";
 import type { Lead } from "@/lib/types";
-import { Avatar, CompanyTile } from "./Avatar";
+import { Avatar } from "./Avatar";
 import { WorkingLine } from "./run/WorkingLine";
 import { Button, Pill, Score, cn } from "./ui";
 
@@ -102,8 +102,7 @@ function LeadRow({ lead, open, onToggle, scoring }: { lead: Lead; open: boolean;
         aria-expanded={open}
         className="grid h-14 w-full grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_128px_40px_92px_16px] items-center gap-x-4 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
       >
-        <span className="flex min-w-0 items-center gap-3">
-          <CompanyTile name={lead.company} size={28} />
+        <span className="flex min-w-0 items-center">
           <span className="truncate text-[14px] font-medium text-ink">{lead.company}</span>
         </span>
         <span className="flex min-w-0 items-center gap-2.5">
