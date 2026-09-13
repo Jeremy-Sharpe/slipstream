@@ -1,216 +1,322 @@
-// What the team learned from its calls: the ICP worked backwards from the won
-// deals and the playbook of behaviours that separate wins from the rest. Every
-// number is computed at module load from the history calls (the demo call is
-// left out). `playbook` and `icpProfile` mirror the API shapes so wiring is 1:1.
-import type { ApiIcpProfile, ApiPlaybook } from "@/docs/api-shapes";
-import { calls } from "./calls";
-import { icp } from "./icp";
-import type { CallRecord, Outcome } from "./types";
+import {
+  getIcpEvidenceInventory,
+  getIcpFreshness,
+  getLatestIcp,
+  getLatestPlaybook,
+  getScorecard,
+  type ApiIcpEvidenceInventory,
+  type ApiIcpFreshness,
+  type ApiIcpProfile,
+  type ApiPlaybook,
+  type ApiScorecard,
+} from "@/lib/api/slipstream";
+import { fixtureConversationId, getFixtures, type ApiFixtureSummary } from "@/lib/api/intelligence";
 
-const DEMO_ID = "call-13-marlowe-finch-demo";
+// What the team learned from its calls, read back from the API: the ICP worked
+// backwards from the won deals, and the behaviours behind them taken from the
+// scorecards. Every number below is computed from a response, never a constant.
 
-/** The scored calls: no email threads, no demo call. */
-export const history: CallRecord[] = calls.filter((c) => c.kind === "call" && c.id !== DEMO_ID);
-const threads = calls.filter((c) => c.kind === "email");
-const won = history.filter((c) => c.outcome === "won");
-const other = history.filter((c) => c.outcome !== "won");
+export type Tile = { label: string; value: string; line: string };
 
-const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
-const rate = (xs: CallRecord[], test: (c: CallRecord) => boolean) => (xs.length ? xs.filter(test).length / xs.length : 0);
-const pct = (x: number) => `${Math.round(x * 100)}%`;
-const firstName = (n: string) => n.split(" ")[0];
-/** First `n` sentences of a turn, verbatim. */
-const clip = (text: string, n: number) => (text.match(/[^.?!]+[.?!]+/g) ?? [text]).slice(0, n).join("").trim();
+export type Quote = { callId: string; href: string; company: string; turn: number; text: string };
 
-/* Counts */
-
-export const outcomes: Record<Exclude<Outcome, "open">, number> = { won: 0, stalled: 0, lost: 0, no_show: 0 };
-for (const c of history) if (c.outcome !== "open") outcomes[c.outcome] += 1;
-
-export const reps = [...new Set(history.map((c) => c.rep))].map((rep) => {
-  const mine = history.filter((c) => c.rep === rep);
-  return {
-    rep,
-    calls: mine.length,
-    won: mine.filter((c) => c.outcome === "won").length,
-    mean_discovery: mean(mine.map((c) => c.scorecard.discovery)),
-    next_step_rate: rate(mine, (c) => c.scorecard.nextStepSecured),
-    mean_talk_ratio: mean(mine.map((c) => c.scorecard.talkRatio)),
-  };
-});
-
-export const winRate = won.length / history.length;
-
-/* Tiles */
-
-export const tiles: { label: string; value: string; line: string }[] = [
-  { label: "Calls analysed", value: String(history.length), line: reps.map((r) => `${firstName(r.rep)} ${r.calls}`).join(" · ") },
-  { label: "Win rate", value: pct(winRate), line: `${outcomes.won} won · ${outcomes.stalled} stalled · ${outcomes.lost} lost · ${outcomes.no_show} no-show` },
-  {
-    label: "Dated next step in wins",
-    value: `${won.filter((c) => c.scorecard.nextStepSecured).length} of ${won.length}`,
-    line: `${other.filter((c) => c.scorecard.nextStepSecured).length} of ${other.length} elsewhere`,
-  },
-];
-
-/* Win patterns */
-
-export type QuoteRef = { callId: string; company: string; t: number; text: string };
 export type Pattern = {
   behaviour: string;
   takeaway: string;
   won: { n: number; of: number };
   other: { n: number; of: number };
-  quotes: QuoteRef[];
+  quotes: Quote[];
 };
 
-const HEALTHY_TALK = 0.5;
+export type Trigger = { label: string; count: number | null };
+
+export type IcpRow = {
+  attribute: string;
+  label: string;
+  value: string;
+  deals: { id: string; company: string; href: string }[];
+};
+
+export type IcpView = {
+  summary: string;
+  confidence: number;
+  wonDeals: number;
+  rows: IcpRow[];
+  sourceSummary: { deals: number; calls: number; emails: number; outcome_labelled: number } | null;
+  freshness: { status: ApiIcpFreshness["status"]; reason: string } | null;
+  inventory: ApiIcpEvidenceInventory | null;
+};
+
+export type Provenance = {
+  rubricVersion: string | null;
+  playbookModel: string | null;
+  playbookGeneratedAt: string | null;
+  profileVersion: number | null;
+  cohortRevision: string | null;
+  profileCreatedAt: string | null;
+};
+
+export type Intelligence = {
+  tiles: Tile[];
+  patterns: Pattern[];
+  coachingFocus: string[];
+  coachingSource: "playbook" | "scorecards" | null;
+  triggers: Trigger[];
+  icp: IcpView | null;
+  provenance: Provenance;
+  scoredCalls: number;
+  unscoredFixtures: string[];
+  needsDerive: boolean;
+  errors: { icp: string | null; freshness: string | null; playbook: string | null; scorecards: string | null };
+};
+
 const DISCOVERY_FLOOR = 4;
+const SCORED_OUTCOMES = ["won", "stalled", "lost", "no_show"] as const;
 
-const quoteAt = (c: CallRecord, i: number | null, sentences = 99): QuoteRef | null => {
-  if (i == null) return null;
-  const turn = c.turns[i];
-  if (!turn) return null;
-  return { callId: c.id, company: c.company, t: turn.t, text: clip(turn.text, sentences) };
+const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+const firstName = (name: string) => name.split(" ")[0];
+const reason = (error: unknown) => (error instanceof Error ? error.message : "Request failed");
+
+const ATTRIBUTE_LABELS: Record<string, string> = {
+  industry: "Industry",
+  headcount_band: "Company size",
+  contact_role: "Champion title",
+  role: "Champion title",
+  trigger: "Buying trigger",
 };
 
-const BEHAVIOURS: { behaviour: string; test: (c: CallRecord) => boolean; takeaway: () => string; quote: (c: CallRecord) => QuoteRef | null; order?: (c: CallRecord) => number }[] = [
-  {
-    behaviour: "Secured a dated next step",
-    test: (c) => c.scorecard.nextStepSecured,
-    takeaway: () => `Every win left with a date in the diary. No stalled or lost call did.`,
-    quote: (c) => quoteAt(c, c.scorecard.spans.nextStep),
-    // Prefer the turns that name a day and a time.
-    order: (c) => (/\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December)/.test(c.turns[c.scorecard.spans.nextStep ?? -1]?.text ?? "") ? 0 : 1),
-  },
-  {
-    behaviour: "Discovery questions before pricing",
-    test: (c) => c.scorecard.discovery >= DISCOVERY_FLOOR,
-    takeaway: () => `Won calls asked ${mean(won.map((c) => c.scorecard.discovery)).toFixed(1)} questions before a price came up. Lost calls asked none.`,
-    quote: (c) => quoteAt(c, c.scorecard.spans.discovery == null ? null : c.scorecard.spans.discovery + 2),
-  },
-  {
-    behaviour: "Objection handled",
-    test: (c) => c.scorecard.objection === "handled",
-    takeaway: () => `Every win named the worry and answered it on the call. Stalled calls got a partial answer, lost calls none.`,
-    quote: (c) => quoteAt(c, c.scorecard.spans.objection == null ? null : c.scorecard.spans.objection + 1, 2),
-  },
-  {
-    behaviour: "Rep talk ratio under half",
-    test: (c) => c.scorecard.talkRatio <= HEALTHY_TALK,
-    takeaway: () => `Winning reps spoke ${pct(mean(won.map((c) => c.scorecard.talkRatio)))} of the call. Lost calls ran at ${pct(mean(history.filter((c) => c.outcome === "lost").map((c) => c.scorecard.talkRatio)))}.`,
-    quote: () => null,
-  },
-];
+function attributeValue(attribute: string, profile: ApiIcpProfile["profile"], why: string): string {
+  switch (attribute) {
+    case "industry":
+      return profile.industries.join(" · ");
+    case "headcount_band":
+      return `${profile.headcount_band} staff`;
+    case "contact_role":
+    case "role":
+      return profile.roles.join(" · ");
+    case "trigger":
+      return profile.triggers.join(" · ");
+    default:
+      return why;
+  }
+}
 
-export const patterns: Pattern[] = BEHAVIOURS.map((b) => {
-  const hits = won.filter(b.test);
-  const ranked = b.order ? [...hits].sort((x, y) => b.order!(x) - b.order!(y)) : hits;
-  return {
-    behaviour: b.behaviour,
-    takeaway: b.takeaway(),
-    won: { n: hits.length, of: won.length },
-    other: { n: other.filter(b.test).length, of: other.length },
-    quotes: ranked.map(b.quote).filter((q): q is QuoteRef => q != null).slice(0, 2),
+async function scorecardsFor(fixtures: ApiFixtureSummary[]): Promise<{ scorecards: ApiScorecard[]; missing: string[]; error: string | null }> {
+  const results = await Promise.allSettled(fixtures.map((fixture) => getScorecard(fixture.call_id)));
+  const scorecards: ApiScorecard[] = [];
+  const missing: string[] = [];
+  let error: string | null = null;
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      error ??= reason(result.reason);
+      return;
+    }
+    if (result.value) scorecards.push(result.value);
+    else if (!fixtures[index].demo) missing.push(fixtures[index].call_id);
+  });
+  return { scorecards, missing, error };
+}
+
+function buildTiles(scorecards: ApiScorecard[], fixtures: ApiFixtureSummary[]): Tile[] {
+  const labelled = scorecards.filter((card) => card.outcome !== null);
+  const won = labelled.filter((card) => card.outcome === "won");
+  const other = labelled.filter((card) => card.outcome !== "won");
+  // The fallback labels describe the same history the ICP is derived from: the demo call is not part of it.
+  const history = fixtures.filter((fixture) => !fixture.demo);
+  const fixtureWon = history.filter((fixture) => fixture.outcome === "won");
+
+  const counts = Object.fromEntries(SCORED_OUTCOMES.map((outcome) => [outcome, labelled.filter((card) => card.outcome === outcome).length]));
+  const byRep = [...new Set(scorecards.map((card) => card.rep))].map((rep) => `${firstName(rep)} ${scorecards.filter((card) => card.rep === rep).length}`);
+
+  const analysed: Tile = {
+    label: "Calls analysed",
+    value: String(scorecards.length),
+    line: scorecards.length
+      ? byRep.join(" · ")
+      : `${history.length} calls in the history, none scored yet`,
   };
-});
 
-export const coachingFocus: string[] = [
-  "Book the date on the call. Every stalled deal left with a promise to send something and no meeting.",
-  "Ask before quoting. The three lost calls opened on price and asked nothing about the setup.",
-];
+  const winRate: Tile = labelled.length
+    ? {
+        label: "Win rate",
+        value: pct(won.length / labelled.length),
+        line: `${counts.won} won · ${counts.stalled} stalled · ${counts.lost} lost · ${counts.no_show} no-show`,
+      }
+    : {
+        label: "Win rate",
+        value: history.length ? pct(fixtureWon.length / history.length) : "—",
+        line: `From the ${history.length} fixture labels, no scorecards yet`,
+      };
 
-/* Triggers */
+  const nextStep: Tile = won.length
+    ? {
+        label: "Dated next step in wins",
+        value: `${won.filter((card) => card.next_step_secured).length} of ${won.length}`,
+        line: `${other.filter((card) => card.next_step_secured).length} of ${other.length} elsewhere`,
+      }
+    : {
+        label: "Dated next step in wins",
+        value: `— of ${fixtureWon.length}`,
+        line: `${fixtureWon.length} wins in the fixture labels, none scored yet`,
+      };
 
-const TRIGGERS: { label: string; re: RegExp }[] = [
-  { label: "Cyber-insurance renewal", re: /insurance/i },
-  { label: "Office move", re: /office move/i },
-  { label: "Microsoft 365 migration", re: /365/ },
-  { label: "Procurement questionnaire", re: /procurement|questionnaire/i },
-  { label: "IT person leaving", re: /leaving/i },
-  { label: "Phishing incident", re: /phishing/i },
-];
+  return [analysed, winRate, nextStep];
+}
 
-export const triggers: { label: string; count: number }[] = TRIGGERS.map((t) => ({
-  label: t.label,
-  count: history.filter((c) => c.trigger && t.re.test(c.trigger)).length,
-})).filter((t) => t.count > 0).sort((a, b) => b.count - a.count);
+async function buildPatterns(scorecards: ApiScorecard[], fixtures: ApiFixtureSummary[]): Promise<Pattern[]> {
+  const labelled = scorecards.filter((card) => card.outcome !== null);
+  const won = labelled.filter((card) => card.outcome === "won");
+  const other = labelled.filter((card) => card.outcome !== "won");
+  if (!labelled.length) return [];
 
-/* Derived ICP */
+  const companies = new Map(fixtures.map((fixture) => [fixture.call_id, fixture.company]));
+  const hrefs = new Map(await Promise.all(fixtures.map(async (fixture) => [fixture.call_id, `/calls/${await fixtureConversationId(fixture.call_id)}`] as const)));
+  const quote = (card: ApiScorecard, evidence: { turn_index: number; quote: string } | undefined): Quote | null => {
+    const key = card.source_external_id ?? card.call_id;
+    return evidence
+      ? {
+          callId: key,
+          href: hrefs.get(key) ?? "/conversations",
+          company: companies.get(key) ?? key,
+          turn: evidence.turn_index,
+          text: evidence.quote,
+        }
+      : null;
+  };
 
-export type IcpRow = { attribute: string; label: string; value: string; calls: { id: string; company: string }[] };
+  const rate = (cards: ApiScorecard[], test: (card: ApiScorecard) => boolean) => (cards.length ? cards.filter(test).length / cards.length : 0);
 
-const ATTRIBUTES: { attribute: string; label: string; value: string; why: string; test: (c: CallRecord) => boolean }[] = [
-  { attribute: "industry", label: "Industry", value: "Professional services, allied health", why: "Every won deal is a firm that bills for expertise or treats patients.", test: (c) => /health|physio|legal|law|account|architect|consult/i.test(c.industry) },
-  { attribute: "headcount", label: "Company size", value: "25 to 80 staff", why: "Won deals sit between 37 and 76 staff; the lost calls were all under 15.", test: (c) => c.headcount >= 25 && c.headcount <= 80 },
-  { attribute: "role", label: "Champion title", value: "Practice, operations or general manager", why: "The person who owns the day-to-day pain was on the call.", test: (c) => /manager/i.test(c.title) },
-  { attribute: "trigger", label: "Buying trigger", value: "Insurance renewal, office move, M365 migration, IT person leaving", why: "Every won deal had a dated reason to move; no lost call did.", test: (c) => Boolean(c.trigger) },
-];
+  const behaviours: { behaviour: string; test: (card: ApiScorecard) => boolean; takeaway: string; quote: (card: ApiScorecard) => Quote | null }[] = [
+    {
+      behaviour: "Secured a dated next step",
+      test: (card) => card.next_step_secured,
+      takeaway: `Won calls booked the next step ${pct(rate(won, (card) => card.next_step_secured))} of the time, the rest ${pct(rate(other, (card) => card.next_step_secured))}.`,
+      quote: (card) => quote(card, card.next_step_evidence ?? undefined),
+    },
+    {
+      behaviour: `${DISCOVERY_FLOOR} or more discovery questions`,
+      test: (card) => card.discovery_questions >= DISCOVERY_FLOOR,
+      takeaway: `Won calls asked ${mean(won.map((card) => card.discovery_questions)).toFixed(1)} discovery questions on average, the rest ${mean(other.map((card) => card.discovery_questions)).toFixed(1)}.`,
+      quote: (card) => quote(card, card.discovery_evidence[0]),
+    },
+    {
+      behaviour: "Objection handled on the call",
+      test: (card) => card.objection_handling === "handled",
+      takeaway: `Won calls answered the objection outright ${pct(rate(won, (card) => card.objection_handling === "handled"))} of the time, the rest ${pct(rate(other, (card) => card.objection_handling === "handled"))}.`,
+      quote: (card) => quote(card, card.objection_evidence[0]),
+    },
+    {
+      behaviour: "Rep talk ratio in the healthy band",
+      test: (card) => card.talk_ratio_band === "healthy",
+      takeaway: `Winning reps spoke ${pct(mean(won.map((card) => card.rep_talk_ratio)))} of the call, the rest ${pct(mean(other.map((card) => card.rep_talk_ratio)))}.`,
+      quote: () => null,
+    },
+  ];
 
-export const icpRows: IcpRow[] = ATTRIBUTES.map((a) => ({
-  attribute: a.attribute,
-  label: a.label,
-  value: a.value,
-  calls: won.filter(a.test).map((c) => ({ id: c.id, company: c.company })),
-}));
+  return behaviours.map((behaviour) => ({
+    behaviour: behaviour.behaviour,
+    takeaway: behaviour.takeaway,
+    won: { n: won.filter(behaviour.test).length, of: won.length },
+    other: { n: other.filter(behaviour.test).length, of: other.length },
+    quotes: won
+      .filter(behaviour.test)
+      .map(behaviour.quote)
+      .filter((item): item is Quote => item !== null)
+      .slice(0, 2),
+  }));
+}
 
-export const icpProfile: ApiIcpProfile = {
-  id: "icp-harbourline-v3",
-  version: icp.version,
-  evidence: ATTRIBUTES.map((a) => ({ attribute: a.attribute, deal_ids: won.filter(a.test).map((c) => c.id), why: a.why })),
-  source_deals: won.map((c) => ({ deal_id: c.id, company_name: c.company, call_ids: [c.id] })),
-  profile: {
-    summary: "Professional services and allied health firms in Victoria with 25 to 80 staff, a concrete trigger, and a practice or operations manager on the call.",
-    industries: ["Professional services", "Allied health"],
-    headcount_band: "25-80",
-    roles: ["Practice Manager", "Operations Manager", "General Manager"],
-    triggers: triggers.map((t) => t.label),
-    confidence: 0.91,
-    origami_brief: icp.brief,
-    source_summary: { deals: history.length, calls: history.length, emails: threads.length, outcome_labelled: history.length },
-    cohort_revision: "cohort-2026-09-13",
-  },
-};
+function coachingFrom(playbook: ApiPlaybook | null, scorecards: ApiScorecard[]): { lines: string[]; source: Intelligence["coachingSource"] } {
+  if (playbook?.coaching_focus.length) return { lines: playbook.coaching_focus.slice(0, 3), source: "playbook" };
+  const weak = scorecards.filter((card) => card.outcome === "lost" || card.outcome === "stalled");
+  const tally = new Map<string, number>();
+  for (const card of weak) for (const line of card.to_improve) tally.set(line, (tally.get(line) ?? 0) + 1);
+  const lines = [...tally.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([line]) => line);
+  return { lines, source: lines.length ? "scorecards" : null };
+}
 
-/* Playbook, API-shaped */
+async function buildIcp(
+  profile: ApiIcpProfile,
+  freshness: ApiIcpFreshness | null,
+  inventory: ApiIcpEvidenceInventory | null,
+): Promise<IcpView> {
+  const sourceDeals = new Map((profile.source_deals ?? []).map((deal) => [deal.deal_id, deal]));
+  const rows = await Promise.all(
+    profile.evidence.map(async (item) => ({
+      attribute: item.attribute,
+      label: ATTRIBUTE_LABELS[item.attribute] ?? item.attribute.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()),
+      value: attributeValue(item.attribute, profile.profile, item.why),
+      deals: await Promise.all(
+        item.deal_ids
+          .map((dealId) => sourceDeals.get(dealId))
+          .filter((deal): deal is NonNullable<typeof deal> => deal != null)
+          .map(async (deal) => ({
+            id: deal.deal_id,
+            company: deal.company_name,
+            href: deal.call_ids[0] ? `/calls/${await fixtureConversationId(deal.call_ids[0])}` : "/conversations",
+          })),
+      ),
+    })),
+  );
 
-const group = (outcome_group: "won" | "not_won", xs: CallRecord[]) => ({
-  outcome_group,
-  calls: xs.length,
-  mean_discovery: mean(xs.map((c) => c.scorecard.discovery)),
-  next_step_rate: rate(xs, (c) => c.scorecard.nextStepSecured),
-  objection_handled_rate: rate(xs, (c) => c.scorecard.objection === "handled"),
-  mean_talk_ratio: mean(xs.map((c) => c.scorecard.talkRatio)),
-});
+  return {
+    summary: profile.profile.summary,
+    confidence: profile.profile.confidence,
+    wonDeals: (profile.source_deals ?? []).length,
+    rows,
+    sourceSummary: profile.profile.source_summary ?? null,
+    freshness: freshness ? { status: freshness.status, reason: freshness.reason } : null,
+    inventory,
+  };
+}
 
-export const playbook: ApiPlaybook = {
-  cohort_revision: "cohort-2026-09-13",
-  sources: history.map((c) => ({
-    call_id: c.id,
-    source_external_id: c.id,
-    source_revision: "1",
-    scorecard_revision: "1",
-    rubric_version: "v1",
-    outcome: c.outcome === "open" ? null : c.outcome,
-  })),
-  stats: [group("won", won), group("not_won", other)],
-  reps,
-  patterns: patterns.map((p) => ({
-    behaviour: p.behaviour,
-    why_it_matters: p.takeaway,
-    call_ids: won.filter((c) => BEHAVIOURS.find((b) => b.behaviour === p.behaviour)!.test(c)).map((c) => c.id),
-    quotes: p.quotes.map((q) => q.text),
-  })),
-  coaching_focus: coachingFocus,
-  model: "scorer-1",
-  generated_at: "2026-09-13T08:00:00+10:00",
-};
+export async function getIntelligence(): Promise<Intelligence> {
+  const [icpResult, inventoryResult, freshnessResult, playbookResult, fixturesResult] = await Promise.allSettled([
+    getLatestIcp(),
+    getIcpEvidenceInventory(),
+    getIcpFreshness(),
+    getLatestPlaybook(),
+    getFixtures(),
+  ]);
 
-export const provenance = {
-  rubric_version: playbook.sources[0]?.rubric_version ?? "v1",
-  profile_version: icpProfile.version,
-  generated_at: playbook.generated_at,
-  source_summary: icpProfile.profile.source_summary!,
-  confidence: icpProfile.profile.confidence,
-  won_deals: won.length,
-};
+  const profile = icpResult.status === "fulfilled" ? icpResult.value : null;
+  const inventory = inventoryResult.status === "fulfilled" ? inventoryResult.value : null;
+  const freshness = freshnessResult.status === "fulfilled" ? freshnessResult.value : null;
+  const playbook = playbookResult.status === "fulfilled" ? playbookResult.value : null;
+  const fixtures = fixturesResult.status === "fulfilled" ? fixturesResult.value : [];
+
+  const { scorecards, missing, error: scorecardError } = fixtures.length
+    ? await scorecardsFor(fixtures)
+    : { scorecards: [] as ApiScorecard[], missing: [] as string[], error: null };
+
+  const coaching = coachingFrom(playbook, scorecards);
+  const errors = {
+    icp: icpResult.status === "rejected" ? reason(icpResult.reason) : null,
+    freshness: freshnessResult.status === "rejected" ? reason(freshnessResult.reason) : null,
+    playbook: playbookResult.status === "rejected" ? reason(playbookResult.reason) : null,
+    scorecards:
+      fixturesResult.status === "rejected" ? reason(fixturesResult.reason) : scorecardError,
+  };
+
+  return {
+    tiles: buildTiles(scorecards, fixtures),
+    patterns: await buildPatterns(scorecards, fixtures),
+    coachingFocus: coaching.lines,
+    coachingSource: coaching.source,
+    triggers: (profile?.profile.triggers ?? []).map((label) => ({ label, count: null })),
+    icp: profile ? await buildIcp(profile, freshness, inventory) : null,
+    provenance: {
+      rubricVersion: playbook?.sources[0]?.rubric_version ?? scorecards[0]?.rubric_version ?? null,
+      playbookModel: playbook?.model ?? null,
+      playbookGeneratedAt: playbook?.generated_at ?? null,
+      profileVersion: profile?.version ?? null,
+      cohortRevision: profile?.profile.cohort_revision ?? null,
+      profileCreatedAt: (profile as (ApiIcpProfile & { created_at?: string | null }) | null)?.created_at ?? null,
+    },
+    scoredCalls: scorecards.length,
+    unscoredFixtures: missing,
+    needsDerive: !profile || !playbook || scorecards.length === 0,
+    errors,
+  };
+}
