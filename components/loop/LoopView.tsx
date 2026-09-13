@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { DEMO_CALL, beats, readiness, value } from "@/lib/loop";
+import { cn } from "@/components/ui";
 import { Beat } from "./Beat";
 
 /* The Revenue loop: the whole business loop as one rail, every beat linked
@@ -47,7 +48,28 @@ export function LoopView() {
         </p>
       </section>
 
-      <ol className="mt-10">
+      {/* The loop strip: seven numbered circles on a hairline; the open beat in tangerine. */}
+      <ol className="mt-10 flex items-center" aria-label="Beats">
+        {beats.map((b, i) => (
+          <li key={b.n} className="flex items-center">
+            <button
+              type="button"
+              aria-label={`${b.verb}: ${b.title}`}
+              aria-current={open === b.n ? "step" : undefined}
+              onClick={() => setOpen(b.n)}
+              className={cn(
+                "flex size-6 items-center justify-center rounded-full text-[11px] font-medium tabular-nums transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+                open === b.n ? "bg-accent text-accent-ink" : "bg-ink text-white hover:bg-[#2f3040]",
+              )}
+            >
+              {i + 1}
+            </button>
+            {i < beats.length - 1 && <span aria-hidden className="h-px w-10 bg-line" />}
+          </li>
+        ))}
+      </ol>
+
+      <ol className="mt-6">
         {beats.map((b, i) => (
           <Beat key={b.n} beat={b} expanded={open === b.n} onToggle={() => setOpen(open === b.n ? null : b.n)} last={i === beats.length - 1} />
         ))}
