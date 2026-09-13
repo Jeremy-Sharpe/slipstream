@@ -33,10 +33,16 @@ class OrigamiClient:
         self._api_key = api_key
         self._base_url = base_url.rstrip("/")
 
-    async def create_search(self, brief: str, count: int, quality: str = "fast") -> Job:
+    async def create_search(
+        self,
+        brief: str,
+        count: int,
+        quality: str = "fast",
+        idempotency_key: str | None = None,
+    ) -> Job:
         response = await self._http.post(
             f"{self._base_url}/leads/searches",
-            headers=self._headers(idempotent=True),
+            headers=self._headers(idempotency_key=idempotency_key or str(uuid4())),
             json={"brief": brief, "count": count, "quality": quality},
         )
         response.raise_for_status()
@@ -122,10 +128,10 @@ class OrigamiClient:
     async def aclose(self) -> None:
         await self._http.aclose()
 
-    def _headers(self, *, idempotent: bool = False) -> dict[str, str]:
+    def _headers(self, *, idempotency_key: str | None = None) -> dict[str, str]:
         headers = {"Authorization": f"Bearer {self._api_key}"}
-        if idempotent:
-            headers["Idempotency-Key"] = str(uuid4())
+        if idempotency_key is not None:
+            headers["Idempotency-Key"] = idempotency_key
         return headers
 
 

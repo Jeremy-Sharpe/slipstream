@@ -182,6 +182,7 @@ def create_openrouter_client(settings: Settings) -> OpenAI:
     return OpenAI(
         api_key=settings.openrouter_api_key.get_secret_value(),
         base_url=settings.openrouter_base_url,
+        default_headers=settings.openrouter_headers,
     )
 
 
@@ -225,6 +226,7 @@ def create_embedding_client(settings: Settings) -> object:
             OpenAI(
                 api_key=settings.openrouter_api_key.get_secret_value(),
                 base_url=settings.openrouter_base_url,
+                default_headers=settings.openrouter_headers,
             )
         )
     if provider == "local" and settings.local_embedding_base_url is not None:

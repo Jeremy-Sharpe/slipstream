@@ -64,6 +64,33 @@ async def test_client_uses_v3_search_and_row_contract() -> None:
 
 
 @pytest.mark.asyncio
+async def test_client_forwards_a_stable_search_idempotency_key() -> None:
+    request_seen: httpx.Request | None = None
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        nonlocal request_seen
+        request_seen = request
+        return httpx.Response(202, json={"id": "job-1", "status": "queued"})
+
+    client = OrigamiClient(
+        httpx.AsyncClient(transport=httpx.MockTransport(respond)),
+        "og_test",
+        "https://origami.test",
+    )
+    await client.create_search(
+        "Find practice managers.",
+        10,
+        idempotency_key="31b779b9-8ef5-451d-b72a-9400d6859d3d",
+    )
+    await client.aclose()
+
+    assert request_seen is not None
+    assert request_seen.headers["Idempotency-Key"] == (
+        "31b779b9-8ef5-451d-b72a-9400d6859d3d"
+    )
+
+
+@pytest.mark.asyncio
 async def test_read_rows_splits_more_than_one_hundred_ids() -> None:
     requests: list[httpx.Request] = []
 

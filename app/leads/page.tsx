@@ -6,7 +6,7 @@ import { FiltersPanel, applyFilters, defaultFilterState, useFiltersPanelState, t
 import { LeadTable } from "@/components/leads/LeadTable";
 import { ResultBar } from "@/components/leads/ResultBar";
 import { TopBar } from "@/components/leads/TopBar";
-import { ApiError, approveLeadOutreach, draftLeadOutreach, getLatestIcp, getLeads, getLeadSourceStatus, getReadiness, sourceLeads, type ApiIcpProfile, type ApiLead, type ApiOutreachDraft } from "@/lib/api/slipstream";
+import { ApiError, approveLeadOutreach, bootstrapDemo, draftLeadOutreach, getLatestIcp, getLeads, getLeadSourceStatus, getReadiness, sourceLeads, type ApiIcpProfile, type ApiLead, type ApiOutreachDraft } from "@/lib/api/slipstream";
 import { defaultBrief } from "@/lib/data/brief";
 import { leads as seed } from "@/lib/data/leads";
 import type { Draft, Lead, LeadStatus } from "@/lib/types";
@@ -88,6 +88,7 @@ export default function LeadsPage() {
   const [busyLeadId, setBusyLeadId] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [source, setSource] = useState<"checking" | "evaluation" | "live">("checking");
+  const [leadProvider, setLeadProvider] = useState<"evaluation" | "origami" | "openrouter_demo">("evaluation");
   const [notice, setNotice] = useState("Showing 12 labelled evaluation leads while checking the deployed API.");
   const [integrations, setIntegrations] = useState<{ supabase: boolean | null; origami: boolean | null }>({ supabase: null, origami: null });
   const mounted = useRef(true);
@@ -115,7 +116,9 @@ export default function LeadsPage() {
         setLeads(leadsResult.value.map(toLead));
         setLeadProfileId(commonProfileId(leadsResult.value));
         setSource("live");
-        setNotice(`${leadsResult.value.length} stored leads loaded from the deployed API. Match evidence appears only when the API supplies it.`);
+        const demoLeads = leadsResult.value.every((lead) => lead.metadata?.source === "openrouter_demo" && lead.metadata?.synthetic === true);
+        setLeadProvider(demoLeads ? "openrouter_demo" : "origami");
+        setNotice(demoLeads ? `${leadsResult.value.length} fictional OpenRouter demo prospects loaded from the deployed API; .example domains cannot receive email.` : `${leadsResult.value.length} stored Origami leads loaded from the deployed API. Match evidence appears only when the API supplies it.`);
       } else {
         setSource("evaluation");
         setNotice(leadsResult.status === "rejected"
@@ -145,9 +148,15 @@ export default function LeadsPage() {
     const controller = new AbortController();
     searchController.current = controller;
     setSearching(true);
-    setNotice("Starting a live Origami search from the latest ICP brief stored by the backend…");
+    const useDemoBootstrap = !icp || integrations.origami !== true;
+    setNotice(useDemoBootstrap ? "Loading the conversation history, deriving a live ICP, and generating 10 clearly fictional OpenRouter demo prospects…" : "Starting a live Origami search from the latest ICP brief stored by the backend…");
     try {
-      const accepted = await sourceLeads(Math.max(1, Math.min(100, filters.total)), controller.signal);
+      const bootstrap = useDemoBootstrap ? await bootstrapDemo(controller.signal) : null;
+      if (bootstrap) {
+        setIcp(bootstrap.icp);
+        setBrief(bootstrap.icp.profile.origami_brief);
+      }
+      const accepted = bootstrap?.lead_source ?? await sourceLeads(Math.max(1, Math.min(10, filters.total)), controller.signal);
       let status = accepted.status;
       for (let attempt = 0; attempt < 20 && !TERMINAL_SEARCH_STATES.has(status); attempt += 1) {
         await abortableDelay(1500, controller.signal);
@@ -166,8 +175,9 @@ export default function LeadsPage() {
       setLeads(stored.map(toLead));
       setLeadProfileId(accepted.icp_profile_id);
       setSource("live");
+      setLeadProvider(bootstrap?.lead_provider === "openrouter_demo" ? "openrouter_demo" : "origami");
       setUpdatedAt(new Date());
-      setNotice(`${stored.length} stored leads for this ICP loaded after the Origami job succeeded. Similarity is backend-computed; visible criteria refine rows locally.`);
+      setNotice(bootstrap?.lead_provider === "openrouter_demo" ? `${stored.length} fictional prospects generated live through OpenRouter and scored against ICP v${bootstrap.icp.version}. Reserved .example domains and disabled delivery keep the proof safe.` : `${stored.length} stored leads for this ICP loaded after the Origami job succeeded. Similarity is backend-computed; visible criteria refine rows locally.`);
     } catch (error) {
       if (!mounted.current || isAbort(error)) return;
       const detail = error instanceof ApiError && error.status === 503
@@ -271,7 +281,7 @@ export default function LeadsPage() {
 
   const verifiedIcp = source === "live" && icp && leadProfileId === icp.id;
   const provenance = source === "live"
-    ? verifiedIcp ? `from verified live ICP v${icp.version}` : "stored backend leads · ICP version not verified"
+    ? leadProvider === "openrouter_demo" ? `fictional OpenRouter proof · scored from live ICP v${icp?.version ?? "?"}` : verifiedIcp ? `from verified live ICP v${icp.version}` : "stored backend leads · ICP version not verified"
     : `from the labelled ICP evaluation across ${WON_DEALS} won deals`;
 
   return (
@@ -289,7 +299,7 @@ export default function LeadsPage() {
       />
       <div className="flex min-h-0 flex-1 flex-col bg-background">
         <div role="status" aria-atomic="true" className="mx-[22px] mt-4 rounded-md border border-line bg-card px-4 py-3 text-sm text-ink">
-          <span className="font-semibold">{source === "live" ? "Live leads" : "Labelled evaluation leads"}</span>
+          <span className="font-semibold">{source === "live" ? leadProvider === "openrouter_demo" ? "Live synthetic lead proof" : "Live Origami leads" : "Labelled evaluation leads"}</span>
           <span className="ml-2 text-muted-foreground">{notice}</span>
         </div>
         <div className="flex min-h-0 flex-1">
