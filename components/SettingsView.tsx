@@ -10,7 +10,7 @@ const CRM = ["HubSpot", "Pipedrive", "Salesforce", "Attio"] as const;
 
 function Row({ label, children, hint }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[180px_minmax(0,1fr)] items-center gap-6 py-3.5">
+    <div className="grid grid-cols-[200px_minmax(0,1fr)] items-center gap-6 py-3.5">
       <div>
         <p className="text-[13.5px] text-ink">{label}</p>
         {hint && <p className="mt-0.5 text-[12.5px] text-faint">{hint}</p>}
@@ -71,9 +71,9 @@ export function SettingsView() {
   };
 
   return (
-    <div className="max-w-[720px]">
-      <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">Settings</h1>
-      <p className="mt-2 text-[13.5px] text-soft">Your account, your CRM, and what needs your approval.</p>
+    <div className="max-w-[760px]">
+      <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">Settings</h1>
+      <p className="mt-2 text-[14px] text-soft">Your account, your CRM, and what needs your approval.</p>
 
       <div className="mt-8 flex flex-col gap-4">
         <Card title="Account">

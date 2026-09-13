@@ -54,10 +54,10 @@ export function LeadsView() {
   const onClose = useCallback(() => setOpenId(null), []);
 
   return (
-    <div className="flex h-[calc(100vh-64px)] flex-col">
+    <div className="flex h-[calc(100vh-72px)] flex-col">
       <div className="shrink-0">
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">Leads</h1>
-        <p className="mt-2 text-[13.5px] text-soft">Companies like the ones you closed, found from your won calls.</p>
+        <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">Leads</h1>
+        <p className="mt-2 text-[14px] text-soft">Companies like the ones you closed, found from your won calls.</p>
       </div>
 
       <div className="mt-8 grid min-h-0 flex-1 grid-cols-[380px_1px_minmax(0,1fr)]">

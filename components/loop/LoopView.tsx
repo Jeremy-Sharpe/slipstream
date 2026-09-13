@@ -19,11 +19,11 @@ export function LoopView() {
   const [open, setOpen] = useState<string | null>(beats[0].n);
 
   return (
-    <div className="max-w-[880px]">
-      <div className="flex items-end justify-between gap-6">
+    <div>
+      <div className="flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">Revenue loop</h1>
-          <p className="mt-2 text-[13.5px] text-soft">One call becomes CRM truth, a follow-up, team intelligence, an ICP, and the next campaign. Every step below links to its evidence.</p>
+          <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">Revenue loop</h1>
+          <p className="mt-2 text-[14px] text-soft">One call becomes CRM truth, a follow-up, team intelligence, an ICP, and the next campaign. Every step below links to its evidence.</p>
         </div>
         <Link
           href={`/calls/${DEMO_CALL}?from=home`}
@@ -53,13 +53,13 @@ export function LoopView() {
         ))}
       </ol>
 
-      <section className="mt-12">
+      <section className="mt-10">
         <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What it is worth</h2>
         <div className="grid grid-cols-3 gap-3">
           {value.map((v) => (
             <div key={v.figure} className="rounded-xl border border-line bg-white p-4">
               <p className="text-[20px] font-semibold tracking-[-0.02em] tabular-nums text-ink">{v.figure}</p>
-              <p className="mt-2 text-[13.5px] text-soft">{v.note}</p>
+              <p className="mt-2 text-[14px] text-soft">{v.note}</p>
             </div>
           ))}
         </div>

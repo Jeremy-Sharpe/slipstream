@@ -45,7 +45,7 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
     <div>
       {groups.map((g, gi) => (
         <section key={g.key}>
-          <h3 className={`mb-2 text-[12px] font-medium text-faint ${gi === 0 ? "mt-3" : "mt-6"}`}>{g.label}</h3>
+          <h3 className={`mb-2 text-[12px] font-medium text-faint ${gi === 0 ? "mt-0" : "mt-6"}`}>{g.label}</h3>
           <ul className="border-b border-line-soft">
             {g.rows.map((c) => {
               const run = runs[c.id];
@@ -54,7 +54,7 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
                 <li key={c.id}>
                   <Link
                     href={`/calls/${c.id}`}
-                    className="grid h-14 grid-cols-[minmax(0,1.1fr)_minmax(0,1.7fr)_104px_72px_120px] items-center gap-x-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                    className="grid h-14 grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)_112px_80px_132px] items-center gap-x-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                   >
                     <span className="flex min-w-0 items-center gap-3">
                       <Avatar name={c.contact} size={28} />

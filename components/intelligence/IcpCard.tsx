@@ -7,7 +7,7 @@ import { Chip } from "./parts";
 export function IcpCard() {
   const s = provenance.source_summary;
   return (
-    <section className="rounded-2xl bg-surface-2 p-6">
+    <section className="rounded-2xl bg-surface-2 p-7">
       <h2 className="text-[12px] font-medium uppercase tracking-[0.06em] text-faint">Ideal customer · From {provenance.won_deals} won deals</h2>
       <p className="mt-2 text-[16px] font-medium leading-6 text-ink">{icpProfile.profile.summary}</p>
 
