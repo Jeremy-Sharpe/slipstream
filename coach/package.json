@@ -1,32 +1,36 @@
 {
   "name": "slipstream-coach",
-  "productName": "Slipstream Coach",
   "version": "0.1.0",
-  "description": "Transparent live sales coaching overlay for Slipstream",
-  "author": "Slipstream contributors",
-  "main": "src/main.js",
-  "license": "GPL-3.0-only",
+  "private": true,
+  "description": "Live customer-aware call coach for Slipstream",
+  "author": "Slipstream",
+  "license": "MIT",
+  "main": "src/main.cjs",
   "scripts": {
-    "build:renderer": "esbuild src/renderer.js --bundle --platform=browser --format=iife --outfile=.build/renderer.js",
-    "start": "npm run build:renderer && electron-forge start",
-    "package": "npm run build:renderer && electron-forge package",
-    "make": "npm run build:renderer && electron-forge make",
-    "test": "node --test test/*.test.js"
-  },
-  "dependencies": {
-    "@elevenlabs/client": "1.25.0",
-    "electron-squirrel-startup": "1.0.1",
-    "ws": "8.21.3"
+    "start": "electron .",
+    "test": "node --test test/*.test.mjs",
+    "package": "electron-builder --mac dir",
+    "dist": "electron-builder --mac dmg"
   },
   "devDependencies": {
-    "@electron-forge/cli": "7.11.2",
-    "@electron-forge/maker-deb": "7.11.2",
-    "@electron-forge/maker-dmg": "7.11.2",
-    "@electron-forge/maker-squirrel": "7.11.2",
-    "@electron-forge/maker-zip": "7.11.2",
-    "@electron-forge/plugin-fuses": "7.11.2",
-    "@electron/fuses": "1.8.0",
     "electron": "44.3.0",
-    "esbuild": "0.25.9"
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.slipstream.coach",
+    "productName": "Slipstream Coach",
+    "files": ["src/**/*", "LICENSE", "package.json"],
+    "protocols": [{"name": "Slipstream Coach", "schemes": ["slipstream"]}],
+    "mac": {
+      "category": "public.app-category.business",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Slipstream listens to your microphone to recognise questions you ask during a coached call.",
+        "NSAudioCaptureUsageDescription": "Slipstream listens to call audio to suggest relevant questions and talking points.",
+        "NSScreenCaptureUsageDescription": "Slipstream captures system audio for calls in other apps. Screen video is not recorded."
+      }
+    }
   }
 }

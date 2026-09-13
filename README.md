@@ -34,7 +34,7 @@ Demo video: https://github.com/Jeremy-Sharpe/slipstream/releases/download/demo-v
 The live URL is five screens on the deployed API: Home (pick a recorded call, upload or record audio, paste a transcript, paste an email), Conversations, the run page for one call or thread, Leads, Intelligence and Revenue loop. Every field, score, lead and number on them is an API response; the web app holds no fixture copies and no fallback data. Browser calls go through a same-origin gateway (`app/gateway`) that adds the deployment's ingest token on the server, so the token never reaches the client.
 
 1. **A sales call happens.** For the demo the call is synthesised with ElevenLabs text-to-dialogue (two voices, realistic objections) and played through speakers. Fixtures cover won, stalled, lost and no-show outcomes.
-2. **The coach listens.** An always-on-top desktop overlay can stream the consented rep microphone to ElevenLabs Scribe realtime and shows the rep the next question to ask, grounded in this deal's CRM history. Its credential-free manual mode demonstrates both sides; this build does not claim mixed call-audio capture.
+2. **The coach listens.** The rep presses **Start call with coach** in the top bar and a macOS desktop coach sits beside the calling app they already use. It hears the rep's microphone and the call audio as two separate ElevenLabs Scribe realtime streams, so it knows who said what, and shows one next question at a time. The model marks a card asked or answered only when it can quote the turn that covered it, so covered questions leave the screen and do not come back; Done, Skip and Undo stay available. In this version the advice draws on what the rep enters before the call and what is said on it.
 3. **The call writes itself into the CRM.** With ElevenLabs configured, a recording is transcribed with Scribe and diarised. The configured reasoning model extracts contact, company, deal stage, promises made, objections raised and the agreed next step into CRM records the rep approves. The production API currently routes schema-constrained reasoning through OpenRouter to `openai/gpt-5.4`; private loopback Qwen remains a credential-free fallback.
 4. **The follow-up drafts and schedules itself safely.** A follow-up email is generated from the transcript and attached to the deal. Approval is a separate, audited state. Exact approved draft IDs can then join a resumable campaign: a trusted Railway worker claims bounded chunks, Resend receives a stable identity, and each result is confirmed, retried, failed or surfaced for reconciliation. Operators can pause future chunks, while the browser gets status without the delivery token. Campaign execution is an API capability (`/api/v1/campaigns`) in this release rather than a screen; the current deployment exposes one paused synthetic campaign and stops before delivery.
 5. **The team learns from every conversation.** The analysis view scores calls against a written rubric, shows which moves correlate with won deals, and derives the ideal customer profile from outcome-labelled CRM deals enriched by both call and email history. The canonical fixture cohort loads 20 CRM deals (12 labelled history calls, the voiced demo call and Eleno's seven publicly listed clients as call-less won deals) and proves 12 calls plus one email across the 19 deals eligible for the profile; the current live profile also includes the paused campaign's provider-neutral email, for two emails total.
@@ -44,10 +44,10 @@ The live URL is five screens on the deployed API: Home (pick a recorded call, up
 ## Architecture
 
 ```
-app/          Next.js 16 + React 19 UI (standalone VPS; Vercel backup). Home, Conversations, the run page, Leads, Intelligence, Revenue loop, plus the server-side gateway that carries the ingest token. Visual contract in DESIGN.md.
-api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts. REST plus one WebSocket.
+app/          Next.js 16 + React 19 UI (standalone VPS; Vercel backup). Home, Conversations, the run page, Leads, Intelligence, Revenue loop, the coached-call review, plus the server-side gateway that carries the ingest token. Visual contract in DESIGN.md.
+api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts, live coaching. REST plus the coach WebSockets.
 scheduler/    Dependency-free one-shot Railway cron worker. Claims one bounded campaign chunk, emits a PII-free result, then exits.
-coach/        Electron live-coach overlay, forked from Cheating Daddy (GPL-3.0). Talks only to the api WebSocket.
+coach/        macOS desktop call coach (Electron). Captures microphone and call audio, streams both to Scribe realtime and talks to the API's coach session routes.
 fixtures/     Twelve labelled sales-call scripts as seeded CRM history, one voiced demo call, and seven public Eleno clients as call-less won deals.
 supabase/     Postgres migrations (pgvector enabled) and seed.
 evals/        Judge evals and submission checks (see docs/judging-evals.md).
@@ -66,7 +66,8 @@ Why the split: the AI half wants Python (Anthropic and ElevenLabs SDKs, pgvector
 | Live transcription | ElevenLabs Scribe v2 Realtime over WebSocket | About 150 ms latency; same vendor as batch so the coach and the record agree |
 | Extraction and follow-up draft | The model named by `REASONING_MODEL` through one provider-agnostic structured-output helper (Anthropic, OpenAI, OpenRouter, or the private local runtime), pinned JSON schema, then a deterministic grounding pass that repairs or drops any quote that is not verbatim in the transcript | Production uses `openai/gpt-5.4` through OpenRouter after the smaller default model failed the strict long-call evidence gate. The private Qwen runtime remains a loopback-only fallback, and every artifact reports its exact provider and model. The seven-model bake-off still picks Mistral Medium 3.1 for a credentialed deployment at 86.5% mean judged pass rate, 7.4 s mean latency and $0.0034 measured cost per call; full misses and evidence remain in `api/evals/extraction-eval.md` |
 | Scorecard | `deepseek/deepseek-v3.2` through OpenRouter | Won the predeclared eleven-model rule: within one call of the best on every judged dimension and about 25 times cheaper than the accuracy-first runner-up |
-| ICP naming and coach suggestions | Same provider-agnostic helper, configured by environment | One helper keeps prompts, schema validation and provider failover in one place |
+| ICP naming | Same provider-agnostic helper, configured by environment | One helper keeps prompts, schema validation and provider failover in one place |
+| Live coach suggestions and card completion | `openai/gpt-5.4` through OpenRouter, prompt `coach-session-v2.md`, plus deterministic guards | Deciding a question was asked or answered hides a card, so precision comes first. A ten-case spot check (`api/evals/coach-eval.md`) went from 0.60 to 1.00 precision at 1.00 recall across three runs as the prompt and guards were fixed; median analysis 2.8 s. Ten cases and one run each, so this is a spot check, not a benchmark |
 | Embeddings | `text-embedding-3-small` through OpenAI or OpenRouter, or the private local Nomic Embed Text v1.5 Q4_K_M fallback; stored in pgvector when Supabase is configured | Production routes `text-embedding-3-small` through OpenRouter for won-deal similarity and lead scoring; the pinned local Nomic runtime remains the credential-free fallback |
 | Lead discovery | OpenRouter proof generator; optional Origami v3 adapter | The public demo generates fictional prospects only, with `.example` domains and no deliverable contact details. The same derived brief can be sent to Origami when configured |
 
@@ -108,6 +109,7 @@ Slipstream is the closed loop. Its Revenue DNA gate is the key difference: call 
 - Approval never claims delivery. The Resend adapter can deliver one exact approved draft or a bounded explicit campaign through separately authenticated server-side endpoints; durable leases, pause/resume controls and per-item outcomes are implemented, but the current deployment has no email-provider credential or Railway login.
 - Call scoring is rubric-based LLM-as-judge with a twelve-call labelled bake-off, not a trained model.
 - Extraction is grounded but not perfect: a value whose quote cannot be found verbatim in the transcript is dropped rather than shown, so a rep can see a null where the model paraphrased. Deal outcome and stage are model judgement calls scored against hand labels in the eval, not ground truth.
+- The live coach runs on macOS only (call audio capture needs macOS 14.2 or later) and ships unsigned. In this version its advice uses the customer details the rep enters plus the live call, not the CRM history, and its automatic asked/answered detection is covered by unit tests but has no measured precision on real calls yet.
 - Single tenant, no auth, no billing. The signed-in user, seller and rep identities are sample data in `lib/data/seller.json`, and the Home placeholders in `lib/data/placeholders.ts`; a production build reads them from the CRM.
 - Campaigns, calendar, lists and settings screens from the earlier UI are not in this release; the API keeps campaigns and the Revenue DNA freshness gate, and Intelligence shows the freshness state.
 - Scoring, playbook derivation, pasted email threads and audio transcription need the web server to hold `SLIPSTREAM_INGEST_TOKEN` (the API's `INGEST_TOKEN`). Without it those actions show a locked message and the run continues past them; extraction, drafting, approval, ICP and leads never need it.
@@ -135,10 +137,10 @@ npm run evals                         # LLM judge on every criterion
 cd scheduler && python3 -m unittest -v test_run.py
 ```
 
-Unsigned Linux, macOS and Windows coach installers are reproducibly built and tested by the pinned [Coach installers workflow](https://github.com/Jeremy-Sharpe/slipstream/actions/workflows/coach-release.yml); production distribution still requires platform signing and notarisation.
+An unsigned macOS coach installer is built and tested by the pinned [Coach installers workflow](https://github.com/Jeremy-Sharpe/slipstream/actions/workflows/coach-release.yml); production distribution still requires Developer ID signing and notarisation.
 
 Copy `.env.example` to `.env` (UI and coach) and to `api/.env` and fill in the keys. Working rules for contributors and agents are in `CLAUDE.md`; the build plan is in `PROJECT.md`; who is building what is in `BOARD.md`.
 
 ## Licence
 
-MIT, except `coach/`, which is GPL-3.0 (see its own `LICENSE`).
+MIT.
