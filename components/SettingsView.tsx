@@ -73,7 +73,7 @@ export function SettingsView() {
   return (
     <div className="max-w-[720px]">
       <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">Settings</h1>
-      <p className="mt-1 text-[13.5px] text-soft">Your account, your CRM, and what needs your approval.</p>
+      <p className="mt-2 text-[13.5px] text-soft">Your account, your CRM, and what needs your approval.</p>
 
       <div className="mt-8 flex flex-col gap-4">
         <Card title="Account">

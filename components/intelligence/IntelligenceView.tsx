@@ -8,10 +8,10 @@ import { Patterns, Triggers } from "./Patterns";
    here besides follow a link. */
 export function IntelligenceView() {
   return (
-    <div className="mx-auto max-w-[880px]">
+    <div className="max-w-[880px]">
       <div>
-        <h1 className="text-[22px] font-semibold text-ink">Intelligence</h1>
-        <p className="mt-1 text-[13.5px] text-soft">What your won deals have in common, worked backwards from the calls.</p>
+        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">Intelligence</h1>
+        <p className="mt-2 text-[13.5px] text-soft">What your won deals have in common, worked backwards from the calls.</p>
       </div>
 
       <div className="mt-8"><IcpCard /></div>

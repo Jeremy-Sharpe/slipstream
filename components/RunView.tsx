@@ -196,7 +196,7 @@ export function RunView({ call }: { call: CallRecord }) {
       <Link href="/conversations" className="inline-flex items-center gap-1.5 text-[13px] text-soft transition-colors duration-150 hover:text-ink">
         <ArrowLeft className="size-3.5" strokeWidth={1.75} /> Conversations
       </Link>
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-3 flex items-center gap-3">
         <Avatar name={call.contact} size={36} />
         <div className="min-w-0 flex-1">
           <h1 className="flex items-center gap-2 text-[20px] font-semibold text-ink">

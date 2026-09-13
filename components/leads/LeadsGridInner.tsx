@@ -39,9 +39,9 @@ const THEME: Partial<Theme> = {
   textHeaderSelected: INK,
   bgCell: "#ffffff",
   bgCellMedium: "#f6f6f7",
-  bgHeader: "#ffffff",
-  bgHeaderHasFocus: "#f6f6f7",
-  bgHeaderHovered: "#f6f6f7",
+  bgHeader: "#fafafa",
+  bgHeaderHasFocus: "#fafafa",
+  bgHeaderHovered: "#fafafa",
   bgBubble: "#f5f5f5",
   bgBubbleSelected: "#ffffff",
   bgSearchResult: "#fff1ec",
@@ -50,7 +50,7 @@ const THEME: Partial<Theme> = {
   headerBottomBorderColor: LINE,
   drilldownBorder: "transparent",
   linkColor: "#ff6847",
-  cellHorizontalPadding: 12,
+  cellHorizontalPadding: 14,
   cellVerticalPadding: 3,
   headerFontStyle: "500 13px",
   baseFontStyle: "14px",
@@ -144,7 +144,7 @@ const contactRenderer: CustomRenderer<ContactCell> = {
     ctx.textBaseline = "middle";
     ctx.font = `14px ${theme.fontFamily}`; ctx.fillStyle = INK;
     ctx.fillText(fitText(ctx, cell.data.name, max), x, cy - 9);
-    ctx.font = `12px ${theme.fontFamily}`; ctx.fillStyle = SOFT;
+    ctx.font = `12.5px ${theme.fontFamily}`; ctx.fillStyle = SOFT;
     ctx.fillText(fitText(ctx, cell.data.title, max), x, cy + 9);
     return true;
   },
@@ -226,8 +226,10 @@ const draftRenderer: CustomRenderer<DraftCell> = {
 
 const HIGHLIGHT_MS = 1500;
 
-export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch, onSearchClose }: {
+export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch, onSearchClose, selectedId }: {
   rows: Row[];
+  /** The lead open in the panel; its row reads selected. */
+  selectedId: string | null;
   sort: Sort;
   onSort: (s: Sort) => void;
   onOpen: (lead: Lead) => void;
@@ -235,13 +237,23 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
   onSearchClose: () => void;
 }) {
   const [widths, setWidths] = useState<Record<string, number>>({});
-  const columns = useMemo(
-    () => COLUMNS.map<GridColumn>((c, i) => {
-      const width = widths[c.id] ?? c.width;
-      return sort?.col === i ? { ...c, width, icon: undefined, title: `${sort.dir === "asc" ? "↑" : "↓"} ${c.title}` } : { ...c, width };
-    }),
-    [widths, sort],
-  );
+  const columns = useMemo(() => COLUMNS.map<GridColumn>((c) => ({ ...c, width: widths[c.id] ?? c.width })), [widths]);
+
+  // Sort indicator after the header label: 12px, faint, no icon swap.
+  const drawHeader = useCallback((args: { ctx: CanvasRenderingContext2D; columnIndex: number; rect: { x: number; y: number; width: number; height: number }; theme: Theme; column: GridColumn }, drawContent: () => void) => {
+    drawContent();
+    if (!sort || sort.col !== args.columnIndex) return;
+    const { ctx, rect, theme, column } = args;
+    ctx.font = `${theme.headerFontStyle} ${theme.fontFamily}`;
+    const label = ctx.measureText(column.title).width;
+    const x = rect.x + theme.cellHorizontalPadding + (column.icon ? theme.headerIconSize + 8 : 0) + label + 6;
+    ctx.font = `12px ${theme.fontFamily}`; ctx.fillStyle = FAINT; ctx.textBaseline = "middle";
+    ctx.fillText(sort.dir === "asc" ? "↑" : "↓", x, rect.y + rect.height / 2);
+  }, [sort]);
+
+  // Hover and selection tints, and the edge fades that track the scroller.
+  const [hoverRow, setHoverRow] = useState<number | null>(null);
+  const [fades, setFades] = useState({ left: false, right: false, bottom: false });
 
   // The grid is exactly as tall as its rows (capped by the pane), so nothing
   // is ruled below the last row.
@@ -266,13 +278,31 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
   }, [latest]);
 
   const getRowThemeOverride = useCallback((row: number) => {
-    const at = rows[row]?.landedAt;
-    if (!at) return undefined;
-    const age = Date.now() - at;
-    if (age > HIGHLIGHT_MS) return undefined;
-    const alpha = 1 - age / HIGHLIGHT_MS;
-    return { bgCell: `rgba(255, 104, 71, ${(0.14 * alpha).toFixed(3)})` };
-  }, [rows]);
+    const r = rows[row];
+    if (!r) return undefined;
+    const age = r.landedAt ? Date.now() - r.landedAt : Infinity;
+    if (age <= HIGHLIGHT_MS) return { bgCell: `rgba(255, 104, 71, ${(0.14 * (1 - age / HIGHLIGHT_MS)).toFixed(3)})` };
+    if (r.id === selectedId) return { bgCell: "#f6f6f7" };
+    if (row === hoverRow) return { bgCell: "#fafafa" };
+    return undefined;
+  }, [rows, selectedId, hoverRow]);
+
+  // Watch the scroller for the fades (it mounts after the dynamic import).
+  useEffect(() => {
+    if (!host) return;
+    const scroller = host.querySelector<HTMLElement>(".dvn-scroller");
+    if (!scroller) return;
+    const update = () => setFades({
+      left: scroller.scrollLeft > 1,
+      right: scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1,
+      bottom: scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 1,
+    });
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(scroller);
+    return () => { scroller.removeEventListener("scroll", update); ro.disconnect(); };
+  }, [host, rows.length, paneHeight]);
 
   const getCell = useCallback(([col, row]: Item): GridCell => {
     const r = rows[row];
@@ -300,7 +330,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
 
   return (
     <div ref={setHost} className="h-full w-full">
-      <div className="overflow-hidden rounded-xl border border-line" style={{ height: paneHeight ? gridHeight : "100%" }}>
+      <div className="relative overflow-hidden rounded-xl border border-line" style={{ height: paneHeight ? gridHeight : "100%" }}>
         <DataEditor
           columns={columns}
           rows={rows.length}
@@ -333,7 +363,12 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
           fixedShadowX={false}
           overscrollX={0}
           overscrollY={0}
+          drawHeader={drawHeader}
+          onItemHovered={(a) => setHoverRow(a.kind === "cell" ? a.location[1] : null)}
         />
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white to-transparent transition-opacity duration-150" style={{ opacity: fades.left ? 1 : 0 }} />
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent transition-opacity duration-150" style={{ opacity: fades.right ? 1 : 0 }} />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent transition-opacity duration-150" style={{ opacity: fades.bottom ? 1 : 0 }} />
       </div>
     </div>
   );

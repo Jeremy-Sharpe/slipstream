@@ -56,14 +56,14 @@ export function LeadsView() {
   return (
     <div className="flex h-[calc(100vh-64px)] flex-col">
       <div className="shrink-0">
-        <h1 className="text-[22px] font-semibold text-ink">Leads</h1>
-        <p className="mt-1 text-[13.5px] text-soft">Companies like the ones you closed, found from your won calls.</p>
+        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">Leads</h1>
+        <p className="mt-2 text-[13.5px] text-soft">Companies like the ones you closed, found from your won calls.</p>
       </div>
 
       <div className="mt-8 grid min-h-0 flex-1 grid-cols-[380px_1px_minmax(0,1fr)]">
         <div className="flex min-h-0 flex-col pr-8">
           <header className="flex h-12 shrink-0 items-center border-b border-line text-[13.5px] font-medium text-ink">Brief</header>
-          <div className="min-h-0 flex-1 pt-4">
+          <div className="min-h-0 flex-1 pt-3">
             <SearchPane searches={searches} leads={leads} selectedId={search?.id ?? null} onSelect={setSelectedId} onFind={onFind} busy={busy} />
           </div>
         </div>
@@ -82,16 +82,16 @@ export function LeadsView() {
               >
                 <Search className="size-3.5" strokeWidth={1.75} /> Search
               </button>
-              <Button variant="primary" size="sm" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
+              <Button variant="primary" size="sm" className="h-8 text-[13px]" disabled={drafts === 0 || !search} onClick={() => search && actions.approveAllLeads(search.id)}>
                 {drafts > 0 ? `Approve all drafts · ${drafts}` : search?.status === "running" ? "Approve all drafts" : "All drafts approved"}
               </Button>
             </div>
           </header>
-          <div className="relative min-h-0 flex-1 pt-4">
+          <div className="relative min-h-0 flex-1 pt-3">
             {rows.length === 0 ? (
               <p className="flex h-full items-center justify-center text-[14px] text-faint">{search?.status === "running" ? "Searching Victoria" : "No companies matched this brief"}</p>
             ) : (
-              <LeadsGrid rows={rows} sort={sort} onSort={setSort} onOpen={onOpen} showSearch={showSearch} onSearchClose={() => setShowSearch(false)} />
+              <LeadsGrid rows={rows} sort={sort} onSort={setSort} onOpen={onOpen} showSearch={showSearch} onSearchClose={() => setShowSearch(false)} selectedId={openId} />
             )}
           </div>
         </section>

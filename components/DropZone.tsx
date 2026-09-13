@@ -114,10 +114,13 @@ export function DropZone() {
   );
 
   return (
-    <div className="text-center motion-safe:transition-[opacity,transform] motion-safe:duration-250" style={{ opacity: leaving ? 0 : 1, transform: leaving ? "translateY(-8px)" : "none", transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
-      <h1 className="text-[22px] font-semibold text-ink">What happened on the call?</h1>
-      <p className="mx-auto mt-2 max-w-[520px] text-[13.5px] text-soft">Drop the recording. Slipstream files it, drafts the follow-up, and goes and finds companies like the one you just spoke to.</p>
-      <div className={cn("mt-7 mb-5 transition-opacity duration-200", phase.kind === "submitting" && "pointer-events-none opacity-40")}><Segmented value={mode} options={MODES} onChange={setMode} /></div>
+    <div className="motion-safe:transition-[opacity,transform] motion-safe:duration-250" style={{ opacity: leaving ? 0 : 1, transform: leaving ? "translateY(-8px)" : "none", transitionTimingFunction: "cubic-bezier(0.23,1,0.32,1)" }}>
+      <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">What happened on the call?</h1>
+      <p className="mt-2 text-[13.5px] text-soft">Drop the recording. Slipstream files it, drafts the follow-up, and goes and finds companies like the one you just spoke to.</p>
+      {/* The capture block sits below the title, centred in the column, with
+          enough top room to read as the page's centre without moving the title. */}
+      <div className="mx-auto max-w-[720px] pt-[18vh] text-center">
+      <div className={cn("mb-5 transition-opacity duration-200", phase.kind === "submitting" && "pointer-events-none opacity-40")}><Segmented value={mode} options={MODES} onChange={setMode} /></div>
 
       {phase.kind === "submitting" && phase.source.kind !== "recording" ? (
         <div key="submitting" className={CARD}>
@@ -183,6 +186,7 @@ export function DropZone() {
           {runPill(!!text.trim(), run)}
         </div>
       )}
+      </div>
     </div>
   );
 }
