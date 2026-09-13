@@ -38,7 +38,7 @@ unavailable deployment credentials or submitting the external form was verified 
 - The latest production ICP is OpenRouter-derived over 13 CRM deals enriched by 12 calls
   and two emails (the canonical fixture cohort contributes one; the paused campaign adds
   one provider-neutral thread). Its customer attributes, headcount band and evidence are
-  grounded in won deals and stamped with `openai/gpt-5.4` and `text-embedding-3-small`.
+  grounded in won deals and stamped with `mistralai/mistral-medium-3.1` and `text-embedding-3-small`.
 - `POST /api/v1/demo/bootstrap` proves the complete aggregate-to-prospect loop with one
   OpenRouter key. Each profile produces exactly ten visibly fictional `.example`
   prospects with no email or LinkedIn coordinates and scores them against the won-deal
