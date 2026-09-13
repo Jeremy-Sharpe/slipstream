@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/components/ui";
 import { LoaderGrid, Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
@@ -11,7 +11,7 @@ import { LoaderGrid, Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
 
 export type TraceStatus = "pending" | "running" | "done" | "skipped";
 
-export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, loader = "spinner", children }: {
+export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, loader = "spinner", onReveal, children }: {
   status: TraceStatus;
   workingLabel: string;
   doneLabel: string;
@@ -25,8 +25,15 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   onToggle: () => void;
   last?: boolean;
   loader?: "spinner" | "grid";
+  onReveal?: (el: HTMLElement) => void;
   children?: ReactNode;
 }) {
+  const itemRef = useRef<HTMLLIElement>(null);
+  useEffect(() => {
+    if (!expanded || !onReveal) return;
+    const t = window.setTimeout(() => { if (itemRef.current) onReveal(itemRef.current); }, 450);
+    return () => window.clearTimeout(t);
+  }, [expanded, status, rowsDone, children, onReveal]);
   const working = status === "running";
   const muted = status === "pending" || status === "skipped";
   const live = useElapsed(startedAt, working);
@@ -37,7 +44,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   useLayoutEffect(() => { if (traceRef.current) setLineHeight(traceRef.current.offsetHeight); }, [visible, expanded, status, children]);
 
   return (
-    <li className="relative flex gap-4">
+    <li ref={itemRef} className="relative flex gap-4">
       <div className="flex flex-col items-center">
         <span
           className={cn(

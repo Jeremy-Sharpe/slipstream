@@ -28,12 +28,13 @@ const LABELS: Record<StepId, { working: string; done: string }> = {
 const fmtAud = (n: number | null | undefined) => (n == null ? "None" : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 
-export function RunTimeline({ call, steps, open, toggle, runId, onHighlight }: {
+export function RunTimeline({ call, steps, open, toggle, runId, onHighlight, onReveal }: {
   call: CallRecord;
   steps: StepState[];
   open: StepId | null;
   toggle: (id: StepId) => void;
   runId: number;
+  onReveal?: (el: HTMLElement) => void;
   onHighlight: (i: number | null) => void;
 }) {
   const store = useStore();
@@ -221,6 +222,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, onHighlight }: {
             onToggle={() => toggle(st.id)}
             last={last && !skippedNote}
             loader={st.id === "search" ? "grid" : "spinner"}
+            onReveal={onReveal}
           >
             {card(st)}
           </TraceStep>
