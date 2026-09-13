@@ -12,7 +12,7 @@ unavailable deployment credentials or submitting the external form was verified 
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok`
   and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
-- API Ruff checks and all 361 tests pass, including provider readiness, OpenRouter demo bootstrap, scorecard/playbook revision, coach lifecycle,
+- API Ruff checks and all 367 tests pass, including provider readiness, OpenRouter demo bootstrap, scorecard/playbook revision, coach lifecycle,
   email concurrency, campaign leasing/controls and provider-environment isolation coverage.
 - All six fixture tests pass.
 - All nine Supabase migrations and seven pgTAP suites pass from an empty ephemeral
@@ -25,7 +25,7 @@ unavailable deployment credentials or submitting the external form was verified 
   rejects unauthenticated scheduler/control calls. It still reports memory storage and
   `email_delivery: false`, so no live send is claimed.
 - The deterministic rubric-sync eval and every deterministic submission check pass.
-- The public fallback video is 4:30, 1440×900 H.264 with AAC narration. Its public
+- The public fallback video is 3:48, 1440×900 H.264 with AAC narration. Its public
   ranged download, sampled frames, stream metadata, loudness and silence profile were
   verified; exact source and checksum are in `docs/video/`.
 - `npm run smoke:production -- --revision "$(git rev-parse HEAD)" --exercise-fixture` performs a
