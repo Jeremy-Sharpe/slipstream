@@ -1,0 +1,50 @@
+{
+  "call_id": "call-08-ridgeline-commercial",
+  "extraction": {
+    "contact": {
+      "name": "Ben Wallace",
+      "role": "Director",
+      "email": "ben@ridgelinecommercial.example",
+      "phone": "+61 3 7010 1108"
+    },
+    "company": {
+      "name": "Ridgeline Commercial",
+      "industry": "Commercial real estate agency",
+      "headcount": 52,
+      "location": "Cremorne, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 78200,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the discovery scope and the fixed build price by Thursday with the sample methodology attached",
+      "I will also run twenty of your real leases through the extraction before that meeting"
+    ],
+    "objections": [
+      {
+        "text": "If it quietly guesses a rent review mechanism and gets it wrong, that is worse than the analyst typing it",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send the discovery scope and fixed build price, then review the sample extraction with Ben and the head of property management.",
+      "due": "2026-09-11"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.47,
+    "notes": "Sam sized the abstraction workload and the cost of a missed rent review before quoting, answered the silent-guess risk with a confidence threshold and review queue, and booked a dated session with the reporting owner."
+  },
+  "icp_signals": {
+    "industry": "Commercial real estate agency",
+    "headcount_band": "25-80",
+    "role": "Director",
+    "trigger": "Lease abstraction and tenant reporting taking a week every month"
+  },
+  "risk_flags": []
+}
