@@ -60,8 +60,3 @@ export function whyTokens(call: CallRecord): { tokens: Token[]; sources: Source[
   const sources = [...new Set(cites.filter((i): i is number => i != null))].map((i) => call.turns[i]).filter(Boolean).map((t) => ({ i: t.i, name: t.name, text: t.text, t: t.t }));
   return { tokens, sources };
 }
-
-export function shorterDraft(body: string) {
-  const paras = body.split("\n\n").filter(Boolean);
-  return [paras[0], paras[paras.length - 1]].join("\n\n");
-}

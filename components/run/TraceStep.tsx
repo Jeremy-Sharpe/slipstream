@@ -11,7 +11,7 @@ import { Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
 
 export type TraceStatus = "pending" | "running" | "waiting" | "done" | "skipped";
 
-export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, shimmer = false, outlined = false, onReveal, children }: {
+export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [], rowsDone = 0, startedAt, elapsedMs, expanded, onToggle, last, shimmer = false, onReveal, children }: {
   status: TraceStatus;
   workingLabel: string;
   doneLabel: string;
@@ -26,8 +26,6 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   last?: boolean;
   /** Shimmer the working label (used for Transcribing); otherwise muted. */
   shimmer?: boolean;
-  /** Brief outline after a chip action. */
-  outlined?: boolean;
   onReveal?: (el: HTMLElement) => void;
   children?: ReactNode;
 }) {
@@ -36,7 +34,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
     if (!expanded || !onReveal) return;
     const t = window.setTimeout(() => { if (itemRef.current) onReveal(itemRef.current); }, 450);
     return () => window.clearTimeout(t);
-  }, [expanded, status, rowsDone, children, onReveal]);
+  }, [expanded, onReveal]);
   const working = status === "running";
   const waiting = status === "waiting";
   const muted = status === "pending" || status === "skipped";
@@ -48,7 +46,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
   useLayoutEffect(() => { if (traceRef.current) setLineHeight(traceRef.current.offsetHeight); }, [visible, expanded, status, children]);
 
   return (
-    <li ref={itemRef} className={cn("relative flex gap-4 rounded-xl transition-shadow duration-500", outlined && "shadow-[0_0_0_2px_#181925]")} style={{ animation: "fade-up 200ms ease-out both" }}>
+    <li ref={itemRef} data-step="" className="relative flex gap-4" style={{ animation: "fade-up 200ms ease-out both" }}>
       <div className="flex flex-col items-center">
         <span
           className={cn(

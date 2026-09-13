@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 import { cn, mmss } from "@/components/ui";
 import { fmtElapsed, useElapsed } from "@/components/run/WorkingLine";
@@ -20,8 +20,8 @@ const mb = (b: number) => `${Math.max(0.1, b / 1048576).toFixed(1)} MB`;
 
 export function Submitting({ source, error, onDone, onReset, variant = "card" }: { source: Source; error?: string; onDone: () => void; onReset?: () => void; variant?: "card" | "bar" }) {
   const [settled, setSettled] = useState(false);
-  const started = useRef(Date.now());
-  const ms = useElapsed(started.current, !settled);
+  const [started] = useState(() => Date.now());
+  const ms = useElapsed(started, !settled);
   const total = source.kind === "paste" ? PASTE_MS : MEDIA_MS;
 
   useEffect(() => {

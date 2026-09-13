@@ -25,9 +25,8 @@ const LABELS: Record<StepId, { working: string; done: string }> = {
 
 const fmtAud = (n: number | null | undefined) => (n == null ? "None" : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
-const fmtElapsed = (ms?: number) => (ms == null ? "" : `${(ms / 1000).toFixed(1)}s`);
 
-export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDraftBody, highlightStep, onHighlight, onJump, onReveal, onSynced }: {
+export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDraftBody, onHighlight, onJump, onReveal, onSynced, onDraftApproved }: {
   call: CallRecord;
   steps: StepState[];
   open: StepId | null;
@@ -35,12 +34,11 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
   runId: number;
   draftBody: string;
   setDraftBody: (b: string) => void;
-  /** Step briefly outlined (after a chip action). */
-  highlightStep?: StepId | null;
   onHighlight: (i: number | null) => void;
   onJump: (i: number) => void;
   onReveal?: (el: HTMLElement) => void;
   onSynced: () => void;
+  onDraftApproved: () => void;
 }) {
   const store = useStore();
   const synced = !!store.synced[call.id];
@@ -64,8 +62,8 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
       case "transcribe": return `${mmss(call.duration)} · ${call.turns.length} turns · Scribe`;
       case "extract": return synced ? "6 fields written to CRM" : "Waiting for your approval";
       case "score": return `${call.scorecard.discovery} discovery questions · ${call.scorecard.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(call.scorecard.talkRatio)}`;
-      case "draft": return approved ? "Approved · nothing is sent" : call.draft.subject;
-      case "icp": return `${icp.sentence.split(" with ")[0]} · v${icp.version}`;
+      case "draft": return approved ? "Follow-up approved · nothing is sent" : st.status === "waiting" ? "Waiting for your approval" : call.draft.subject;
+      case "icp": return `From ${icp.wonDeals} won deals`;
       case "search": return st.status === "done" ? "10 found · scored against the won deals" : "";
       case "outreach": return st.status === "done" ? "5 drafts ready" : "";
     }
@@ -73,7 +71,6 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
 
   const doneLabel = (id: StepId) => {
     if (id === "extract" && synced) return "Extracted 6 fields · Synced";
-    if (id === "draft" && approved) return "Follow-up approved";
     return LABELS[id].done;
   };
 
@@ -138,7 +135,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
         );
       }
       case "draft":
-        if (st.status !== "done") return null;
+        if (st.status !== "done" && st.status !== "waiting") return null;
         return (
           <div>
             <p className="text-[15px] font-medium text-ink">{call.draft.subject}</p>
@@ -159,7 +156,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
               {approved ? (
                 <p className="flex items-center gap-2 text-[14px] text-soft" style={{ animation: "fade-in 200ms ease-out both" }}><Check className="size-3.5 text-ink" strokeWidth={2.5} /> Approved · nothing is sent from Slipstream</p>
               ) : (
-                <Button variant="primary" onClick={() => actions.approveDraft(call.id)}>Approve</Button>
+                <Button variant="primary" onClick={() => { actions.approveDraft(call.id); onDraftApproved(); }}>Approve follow-up</Button>
               )}
             </div>
           </div>
@@ -169,7 +166,7 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
         return (
           <div>
             <p className="text-[15px] text-ink">{icp.sentence}</p>
-            <p className="mt-1 text-[14px] text-soft">From {icp.wonDeals} won deals · v{icp.version}</p>
+            <p className="mt-1 text-[14px] text-soft">From {icp.wonDeals} won deals</p>
             {call.icp && (
               <ul className="mt-4 flex flex-col gap-1.5">
                 {[["Industry", call.icp.industry], ["Size", call.icp.headcount_band + " staff"], ["Buyer", call.icp.role], ["Trigger", call.icp.trigger ?? "none"]].map(([k, v]) => (
@@ -236,7 +233,6 @@ export function RunTimeline({ call, steps, open, toggle, runId, draftBody, setDr
             onToggle={() => toggle(st.id)}
             last={last && !skippedNote}
             shimmer={st.id === "transcribe"}
-            outlined={highlightStep === st.id}
             onReveal={onReveal}
           >
             {card(st)}

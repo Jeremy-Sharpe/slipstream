@@ -13,7 +13,8 @@ export type StepStatus = "pending" | "running" | "waiting" | "done" | "skipped";
 export type StepState = { id: StepId; status: StepStatus; progress?: number; note?: string; startedAt?: number; elapsedMs?: number };
 
 export const PHASE1: StepId[] = ["transcribe", "extract"];
-export const PHASE2: StepId[] = ["score", "draft", "icp", "search", "outreach"];
+export const PHASE2: StepId[] = ["score", "draft"];
+export const PHASE3: StepId[] = ["icp", "search", "outreach"];
 
 /** Sub-items ticked off while each step works. */
 export const TRACE: Record<StepId, string[]> = {
@@ -89,13 +90,21 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
     });
   }, [call, schedule, opts.startDelay, opts.transcribed]);
 
-  /** Phase 2: only after the fields are approved. The timeline grows here. */
+  /** Phase 2: after the fields are approved. Scores, drafts, then waits again. */
   const startPhase2 = useCallback(() => {
     set("extract", { status: "done" });
     setOpen(null);
     setSteps((all) => (all.some((s) => s.id === "score") ? all : [...all, ...PHASE2.map((id) => ({ id, status: "pending" as const }))]));
+    schedule(PHASE2, SETTLE, { id: "draft", wait: true }, () => setOpen("draft"));
+  }, [schedule, set]);
+
+  /** Phase 3: after the follow-up is approved. The timeline grows again. */
+  const startPhase3 = useCallback(() => {
+    set("draft", { status: "done" });
+    setOpen(null);
+    setSteps((all) => (all.some((s) => s.id === "icp") ? all : [...all, ...PHASE3.map((id) => ({ id, status: "pending" as const }))]));
     const stop = call.outcome === "lost" ? { id: "icp" as StepId, note: "Not a fit for the ICP. No leads searched" } : undefined;
-    schedule(PHASE2, SETTLE, stop, () => actions.setRun(call.id, "done"));
+    schedule(PHASE3, SETTLE, stop, () => actions.setRun(call.id, "done"));
   }, [call, schedule, set]);
 
   useEffect(() => {
@@ -106,5 +115,5 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
   }, [start]);
 
   const toggle = (id: StepId) => setOpen((o) => (o === id ? null : id));
-  return { steps, open, toggle, setOpen, phase1Done, runId, rerun: start, startPhase2 };
+  return { steps, open, toggle, setOpen, phase1Done, runId, rerun: start, startPhase2, startPhase3 };
 }

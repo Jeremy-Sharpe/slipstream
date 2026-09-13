@@ -39,8 +39,6 @@ export type CallRecord = {
   icp: { industry: string; headcount_band: string; role: string; trigger: string | null } | null;
   riskFlags: unknown[];
   draft: { subject: string; body: string };
-  /** Hardcoded shorter variant for the "again, shorter" chip. */
-  draftShort: { subject: string; body: string };
   /** Set when the call came from a dropped recording / pasted transcript. */
   fileName?: string;
   pasted?: boolean;

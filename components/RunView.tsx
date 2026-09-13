@@ -5,13 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { CallRecord } from "@/lib/types";
-import { useRun, type StepId } from "@/lib/useRun";
+import { useRun } from "@/lib/useRun";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { Avatar } from "./Avatar";
 import { RunTimeline } from "./RunTimeline";
 import { Summary } from "./run/Summary";
 import { Transcript } from "./Transcript";
-import { Button, OutcomePill, fmtDate, fmtTime, mmss } from "./ui";
+import { Button, OutcomePill, cn, fmtDate, fmtTime, mmss } from "./ui";
 
 export function RunView({ call }: { call: CallRecord }) {
   const params = useSearchParams();
@@ -57,26 +57,16 @@ export function RunView({ call }: { call: CallRecord }) {
   }, [reduced]);
   const highlight = clicked ?? hover;
 
-  // Draft body (editable, replaced by the "shorter" chip) and a brief step outline.
+  // Editable draft body, reset when the run restarts (state adjusted during render).
   const [draftBody, setDraftBody] = useState(call.draft.body);
-  const [outlined, setOutlined] = useState<StepId | null>(null);
-  // Reset the draft when the run restarts (state adjusted during render).
   const [seenRun, setSeenRun] = useState(run.runId);
   if (seenRun !== run.runId) { setSeenRun(run.runId); setDraftBody(call.draft.body); }
-  const shorterDraft = () => {
-    setDraftBody(call.draftShort.body);
-    run.setOpen("draft");
-    setOutlined("draft");
-    window.setTimeout(() => setOutlined(null), 1200);
-  };
 
-  const extractStatus = run.steps.find((s) => s.id === "extract")?.status;
-  const extractDone = extractStatus === "done" || extractStatus === "waiting";
 
   // The right column is sticky and scrolls internally: its height is the
   // viewport minus the header above the grid (measured) minus 48px.
   const gridRef = useRef<HTMLDivElement>(null);
-  const columnRef = useRef<HTMLElement>(null);
+  const columnRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
     const measure = () => { const el = gridRef.current; if (el) setHeaderHeight(el.getBoundingClientRect().top + window.scrollY); };
@@ -87,19 +77,58 @@ export function RunView({ call }: { call: CallRecord }) {
     return () => { ro.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
 
-  // Reveal a step inside the column only, and never fight a user who just scrolled it.
+  // The timeline scroll area never ends on a row boundary: it is sized so the
+  // last visible row is cut about mid-height (a peek at what is below), and a
+  // bottom fade shows only while there is more to scroll.
+  const sectionRef = useRef<HTMLElement>(null);
+  const ciRef = useRef<HTMLDivElement>(null);
+  const [timelineHeight, setTimelineHeight] = useState<number | null>(null);
+  const [fade, setFade] = useState(false);
+  useEffect(() => {
+    const section = sectionRef.current, ci = ciRef.current, host = columnRef.current;
+    if (!section || !ci || !host) return;
+    const measure = () => {
+      const available = section.clientHeight - ci.offsetHeight - 16;
+      const rows = host.querySelectorAll<HTMLElement>("li[data-step]");
+      const first = rows[0];
+      const pitch = rows.length > 1 ? rows[1].getBoundingClientRect().top - first.getBoundingClientRect().top : 53;
+      const lead = first ? first.getBoundingClientRect().top - host.getBoundingClientRect().top + host.scrollTop : 30;
+      const fit = Math.max(1, Math.floor((available - lead - pitch * 0.55) / pitch));
+      setTimelineHeight(Math.min(available, lead + fit * pitch + pitch * 0.55));
+      setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(section); ro.observe(ci); if (host.firstElementChild) ro.observe(host.firstElementChild as Element);
+    for (const child of host.children) ro.observe(child);
+    const onScroll = () => setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
+    host.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure);
+    document.addEventListener("visibilitychange", measure);
+    return () => { ro.disconnect(); host.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure); document.removeEventListener("visibilitychange", measure); };
+  }, [run.runId]);
+
+  // Reveal a step inside the timeline only when the pointer is NOT inside the
+  // column and the user hasn't wheel/touch-scrolled it in the last 3s.
+  // Nothing ever scrolls under a resting pointer.
   const userScrolledAt = useRef(0);
+  const pointerInside = useRef(false);
   const programmatic = useRef(false);
   useEffect(() => {
     const host = columnRef.current;
     if (!host) return;
-    const onScroll = () => { if (!programmatic.current) userScrolledAt.current = Date.now(); };
-    host.addEventListener("scroll", onScroll, { passive: true });
-    return () => host.removeEventListener("scroll", onScroll);
+    const onUser = () => { userScrolledAt.current = Date.now(); };
+    const onEnter = () => { pointerInside.current = true; };
+    const onLeave = () => { pointerInside.current = false; };
+    host.addEventListener("wheel", onUser, { passive: true });
+    host.addEventListener("touchmove", onUser, { passive: true });
+    host.addEventListener("pointerenter", onEnter);
+    host.addEventListener("pointerleave", onLeave);
+    return () => { host.removeEventListener("wheel", onUser); host.removeEventListener("touchmove", onUser); host.removeEventListener("pointerenter", onEnter); host.removeEventListener("pointerleave", onLeave); };
   }, []);
   const reveal = useCallback((el: HTMLElement) => {
     const host = columnRef.current;
-    if (!host || Date.now() - userScrolledAt.current < 3000) return;
+    if (!host || pointerInside.current || Date.now() - userScrolledAt.current < 3000) return;
     const h = host.getBoundingClientRect(), r = el.getBoundingClientRect();
     if (r.top >= h.top && r.bottom <= h.bottom) return;
     const target = r.top < h.top ? host.scrollTop + (r.top - h.top) - 16 : host.scrollTop + (r.bottom - h.bottom) + 16;
@@ -124,7 +153,7 @@ export function RunView({ call }: { call: CallRecord }) {
             <span>{call.company}</span>
           </h1>
           <p className="mt-0.5 flex h-6 items-center gap-2 text-[13px] text-soft">
-            {extractDone && <span style={{ animation: "fade-in 200ms ease-out both" }}><OutcomePill outcome={call.outcome} /></span>}
+            <OutcomePill outcome={call.outcome} />
             <span>{call.rep}</span>
             <span className="text-faint">·</span>
             <span className="text-[13.5px] tabular-nums">{fmtDate(call.at)} · {fmtTime(call.at)} · {mmss(call.duration)}</span>
@@ -140,11 +169,18 @@ export function RunView({ call }: { call: CallRecord }) {
           <Transcript turns={call.turns} highlight={highlight} />
         </section>
         <section
-          ref={columnRef}
-          className="run-column sticky top-6 self-start overflow-y-auto pr-3 pb-6"
-          style={{ height: headerHeight ? `calc(100vh - ${headerHeight}px - 48px)` : "calc(100vh - 48px)", overscrollBehavior: "contain", ...enter(240) }}
+          ref={sectionRef}
+          className="sticky top-6 flex flex-col gap-4 self-start"
+          style={{ height: headerHeight ? `calc(100vh - ${headerHeight}px - 48px)` : "calc(100vh - 48px)", ...enter(240) }}
         >
-          <Summary call={call} runId={run.runId} ready={run.steps.find((s) => s.id === "draft")?.status === "done"} onHighlight={setHover} onJump={jump} onShorterDraft={shorterDraft} />
+          <div ref={ciRef} className="shrink-0">
+            <Summary call={call} runId={run.runId} ready={["done", "waiting"].includes(run.steps.find((s) => s.id === "draft")?.status ?? "")} onHighlight={setHover} onJump={jump} />
+          </div>
+          <div
+            ref={columnRef}
+            className={cn("run-column min-h-0 shrink-0 overflow-y-auto pr-3", fade && "run-column-fade")}
+            style={{ height: timelineHeight ?? undefined, flex: timelineHeight == null ? "1 1 0%" : undefined, overscrollBehavior: "contain", overflowAnchor: "none" }}
+          >
           <h2 className="mb-4 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">What Slipstream did</h2>
           <RunTimeline
             call={call}
@@ -154,12 +190,13 @@ export function RunView({ call }: { call: CallRecord }) {
             runId={run.runId}
             draftBody={draftBody}
             setDraftBody={setDraftBody}
-            highlightStep={outlined}
             onHighlight={setHover}
             onJump={jump}
             onReveal={reveal}
             onSynced={run.startPhase2}
+            onDraftApproved={run.startPhase3}
           />
+          </div>
         </section>
       </div>
     </div>

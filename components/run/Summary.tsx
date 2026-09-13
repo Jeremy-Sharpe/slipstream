@@ -7,13 +7,12 @@ import { StreamingText } from "./StreamingText";
 
 /* Conversation intelligence: fades in above the timeline once phase 1 is
    done, streams the summary with transcript citations, and offers two chips. */
-export function Summary({ call, runId, ready, onHighlight, onJump, onShorterDraft }: {
+export function Summary({ call, runId, ready, onHighlight, onJump }: {
   call: CallRecord;
   runId: number;
   ready: boolean;
   onHighlight: (i: number | null) => void;
   onJump: (i: number) => void;
-  onShorterDraft: () => void;
 }) {
   const [why, setWhy] = useState(false);
   const [gen, setGen] = useState(0);
@@ -24,13 +23,10 @@ export function Summary({ call, runId, ready, onHighlight, onJump, onShorterDraf
   const base = summaryTokens(call);
   const answer = whyTokens(call);
   const whyLabel = call.outcome === "won" ? "Why did this one close?" : call.outcome === "stalled" ? "Why did this one stall?" : call.outcome === "lost" ? "Why did this one get lost?" : null;
-  const followUps = [
-    "Draft the follow-up again, shorter",
-    ...(whyLabel && !why ? [whyLabel] : []),
-  ];
+  const followUps = whyLabel && !why ? [whyLabel] : [];
 
   return (
-    <section className="mb-6 rounded-xl bg-surface p-4" style={{ animation: "fade-in 200ms ease-out both" }}>
+    <section className="rounded-xl bg-surface p-4" style={{ animation: "fade-in 200ms ease-out both" }}>
       <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.08em] text-faint">Conversation intelligence</p>
       <StreamingText
         key={`summary-${gen}`}
@@ -40,7 +36,7 @@ export function Summary({ call, runId, ready, onHighlight, onJump, onShorterDraf
         followUps={followUps}
         onCite={onHighlight}
         onJump={onJump}
-        onFollowUp={(_, i) => { if (i === 0) onShorterDraft(); else setWhy(true); }}
+        onFollowUp={() => setWhy(true)}
       />
       {why && (
         <div className="mt-3 border-t border-line pt-3" style={{ animation: "fade-in 200ms ease-out both" }}>
