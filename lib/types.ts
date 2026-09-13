@@ -56,6 +56,10 @@ export type CallRecord = {
     nextStepSecured: boolean;
     objection: string;
     talkRatio: number;
+    /** The judge's validated coaching text; empty lists mean the judge had nothing to say. */
+    summary: string;
+    wentWell: string[];
+    toImprove: string[];
     /** Threads only: whether the reply asked what it needed to, and how fast it came. */
     askedRightQuestions?: boolean;
     responseTime?: string;

@@ -167,6 +167,128 @@ def test_score_call_drops_evidence_when_next_step_verdict_is_false() -> None:
     assert scorecard.next_step_evidence is None
 
 
+def test_score_call_keeps_valid_judge_narratives() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+
+    scorecard, _ = score_call(transcript, FakeJudge())
+
+    assert scorecard.went_well == ["Asked about change."]
+    assert scorecard.to_improve == ["Add proof for objections."]
+    assert scorecard.summary == "The rep asked about the change and secured Thursday."
+
+
+def test_score_call_drops_narrative_with_unsupported_quote() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+    judged = _judged_scorecard().model_copy(
+        update={
+            "went_well": [
+                "Opened with “What changed this week?”",
+                "Reassured them with “we never lose data”.",
+                "Closed on the review date.",
+            ]
+        }
+    )
+
+    scorecard, _ = score_call(transcript, FakeJudge(scorecard=judged))
+
+    assert scorecard.went_well == [
+        "Opened with “What changed this week?”",
+        "Closed on the review date.",
+    ]
+    assert scorecard.to_improve == ["Add proof for objections."]
+
+
+def test_score_call_keeps_narrative_quoting_an_uncited_transcript_turn() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+    judged = _judged_scorecard().model_copy(
+        update={"went_well": ["Confirmed timing when they said “thursday works for the review”."]}
+    )
+
+    scorecard, _ = score_call(transcript, FakeJudge(scorecard=judged))
+
+    assert scorecard.went_well == [
+        "Confirmed timing when they said “thursday works for the review”."
+    ]
+
+
+def test_score_call_leaves_one_list_empty_when_only_its_narratives_drop() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+    judged = _judged_scorecard().model_copy(
+        update={"went_well": ["Reassured them with “we never lose data”."]}
+    )
+
+    scorecard, _ = score_call(transcript, FakeJudge(scorecard=judged))
+
+    assert scorecard.went_well == []
+    assert scorecard.to_improve == ["Add proof for objections."]
+
+
+def test_score_call_falls_back_to_grounded_coaching_when_both_lists_drop() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+    judged = _judged_scorecard().model_copy(
+        update={
+            "went_well": ["Reassured them with “we never lose data”."],
+            "to_improve": ["Avoid promising “a full refund any time”."],
+        }
+    )
+
+    scorecard, _ = score_call(transcript, FakeJudge(scorecard=judged))
+
+    assert scorecard.went_well == ["Secured an evidenced next step."]
+    assert scorecard.to_improve == [
+        "Ask at least three discovery questions before discussing price."
+    ]
+    assert scorecard.summary == "The rep asked about the change and secured Thursday."
+
+
+def test_score_call_deduplicates_judge_narratives() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+    judged = _judged_scorecard().model_copy(
+        update={
+            "went_well": [
+                "Asked about change.",
+                "Asked about change.",
+                "Confirmed the review date.",
+            ]
+        }
+    )
+
+    scorecard, _ = score_call(transcript, FakeJudge(scorecard=judged))
+
+    assert scorecard.went_well == ["Asked about change.", "Confirmed the review date."]
+
+
+def test_score_call_rejects_summary_claiming_an_unevidenced_next_step() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+    judged = _judged_scorecard().model_copy(
+        update={"next_step_evidence": Evidence(turn_index=2, quote="Friday works")}
+    )
+
+    scorecard, _ = score_call(transcript, FakeJudge(scorecard=judged))
+
+    assert scorecard.next_step_secured is False
+    assert scorecard.summary == (
+        "The rep asked 1 evidenced discovery questions, "
+        "did not secure an evidenced next step, and had a 44% talk ratio."
+    )
+    assert scorecard.went_well == ["Asked about change."]
+
+
+def test_score_call_keeps_summary_that_admits_no_next_step() -> None:
+    transcript = Transcript.model_validate(_transcript_payload())
+    judged = _judged_scorecard().model_copy(
+        update={
+            "next_step_evidence": Evidence(turn_index=2, quote="Friday works"),
+            "summary": "The rep opened well but a next step was not secured.",
+        }
+    )
+
+    scorecard, _ = score_call(transcript, FakeJudge(scorecard=judged))
+
+    assert scorecard.next_step_secured is False
+    assert scorecard.summary == "The rep opened well but a next step was not secured."
+
+
 def test_score_call_uses_request_start_for_stale_write_ordering() -> None:
     started_at = datetime(2026, 9, 12, 8, 0, tzinfo=UTC)
 
