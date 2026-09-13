@@ -122,7 +122,7 @@ export function StartCoachDialog() {
             <details className="text-xs text-muted-foreground">
               <summary className="cursor-pointer">No desktop coach yet?</summary>
               <p className="mt-2">
-                It runs on macOS 14.2 or later. Download the latest build from the Coach installers workflow on GitHub, or run it from the repository with <code>cd coach && npm install && npm start</code>.
+                It runs on macOS 14.2 or later. Download the latest build from the Coach installers workflow on GitHub. When running it from the repository (<code>cd coach && npm install && npm start</code>), use Copy link and paste it into the coach.
               </p>
             </details>
           </div>

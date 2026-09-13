@@ -21,7 +21,9 @@ let busy = false,
 let startedAt = Date.now(),
   cardSignature = "",
   lastSignal = {},
-  captureActive = false;
+  captureActive = false,
+  sessionRejected = false,
+  recordingLimited = false;
 const showError = (message) => {
   $("error").textContent = message;
   $("error").hidden = !message;
@@ -85,7 +87,11 @@ function render() {
       ]) {
         const button = document.createElement("button");
         button.textContent = label;
-        button.onclick = () => act(action, active.id);
+        button.onclick = () => {
+          // One decision per card; the next snapshot redraws the buttons.
+          for (const sibling of actions.querySelectorAll("button")) sibling.disabled = true;
+          act(action, active.id);
+        };
         actions.append(button);
       }
       const details = document.createElement("details");
@@ -206,6 +212,7 @@ function connect() {
     if (generation !== connectGeneration || row?.status === "ended") return;
     status("Reconnecting · advice may be out of date");
     if (event.code === 1008) {
+      sessionRejected = true;
       showError(
         "Session connection rejected. Your transcript is retained; reopen the coach or end the call.",
       );
@@ -238,6 +245,8 @@ async function activate(value) {
   cardSignature = "";
   startedAt = row ? Date.parse(row.created_at) : Date.now();
   captureActive = false;
+  sessionRejected = false;
+  recordingLimited = false;
   ending = false;
   showError("");
   $("setup").hidden = true;
@@ -276,8 +285,16 @@ async function start() {
         if (level > 0.0005) lastSignal[channel] = Date.now();
       },
       onRecording: (bytes) => {
+        if (recordingLimited) return;
         recordingQueue = recordingQueue
           .then(() => window.coach.recording(current.id, bytes))
+          .then((result) => {
+            if (!result?.limited || recordingLimited) return;
+            recordingLimited = true;
+            showError(
+              "Recording limit reached (about 26 minutes). Coaching continues, and the call will be saved from the live transcript.",
+            );
+          })
           .catch((error) => {
             showError(error.message);
             pause();
@@ -340,18 +357,25 @@ async function end(skipRecording = false) {
     await pause();
     await recordingQueue;
     await checkpointQueue;
+    // A rejected session can never acknowledge the outstanding transcript, so do not wait for it.
     const deadline = Date.now() + 10000;
-    while (outbox.pending().length && Date.now() < deadline)
+    while (outbox.pending().length && !sessionRejected && Date.now() < deadline)
       await new Promise((resolve) => setTimeout(resolve, 100));
-    if (outbox.pending().length)
+    if (outbox.pending().length && !sessionRejected)
       throw new Error(
         "Some transcript is waiting to sync. Reconnect and retry to save the full call.",
       );
-    if (!skipRecording) {
+    if (!skipRecording && !recordingLimited) {
       status("Saving recording…");
       await window.coach.upload();
     }
-    row = await window.coach.finish();
+    const result = await window.coach.finish();
+    if (result.orphaned) {
+      row = row ? { ...row, status: "ended", recording_status: "not_uploaded" } : row;
+      showError(
+        "The server no longer has this call, so it was not saved there. Your recording is still on this computer; export it below.",
+      );
+    } else row = result;
     checkpoint();
     render();
     socket?.close();

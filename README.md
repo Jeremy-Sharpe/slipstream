@@ -45,7 +45,7 @@ The live URL exposes the complete product surface and an executable fixture loop
 
 ```
 app/          Next.js 16 + React 19 UI (standalone VPS; Vercel backup). Conversations, analysis, leads. Calls the API for live data and actions.
-api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts. REST plus one WebSocket.
+api/          FastAPI (Python 3.12) AI pipeline (Jeremy's VPS, HTTPS). Transcription, extraction, scoring, ICP, Origami, drafts, live coaching. REST plus the coach WebSockets.
 scheduler/    Dependency-free one-shot Railway cron worker. Claims one bounded campaign chunk, emits a PII-free result, then exits.
 coach/        macOS desktop call coach (Electron). Captures microphone and call audio, streams both to Scribe realtime and talks to the API's coach session routes.
 fixtures/     Twelve labelled sales-call scripts as seeded CRM history, plus one voiced demo call.

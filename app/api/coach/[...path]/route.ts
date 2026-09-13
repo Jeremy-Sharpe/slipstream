@@ -9,8 +9,9 @@ export const dynamic = "force-dynamic";
 const SESSION = /^sessions\/[0-9a-f-]{36}$/i;
 type Context = { params: Promise<{ path: string[] }> };
 
+// A session's random UUID is what lets the page read it, so there is deliberately no list route.
 function allowed(method: string, path: string): boolean {
-  if (method === "GET") return path === "customers" || path === "sessions" || SESSION.test(path);
+  if (method === "GET") return SESSION.test(path);
   return method === "POST" && path === "sessions";
 }
 

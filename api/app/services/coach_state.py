@@ -132,7 +132,11 @@ def bump_control(state: dict) -> None:
 
 
 def apply_analysis(
-    state: dict, analysis: Analysis, control_revision: int, sources: list[dict]
+    state: dict,
+    analysis: Analysis,
+    control_revision: int,
+    sources: list[dict],
+    seen_sequence: int | None = None,
 ) -> bool:
     if state.get("control_revision", 0) != control_revision:
         return False
@@ -189,7 +193,10 @@ def apply_analysis(
         ):
             continue
         item = candidate.model_dump()
-        item.update(id=str(uuid4()), status="queued", created_sequence=len(state["turns"]) - 1)
+        # Anchor new cards to the transcript the model saw, so a turn spoken while it was
+        # thinking can still complete the card on the next analysis.
+        created = len(state["turns"]) - 1 if seen_sequence is None else seen_sequence
+        item.update(id=str(uuid4()), status="queued", created_sequence=created)
         state["suggestions"].append(item)
         intents.add(intent_key(candidate.intent))
         texts.add(intent_key(candidate.text))

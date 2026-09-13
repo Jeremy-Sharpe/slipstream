@@ -29,6 +29,8 @@ from app.services.transcribe import Transcript, TranscriptSegment, transcribe_au
 from app.ws.coach import _paid_coach_enabled, _valid_token, create_scribe_token
 
 router = APIRouter(prefix="/coach", tags=["coach sessions"])
+# Model analyses per session; analyses run back to back while people talk.
+MAX_ANALYSES = 600
 
 
 class NewCustomer(BaseModel):
@@ -265,8 +267,9 @@ async def recording(session_id: UUID, request: Request, authorization: str | Non
             fingerprint = hashlib.sha256(parts).hexdigest()
             if row.get("recording_hash") == fingerprint:
                 return {"status": row["recording_status"]}
-            if row["status"] == "ended" or row.get("finalizing"):
-                raise HTTPException(409, "This call has ended or is finalising")
+            # A failed finish can be retried with the recording, so only a finished call is closed.
+            if row["status"] == "ended":
+                raise HTTPException(409, "This call has ended")
             settings = request.app.state.settings
             if not settings.elevenlabs_api_key:
                 raise HTTPException(
@@ -344,17 +347,27 @@ async def finish(request, row: dict) -> None:
         if request.app.state.supabase:
 
             def link():
-                request.app.state.supabase.table("conversations").update(
+                client = request.app.state.supabase
+                rows = (
+                    client.table("conversations")
+                    .select("metadata")
+                    .eq("id", str(record.id))
+                    .execute()
+                    .data
+                )
+                # Merge, never replace: the canonical call keeps its rep and source here.
+                metadata = {
+                    **((rows[0].get("metadata") or {}) if rows else {}),
+                    "coach_session_id": row["id"],
+                    "recording_path": f"{row['id']}/recording.wav"
+                    if row["recording_status"] == "stored"
+                    else None,
+                }
+                client.table("conversations").update(
                     {
                         "contact_id": row["contact_id"],
                         "deal_id": row["deal_id"],
-                        "metadata": {
-                            "provider": transcript.provider,
-                            "coach_session_id": row["id"],
-                            "recording_path": f"{row['id']}/recording.wav"
-                            if row["recording_status"] == "stored"
-                            else None,
-                        },
+                        "metadata": metadata,
                     }
                 ).eq("id", str(record.id)).execute()
 
@@ -410,6 +423,7 @@ async def live(session_id: UUID, websocket: WebSocket):
 
         async def reason_loop():
             analysed_revision = None
+            limit_reported = False
             while True:
                 try:
                     await asyncio.wait_for(dirty.wait(), timeout=30)
@@ -428,17 +442,20 @@ async def live(session_id: UUID, websocket: WebSocket):
                     # The periodic reassessment only spends a model call if something changed.
                     if not woken and row["state"]["revision"] == analysed_revision:
                         continue
-                    if row["state"]["analysis_count"] >= 240:
-                        await send(
-                            {
-                                "type": "error",
-                                "detail": "Analysis limit reached; transcript continues",
-                            }
-                        )
+                    if row["state"]["analysis_count"] >= MAX_ANALYSES:
+                        if not limit_reported:
+                            limit_reported = True
+                            await send(
+                                {
+                                    "type": "error",
+                                    "detail": "Analysis limit reached; transcript continues",
+                                }
+                            )
                         continue
                     row["state"]["analysis_count"] += 1
                     await store.save(row, "analysis_attempt")
                 control_revision = row["state"].get("control_revision", 0)
+                seen_sequence = len(row["state"]["turns"]) - 1
                 started = time.monotonic()
 
                 async def run_model(snapshot_row):
@@ -469,6 +486,7 @@ async def live(session_id: UUID, websocket: WebSocket):
                                 result,
                                 control_revision,
                                 latest["context"]["sources"],
+                                seen_sequence=seen_sequence,
                             )
                         ):
                             latest["model"] = model
@@ -525,9 +543,15 @@ async def live(session_id: UUID, websocket: WebSocket):
                     await snapshot(row)
                 elif kind == "action":
                     action_id = str(UUID(event.get("action_id", "")))
-                    if manual_action(
-                        row["state"], action_id, event.get("action"), event.get("suggestion_id")
-                    ):
+                    try:
+                        changed = manual_action(
+                            row["state"], action_id, event.get("action"), event.get("suggestion_id")
+                        )
+                    except ValueError:
+                        # A double click, or a card the model already retired: acknowledge so the
+                        # client drops the action, and let the snapshot show the current card.
+                        changed = False
+                    if changed:
                         await store.save(row, "manual_action")
                         dirty.set()
                     await send({"type": "action_ack", "action_id": action_id})

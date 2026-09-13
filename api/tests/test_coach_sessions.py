@@ -413,3 +413,64 @@ def test_advice_lands_while_the_call_keeps_talking(client, monkeypatch):
         suggestions = receive(ws, "snapshot")["session"]["state"]["suggestions"]
     assert [s["text"] for s in suggestions] == ["When is the renewal due?"]
     assert suggestions[0]["status"] == "shown"
+
+
+def test_question_asked_while_the_model_thinks_can_still_retire_its_card():
+    state = new_state()
+    turn(state, "prospect", "Our renewal is in October.")
+    seen = len(state["turns"]) - 1
+    candidate = Candidate(
+        intent="decision_owner",
+        kind="ask",
+        text="Who else will help make the decision?",
+        reason="Identify the decision group.",
+        evidence_ids=["customer"],
+        priority=80,
+    )
+    asked = turn(state, "rep", "Who else is involved in deciding?")
+    assert apply_analysis(state, Analysis(candidates=[candidate]), 0, SOURCES, seen_sequence=seen)
+    follow_up = Analysis(
+        transitions=[
+            Transition(
+                suggestion_id=state["suggestions"][0]["id"],
+                status="asked",
+                sequence=asked.sequence,
+                quote=asked.text,
+                confidence=0.97,
+            )
+        ]
+    )
+    assert apply_analysis(state, follow_up, state["control_revision"], SOURCES)
+    assert state["suggestions"][0]["status"] == "asked"
+
+
+def test_repeated_action_on_a_finished_card_keeps_the_call_connected(client):
+    session_id, key, _ = create(client)
+    seeded = seed()
+    client.app.state.coach_store.rows[session_id]["state"]["suggestions"] = seeded["suggestions"]
+    first = seeded["suggestions"][0]["id"]
+    with client.websocket_connect(f"/api/v1/coach/sessions/{session_id}/live") as ws:
+        ws.send_json({"token": key})
+        receive(ws, "snapshot")
+        for _ in range(2):
+            action_id = str(uuid4())
+            ws.send_json(
+                {"type": "action", "action_id": action_id, "action": "done", "suggestion_id": first}
+            )
+            assert receive(ws, "action_ack")["action_id"] == action_id
+        ws.send_json({"type": "ping"})
+        receive(ws, "pong")
+    saved = client.app.state.coach_store.rows[session_id]["state"]["suggestions"]
+    assert [s["status"] for s in saved] == ["done", "shown"]
+
+
+def test_recording_can_be_retried_after_a_failed_finish(client):
+    session_id, key, _ = create(client)
+    client.app.state.coach_store.rows[session_id]["finalizing"] = True
+    response = client.post(
+        f"/api/v1/coach/sessions/{session_id}/recording",
+        content=b"RIFF0000WAVEfmt ",
+        headers={"Authorization": "Bearer " + key, "Content-Type": "audio/wav"},
+    )
+    # Reaches batch transcription (unconfigured in tests) instead of being refused as finalising.
+    assert response.status_code == 503, response.text

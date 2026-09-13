@@ -65,8 +65,13 @@ async function request(route, options = {}) {
   } catch {
     throw new Error("The coach API returned an invalid response");
   }
-  if (!response.ok)
-    throw new Error(typeof body.detail === "string" ? body.detail : "Coach API request failed");
+  if (!response.ok) {
+    const error = new Error(
+      typeof body.detail === "string" ? body.detail : "Coach API request failed",
+    );
+    error.status = response.status;
+    throw error;
+  }
   return body;
 }
 async function launch(value) {
@@ -317,26 +322,43 @@ handle("recording", (id, chunk) => {
   const filename = local(id + ".pcm");
   const existing = fs.existsSync(filename) ? fs.statSync(filename).size : 0;
   recordingBytes = existing + chunk.length;
-  if (recordingBytes > 50 * 1024 * 1024 - 44)
-    throw new Error("Recording limit reached. End the call to save it.");
+  // The API accepts recordings up to 50 MB; past that, coaching continues from the live transcript.
+  if (recordingBytes > 50 * 1024 * 1024 - 44) return { limited: true };
   fs.appendFileSync(filename, Buffer.from(chunk), { mode: 0o600 });
+  return { limited: false };
 });
 async function recordingFile(filename) {
   const { wavHeader } = await import("./pcm.mjs");
   const pcm = fs.readFileSync(filename);
   return new Uint8Array(Buffer.concat([Buffer.from(wavHeader(pcm.length)), pcm]));
 }
+// 401 or 404 means the server no longer has this session (API restart or expired access).
+const sessionMissing = (error) => error.status === 401 || error.status === 404;
 handle("upload", async () => {
   const filename = local(current.id + ".pcm");
   if (!fs.existsSync(filename)) return { status: "not_recorded" };
-  return request(`sessions/${current.id}/recording`, {
-    method: "POST",
-    headers: { "Content-Type": "audio/wav" },
-    body: await recordingFile(filename),
-  });
+  try {
+    return await request(`sessions/${current.id}/recording`, {
+      method: "POST",
+      headers: { "Content-Type": "audio/wav" },
+      body: await recordingFile(filename),
+    });
+  } catch (error) {
+    if (sessionMissing(error)) return { status: "session_missing" };
+    throw error;
+  }
 });
 handle("finish", async () => {
-  const result = await request(`sessions/${current.id}/finish`, { method: "POST" });
+  let result;
+  try {
+    result = await request(`sessions/${current.id}/finish`, { method: "POST" });
+  } catch (error) {
+    if (!sessionMissing(error)) throw error;
+    // Release the desktop so the rep can start another call; the recording stays for export.
+    current.status = "ended";
+    persist();
+    return { orphaned: true };
+  }
   current.status = "ended";
   persist();
   if (result.recording_status === "stored") fs.rmSync(local(current.id + ".pcm"), { force: true });

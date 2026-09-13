@@ -48,7 +48,7 @@ With Supabase, apply `supabase/migrations/20260913040000_coach_sessions.sql` aft
 
 Run one API worker for the demo, matching the existing architecture. Database version checks protect stale saves; live socket ownership and model concurrency limits are process-local. Real customer use still requires the project's tenant/auth/retention work. The web app and existing CRM policies are an unauthenticated synthetic-data demo.
 
-Uploaded recordings are removed from the temporary local store after successful finalisation. Unuploaded recordings remain available for export/retry. A crash can leave a local recording until recovery/cleanup. The final call uses batch transcript segments when recording processing succeeds and otherwise the committed live transcript; live provenance and coaching events remain in the session. Downstream extraction/review is handled by the existing API lane.
+When the API stores recordings (Supabase configured), the local copy is removed once the call is saved; with the in-memory API the recording stays on the computer for export. Recording stops at the 50 MB limit (about 26 minutes) while coaching continues, and that call is saved from the live transcript. If the server has lost the session, for example after an API restart, End marks the call finished locally so another call can start, and the recording stays available to export. A crash can leave a local recording until recovery/cleanup. The final call uses batch transcript segments when recording processing succeeds and otherwise the committed live transcript; live provenance and coaching events remain in the session. Downstream extraction/review is handled by the existing API lane.
 
 ## Verify
 
