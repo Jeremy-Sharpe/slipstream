@@ -1,5 +1,6 @@
 // API entities to the `CallRecord` the run surface renders. Every block a step
 // produces (fields, scorecard, draft) is left off until that step has run.
+import { user } from "@/lib/data/seller";
 import type { ApiCall, ApiDraft, ApiEmailRecord, ApiEvidence, ApiExtraction, ApiField, ApiScorecard } from "@/lib/api/slipstream";
 import type { CallRecord, EmailMessage, Field, Outcome, Turn } from "@/lib/types";
 
@@ -240,7 +241,7 @@ export function toEmailRecord(
     industry: extraction?.company.industry.value ?? null,
     headcount: extraction?.company.employee_count.value ?? null,
     location: extraction?.company.location.value ?? null,
-    rep: rep?.name ?? rep?.email ?? records[0]?.mailbox.name ?? "Sam Whitfield",
+    rep: rep?.name ?? rep?.email ?? records[0]?.mailbox.name ?? user.name,
     at: messages[messages.length - 1]?.occurred_at ?? new Date(0).toISOString(),
     duration: 0,
     ...(extra.responseTime ? { responseTime: extra.responseTime } : {}),

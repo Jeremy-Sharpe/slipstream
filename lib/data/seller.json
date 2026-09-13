@@ -1,0 +1,15 @@
+{
+  "company": {
+    "name": "Eleno",
+    "emailDomain": "eleno.example",
+    "mailboxExternalId": "eleno-sales"
+  },
+  "user": {
+    "name": "Liam Albrecht",
+    "email": "liam@eleno.example"
+  },
+  "reps": [
+    { "name": "Sam Whitfield", "email": "sam@eleno.example" },
+    { "name": "Jordan Lee", "email": "jordan@eleno.example" }
+  ]
+}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, House, LineChart, MessageSquare, Repeat } from "lucide-react";
+import { company, user } from "@/lib/data/seller";
 import { Avatar } from "./Avatar";
 import { cn } from "./ui";
 
@@ -42,10 +43,10 @@ export function Sidebar() {
         })}
       </nav>
       <div className="mt-auto flex items-center gap-2.5 px-3">
-        <Avatar name="Maxim Durand" size={28} />
+        <Avatar name={user.name} size={28} />
         <div className="min-w-0">
-          <p className="truncate text-[12.5px] font-semibold leading-tight text-ink">Maxim Durand</p>
-          <p className="truncate text-[11px] text-faint">Eleno</p>
+          <p className="truncate text-[12.5px] font-semibold leading-tight text-ink">{user.name}</p>
+          <p className="truncate text-[11px] text-faint">{company.name}</p>
         </div>
       </div>
     </aside>
