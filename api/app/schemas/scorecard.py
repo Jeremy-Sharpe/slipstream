@@ -21,6 +21,10 @@ Narrative = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=3, max_length=1_000),
 ]
+PatternKey = Annotated[
+    str,
+    StringConstraints(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$", min_length=1, max_length=64),
+]
 MAX_TRANSCRIPT_TURNS = 500
 MAX_TRANSCRIPT_BYTES = 512 * 1024
 MAX_PLAYBOOK_SCORECARDS = 200
@@ -146,6 +150,32 @@ class WinningPattern(BaseModel):
         return self
 
 
+class PatternRate(BaseModel):
+    n: int = Field(ge=0)
+    of: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def within_group(self) -> PatternRate:
+        if self.n > self.of:
+            raise ValueError("A behaviour cannot hold more calls than its group has")
+        return self
+
+
+class BehaviourQuote(BaseModel):
+    call_id: Identifier
+    turn_index: int = Field(ge=1)
+    quote: EvidenceQuote
+
+
+class BehaviourPattern(BaseModel):
+    key: PatternKey
+    behaviour: Narrative
+    takeaway: Narrative
+    won: PatternRate
+    other: PatternRate
+    quotes: list[BehaviourQuote] = Field(max_length=3)
+
+
 class JudgedPlaybook(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -168,6 +198,7 @@ class Playbook(BaseModel):
     stats: list[OutcomeStats]
     reps: list[RepProfile]
     patterns: list[WinningPattern]
+    behaviours: list[BehaviourPattern] = []
     coaching_focus: list[str]
     model: str
     generated_at: datetime

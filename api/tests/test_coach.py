@@ -1,12 +1,15 @@
 import asyncio
 import hashlib
+import json
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from starlette.testclient import WebSocketTestSession
 
 from app.core.config import Settings
 from app.factory import create_app
@@ -14,9 +17,22 @@ from app.services.coach import (
     CoachingSuggestion,
     CoachingTurn,
     deterministic_suggestion,
+    flag_rep_risk,
+    rep_risk_flag,
     suggest_next_move,
 )
 from app.services.transcribe import Transcript, TranscriptSegment
+from app.ws.coach import MAX_RISK_FLAGS
+
+DEMO_SCRIPT = json.loads(
+    (
+        Path(__file__).resolve().parents[2]
+        / "fixtures"
+        / "calls"
+        / "call-13-marlowe-finch-demo"
+        / "script.json"
+    ).read_text(encoding="utf-8")
+)
 
 
 def _start(**overrides: object) -> dict[str, object]:
@@ -42,6 +58,59 @@ def _turn(sequence: int, role: str, text: str, start_ms: int) -> dict[str, objec
         "start_ms": start_ms,
         "end_ms": start_ms + 900,
     }
+
+
+def _demo_turn(index: int) -> dict[str, object]:
+    turn = DEMO_SCRIPT["turns"][index]
+    return {
+        "type": "transcript",
+        "sequence": index,
+        "speaker": turn["name"],
+        "role": turn["speaker"],
+        "text": turn["text"],
+        "start_ms": index * 1000,
+        "end_ms": index * 1000 + 900,
+    }
+
+
+def _risky_settings() -> Settings:
+    return Settings(_env_file=None, reasoning_model="gpt-5.4", openai_api_key="key")
+
+
+def _demo_risk_turns() -> list[CoachingTurn]:
+    """The demo call's hallucination guarantee, with the prospect turn that precedes it."""
+    return [
+        CoachingTurn(
+            sequence=0,
+            speaker="Donnie Azoff",
+            role="prospect",
+            text=DEMO_SCRIPT["turns"][3]["text"],
+        ),
+        CoachingTurn(
+            sequence=1,
+            speaker="Jordan Belfort",
+            role="rep",
+            text=DEMO_SCRIPT["turns"][4]["text"],
+        ),
+    ]
+
+
+def _collect_until(
+    websocket: WebSocketTestSession,
+    terminator: str,
+    sequence: int | None = None,
+) -> list[dict[str, object]]:
+    """Return the suggestions that arrive before the expected terminating message."""
+    suggestions: list[dict[str, object]] = []
+    while True:
+        message = websocket.receive_json()
+        if message["type"] == "suggestion":
+            suggestions.append(message)
+            continue
+        assert message["type"] == terminator, message
+        if sequence is not None:
+            assert message["sequence"] == sequence
+        return suggestions
 
 
 def test_live_coach_suggests_and_persists_completed_call(client: TestClient) -> None:
@@ -459,3 +528,165 @@ def test_model_must_cite_a_prospect_turn(monkeypatch) -> None:
 
     assert suggestion.source == "deterministic"
     assert suggestion.evidence_sequence == 1
+    assert suggestion.flag is None
+
+
+def test_demo_call_flags_the_reps_own_risky_claims(client: TestClient) -> None:
+    collected: list[dict[str, object]] = []
+    with client.websocket_connect("/api/v1/coach/live") as websocket:
+        websocket.send_json(_start(source_external_id="live-demo-risk"))
+        assert websocket.receive_json()["type"] == "ready"
+        for index in range(10):
+            websocket.send_json(_demo_turn(index))
+            collected += _collect_until(websocket, "committed", index)
+        websocket.send_json({"type": "stop"})
+        collected += _collect_until(websocket, "completed")
+
+    risks = [item for item in collected if item["flag"] is not None]
+    assert [(item["evidence_sequence"], item["flag"]) for item in risks] == [
+        (2, "pressure"),
+        (4, "overclaim"),
+        (8, "overclaim"),
+    ]
+    assert all(item["category"] == "risk" for item in risks)
+    assert all(item["source"] == "deterministic" for item in risks)
+    assert "the pilot price is gone Friday" in DEMO_SCRIPT["turns"][2]["text"]
+    assert "I can guarantee the agents never hallucinate" in DEMO_SCRIPT["turns"][4]["text"]
+
+
+def test_risk_flags_bypass_the_interval_and_stop_at_the_cap(client: TestClient) -> None:
+    claim = "I guarantee the agents never fail."
+    with client.websocket_connect("/api/v1/coach/live") as websocket:
+        websocket.send_json(_start(source_external_id="live-risk-cap"))
+        assert websocket.receive_json()["type"] == "ready"
+        for index in range(MAX_RISK_FLAGS):
+            websocket.send_json(_turn(index, "rep", claim, index * 1000))
+            assert websocket.receive_json() == {"type": "committed", "sequence": index}
+            flagged = websocket.receive_json()
+            assert flagged["type"] == "suggestion"
+            assert flagged["flag"] == "overclaim"
+            assert flagged["evidence_sequence"] == index
+        websocket.send_json(_turn(MAX_RISK_FLAGS, "rep", claim, MAX_RISK_FLAGS * 1000))
+        assert websocket.receive_json() == {
+            "type": "committed",
+            "sequence": MAX_RISK_FLAGS,
+        }
+        websocket.send_json({"type": "stop"})
+        assert websocket.receive_json()["type"] == "completed"
+
+
+def test_risk_flags_count_against_the_session_suggestion_budget(
+    client: TestClient, monkeypatch
+) -> None:
+    from app.ws import coach
+
+    monkeypatch.setattr(coach, "MAX_SUGGESTIONS", 1)
+    claim = "I guarantee the agents never fail."
+    with client.websocket_connect("/api/v1/coach/live") as websocket:
+        websocket.send_json(_start(source_external_id="live-risk-budget"))
+        assert websocket.receive_json()["type"] == "ready"
+        websocket.send_json(_turn(0, "rep", claim, 0))
+        assert websocket.receive_json() == {"type": "committed", "sequence": 0}
+        assert websocket.receive_json()["flag"] == "overclaim"
+        websocket.send_json(_turn(1, "rep", claim, 1000))
+        assert websocket.receive_json() == {"type": "committed", "sequence": 1}
+        websocket.send_json({"type": "stop"})
+        assert websocket.receive_json()["type"] == "completed"
+
+
+def test_resumed_session_keeps_the_risk_flag_cap(client: TestClient) -> None:
+    claim = "I guarantee the agents never fail."
+    with client.websocket_connect("/api/v1/coach/live") as websocket:
+        websocket.send_json(_start(source_external_id="live-risk-resume"))
+        assert websocket.receive_json()["type"] == "ready"
+        for index in range(MAX_RISK_FLAGS):
+            websocket.send_json(_turn(index, "rep", claim, index * 1000))
+            assert websocket.receive_json()["type"] == "committed"
+            assert websocket.receive_json()["flag"] == "overclaim"
+
+    with client.websocket_connect("/api/v1/coach/live") as websocket:
+        websocket.send_json(_start(source_external_id="live-risk-resume"))
+        assert websocket.receive_json()["resume_from_sequence"] == MAX_RISK_FLAGS
+        websocket.send_json(_turn(MAX_RISK_FLAGS, "rep", claim, MAX_RISK_FLAGS * 1000))
+        assert websocket.receive_json()["type"] == "committed"
+        websocket.send_json({"type": "stop"})
+        assert websocket.receive_json()["type"] == "completed"
+
+
+def test_model_risk_flag_must_cite_the_rep_turn(monkeypatch) -> None:
+    from app.services import coach
+
+    def fake_structured(*_args, **_kwargs):
+        return SimpleNamespace(
+            model="fake-model",
+            output=CoachingSuggestion(
+                category="risk",
+                title="Cites the buyer",
+                message="This cites the prospect rather than the claim the rep just made.",
+                evidence_sequence=0,
+                flag="overclaim",
+            ),
+        )
+
+    monkeypatch.setattr(coach, "structured", fake_structured)
+    suggestion = flag_rep_risk(_risky_settings(), _demo_risk_turns())
+
+    assert suggestion is not None
+    assert suggestion.source == "deterministic"
+    assert suggestion.evidence_sequence == 1
+    assert suggestion.flag == "overclaim"
+
+
+def test_model_may_refine_a_risk_flag_on_the_rep_turn(monkeypatch) -> None:
+    from app.services import coach
+
+    def fake_structured(*_args, **_kwargs):
+        return SimpleNamespace(
+            model="fake-model",
+            output=CoachingSuggestion(
+                category="risk",
+                title="Name the review gate",
+                message="Say which step a human checks instead of promising the agents never err.",
+                evidence_sequence=1,
+                flag="unverifiable",
+            ),
+        )
+
+    monkeypatch.setattr(coach, "structured", fake_structured)
+    suggestion = flag_rep_risk(_risky_settings(), _demo_risk_turns())
+
+    assert suggestion is not None
+    assert suggestion.source == "model"
+    assert suggestion.model == "fake-model"
+    assert suggestion.evidence_sequence == 1
+    assert suggestion.flag == "unverifiable"
+
+
+def test_a_clean_rep_turn_produces_no_risk_flag(monkeypatch) -> None:
+    from app.services import coach
+
+    def fail_structured(*_args, **_kwargs):
+        raise AssertionError("A clean rep turn must never reach the model")
+
+    monkeypatch.setattr(coach, "structured", fail_structured)
+    turn = CoachingTurn(
+        sequence=3,
+        speaker="Rep",
+        role="rep",
+        text="Thanks, that helps. Who else needs to be comfortable before you commit?",
+    )
+
+    assert rep_risk_flag(turn) is None
+    assert flag_rep_risk(_risky_settings(), [turn]) is None
+
+
+def test_prospect_turns_are_never_risk_flagged() -> None:
+    echo = CoachingTurn(
+        sequence=15,
+        speaker="Donnie Azoff",
+        role="prospect",
+        text=DEMO_SCRIPT["turns"][15]["text"],
+    )
+
+    assert "About to lose certification?" in echo.text
+    assert rep_risk_flag(echo) is None

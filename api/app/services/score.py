@@ -5,7 +5,7 @@ import json
 import logging
 import math
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,11 +15,14 @@ import httpx
 from pydantic import BaseModel, ValidationError
 
 from app.schemas.scorecard import (
+    BehaviourPattern,
+    BehaviourQuote,
     Evidence,
     JudgedPlaybook,
     JudgedScorecard,
     Outcome,
     OutcomeStats,
+    PatternRate,
     Playbook,
     PlaybookSource,
     RepProfile,
@@ -31,6 +34,9 @@ from app.schemas.scorecard import (
 )
 
 RUBRIC_VERSION = "v1"
+DISCOVERY_FLOOR = 4
+MAX_BEHAVIOUR_QUOTES = 3
+MIN_CONTAINED_QUOTE_CHARS = 25
 DEFAULT_JUDGE_MODEL = "deepseek/deepseek-v3.2"
 PRICES_PER_MTOK = {
     "claude-sonnet-5": (2.0, 10.0),
@@ -42,6 +48,25 @@ PRICES_PER_MTOK = {
 }
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 PRICING_RE = re.compile(r"(\$|AUD|\bper seat\b|\bper user\b|\bmonthly fee\b)", re.IGNORECASE)
+QUOTE_CHAR_MAP = str.maketrans(
+    {
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201a": "'",
+        "\u201b": "'",
+        "\u2032": "'",
+        "\u00b4": "'",
+        "\u0060": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u201e": '"',
+        "\u201f": '"',
+        "\u2033": '"',
+        "\u2026": "...",
+    }
+)
+QUOTE_SPACE_RE = re.compile(r"\s+")
+QUOTE_EDGE_RE = re.compile(r"^[\s\"'.,;:!?]+|[\s\"'.,;:!?]+$")
 WORD_RE = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?")
 TRANSCRIPT_LINE_RE = re.compile(r"^\[(\d+)\] (.+?) \((rep|prospect)\): (.*)$", re.MULTILINE)
 WEEKDAY_RE = re.compile(
@@ -628,30 +653,28 @@ def score_call(
         len(discovery_evidence), next_step_secured, objection_handling, ratio
     )
     scorecard = Scorecard(
-            call_id=transcript.call_id,
-            request_id=transcript.request_id,
-            source_external_id=transcript.call_id,
-            source_revision=hashlib.sha256(
-                transcript.model_dump_json().encode("utf-8")
-            ).hexdigest(),
-            source_turns=transcript.turns,
-            rep=transcript.rep,
-            outcome=transcript.outcome,
-            discovery_questions=len(discovery_evidence),
-            discovery_evidence=discovery_evidence,
-            next_step_secured=next_step_secured,
-            next_step_evidence=next_step_evidence,
-            objection_handling=objection_handling,
-            objection_evidence=objection_evidence if objection_handling != "none_raised" else [],
-            rep_talk_ratio=ratio,
-            talk_ratio_band=talk_ratio_band(ratio),
-            went_well=went_well,
-            to_improve=to_improve,
-            summary=summary,
-            model=result.model,
-            rubric_version=RUBRIC_VERSION,
-            scored_at=scoring_started_at or datetime.now(UTC),
-        )
+        call_id=transcript.call_id,
+        request_id=transcript.request_id,
+        source_external_id=transcript.call_id,
+        source_revision=hashlib.sha256(transcript.model_dump_json().encode("utf-8")).hexdigest(),
+        source_turns=transcript.turns,
+        rep=transcript.rep,
+        outcome=transcript.outcome,
+        discovery_questions=len(discovery_evidence),
+        discovery_evidence=discovery_evidence,
+        next_step_secured=next_step_secured,
+        next_step_evidence=next_step_evidence,
+        objection_handling=objection_handling,
+        objection_evidence=objection_evidence if objection_handling != "none_raised" else [],
+        rep_talk_ratio=ratio,
+        talk_ratio_band=talk_ratio_band(ratio),
+        went_well=went_well,
+        to_improve=to_improve,
+        summary=summary,
+        model=result.model,
+        rubric_version=RUBRIC_VERSION,
+        scored_at=scoring_started_at or datetime.now(UTC),
+    )
     return (
         stamp_scorecard_revision(scorecard),
         result,
@@ -728,10 +751,12 @@ def derive_playbook(
         raise JudgeError("Playbook requires won and not-won evidence")
     stats = outcome_stats(scorecards)
     reps = rep_profiles(scorecards)
-    system = load_prompt("playbook-v1")
+    system = load_prompt("playbook-v2")
     user = (
         "Deterministic stats:\n"
         f"{_stats_table(stats)}\n\n"
+        "Allowed quotes, by call id. Every quote you cite must be copied from this list:\n"
+        f"{_allowed_quotes(scorecards)}\n\n"
         "Scorecards JSON:\n"
         f"{json.dumps([scorecard.model_dump(mode='json') for scorecard in scorecards])}"
     )
@@ -752,6 +777,7 @@ def derive_playbook(
             stats=stats,
             reps=reps,
             patterns=patterns,
+            behaviours=behaviour_patterns(scorecards),
             coaching_focus=result.output.coaching_focus,
             model=result.model,
             generated_at=datetime.now(UTC),
@@ -926,26 +952,233 @@ def _valid_patterns(
     for pattern in patterns:
         if len(pattern.call_ids) != len(pattern.quotes):
             continue
-        if all(
-            call_id in by_call_id and _quote_is_supported(quote, by_call_id[call_id])
-            for call_id, quote in zip(pattern.call_ids, pattern.quotes, strict=True)
-        ):
-            valid.append(pattern)
+        canonical: list[str] = []
+        for call_id, quote in zip(pattern.call_ids, pattern.quotes, strict=True):
+            scorecard = by_call_id.get(call_id)
+            supported = _supported_quote(quote, scorecard) if scorecard else None
+            if supported is None:
+                break
+            canonical.append(supported)
+        else:
+            valid.append(pattern.model_copy(update={"quotes": canonical}))
     return valid
 
 
-def _quote_is_supported(
+def _quote_is_supported(quote: str, scorecard: Scorecard) -> bool:
+    return _supported_quote(quote, scorecard) is not None
+
+
+def _supported_quote(
     quote: str,
     scorecard: Scorecard,
-) -> bool:
-    if not quote.strip():
-        return False
-    evidence_quotes = [
-        evidence.quote
-        for evidence in [
-            *scorecard.discovery_evidence,
-            *scorecard.objection_evidence,
-            *([scorecard.next_step_evidence] if scorecard.next_step_evidence else []),
-        ]
+) -> str | None:
+    """The evidence quote the judge's quote stands for, or None.
+
+    The judge re-types a quote rather than copying it byte for byte: curly
+    quotes become straight ones, a run of whitespace collapses, a full stop or
+    an ellipsis is added or dropped, a call id is prefixed. So both sides are
+    normalised before comparison, and a judge quote that wraps a substantial
+    evidence quote counts as well as one contained by it. The stored quote is
+    always our own evidence text, so nothing the judge added around it is
+    shown. A quote matching no evidence span is dropped.
+    """
+    needle = _normalise_quote(quote)
+    if not needle:
+        return None
+    for _, evidence in _evidence_items(scorecard):
+        haystack = _normalise_quote(evidence.quote)
+        if not haystack:
+            continue
+        if needle in haystack:
+            return evidence.quote
+        if len(haystack) >= MIN_CONTAINED_QUOTE_CHARS and haystack in needle:
+            return evidence.quote
+    return None
+
+
+def _normalise_quote(quote: str) -> str:
+    collapsed = QUOTE_SPACE_RE.sub(" ", quote.translate(QUOTE_CHAR_MAP))
+    return QUOTE_EDGE_RE.sub("", collapsed).casefold()
+
+
+def _evidence_items(scorecard: Scorecard) -> list[tuple[str, Evidence]]:
+    items = [("discovery", item) for item in scorecard.discovery_evidence]
+    items += [("objection", item) for item in scorecard.objection_evidence]
+    if scorecard.next_step_evidence is not None:
+        items.append(("next step", scorecard.next_step_evidence))
+    return items
+
+
+def _allowed_quotes(scorecards: list[Scorecard]) -> str:
+    blocks: list[str] = []
+    for scorecard in scorecards:
+        lines = [f"{scorecard.call_id} ({scorecard.outcome}):"]
+        items = _evidence_items(scorecard)
+        if not items:
+            lines.append("  (no evidence quotes: do not cite this call)")
+        for position, (label, evidence) in enumerate(items, start=1):
+            lines.append(f"  {position}. [{label}, turn {evidence.turn_index}] {evidence.quote}")
+        blocks.append("\n".join(lines))
+    return "\n".join(blocks)
+
+
+def behaviour_patterns(scorecards: list[Scorecard]) -> list[BehaviourPattern]:
+    """Behaviours that split won calls from the rest, computed without a model.
+
+    The judge can return nothing the evidence supports; these always hold, so
+    the playbook is never empty while a cohort has won and not-won calls.
+    Ordered by the gap between the two rates, widest first.
+    """
+    won = [card for card in scorecards if card.outcome == "won"]
+    other = [card for card in scorecards if card.outcome in {"lost", "stalled"}]
+    patterns = [
+        _behaviour_pattern(
+            key="dated-next-step",
+            behaviour="Secured a dated next step",
+            clause="secured a dated next step",
+            detail="",
+            won=won,
+            other=other,
+            test=lambda card: card.next_step_secured,
+            quote=lambda card: card.next_step_evidence,
+        ),
+        _behaviour_pattern(
+            key=f"discovery-floor-{DISCOVERY_FLOOR}",
+            behaviour=f"{DISCOVERY_FLOOR} or more discovery questions",
+            clause=f"asked {DISCOVERY_FLOOR} or more discovery questions",
+            detail=(
+                f"won calls averaged {_mean(card.discovery_questions for card in won):.1f} "
+                "discovery questions against "
+                f"{_mean(card.discovery_questions for card in other):.1f}"
+            ),
+            won=won,
+            other=other,
+            test=lambda card: card.discovery_questions >= DISCOVERY_FLOOR,
+            quote=lambda card: next(iter(card.discovery_evidence), None),
+        ),
+        _behaviour_pattern(
+            key="objection-handled",
+            behaviour="Objection handled on the call",
+            clause="answered the objection outright",
+            detail="",
+            won=won,
+            other=other,
+            test=lambda card: card.objection_handling == "handled",
+            quote=lambda card: next(iter(card.objection_evidence), None),
+        ),
+        _behaviour_pattern(
+            key="healthy-talk-ratio",
+            behaviour="Rep talk ratio in the healthy band",
+            clause="stayed in the healthy talk-ratio band",
+            detail=(
+                "winning reps spoke "
+                f"{_percent_of_one(_mean(card.rep_talk_ratio for card in won))} of the call "
+                f"against {_percent_of_one(_mean(card.rep_talk_ratio for card in other))}"
+            ),
+            won=won,
+            other=other,
+            test=lambda card: card.talk_ratio_band == "healthy",
+            quote=lambda card: None,
+        ),
     ]
-    return any(quote in evidence_quote for evidence_quote in evidence_quotes)
+    pricing = _pricing_behaviour(won, other)
+    if pricing is not None:
+        patterns.append(pricing)
+    return sorted(patterns, key=lambda item: (-_behaviour_gap(item), item.key))
+
+
+def _pricing_behaviour(
+    won: list[Scorecard],
+    other: list[Scorecard],
+) -> BehaviourPattern | None:
+    """Discovery before pricing, only where the stored turns can prove it."""
+    derivable_won = [card for card in won if _first_pricing_turn(card) is not None]
+    derivable_other = [card for card in other if _first_pricing_turn(card) is not None]
+    if not derivable_won or not derivable_other:
+        return None
+    return _behaviour_pattern(
+        key="discovery-before-pricing",
+        behaviour="Discovery before the first pricing mention",
+        clause="asked a discovery question before pricing came up",
+        detail="counted only over the calls where pricing was mentioned",
+        won=derivable_won,
+        other=derivable_other,
+        test=lambda card: _discovery_before_pricing_quote(card) is not None,
+        quote=_discovery_before_pricing_quote,
+    )
+
+
+def _first_pricing_turn(scorecard: Scorecard) -> int | None:
+    for index, turn in enumerate(scorecard.source_turns or [], start=1):
+        if PRICING_RE.search(turn.text):
+            return index
+    return None
+
+
+def _discovery_before_pricing_quote(scorecard: Scorecard) -> Evidence | None:
+    pricing_turn = _first_pricing_turn(scorecard)
+    if pricing_turn is None:
+        return None
+    return next(
+        (item for item in scorecard.discovery_evidence if item.turn_index < pricing_turn),
+        None,
+    )
+
+
+def _behaviour_pattern(
+    *,
+    key: str,
+    behaviour: str,
+    clause: str,
+    detail: str,
+    won: list[Scorecard],
+    other: list[Scorecard],
+    test: Callable[[Scorecard], bool],
+    quote: Callable[[Scorecard], Evidence | None],
+) -> BehaviourPattern:
+    won_hits = [card for card in won if test(card)]
+    other_hits = [card for card in other if test(card)]
+    quotes: list[BehaviourQuote] = []
+    for card in won_hits:
+        evidence = quote(card)
+        if evidence is None:
+            continue
+        quotes.append(
+            BehaviourQuote(
+                call_id=card.call_id,
+                turn_index=evidence.turn_index,
+                quote=evidence.quote,
+            )
+        )
+        if len(quotes) == MAX_BEHAVIOUR_QUOTES:
+            break
+    takeaway = (
+        f"Won calls {clause} {len(won_hits)} of {len(won)} times "
+        f"({_percent(len(won_hits), len(won))}), the rest "
+        f"{len(other_hits)} of {len(other)} ({_percent(len(other_hits), len(other))})"
+    )
+    takeaway = f"{takeaway}; {detail}." if detail else f"{takeaway}."
+    return BehaviourPattern(
+        key=key,
+        behaviour=behaviour,
+        takeaway=takeaway,
+        won=PatternRate(n=len(won_hits), of=len(won)),
+        other=PatternRate(n=len(other_hits), of=len(other)),
+        quotes=quotes,
+    )
+
+
+def _behaviour_gap(pattern: BehaviourPattern) -> float:
+    return _share(pattern.won.n, pattern.won.of) - _share(pattern.other.n, pattern.other.of)
+
+
+def _share(part: int, whole: int) -> float:
+    return part / whole if whole else 0.0
+
+
+def _percent(part: int, whole: int) -> str:
+    return f"{round(_share(part, whole) * 100)}%"
+
+
+def _percent_of_one(value: float) -> str:
+    return f"{round(value * 100)}%"

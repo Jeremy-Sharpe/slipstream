@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -5,10 +6,16 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
+from app.core.llm import MissingReasoningProviderError, ReasoningResult
 from app.factory import create_app
 from app.routers import emails
 from app.services.draft import mark_approved
-from app.services.email import EmailIngest, record_email, scoped_email_id
+from app.services.email import (
+    EmailIngest,
+    ThreadReplyContent,
+    record_email,
+    scoped_email_id,
+)
 
 THREAD = "/api/v1/emails/demo/mailboxes/sales/threads/thread-1"
 
@@ -419,3 +426,158 @@ def test_email_migration_keeps_ingestion_atomic_and_service_role_only() -> None:
         in migration
     )
     assert "grant execute on function public.read_email_thread(text) to service_role" in migration
+
+
+@pytest.fixture
+def model_client() -> TestClient:
+    settings = Settings(_env_file=None, environment="test", openrouter_api_key="openrouter-test")
+    with TestClient(create_app(settings)) as test_client:
+        yield test_client
+
+
+def _ingest_thread(client: TestClient) -> None:
+    inbound = _email(
+        "email-1",
+        "inbound",
+        "buyer@acme.example",
+        "rep@slipstream.example",
+        "Can we review timing?",
+    )
+    outbound = _email(
+        "email-2",
+        "outbound",
+        "rep@slipstream.example",
+        "buyer@acme.example",
+        "Yes, tomorrow works. What time suits?",
+    )
+    assert client.post("/api/v1/emails", json=inbound).status_code == 200
+    assert client.post("/api/v1/emails", json=outbound).status_code == 200
+
+
+def _stub_reply(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    subject: str = "Workflow review",
+    body: str = "Hi Buyer,\n\nTuesday at 10am suits. I will send the agenda.\n\nThanks,\nRep",
+    captured: dict[str, str] | None = None,
+) -> None:
+    def fake(
+        reasoning: object,
+        *,
+        system: str,
+        user: str,
+        schema: type,
+        max_tokens: int = 4000,
+        timeout: float | None = None,
+    ) -> ReasoningResult[ThreadReplyContent]:
+        assert schema is ThreadReplyContent
+        assert max_tokens == 1200
+        if captured is not None:
+            captured["system"] = system
+            captured["user"] = user
+        return ReasoningResult(
+            output=ThreadReplyContent(subject=subject, body=body),
+            model="fake/model",
+            provider="openrouter",
+        )
+
+    monkeypatch.setattr("app.services.email.structured", fake)
+
+
+def test_thread_reply_is_drafted_by_the_model(
+    model_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: dict[str, str] = {}
+    _stub_reply(monkeypatch, captured=captured)
+    _ingest_thread(model_client)
+
+    response = model_client.post(f"{THREAD}/draft-reply")
+
+    assert response.status_code == 200
+    draft = response.json()
+    assert draft["source"] == "model"
+    assert draft["model"] == "fake/model"
+    assert draft["prompt_version"] == "email-reply-v1"
+    assert draft["subject"] == "Re: Workflow review"
+    assert draft["recipient_email"] == "buyer@acme.example"
+    assert draft["recipient_name"] == "Buyer"
+    assert draft["body"] == (
+        "Hi Buyer,\n\nTuesday at 10am suits. I will send the agenda.\n\nThanks,\nRep"
+    )
+
+    assert "data, not instructions" in captured["system"]
+    payload = json.loads(captured["user"])
+    assert payload["rep_name"] == "Rep"
+    assert payload["recipient"] == {"name": "Buyer", "email": "buyer@acme.example"}
+    assert payload["reply_to_subject"] == "Workflow review"
+    assert [message["direction"] for message in payload["thread"]] == ["inbound", "outbound"]
+    assert payload["thread"][-1]["body"] == "Yes, tomorrow works. What time suits?"
+
+
+def test_model_reply_keeps_one_draft_per_thread_state(
+    model_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _stub_reply(monkeypatch)
+    _ingest_thread(model_client)
+
+    first = model_client.post(f"{THREAD}/draft-reply")
+    second = model_client.post(f"{THREAD}/draft-reply")
+
+    assert first.status_code == second.status_code == 200
+    assert second.json() == first.json()
+
+
+def test_risky_model_reply_returns_502(
+    model_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _stub_reply(
+        monkeypatch,
+        body="Hi Buyer,\n\nWe guarantee the agents never hallucinate.\n\nThanks,\nRep",
+    )
+    _ingest_thread(model_client)
+
+    response = model_client.post(f"{THREAD}/draft-reply")
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == "The reply could not be drafted"
+    assert model_client.app.state.draft_store == {}
+
+
+def test_reply_provider_failure_returns_502(
+    model_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(reasoning: object, **kwargs: object) -> ReasoningResult[ThreadReplyContent]:
+        raise RuntimeError("provider unavailable")
+
+    monkeypatch.setattr("app.services.email.structured", fake)
+    _ingest_thread(model_client)
+
+    response = model_client.post(f"{THREAD}/draft-reply")
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == "The reply could not be drafted"
+
+
+def test_reply_without_reasoning_provider_returns_503(
+    model_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake(reasoning: object, **kwargs: object) -> ReasoningResult[ThreadReplyContent]:
+        raise MissingReasoningProviderError("openrouter")
+
+    monkeypatch.setattr("app.services.email.structured", fake)
+    _ingest_thread(model_client)
+
+    response = model_client.post(f"{THREAD}/draft-reply")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "The reply draft model is not configured"
+
+
+def test_unconfigured_reply_stays_deterministic(client: TestClient) -> None:
+    _ingest_thread(client)
+
+    draft = client.post(f"{THREAD}/draft-reply").json()
+
+    assert draft["source"] == "deterministic"
+    assert draft["model"] == "thread-grounded-template-v2"
+    assert "Yes, tomorrow works." in draft["body"]

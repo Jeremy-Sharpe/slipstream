@@ -79,7 +79,7 @@ const HEADER_ICONS = Object.fromEntries(Object.entries(PATHS).map(([k, v]) => [k
 
 const COLUMNS: (GridColumn & { id: string; width: number })[] = [
   { id: "n", title: "", width: 44, icon: "similarity" },
-  { id: "company", title: "Company", width: 200, icon: "company" },
+  { id: "company", title: "Company", width: 280, icon: "company" },
   { id: "contact", title: "Contact", width: 180, icon: "contact" },
   { id: "similarity", title: "Similarity", width: 112, icon: "similarity" },
   { id: "status", title: "Status", width: 96, icon: "status" },
@@ -90,6 +90,7 @@ const COLUMNS: (GridColumn & { id: string; width: number })[] = [
 
 type TextCell = CustomCell<{ kind: "text"; text: string; weight?: number }>;
 type IndexCell = CustomCell<{ kind: "index"; n: number }>;
+type CompanyCell = CustomCell<{ kind: "company"; name: string; fictional: boolean }>;
 type ContactCell = CustomCell<{ kind: "contact"; name: string; title: string }>;
 type ScoreCell = CustomCell<{ kind: "score"; value: number }>;
 type PillCell = CustomCell<{ kind: "pill"; label: string; tone: "grey" | "green" }>;
@@ -129,6 +130,35 @@ const indexRenderer: CustomRenderer<IndexCell> = {
     ctx.font = `13px ${theme.fontFamily}`; ctx.fillStyle = FAINT;
     ctx.fillText(String(cell.data.n), rect.x + rect.width / 2, rect.y + rect.height / 2);
     ctx.textAlign = "start";
+    return true;
+  },
+};
+
+/* Generated prospects are invented, so the company name carries a muted chip
+   (the grey Pill from ui.tsx, drawn on canvas). */
+const FICTIONAL = "Fictional";
+
+const companyRenderer: CustomRenderer<CompanyCell> = {
+  kind: GridCellKind.Custom,
+  isMatch: is<CompanyCell>("company"),
+  draw: (args, cell) => {
+    const { ctx, rect, theme } = args;
+    const x = rect.x + theme.cellHorizontalPadding, cy = rect.y + rect.height / 2;
+    let max = rect.width - theme.cellHorizontalPadding * 2, chipW = 0;
+    if (cell.data.fictional) {
+      ctx.font = `500 11px ${theme.fontFamily}`;
+      chipW = ctx.measureText(FICTIONAL).width + 14;
+      max -= chipW + 8;
+    }
+    ctx.textBaseline = "middle";
+    ctx.font = `500 14px ${theme.fontFamily}`; ctx.fillStyle = INK;
+    const name = fitText(ctx, cell.data.name, Math.max(24, max));
+    ctx.fillText(name, x, cy);
+    if (!cell.data.fictional) return true;
+    const cx = x + ctx.measureText(name).width + 8, h = 18;
+    ctx.beginPath(); ctx.roundRect(cx, cy - h / 2, chipW, h, 9); ctx.fillStyle = "#f5f5f5"; ctx.fill();
+    ctx.font = `500 11px ${theme.fontFamily}`; ctx.fillStyle = SOFT;
+    ctx.fillText(FICTIONAL, cx + 7, cy + 0.5);
     return true;
   },
 };
@@ -286,7 +316,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
     if (!r) return text("");
     switch (COLUMNS[col].id) {
       case "n": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: String(row + 1), data: { kind: "index", n: row + 1 } } as IndexCell;
-      case "company": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.company, data: { kind: "text", text: r.company, weight: 500 } } as TextCell;
+      case "company": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.company, data: { kind: "company", name: r.company, fictional: r.synthetic } } as CompanyCell;
       case "contact": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: `${r.contact} · ${r.title}`, data: { kind: "contact", name: r.contact, title: r.title } } as ContactCell;
       case "similarity":
         if (!r.scored) return { kind: GridCellKind.Loading, allowOverlay: false, skeletonWidth: 78, skeletonWidthVariability: 0 };
@@ -318,7 +348,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
           freezeColumns={0}
           theme={THEME}
           headerIcons={HEADER_ICONS}
-          customRenderers={[indexRenderer, textRenderer, contactRenderer, scoreRenderer, pillRenderer, draftRenderer]}
+          customRenderers={[indexRenderer, textRenderer, companyRenderer, contactRenderer, scoreRenderer, pillRenderer, draftRenderer]}
           getRowThemeOverride={getRowThemeOverride}
           onHeaderClicked={(col) => col > 0 && onSort(sort?.col === col ? (sort.dir === "desc" ? { col, dir: "asc" } : null) : { col, dir: "desc" })}
           onCellActivated={openRow}

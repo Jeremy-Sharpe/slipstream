@@ -65,8 +65,12 @@ class FakeJudge:
     ) -> None:
         self.scorecard = scorecard or _judged_scorecard()
         self.playbook = playbook or _judged_playbook()
+        self.last_system = ""
+        self.last_user = ""
 
     def __call__(self, *, system: str, user: str, schema: type[Any]) -> JudgeResult[Any]:
+        self.last_system = system
+        self.last_user = user
         output = self.playbook if schema is JudgedPlaybook else self.scorecard
         return JudgeResult(
             output=output,
@@ -579,6 +583,147 @@ def test_derive_playbook_drops_patterns_with_unknown_call_ids() -> None:
     assert derived.coaching_focus == ["Ask before pricing."]
 
 
+def test_derive_playbook_keeps_retyped_quotes_and_drops_paraphrases() -> None:
+    evidence = Evidence(turn_index=1, quote="We’d need the board’s sign-off before Thursday")
+    scorecard = _scorecard("call-1", "Sam Whitfield", "won", discovery_evidence=[evidence])
+    contrast = _scorecard("call-2", "Sam Whitfield", "lost", 1, False, "ignored", 0.60)
+    playbook = JudgedPlaybook(
+        patterns=[
+            WinningPattern(
+                behaviour="Named the approver",
+                why_it_matters="It surfaces the real decision path.",
+                call_ids=["call-1"],
+                quotes=["\"We'd need the  board's sign-off before Thursday.\""],
+            ),
+            WinningPattern(
+                behaviour="Paraphrased by the judge",
+                why_it_matters="It should be dropped.",
+                call_ids=["call-1"],
+                quotes=["The rep asked who signs the contract off"],
+            ),
+        ],
+        coaching_focus=["Ask who signs off."],
+    )
+
+    judge = FakeJudge(playbook=playbook)
+    derived, _ = derive_playbook([scorecard, contrast], judge)
+
+    assert [pattern.behaviour for pattern in derived.patterns] == ["Named the approver"]
+    assert "Allowed quotes, by call id" in judge.last_user
+    assert (
+        "  1. [discovery, turn 1] We’d need the board’s sign-off before Thursday" in judge.last_user
+    )
+    assert "  2. [objection, turn 1] objection quote" in judge.last_user
+    assert "  3. [next step, turn 2] next quote" in judge.last_user
+    assert "copied character for character" in judge.last_system
+
+
+def test_derive_playbook_computes_behaviours_and_sorts_them_by_the_gap() -> None:
+    cohort = [
+        _scorecard("call-1", "Sam Whitfield", "won", 5, True, "handled", 0.40),
+        _scorecard("call-2", "Sam Whitfield", "won", 3, True, "handled", 0.45),
+        _scorecard("call-3", "Ada Nwosu", "lost", 1, False, "ignored", 0.70),
+        _scorecard("call-4", "Ada Nwosu", "stalled", 4, False, "handled", 0.45),
+        _scorecard("call-5", "Ada Nwosu", "lost", 2, True, "ignored", 0.70),
+    ]
+
+    derived, _ = derive_playbook(
+        cohort,
+        FakeJudge(playbook=JudgedPlaybook(patterns=[], coaching_focus=["Ask before pricing."])),
+    )
+    rates = {
+        behaviour.key: (behaviour.won.n, behaviour.won.of, behaviour.other.n, behaviour.other.of)
+        for behaviour in derived.behaviours
+    }
+
+    assert rates == {
+        "dated-next-step": (2, 2, 1, 3),
+        "discovery-floor-4": (1, 2, 1, 3),
+        "objection-handled": (2, 2, 1, 3),
+        "healthy-talk-ratio": (2, 2, 1, 3),
+    }
+    gaps = [
+        behaviour.won.n / behaviour.won.of - behaviour.other.n / behaviour.other.of
+        for behaviour in derived.behaviours
+    ]
+    assert gaps == sorted(gaps, reverse=True)
+    assert derived.behaviours[0].key in {
+        "dated-next-step",
+        "objection-handled",
+        "healthy-talk-ratio",
+    }
+    next_step = next(item for item in derived.behaviours if item.key == "dated-next-step")
+    assert next_step.behaviour == "Secured a dated next step"
+    assert next_step.takeaway == (
+        "Won calls secured a dated next step 2 of 2 times (100%), the rest 1 of 3 (33%)."
+    )
+    assert [quote.call_id for quote in next_step.quotes] == ["call-1", "call-2"]
+    discovery = next(item for item in derived.behaviours if item.key == "discovery-floor-4")
+    assert discovery.takeaway.endswith("won calls averaged 4.0 discovery questions against 2.3.")
+    assert [quote.call_id for quote in discovery.quotes] == ["call-1"]
+    talk_ratio = next(item for item in derived.behaviours if item.key == "healthy-talk-ratio")
+    assert talk_ratio.quotes == []
+    assert all(len(behaviour.quotes) <= 3 for behaviour in derived.behaviours)
+
+
+def test_derive_playbook_adds_the_pricing_behaviour_only_when_turns_prove_it() -> None:
+    asked = Evidence(turn_index=1, quote="What changed this week?")
+    late = Evidence(turn_index=2, quote="What changed this week?")
+    won = _scorecard(
+        "call-1",
+        "Sam Whitfield",
+        "won",
+        discovery_evidence=[asked],
+        source_turns=[
+            TranscriptTurn(speaker="rep", name="Sam Whitfield", text="What changed this week?"),
+            TranscriptTurn(speaker="rep", name="Sam Whitfield", text="It is $40 per seat."),
+        ],
+    )
+    lost = _scorecard(
+        "call-2",
+        "Sam Whitfield",
+        "lost",
+        next_step=False,
+        objection="ignored",
+        talk_ratio=0.70,
+        discovery_evidence=[late],
+        source_turns=[
+            TranscriptTurn(speaker="rep", name="Sam Whitfield", text="It is $40 per seat."),
+            TranscriptTurn(speaker="rep", name="Sam Whitfield", text="What changed this week?"),
+        ],
+    )
+    judge = FakeJudge(playbook=JudgedPlaybook(patterns=[], coaching_focus=["Ask before pricing."]))
+
+    derived, _ = derive_playbook([won, lost], judge)
+    without_turns, _ = derive_playbook(
+        [
+            _scorecard("call-1", "Sam Whitfield", "won"),
+            _scorecard("call-2", "Sam Whitfield", "lost", 1, False, "ignored", 0.70),
+        ],
+        judge,
+    )
+
+    pricing = next(item for item in derived.behaviours if item.key == "discovery-before-pricing")
+    assert (pricing.won.n, pricing.won.of, pricing.other.n, pricing.other.of) == (1, 1, 0, 1)
+    assert [quote.turn_index for quote in pricing.quotes] == [1]
+    assert all(item.key != "discovery-before-pricing" for item in without_turns.behaviours)
+
+
+def test_derive_playbook_still_validates_when_the_judge_finds_no_pattern() -> None:
+    cohort = [
+        _scorecard("call-1", "Sam Whitfield", "won"),
+        _scorecard("call-2", "Sam Whitfield", "lost", 1, False, "ignored", 0.70),
+    ]
+    judge = FakeJudge(playbook=JudgedPlaybook(patterns=[], coaching_focus=["Ask before pricing."]))
+
+    derived, _ = derive_playbook(cohort, judge)
+
+    assert derived.patterns == []
+    assert derived.coaching_focus == ["Ask before pricing."]
+    assert len(derived.behaviours) == 4
+    assert Playbook.model_validate(derived.model_dump(mode="json")) == derived
+
+
 def test_playbook_store_upserts_and_reads_validated_payload() -> None:
     playbook, _ = derive_playbook(
         [
@@ -690,9 +835,7 @@ def test_scorecard_routes_handle_configuration_fake_judge_and_validation(
     assert client.post("/scorecards", json={"call_id": "broken"}).status_code == 422
     client.app.state.scorecard_store["call-3"] = _scorecard("call-3", "Jordan Lee", "won")
     client.app.state.scorecard_store["call-4"] = _scorecard("call-4", "Jordan Lee", "stalled")
-    newer_playbook = client.post(
-        "/playbook", json={"call_ids": ["call-3", "call-4"]}
-    )
+    newer_playbook = client.post("/playbook", json={"call_ids": ["call-3", "call-4"]})
     assert newer_playbook.status_code == 200
     client.app.state.scorecard_store["call-3"] = client.app.state.scorecard_store[
         "call-3"
@@ -1005,19 +1148,22 @@ def _scorecard(
     next_step: bool = True,
     objection: str = "handled",
     talk_ratio: float = 0.40,
+    discovery_evidence: list[Evidence] | None = None,
+    source_turns: list[TranscriptTurn] | None = None,
 ) -> Scorecard:
+    evidence = discovery_evidence or [
+        Evidence(turn_index=index + 1, quote=f"good quote {index}") for index in range(discovery)
+    ]
     return Scorecard(
         call_id=call_id,
         source_external_id=call_id,
         source_revision=f"revision-{call_id}",
         scorecard_revision=f"revision-scorecard-{call_id}",
+        source_turns=source_turns,
         rep=rep,
         outcome=outcome,  # type: ignore[arg-type]
-        discovery_questions=discovery,
-        discovery_evidence=[
-            Evidence(turn_index=index + 1, quote=f"good quote {index}")
-            for index in range(discovery)
-        ],
+        discovery_questions=len(evidence),
+        discovery_evidence=evidence,
         next_step_secured=next_step,
         next_step_evidence=Evidence(turn_index=2, quote="next quote") if next_step else None,
         objection_handling=objection,  # type: ignore[arg-type]
@@ -1296,3 +1442,23 @@ class _FakePlaybookClient:
     def table(self, name: str) -> _FakePlaybookQuery:
         assert name == "playbooks"
         return _FakePlaybookQuery(self)
+
+
+def test_wrapped_judge_quote_is_stored_as_the_evidence_text() -> None:
+    from app.services.score import _valid_patterns
+
+    evidence = "Thursday 3 September at 2pm. Put the research note drafting pilot first."
+    scorecard = _scorecard(
+        "call-01",
+        "Sam Whitfield",
+        "won",
+        discovery_evidence=[Evidence(turn_index=3, quote=evidence)],
+    )
+    pattern = WinningPattern(
+        behaviour="Won calls secure a dated next step.",
+        why_it_matters="Momentum.",
+        call_ids=["call-01"],
+        quotes=[f"call-01-northstar-labs: {evidence}"],
+    )
+    kept = _valid_patterns([pattern], [scorecard])
+    assert [item.quotes for item in kept] == [[evidence]]

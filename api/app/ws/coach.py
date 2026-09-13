@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import secrets
 import time
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from typing import Literal
 from uuid import uuid4
@@ -26,6 +27,8 @@ from app.services.coach import (
     CoachingSuggestion,
     CoachingTurn,
     deterministic_suggestion,
+    flag_rep_risk,
+    rep_risk_flag,
     suggest_next_move,
 )
 from app.services.transcribe import Transcript, TranscriptSegment
@@ -36,6 +39,10 @@ MAX_TURNS = 500
 MAX_TRANSCRIPT_CHARS = 100_000
 SUGGESTION_INTERVAL_MS = 15_000
 MAX_SUGGESTIONS = 25
+MAX_RISK_FLAGS = 6
+# Later flags in a session stay deterministic so a pasted transcript cannot queue
+# six five-second model calls behind one another.
+MAX_MODEL_RISK_REFINEMENTS = 2
 START_TIMEOUT_SECONDS = 10
 IDLE_TIMEOUT_SECONDS = 60
 MAX_SESSION_SECONDS = 2 * 60 * 60
@@ -105,13 +112,11 @@ def _paid_coach_enabled(settings: Settings) -> bool:
     )
 
 
-async def _bounded_suggestion(
+async def _bounded_model_pass(
     websocket: WebSocket,
-    settings: Settings,
-    turns: list[CoachingTurn],
-    deal_context: str | None,
+    fallback: CoachingSuggestion,
+    work: Callable[[], Awaitable[CoachingSuggestion | None]],
 ) -> CoachingSuggestion:
-    fallback = deterministic_suggestion(turns[-1])
     now = time.monotonic()
     async with websocket.app.state.coach_suggestion_lock:
         started = websocket.app.state.coach_suggestion_started_at
@@ -127,7 +132,7 @@ async def _bounded_suggestion(
 
     async def run() -> CoachingSuggestion:
         try:
-            return await asyncio.to_thread(suggest_next_move, settings, turns, deal_context)
+            return await work() or fallback
         finally:
             websocket.app.state.coach_reasoning_slots.release()
 
@@ -137,6 +142,36 @@ async def _bounded_suggestion(
     except asyncio.CancelledError:
         worker.add_done_callback(lambda task: task.exception() if not task.cancelled() else None)
         raise
+
+
+async def _bounded_suggestion(
+    websocket: WebSocket,
+    settings: Settings,
+    turns: list[CoachingTurn],
+    deal_context: str | None,
+) -> CoachingSuggestion:
+    return await _bounded_model_pass(
+        websocket,
+        deterministic_suggestion(turns[-1]),
+        lambda: asyncio.to_thread(suggest_next_move, settings, turns, deal_context),
+    )
+
+
+async def _bounded_risk_flag(
+    websocket: WebSocket,
+    settings: Settings,
+    turns: list[CoachingTurn],
+    deal_context: str | None,
+    refine: bool,
+) -> CoachingSuggestion | None:
+    fallback = rep_risk_flag(turns[-1])
+    if fallback is None or not refine:
+        return fallback
+    return await _bounded_model_pass(
+        websocket,
+        fallback,
+        lambda: asyncio.to_thread(flag_rep_risk, settings, turns, deal_context),
+    )
 
 
 async def _send_error(websocket: WebSocket, code: str, detail: str) -> None:
@@ -327,6 +362,7 @@ async def live_coach(websocket: WebSocket) -> None:
                 "deal_context": start.deal_context,
                 "events": [],
                 "suggestion_count": 0,
+                "risk_flag_count": 0,
                 "last_suggestion_at": None,
                 "updated_at": time.monotonic(),
                 "persistence_task": None,
@@ -407,6 +443,7 @@ async def live_coach(websocket: WebSocket) -> None:
             }
         )
         suggestion_count = checkpoint["suggestion_count"]
+        risk_flag_count = checkpoint.get("risk_flag_count", 0)
         last_suggestion_at: float | None = checkpoint["last_suggestion_at"]
         session_started_at = time.monotonic()
         while True:
@@ -534,6 +571,27 @@ async def live_coach(websocket: WebSocket) -> None:
                 )
             )
             await websocket.send_json({"type": "committed", "sequence": event.sequence})
+            # A rep's own risky claim cannot wait for the next-move interval, so the only
+            # limits on a risk flag are the session cap and the shared rate limit.
+            risk_due = (
+                event.role == "rep"
+                and risk_flag_count < MAX_RISK_FLAGS
+                and suggestion_count < MAX_SUGGESTIONS
+            )
+            if risk_due:
+                risk = await _bounded_risk_flag(
+                    websocket,
+                    settings,
+                    coaching_turns[-6:],
+                    checkpoint["deal_context"],
+                    refine=risk_flag_count < MAX_MODEL_RISK_REFINEMENTS,
+                )
+                if risk is not None:
+                    risk_flag_count += 1
+                    suggestion_count += 1
+                    checkpoint["risk_flag_count"] = risk_flag_count
+                    checkpoint["suggestion_count"] = suggestion_count
+                    await websocket.send_json({"type": "suggestion", **risk.model_dump()})
             suggestion_due = (
                 event.role == "prospect"
                 and suggestion_count < MAX_SUGGESTIONS

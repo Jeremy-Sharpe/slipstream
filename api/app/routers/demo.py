@@ -216,8 +216,9 @@ async def bootstrap(
         lead_source=lead_source,
         lead_provider="openrouter_demo",
         spend_guardrail=(
-            "Exactly 10 fictional prospects use reserved .example domains and no deliverable "
-            "contact details. Email delivery remains disabled until separately configured."
+            "Exactly 10 fictional prospects carry invented names on reserved .example domains "
+            "with no deliverable contact details. Email delivery remains disabled until "
+            "separately configured."
         ),
     )
 
