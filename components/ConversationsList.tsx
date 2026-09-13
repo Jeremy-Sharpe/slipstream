@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, Mail, Phone } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { CallRecord } from "@/lib/types";
 import { Avatar } from "./Avatar";
 import { OutcomePill, fmtTime } from "./ui";
+
+export type ConversationFilter = "all" | "call" | "email";
 
 const TZ = "Australia/Melbourne";
 const dayKey = (iso: string) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
@@ -19,10 +21,14 @@ function dayLabel(iso: string) {
   return longDay.format(new Date(iso));
 }
 
-export function CallsList({ query = "" }: { query?: string }) {
+const subjectOf = (c: CallRecord) => c.messages?.[0]?.subject ?? c.draft.subject.replace(/^Re:\s*/i, "");
+
+export function ConversationsList({ query = "", filter = "all" }: { query?: string; filter?: ConversationFilter }) {
   const { calls, runs } = useStore();
   const q = query.trim().toLowerCase();
-  const rows = q ? calls.filter((c) => `${c.contact} ${c.company} ${c.title}`.toLowerCase().includes(q)) : calls;
+  const rows = calls
+    .filter((c) => filter === "all" || c.kind === filter)
+    .filter((c) => !q || `${c.contact} ${c.company} ${c.title} ${c.kind === "email" ? subjectOf(c) : ""}`.toLowerCase().includes(q));
 
   // Newest first, grouped by day.
   const groups: { key: string; label: string; rows: CallRecord[] }[] = [];
@@ -43,6 +49,7 @@ export function CallsList({ query = "" }: { query?: string }) {
           <ul className="border-b border-line-soft">
             {g.rows.map((c) => {
               const run = runs[c.id];
+              const Glyph = c.kind === "email" ? Mail : Phone;
               return (
                 <li key={c.id}>
                   <Link
@@ -51,11 +58,12 @@ export function CallsList({ query = "" }: { query?: string }) {
                   >
                     <span className="flex min-w-0 items-center gap-3">
                       <Avatar name={c.contact} size={28} />
+                      <Glyph aria-label={c.kind === "email" ? "Email" : "Call"} className="size-4 shrink-0 text-faint" strokeWidth={1.75} />
                       <span className="truncate text-[14px] font-medium text-ink">{c.contact}</span>
                     </span>
                     <span className="flex min-w-0 items-center gap-2">
                       <span className="truncate text-[14px] text-ink">{c.company}</span>
-                      <span className="truncate text-[13.5px] text-soft">· {c.title}</span>
+                      <span className="truncate text-[13.5px] text-soft">· {c.kind === "email" ? subjectOf(c) : c.title}</span>
                     </span>
                     <span className="flex items-center"><OutcomePill outcome={c.outcome} /></span>
                     <span className="text-[13.5px] tabular-nums text-soft">{fmtTime(c.at)}</span>

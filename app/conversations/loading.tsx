@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <div aria-busy>
-      <div className="h-7 w-20 rounded-md bg-surface" />
+      <div className="h-7 w-40 rounded-md bg-surface" />
       <div className="mt-2 h-4 w-72 rounded bg-surface-2" />
       <ul className="mt-8 divide-y divide-line-soft border-y border-line-soft">
         {Array.from({ length: 9 }).map((_, i) => (
