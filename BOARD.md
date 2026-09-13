@@ -95,3 +95,4 @@ Order matters. The foundation rows unblock everything else and should be claimed
 |---|---|---|
 | `model-bakeoff` | Compare Claude, OpenAI and open-weight models on extraction, scorecard and risk flags over the fixtures; plan in `docs/model-bakeoff.md`. Owner Anna. | The demo loop runs end to end and the prompts in `api/app/prompts/` exist |
 | `draft-judge` | Pairwise blind judge for follow-up draft quality, part of the bake-off | After `model-bakeoff` |
+| `one-thread-latest` | Port Maxim's later one-thread commits (Settings, shared frame spacing, Leads sheet columns, Intelligence as a finding, Revenue loop beats) onto main's API-wired app tree | `app/`, `components/`, `lib/` | Jeremy's agent (for Maxim) | feat/one-thread-latest | in progress | Maxim's layout and copy win; Anna's real-API wiring, gateway token handling and Eleno data kept |
