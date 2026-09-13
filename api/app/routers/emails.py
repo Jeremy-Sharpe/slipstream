@@ -8,10 +8,11 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Header, HTTPException, Request, status
 
+from app.core.llm import MissingReasoningProviderError
 from app.routers.drafts import _create_draft
 from app.schemas.icp import InteractionEvidence
 from app.services.crm_mirror import mirror_interaction
-from app.services.draft import DraftResponse
+from app.services.draft import DraftResponse, DraftUnavailableError
 from app.services.email import (
     EmailIngest,
     EmailRecord,
@@ -282,9 +283,17 @@ async def create_reply(
     if not messages:
         raise HTTPException(status_code=404, detail="Email thread not found")
     try:
-        draft = draft_thread_reply(messages)
+        draft = await asyncio.to_thread(
+            draft_thread_reply, messages, request.app.state.settings
+        )
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
+    except MissingReasoningProviderError as error:
+        raise HTTPException(
+            status_code=503, detail="The reply draft model is not configured"
+        ) from error
+    except DraftUnavailableError as error:
+        raise HTTPException(status_code=502, detail="The reply could not be drafted") from error
     if request.app.state.supabase is not None:
         try:
             draft = await asyncio.to_thread(_create_draft, request.app.state.supabase, draft)

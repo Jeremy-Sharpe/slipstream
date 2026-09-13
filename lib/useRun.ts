@@ -9,15 +9,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ApiError,
   approveDraft as approveDraftRequest,
+  bootstrapDemo,
   deriveIcp,
   draftEmailReply,
   draftFromCall,
+  draftLeadOutreach,
   extractCall,
   getExtraction,
   getEmailThread,
   getIcpFreshness,
   getLatestIcp,
   getLeads,
+  getReadiness,
   getScorecard,
   loadIcpHistory,
   scoreCall,
@@ -76,6 +79,8 @@ const SETTLE = 500;
 const NO_SHOW_NOTE = "No conversation to extract. Reschedule note drafted";
 const LOST_NOTE = "Not a fit for the ICP. No leads searched";
 const CRM_NOTE = "CRM record written; external webhook not configured on this deployment";
+/** Outreach is drafted for the best-matching new leads only; each draft is a model call. */
+const OUTREACH_LEADS = 3;
 
 export type RunSource = {
   id: string;
@@ -352,9 +357,18 @@ export function useRun(source: RunSource, opts: { instant?: boolean; startDelay?
       if (!instant) await wait(SETTLE);
       const result = await exec(gen, "icp", TRACE.icp.length, async () => {
         const [freshness, latest] = await Promise.all([getIcpFreshness(), getLatestIcp()]);
-        if (latest) return { profile: latest, freshness };
-        await loadIcpHistory();
-        return { profile: await deriveIcp(), freshness };
+        if (latest && freshness?.status !== "stale") return { profile: latest, freshness };
+        // The approved call changed the won-deal cohort (or there is no profile yet):
+        // relearn before searching. Without Origami the demo bootstrap relearns and
+        // sources the fictional leads for the new version in one request.
+        let profile: ApiIcpProfile;
+        if ((await getReadiness()).integrations.origami) {
+          if (!latest) await loadIcpHistory();
+          profile = await deriveIcp();
+        } else {
+          profile = (await bootstrapDemo()).icp;
+        }
+        return { profile, freshness: await getIcpFreshness() };
       });
       if (gen !== generation.current) return;
       profile = result.profile;
@@ -375,9 +389,10 @@ export function useRun(source: RunSource, opts: { instant?: boolean; startDelay?
       return;
     }
 
+    let found: { leads: ApiLead[]; stale: boolean };
     try {
       if (!instant) await wait(SETTLE);
-      const found = await exec(gen, "search", TRACE.search.length, async () => {
+      found = await exec(gen, "search", TRACE.search.length, async () => {
         const onProfile = await getLeads(profile.id);
         // Leads outlive a profile version: the API counts the ones still to be
         // rescored, and they are the same rows until that happens.
@@ -395,7 +410,16 @@ export function useRun(source: RunSource, opts: { instant?: boolean; startDelay?
 
     try {
       if (!instant) await wait(SETTLE);
-      await exec(gen, "outreach", TRACE.outreach.length, async () => undefined);
+      await exec(gen, "outreach", TRACE.outreach.length, async () => {
+        const fresh = found.leads.filter((lead) => lead.status === "new").slice(0, OUTREACH_LEADS);
+        for (const lead of fresh) await draftLeadOutreach(lead.id);
+        if (!fresh.length || gen !== generation.current) return;
+        const drafted = new Set(fresh.map((lead) => lead.id));
+        setData((current) => ({
+          ...current,
+          leads: (current.leads ?? []).map((lead) => (drafted.has(lead.id) ? { ...lead, status: "reviewed" } : lead)),
+        }));
+      });
       if (gen !== generation.current) return;
       setRun(source.id, { state: "done" });
     } catch {

@@ -3,20 +3,24 @@ import { Avatar } from "@/components/Avatar";
 import type { Intelligence, Pattern, Trigger } from "@/lib/intelligence";
 import { Bar, ErrorLine, SectionLabel } from "./parts";
 
-/* The centrepiece: the behaviours the scorecards measured, won against the
-   others on one track, one verbatim turn under each. */
+/* What winning calls did: the behaviours the scorecards measured, won against
+   the rest, with the quote the scorer cited. Below them, whatever the judge
+   noticed on top of the measured set, which carries quotes but no counts. */
 export function Patterns({ patterns, error }: { patterns: Pattern[]; error: string | null }) {
+  const measured = patterns.filter((p): p is Extract<Pattern, { kind: "behaviour" }> => p.kind === "behaviour");
+  const analyst = patterns.filter((p): p is Extract<Pattern, { kind: "analyst" }> => p.kind === "analyst");
+
   return (
     <section>
       <SectionLabel>What winning calls did</SectionLabel>
-      {patterns.length === 0 ? (
+      {measured.length === 0 ? (
         <ErrorLine className="mt-2">{error ?? "Not yet derived. Score the call history to fill this."}</ErrorLine>
       ) : (
         <ul className="mt-2 divide-y divide-line-soft border-y border-line-soft">
-          {patterns.map((p) => {
+          {measured.map((p) => {
             const q = p.quotes[0];
             return (
-              <li key={p.behaviour} className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-10 py-5">
+              <li key={p.key} className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-10 py-5">
                 <div className="min-w-0">
                   <p className="text-[15px] font-medium leading-6 text-ink">{p.behaviour}</p>
                   {q && (
@@ -41,6 +45,30 @@ export function Patterns({ patterns, error }: { patterns: Pattern[]; error: stri
             );
           })}
         </ul>
+      )}
+
+      {analyst.length > 0 && (
+        <div className="mt-10">
+          <SectionLabel>What the analyst noticed</SectionLabel>
+          <ul className="mt-2 divide-y divide-line-soft border-y border-line-soft">
+            {analyst.map((p) => (
+              <li key={p.key} className="py-5">
+                <p className="text-[15px] font-medium leading-6 text-ink">{p.behaviour}</p>
+                <p className="mt-1 text-[13.5px] leading-6 text-soft">{p.whyItMatters}</p>
+                {p.quotes.length > 0 && (
+                  <ul className="mt-3 flex flex-col gap-3">
+                    {p.quotes.map((q, index) => (
+                      <li key={`${q.callId}-${index}`} className="border-l-2 border-line pl-4">
+                        <p className="text-[16px] leading-6 text-ink">“{q.text}”</p>
+                        <Link href={q.href} className="mt-1.5 inline-block text-[13px] text-soft transition-colors duration-150 hover:text-ink">{q.company}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   );

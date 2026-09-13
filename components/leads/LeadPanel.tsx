@@ -33,7 +33,10 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
         <>
           <header className="flex items-start gap-3 px-6 pt-6 pb-4">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[16px] font-semibold text-ink">{l.company}</p>
+              <div className="flex items-center gap-2">
+                <p className="truncate text-[16px] font-semibold text-ink">{l.company}</p>
+                {l.synthetic && <Pill className="shrink-0">Fictional</Pill>}
+              </div>
               <p className="truncate text-[13.5px] text-soft">{[l.contact, l.title, l.location].filter(Boolean).join(" · ")}</p>
               {l.linkedinUrl && <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[13px] text-soft transition-colors duration-150 hover:text-ink">LinkedIn →</a>}
             </div>

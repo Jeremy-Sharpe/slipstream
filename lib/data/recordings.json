@@ -1,0 +1,27 @@
+{
+  "call-03-afterglow-studio": {
+    "src": "/recordings/call-03-afterglow-studio.mp3",
+    "seconds": 270.48,
+    "voices": "Kokoro-82M (local): Jordan Lee: Kokoro am_michael, Priya Shah: Kokoro af_heart"
+  },
+  "call-04-kite-and-co": {
+    "src": "/recordings/call-04-kite-and-co.mp3",
+    "seconds": 272.32,
+    "voices": "Kokoro-82M (local): Daniel Ortiz: Kokoro am_fenrir, Sam Whitfield: Kokoro bm_george"
+  },
+  "call-07-fairfield-wealth": {
+    "src": "/recordings/call-07-fairfield-wealth.mp3",
+    "seconds": 299.13,
+    "voices": "Kokoro-82M (local): Olivia Hart: Kokoro bf_emma, Sam Whitfield: Kokoro bm_george"
+  },
+  "call-12-dockside-dental": {
+    "src": "/recordings/call-12-dockside-dental.mp3",
+    "seconds": 33.03,
+    "voices": "Kokoro-82M (local): Jordan Lee: Kokoro am_michael, Reception: Kokoro af_bella"
+  },
+  "call-13-marlowe-finch-demo": {
+    "src": "/recordings/call-13-marlowe-finch-demo.mp3",
+    "seconds": 333.75,
+    "voices": "ElevenLabs eleven_v3 text-to-dialogue"
+  }
+}
