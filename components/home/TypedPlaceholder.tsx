@@ -15,10 +15,11 @@ const SAMPLES: [string, string, string][][] = [
   [["00:00:11", "Jordan Lee", "Aisha, what is driving the timing?"], ["00:00:17", "Aisha Rahman", "The immediate issue is our cyber insurance renewal, which has become much stricter."], ["00:00:30", "Jordan Lee", "Insurance work first, then the helpdesk."]],
 ];
 
-/* Forwarded emails: header lines, a blank line, then the body. */
+/* Forwarded emails: two header lines, a blank line, a greeting and two short
+   body lines, so a sample never runs past the 220px card. */
 const EMAIL_SAMPLES: string[][] = [
-  ["From: Hannah Lee <hannah@brunswickdental.example>", "To: Sam Whitfield <sam@harbourlineit.example>", "Subject: Essential Eight evidence for our insurer", "Date: Sat 12 Sept 2026 08:52", "", "Hi Sam,", "", "Our broker has asked for evidence of Essential Eight controls before they will quote the renewal. We are three practices, about 41 staff. What is involved, and roughly what should a group our size expect to pay?"],
-  ["From: Olivia Hart <olivia@wattlestreetlegal.example>", "To: Sam Whitfield <sam@harbourlineit.example>", "Subject: Handover timing", "Date: Tue 8 Sept 2026 08:31", "", "Hi Sam,", "", "Our IT coordinator's last day is now the 26th. The principal has signed off on the transition plan, so can we start the shadow handover next week?"],
+  ["From: Hannah Lee <hannah@brunswickdental.example>", "Subject: Essential Eight evidence for our insurer", "", "Hi Sam,", "Our broker wants Essential Eight evidence before they quote.", "We are three practices, about 41 staff. What is involved?"],
+  ["From: Olivia Hart <olivia@wattlestreetlegal.example>", "Subject: Handover timing", "", "Hi Sam,", "Our IT coordinator's last day is now the 26th.", "Can we start the shadow handover next week?"],
 ];
 
 type Tok = { text: string; speaker?: boolean; stamp?: boolean; br?: boolean };
@@ -69,7 +70,7 @@ export function TypedPlaceholder({ active, variant = "transcript" }: { active: b
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-0 p-5 pb-10 text-[15px] leading-6 whitespace-pre-wrap transition-opacity"
+      className="pointer-events-none absolute inset-0 overflow-hidden p-5 pb-10 text-[15px] leading-6 whitespace-pre-wrap transition-opacity"
       style={{ color: "#c4c4c4", opacity: active ? (fading ? 0 : 1) : 0, transitionDuration: active ? `${FADE_MS}ms` : "150ms", willChange: "opacity", minHeight: 72 }}
     >
       {shown.map((t, i) => (

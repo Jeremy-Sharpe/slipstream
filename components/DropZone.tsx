@@ -38,6 +38,7 @@ export function DropZone() {
   const [leaving, setLeaving] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const attach = useRef<HTMLInputElement>(null);
+  const attachEmail = useRef<HTMLInputElement>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -91,6 +92,11 @@ export function DropZone() {
   const run = () => {
     if (!text.trim()) return;
     setPhase({ kind: "submitting", source: { kind: "paste", lines: text.split(/\n/).filter((l) => l.trim()).length }, text });
+  };
+
+  const onAttachEmail = async (files: FileList | null) => {
+    const f = files?.[0];
+    if (f) setEmailText(await f.text());
   };
 
   // A forwarded email: headers and quoted replies become the thread.
@@ -156,8 +162,17 @@ export function DropZone() {
             onFocus={() => setEmailFocused(true)}
             onBlur={() => setEmailFocused(false)}
             aria-label="Paste the email"
-            className="relative min-h-0 w-full flex-1 resize-none bg-transparent pb-10 text-[15px] leading-6 text-ink outline-none"
+            className="relative mb-5 min-h-0 w-full flex-1 resize-none bg-transparent text-[15px] leading-6 text-ink outline-none"
           />
+          <button
+            type="button"
+            aria-label="Attach an email file"
+            onClick={() => attachEmail.current?.click()}
+            className="absolute bottom-3 left-3 flex size-7 items-center justify-center rounded-full bg-white text-ink shadow-[inset_0_0_0_1px_#e8e8e8] outline-none transition-colors duration-150 hover:bg-surface focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          >
+            <Plus className="size-3.5" strokeWidth={2} />
+          </button>
+          <input ref={attachEmail} type="file" accept=".eml,.txt,message/rfc822,text/plain" className="sr-only" tabIndex={-1} onChange={(e) => onAttachEmail(e.target.files)} />
           {runPill(!!emailText.trim(), runEmail)}
         </div>
       ) : (
@@ -169,7 +184,7 @@ export function DropZone() {
             onFocus={() => setPasteFocused(true)}
             onBlur={() => setPasteFocused(false)}
             aria-label="Paste the transcript"
-            className="relative min-h-0 w-full flex-1 resize-none bg-transparent pb-10 text-[15px] leading-6 text-ink outline-none"
+            className="relative mb-5 min-h-0 w-full flex-1 resize-none bg-transparent text-[15px] leading-6 text-ink outline-none"
           />
           <button
             type="button"
