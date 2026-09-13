@@ -64,14 +64,14 @@ export function useRun(call: CallRecord, opts: { instant?: boolean; startDelay?:
       for (let n = 1; n <= ticks; n++) at(t + (len / (ticks + 1)) * n, () => set(id, { progress: n }));
       const gate = i === stopIndex && stopAfter?.wait;
       at(t + len, () => {
-        set(id, (s) => ({ status: gate ? "waiting" : "done", progress: ticks, elapsedMs: s.startedAt ? Date.now() - s.startedAt : len }));
+        set(id, (s) => ({ status: gate ? "waiting" : "done", progress: ticks, elapsedMs: instant ? 0 : s.startedAt ? Date.now() - s.startedAt : len }));
         if (!gate) setOpen(null);
       });
       t += len + SETTLE;
     });
     at(t, () => onEnd?.());
     return t;
-  }, [at, set]);
+  }, [at, set, instant]);
 
   const start = useCallback(() => {
     timers.current.forEach(clearTimeout);

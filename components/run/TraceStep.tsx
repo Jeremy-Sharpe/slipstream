@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/components/ui";
-import { Spinner, fmtElapsed, useElapsed } from "./WorkingLine";
+import { Spinner, fmtDone, fmtElapsed, useElapsed } from "./WorkingLine";
 
 /* One step of the agent trace. The label shimmers while working and settles
    with a fade to the done label; the body is an expandable trace with a
@@ -95,7 +95,7 @@ export function TraceStep({ status, workingLabel, doneLabel, summary, rows = [],
           </span>
           <span className="min-w-0 flex-1 truncate text-[14px] tabular-nums text-soft">
             {working && ms != null ? <span className="text-faint">{fmtElapsed(ms)}</span> : summary}
-            {status === "done" && ms != null && summary && <span className="text-faint"> · {fmtElapsed(ms)}</span>}
+            {status === "done" && ms != null && summary && <span className="text-faint"> · {fmtDone(ms)}</span>}
           </span>
           {!muted && (
             <ChevronDown className="size-3.5 shrink-0 text-faint transition-transform duration-300" strokeWidth={2.2} style={{ transform: expanded ? "rotate(180deg)" : "rotate(0)" }} />

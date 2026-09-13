@@ -19,6 +19,11 @@ export function useElapsed(startedAt?: number, running = true) {
   return ms;
 }
 
+/** Elapsed for a finished step; sub-100ms runs (?instant=1) read "instant". */
+export function fmtDone(ms: number) {
+  return ms < 100 ? "instant" : fmtElapsed(ms);
+}
+
 export function fmtElapsed(ms: number) {
   const s = ms / 1000;
   if (s < 60) return `${s.toFixed(1)}s`;

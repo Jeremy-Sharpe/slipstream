@@ -45,7 +45,7 @@ export function useLeadSearch(opts: { instant?: boolean } = {}) {
     at(t, () => actions.updateSearch(id, { step: "draft" }));
     leads.forEach((_, i) => at(t + FILL_MS * (i + 1), () => actions.updateSearch(id, { drafted: i + 1 })));
     t += Math.max(STEP_MIN, FILL_MS * (count + 1)) + SETTLE;
-    at(t, () => actions.updateSearch(id, { status: "done", elapsedMs: Date.now() - search.startedAt }));
+    at(t, () => actions.updateSearch(id, { status: "done", elapsedMs: fast ? 0 : Date.now() - search.startedAt }));
     return id;
   }, [searches.length, fast]);
 

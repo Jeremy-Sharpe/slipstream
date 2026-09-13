@@ -13,11 +13,10 @@ import {
   type Theme,
 } from "@glideapps/glide-data-grid";
 import "@glideapps/glide-data-grid/dist/index.css";
-import { gradientFor } from "../Avatar";
 import type { Lead } from "@/lib/types";
 
-/* The sheet. Glide Data Grid themed to the app tokens; canvas renderers for
-   the contact avatar and the status pill. Rows arriving from a running search
+/* The sheet. Glide Data Grid themed to the app tokens; a canvas renderer for
+   the status pill. Rows arriving from a running search
    get a 1.5s soft tangerine highlight; cells fill in place as scoring and
    drafting progress. */
 
@@ -63,34 +62,20 @@ const THEME: Partial<Theme> = {
 
 const COLUMNS: (GridColumn & { id: string; width: number })[] = [
   { id: "company", title: "Company", width: 220, icon: GridColumnIcon.HeaderString },
-  { id: "contact", title: "Contact", width: 200 },
-  { id: "title", title: "Title", width: 180 },
+  { id: "contact", title: "Contact", width: 160 },
+  { id: "title", title: "Title", width: 150 },
   { id: "location", title: "Location", width: 140 },
-  { id: "trigger", title: "Trigger", width: 260, icon: GridColumnIcon.HeaderString },
+  { id: "trigger", title: "Trigger", width: 200, icon: GridColumnIcon.HeaderString },
   { id: "similarity", title: "Similarity", width: 100, icon: GridColumnIcon.HeaderNumber },
   { id: "status", title: "Status", width: 110 },
-  { id: "draft", title: "Draft", width: 320, grow: 1 },
+  { id: "draft", title: "Draft", width: 160, grow: 1 },
 ];
+const MARKER_W = 44;
+const FIXED_W = COLUMNS.filter((c) => c.id !== "draft").reduce((n, c) => n + c.width, 0);
+/** Columns shrink proportionally to fit the sheet, down to this factor; below it the sheet scrolls. */
+const MIN_SCALE = 0.6;
 
-type AvatarCell = CustomCell<{ kind: "avatar"; name: string }>;
 type PillCell = CustomCell<{ kind: "pill"; label: string; tone: "grey" | "green" }>;
-
-const avatarRenderer: CustomRenderer<AvatarCell> = {
-  kind: GridCellKind.Custom,
-  isMatch: (c): c is AvatarCell => (c.data as { kind?: string }).kind === "avatar",
-  draw: (args, cell) => {
-    const { ctx, rect, theme } = args;
-    const size = 24;
-    const x = rect.x + theme.cellHorizontalPadding, y = rect.y + (rect.height - size) / 2;
-    const [a, b] = gradientFor(cell.data.name);
-    const g = ctx.createLinearGradient(x, y, x + size, y + size);
-    g.addColorStop(0, a); g.addColorStop(1, b);
-    ctx.beginPath(); ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-    ctx.fillStyle = theme.textDark; ctx.textBaseline = "middle";
-    ctx.fillText(cell.data.name, x + size + 10, rect.y + rect.height / 2);
-    return true;
-  },
-};
 
 const pillRenderer: CustomRenderer<PillCell> = {
   kind: GridCellKind.Custom,
@@ -119,9 +104,21 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
   onSearchClose: () => void;
 }) {
   const [widths, setWidths] = useState<Record<string, number>>({});
+  const [hostRef, setHostRef] = useState<HTMLDivElement | null>(null);
+  const [available, setAvailable] = useState(0);
+  useEffect(() => {
+    if (!hostRef) return;
+    const ro = new ResizeObserver(() => setAvailable(hostRef.clientWidth));
+    ro.observe(hostRef);
+    return () => ro.disconnect();
+  }, [hostRef]);
+  const scale = available ? Math.max(MIN_SCALE, Math.min(1, (available - MARKER_W - 160) / FIXED_W)) : 1;
   const columns = useMemo(
-    () => COLUMNS.map<GridColumn>((c, i) => (sort?.col === i ? { ...c, width: widths[c.id] ?? c.width, icon: undefined, title: `${sort.dir === "asc" ? "↑" : "↓"} ${c.title}` } : { ...c, width: widths[c.id] ?? c.width })),
-    [widths, sort],
+    () => COLUMNS.map<GridColumn>((c, i) => {
+      const width = widths[c.id] ?? (c.id === "draft" ? c.width : Math.round(c.width * scale));
+      return sort?.col === i ? { ...c, width, icon: undefined, title: `${sort.dir === "asc" ? "↑" : "↓"} ${c.title}` } : { ...c, width };
+    }),
+    [widths, sort, scale],
   );
 
   // Re-render every 60ms while any row is still highlighted so the tint fades.
@@ -149,7 +146,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
     if (!r) return text("");
     switch (COLUMNS[col].id) {
       case "company": return text(r.company, { themeOverride: { baseFontStyle: "500 14px" } } as Partial<GridCell>);
-      case "contact": return { kind: GridCellKind.Custom, allowOverlay: false, copyData: r.contact, data: { kind: "avatar", name: r.contact } } as AvatarCell;
+      case "contact": return text(r.contact);
       case "title": return text(r.title);
       case "location": return text(r.location);
       case "trigger": return text(r.trigger);
@@ -167,6 +164,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
   }, [rows]);
 
   return (
+    <div ref={setHostRef} className="h-full w-full">
     <DataEditor
       columns={columns}
       rows={rows.length}
@@ -177,7 +175,7 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
       rowHeight={44}
       headerHeight={40}
       theme={THEME}
-      customRenderers={[avatarRenderer, pillRenderer]}
+      customRenderers={[pillRenderer]}
       getRowThemeOverride={getRowThemeOverride}
       onHeaderClicked={(col) => onSort(sort?.col === col ? (sort.dir === "desc" ? { col, dir: "asc" } : null) : { col, dir: "desc" })}
       onCellActivated={([, row]) => { const r = rows[row]; if (r) onOpen(r); }}
@@ -193,7 +191,8 @@ export default function LeadsGridInner({ rows, sort, onSort, onOpen, showSearch,
       smoothScrollX
       smoothScrollY
       getCellsForSelection={true}
-      verticalBorder={true}
+      verticalBorder={(col) => col !== 0}
     />
+    </div>
   );
 }

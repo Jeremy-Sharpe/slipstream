@@ -11,13 +11,8 @@ function hash(s: string) {
   return Math.abs(h);
 }
 
-/** The two gradient stops for a person, shared with canvas renderers. */
-export function gradientFor(name: string): [string, string] {
-  return GRADIENTS[hash(name) % GRADIENTS.length];
-}
-
 export function Avatar({ name, size = 28, className = "" }: { name: string; size?: number; className?: string }) {
-  const [a, b] = gradientFor(name);
+  const [a, b] = GRADIENTS[hash(name) % GRADIENTS.length];
   return (
     <span
       aria-hidden

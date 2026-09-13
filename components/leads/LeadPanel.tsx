@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { actions } from "@/lib/store";
 import type { Lead } from "@/lib/types";
-import { Avatar } from "../Avatar";
 import { Button, Pill, cn } from "../ui";
 
 /* 440px slide-over for one lead: why it matched, the outreach draft, Approve / Skip. */
@@ -33,7 +32,6 @@ export function LeadPanel({ lead, onClose }: { lead: Lead | null; onClose: () =>
       {l && (
         <>
           <header className="flex items-start gap-3 px-6 pt-6 pb-4">
-            <Avatar name={l.contact} size={40} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[16px] font-semibold text-ink">{l.company}</p>
               <p className="truncate text-[13.5px] text-soft">{l.contact} · {l.title} · {l.location}</p>

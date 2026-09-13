@@ -3,7 +3,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import { icp } from "@/lib/icp";
 import type { Lead, Search, SearchStep } from "@/lib/types";
-import { Spinner, fmtElapsed, useElapsed } from "../run/WorkingLine";
+import { Spinner, fmtDone, fmtElapsed, useElapsed } from "../run/WorkingLine";
 import { cn } from "../ui";
 
 /* One search in the history: a TraceStep-style block. Ink check when done,
@@ -48,7 +48,7 @@ export function SearchEntry({ search, leads, selected, expanded, onSelect, onTog
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
             <span className="truncate text-[15px] font-medium text-ink">Search {search.n} · {search.count} companies</span>
-            {ms != null && <span className="ml-auto shrink-0 text-[13px] tabular-nums text-faint">{fmtElapsed(ms)}</span>}
+            {ms != null && <span className="ml-auto shrink-0 text-[13px] tabular-nums text-faint">{running ? fmtElapsed(ms) : fmtDone(ms)}</span>}
             <ChevronDown className="size-3.5 shrink-0 text-faint transition-transform duration-300" strokeWidth={2.2} style={{ transform: expanded ? "rotate(180deg)" : "rotate(0)" }} />
           </span>
           <span className="mt-0.5 block truncate text-[13.5px] text-soft">{running ? excerpt : summary}</span>
