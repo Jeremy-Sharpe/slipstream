@@ -41,9 +41,19 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
     .filter((row) => !q || `${row.contact} ${row.company} ${row.subject}`.toLowerCase().includes(q));
 
   if (loading) {
+    // Same bones as the list: a day label, then 56px rows with a disc and two bars.
     return (
-      <div aria-busy className="flex flex-col gap-2">
-        {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-14 rounded-xl bg-surface-2" style={{ opacity: 1 - i * 0.1 }} />)}
+      <div aria-busy>
+        <div className="mb-2 h-3.5 w-40 rounded bg-surface-2" />
+        <ul className="border-b border-line-soft">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <li key={i} className="flex h-14 items-center gap-3 px-2" style={{ opacity: 1 - i * 0.1 }}>
+              <span className="size-7 shrink-0 rounded-full bg-surface" />
+              <span className="ml-7 h-3.5 w-32 rounded bg-surface" />
+              <span className="ml-4 h-3.5 w-56 rounded bg-surface-2" />
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
