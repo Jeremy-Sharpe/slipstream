@@ -55,7 +55,7 @@ export const tiles: { label: string; value: string; line: string }[] = [
 
 /* Win patterns */
 
-export type QuoteRef = { callId: string; company: string; t: number; text: string };
+export type QuoteRef = { callId: string; company: string; speaker: string; t: number; text: string };
 export type Pattern = {
   behaviour: string;
   takeaway: string;
@@ -71,7 +71,7 @@ const quoteAt = (c: CallRecord, i: number | null, sentences = 99): QuoteRef | nu
   if (i == null) return null;
   const turn = c.turns[i];
   if (!turn) return null;
-  return { callId: c.id, company: c.company, t: turn.t, text: clip(turn.text, sentences) };
+  return { callId: c.id, company: c.company, speaker: turn.name, t: turn.t, text: clip(turn.text, sentences) };
 };
 
 const BEHAVIOURS: { behaviour: string; test: (c: CallRecord) => boolean; takeaway: () => string; quote: (c: CallRecord) => QuoteRef | null; order?: (c: CallRecord) => number }[] = [
@@ -115,10 +115,14 @@ export const patterns: Pattern[] = BEHAVIOURS.map((b) => {
   };
 });
 
-export const coachingFocus: string[] = [
-  "Book the date on the call. Every stalled deal left with a promise to send something and no meeting.",
-  "Ask before quoting. The three lost calls opened on price and asked nothing about the setup.",
+/** Two lines of coaching, each addressed to the rep whose numbers say so. */
+const byNextStep = [...reps].sort((a, b) => a.next_step_rate - b.next_step_rate)[0]?.rep ?? reps[0].rep;
+const byDiscovery = [...reps].sort((a, b) => a.mean_discovery - b.mean_discovery)[0]?.rep ?? reps[0].rep;
+export const coaching: { rep: string; line: string }[] = [
+  { rep: byNextStep, line: "Book the date on the call. Every stalled deal left with a promise to send something and no meeting." },
+  { rep: byDiscovery, line: "Ask before quoting. The three lost calls opened on price and asked nothing about the setup." },
 ];
+export const coachingFocus: string[] = coaching.map((c) => c.line);
 
 /* Triggers */
 
@@ -138,7 +142,7 @@ export const triggers: { label: string; count: number }[] = TRIGGERS.map((t) => 
 
 /* Derived ICP */
 
-export type IcpRow = { attribute: string; label: string; value: string; calls: { id: string; company: string }[] };
+export type IcpRow = { attribute: string; label: string; value: string; calls: { id: string; company: string; contact: string }[] };
 
 const ATTRIBUTES: { attribute: string; label: string; value: string; why: string; test: (c: CallRecord) => boolean }[] = [
   { attribute: "industry", label: "Industry", value: "Professional services, allied health", why: "Every won deal is a firm that bills for expertise or treats patients.", test: (c) => /health|physio|legal|law|account|architect|consult/i.test(c.industry) },
@@ -151,7 +155,7 @@ export const icpRows: IcpRow[] = ATTRIBUTES.map((a) => ({
   attribute: a.attribute,
   label: a.label,
   value: a.value,
-  calls: won.filter(a.test).map((c) => ({ id: c.id, company: c.company })),
+  calls: won.filter(a.test).map((c) => ({ id: c.id, company: c.company, contact: c.contact })),
 }));
 
 export const icpProfile: ApiIcpProfile = {
