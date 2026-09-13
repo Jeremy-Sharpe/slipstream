@@ -3,45 +3,75 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { useStore } from "@/lib/store";
+import type { CallRecord } from "@/lib/types";
 import { Avatar, CompanyTile } from "./Avatar";
-import { OutcomePill, fmtDate, fmtTime } from "./ui";
+import { OutcomePill, fmtTime } from "./ui";
+
+const TZ = "Australia/Melbourne";
+const dayKey = (iso: string) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
+const longDay = new Intl.DateTimeFormat("en-AU", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" });
+
+function dayLabel(iso: string) {
+  const key = dayKey(iso);
+  const now = new Date();
+  if (key === dayKey(now.toISOString())) return "Today";
+  if (key === dayKey(new Date(now.getTime() - 86400000).toISOString())) return "Yesterday";
+  return longDay.format(new Date(iso));
+}
 
 export function CallsList({ query = "" }: { query?: string }) {
   const { calls, runs } = useStore();
   const q = query.trim().toLowerCase();
   const rows = q ? calls.filter((c) => `${c.contact} ${c.company} ${c.title}`.toLowerCase().includes(q)) : calls;
+
+  // Newest first, grouped by day.
+  const groups: { key: string; label: string; rows: CallRecord[] }[] = [];
+  for (const c of rows) {
+    const key = dayKey(c.at);
+    const g = groups[groups.length - 1];
+    if (g && g.key === key) g.rows.push(c);
+    else groups.push({ key, label: dayLabel(c.at), rows: [c] });
+  }
+
+  if (rows.length === 0) return <p className="border-y border-line-soft py-16 text-center text-[14px] text-faint">Nothing matches.</p>;
+
   return (
-    <ul className="divide-y divide-line-soft border-y border-line-soft">
-      {rows.length === 0 && <li className="py-16 text-center text-[14px] text-faint">Nothing matches.</li>}
-      {rows.map((c) => {
-        const run = runs[c.id];
-        return (
-          <li key={c.id}>
-            <Link
-              href={`/calls/${c.id}`}
-              className="grid h-14 grid-cols-[minmax(0,1.1fr)_minmax(0,1.7fr)_104px_72px_128px_120px] items-center gap-x-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-            >
-              <span className="flex min-w-0 items-center gap-3">
-                <Avatar name={c.contact} size={28} />
-                <span className="truncate text-[14px] font-medium text-ink">{c.contact}</span>
-              </span>
-              <span className="flex min-w-0 items-center gap-2.5">
-                <CompanyTile name={c.company} size={28} />
-                <span className="truncate text-[14px] text-ink">{c.company}</span>
-                <span className="truncate text-[13.5px] text-soft">· {c.title}</span>
-              </span>
-              <span className="flex items-center"><OutcomePill outcome={c.outcome} /></span>
-              <span className="truncate text-[13.5px] text-soft">{c.rep.split(" ")[0]}</span>
-              <span className="text-[13.5px] tabular-nums text-soft">{fmtDate(c.at)} · {fmtTime(c.at)}</span>
-              <span className="flex items-center justify-end gap-1.5 text-[13.5px]">
-                {run === "running" && <><span className="pulse-dot size-2 rounded-full bg-accent" /><span className="text-soft">Running</span></>}
-                {run === "review" && <><span className="size-2 rounded-full bg-accent" /><span className="text-soft">Needs review</span></>}
-                {run === "done" && <><Check className="size-3.5 text-faint" strokeWidth={2} /><span className="text-soft">Done</span></>}
-              </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+    <div>
+      {groups.map((g, gi) => (
+        <section key={g.key}>
+          <h3 className={`mb-2 text-[12px] font-medium text-faint ${gi === 0 ? "mt-3" : "mt-6"}`}>{g.label}</h3>
+          <ul className="border-b border-line-soft">
+            {g.rows.map((c) => {
+              const run = runs[c.id];
+              return (
+                <li key={c.id}>
+                  <Link
+                    href={`/calls/${c.id}`}
+                    className="grid h-14 grid-cols-[minmax(0,1.1fr)_minmax(0,1.7fr)_104px_72px_120px] items-center gap-x-4 rounded-lg px-2 transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                  >
+                    <span className="flex min-w-0 items-center gap-3">
+                      <Avatar name={c.contact} size={28} />
+                      <span className="truncate text-[14px] font-medium text-ink">{c.contact}</span>
+                    </span>
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <CompanyTile name={c.company} size={28} />
+                      <span className="truncate text-[14px] text-ink">{c.company}</span>
+                      <span className="truncate text-[13.5px] text-soft">· {c.title}</span>
+                    </span>
+                    <span className="flex items-center"><OutcomePill outcome={c.outcome} /></span>
+                    <span className="text-[13.5px] tabular-nums text-soft">{fmtTime(c.at)}</span>
+                    <span className="flex items-center justify-end gap-1.5 text-[13.5px]">
+                      {run === "running" && <><span className="pulse-dot size-2 rounded-full bg-accent" /><span className="text-soft">Running</span></>}
+                      {run === "review" && <><span className="size-2 rounded-full bg-accent" /><span className="text-soft">Needs review</span></>}
+                      {run === "done" && <><Check className="size-3.5 text-faint" strokeWidth={2} /><span className="text-soft">Done</span></>}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
   );
 }
