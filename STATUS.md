@@ -9,7 +9,7 @@ Who is on what, what the live environment actually holds, and what only a human 
 | Person | Lanes | Where they are up to |
 |---|---|---|
 | Anna | `fixtures`, `scorecard`, `icp`, `leads`, `outreach`, `live-extraction`, `model-bakeoff` | Fixtures, scorecard, ICP and live extraction are merged. Her work now feeds the OpenRouter-only demo bootstrap; the optional real Origami adapter remains untested with a credential. |
-| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, all five `web-wire-*` lanes, `coach-shell`, `coach-release`, `ci`, `playbook-store`, `submission` | Product code and automated submission evidence are merged. Production uses OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`, serves ten safe fictional prospects for the latest ICP and a safely paused campaign, and remains memory-backed. 363 API tests pass; strict T1 now passes at 8/10. |
+| Jeremy | `schema`, `api-skeleton`, `ingest`, `email-ingest`, `extract`, `draft`, `coach-brain`, all five `web-wire-*` lanes, `coach-shell`, `coach-release`, `ci`, `playbook-store`, `submission`, `revenue-dna-freshness` | Product code and automated submission evidence are merged. Production uses OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`, serves ten safe fictional prospects for the latest ICP and a safely paused campaign, and remains memory-backed. Revenue DNA proves the targeting cohort is current and gates stale searches. 367 API tests pass; strict T1 passes at 8/10. |
 | Max (Maxim Durand) | Clay-style conversations UI foundation | Merged into main on 12 September and since wired to the live pipeline by Jeremy's agent. |
 | Romain | Not recorded on the board | No commits under this name and no board rows. The automated fallback video is already public; the remaining team-owned action is submitting the external form or optionally recording a human-presented replacement. |
 
@@ -17,12 +17,12 @@ Who is on what, what the live environment actually holds, and what only a human 
 
 | Thing | Where | State |
 |---|---|---|
-| Production UI | https://slipstream-hackathon.vercel.app | Vercel production deployment `dpl_35iFEtxJ18tBy7kF541UVzLh64HX` serves the PR #51 dynamic Revenue Loop. Its first HTML response already contains OpenRouter, API revision `c342825`, 12 calls plus two emails, ICP v1 and one queued/zero sent; JavaScript is not required to discover the live proof |
-| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `c3428258ab461e37b65bee9888527a6d8aaa622a`; readiness verifies OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`. The bounded demo evidence endpoint verifies 13 deals, 12 calls, two emails and ten safe fictional prospects. Storage is `memory`; Supabase, Origami and delivery remain disabled. Canonical Maya extraction and approved-unsent draft are present. |
+| Production UI | https://slipstream-hackathon.vercel.app | Vercel deployment `dpl_F17QVRsNEv2zMTVq7NXLyzq77xJV` serves the PR #53 Revenue DNA card, OpenRouter-first sourcing copy, dynamic Revenue Loop and the exact paused campaign in first-response HTML |
+| Production API | https://slipstream-api.3-104-149-193.sslip.io | Live at exact revision `16520b8dc829679b0e5461cedd7a2be77d367d6f`; readiness verifies OpenRouter `openai/gpt-5.4` reasoning and `text-embedding-3-small`. The bounded demo evidence endpoint verifies 13 deals, 12 calls, two emails, ten safe fictional prospects and a current Revenue DNA fingerprint. Storage is `memory`; Supabase, Origami and delivery remain disabled. |
 | API environment file | `/etc/slipstream/api.env` on the VPS, root owned, 0600 | Loaded by the systemd unit. Every key the API needs has to exist here as well as locally |
 | Local API environment | `api/.env`, gitignored | Not present in the current workspace. Production secrets exist only in the root-owned VPS environment |
 | Hosted database | Supabase | Only migration `20260912000000` is applied. The email, scorecard and playbook persistence migrations are merged but unapplied, so those later tables/functions do not exist live |
-| Repository CI | GitHub Actions | Main revision `c342825` passed web lint/build, 363 API tests plus Ruff, 40 smoke tests, fixture validation, scheduler, coach, all migrations and pgTAP in run `34734911042` |
+| Repository CI | GitHub Actions | Main revision `16520b8` passed web lint/build, 367 API tests plus Ruff, 41 smoke tests, fixture validation, scheduler, coach, all migrations and pgTAP in run `34736562025` |
 | Coach installers | GitHub Actions | Main revision `d876e5c` produced retained unsigned Linux, macOS and Windows artifacts in run `34694011356`; signing/notarisation remains intentionally unconfigured |
 
 ## Keys
