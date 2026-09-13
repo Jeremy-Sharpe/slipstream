@@ -59,9 +59,9 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
 
       <p className="mt-10 pb-8 text-[12px] text-faint">
         {provenance.profileVersion != null ? `Profile v${provenance.profileVersion}` : "No profile yet"}
-        {provenance.profileCreatedAt ? ` · derived ${fmtDate(provenance.profileCreatedAt)}` : ""}
-        {provenance.rubricVersion ? ` · scored with rubric ${provenance.rubricVersion}` : ""}
-        {provenance.playbookGeneratedAt ? ` · playbook ${fmtDate(provenance.playbookGeneratedAt)}` : ""}
+        {provenance.profileCreatedAt ? ` · Derived ${fmtDate(provenance.profileCreatedAt)}` : ""}
+        {provenance.rubricVersion ? ` · Scored with rubric ${provenance.rubricVersion}` : ""}
+        {provenance.playbookGeneratedAt ? ` · Playbook ${fmtDate(provenance.playbookGeneratedAt)}` : ""}
       </p>
     </div>
   );

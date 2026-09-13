@@ -97,7 +97,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
     return Array.isArray(value) ? value.length > 0 : value != null;
   }).length;
   const leads = data.leads ?? [];
-  const drafted = leads.filter((lead) => ["reviewed", "approved", "contacted"].includes(lead.status)).length;
+  const drafted = leads.filter((lead) => lead.status !== "new" && lead.status !== "rejected").length;
   const wonDeals = data.wonDeals ?? 0;
 
   const summary = (st: StepState): ReactNode => {
@@ -105,18 +105,18 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
     switch (st.id) {
       case "transcribe": return email
         ? `${plural(messages.length, "message")} · ${inbound} inbound`
-        : `${mmss(call.duration)} · ${plural(call.turns.length, "turn")} · talk ratio ${pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))}`;
+        : `${mmss(call.duration)} · ${plural(call.turns.length, "turn")} · Talk ratio ${pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))}`;
       case "extract":
         if (synced) return email ? "Thread filed to CRM" : `${plural(filled, "field")} written to CRM`;
         return st.status === "waiting" ? "Waiting for your approval" : "";
       case "score": {
         const s = call.scorecard;
         if (!s) return "";
-        return `${plural(s.discovery, "discovery question")} · ${s.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(s.talkRatio)}`;
+        return `${plural(s.discovery, "discovery question")} · ${s.nextStepSecured ? "Next step secured" : "No dated next step"} · Talk ratio ${pct(s.talkRatio)}`;
       }
-      case "draft": return approved ? `${email ? "Reply" : "Follow-up"} approved · nothing is sent` : st.status === "waiting" ? "Waiting for your approval" : call.draft?.subject ?? "";
+      case "draft": return approved ? `${email ? "Reply" : "Follow-up"} approved · Nothing is sent` : st.status === "waiting" ? "Waiting for your approval" : call.draft?.subject ?? "";
       case "icp": return data.icp ? `From ${plural(wonDeals, "won deal")}` : "";
-      case "search": return st.status === "done" ? `${plural(leads.length, "lead")} · scored against the won deals` : "";
+      case "search": return st.status === "done" ? `${plural(leads.length, "lead")} · Scored against the won deals` : "";
       case "outreach": return st.status === "done" ? `${plural(drafted, "draft")} ready` : "";
     }
   };
@@ -213,7 +213,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
                 {plainRow("Messages", plural(records.length || messages.length, "message"))}
                 {plainRow("CRM deal", first?.deal_external_id ?? "Not stated")}
               </div>
-              {gate("Approve & sync to CRM", "Filed to CRM · the thread is on the deal", data.crmNote, onSynced, synced)}
+              {gate("Approve & sync to CRM", "Filed to CRM · The thread is on the deal", data.crmNote, onSynced, synced)}
             </div>
           );
         }
@@ -285,7 +285,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
                 <StreamingText key={draftGen} size="lg" tokens={words(draftBody.replace(/\n/g, " ⏎ ")).map((t) => ({ text: t.text === "⏎" ? "\n" : t.text }))} onDone={() => setDraftStreamed(true)} />
               </div>
             )}
-            {gate(email ? "Approve reply" : "Approve follow-up", "Approved · nothing is sent from Slipstream", undefined, onDraftApproved, approved)}
+            {gate(email ? "Approve reply" : "Approve follow-up", "Approved · Nothing is sent from Slipstream", undefined, onDraftApproved, approved)}
           </div>
         );
       case "icp": {
@@ -294,7 +294,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
         return (
           <div>
             <p className="text-[15px] text-ink">{profile.summary}</p>
-            <p className="mt-1 text-[14px] text-soft">From {plural(wonDeals, "won deal")}{data.icpStatus ? ` · profile ${data.icpStatus}` : ""}</p>
+            <p className="mt-1 text-[14px] text-soft">From {plural(wonDeals, "won deal")}{data.icpStatus ? ` · Profile ${data.icpStatus}` : ""}</p>
             <ul className="mt-4 flex flex-col gap-1.5">
               {[["Industry", profile.industries.join(", ")], ["Size", `${profile.headcount_band} staff`], ["Buyer", profile.roles.join(", ")], ["Trigger", profile.triggers[0] ?? "None"]].map(([k, v]) => (
                 <li key={k} className="grid grid-cols-[20px_72px_minmax(0,1fr)] items-center gap-x-1 text-[14px]">

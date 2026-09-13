@@ -113,8 +113,8 @@ export function SettingsView({ crmConnected }: { crmConnected: boolean | null })
               {crmConnected === null
                 ? "Status unavailable, the API did not answer"
                 : crmConnected
-                  ? "Connected · nothing is written without your approval"
-                  : "Not connected on this deployment · approved fields stay in Slipstream"}
+                  ? "Connected · Nothing is written without your approval"
+                  : "Not connected on this deployment · Approved fields stay in Slipstream"}
             </span>
           </Row>
         </Card>

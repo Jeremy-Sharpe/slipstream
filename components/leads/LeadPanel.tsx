@@ -87,7 +87,7 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
           </div>
           <footer className="flex items-center justify-end gap-2 border-t border-line px-6 py-4">
             {l.status === "approved" ? (
-              <span className="mr-auto text-[13px] text-soft">Approved · nothing is sent</span>
+              <span className="mr-auto text-[13px] text-soft">Approved · Nothing is sent</span>
             ) : (
               <>
                 <Button onClick={onClose}>Skip</Button>
