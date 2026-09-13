@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, LineChart, Phone } from "lucide-react";
+import { BarChart3, House, LineChart, MessageSquare, Repeat } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { cn } from "./ui";
 
 const NAV = [
   { href: "/", label: "Home", icon: House },
-  { href: "/calls", label: "Calls", icon: Phone },
+  { href: "/conversations", label: "Conversations", icon: MessageSquare },
   { href: "/leads", label: "Leads", icon: LineChart },
+  { href: "/intelligence", label: "Intelligence", icon: BarChart3 },
+  { href: "/loop", label: "Revenue loop", icon: Repeat },
 ];
 
 export function Sidebar() {
