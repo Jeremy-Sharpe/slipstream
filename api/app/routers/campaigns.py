@@ -9,7 +9,7 @@ from uuid import UUID
 from fastapi import APIRouter, Header, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field, field_validator
 
-from app.routers import deliveries
+from app.services import deliveries
 from app.services.campaigns import (
     Campaign,
     CampaignClaim,
