@@ -8,7 +8,9 @@ Built for the Forward: AI in Business Hackathon, University of Melbourne, 12 to 
 
 Track: Track 1: Improve an Existing Business Capability (also entered in the Built With ElevenLabs special track)
 
-Production URL: https://slipstream-hackathon.vercel.app
+Production URL: https://slipstream.3-104-149-193.sslip.io
+
+Backup UI: https://slipstream-hackathon.vercel.app (Vercel quota-delayed; use the production URL above for the newest demo)
 
 Production API: https://slipstream-api.3-104-149-193.sslip.io
 
