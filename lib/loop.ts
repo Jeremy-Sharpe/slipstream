@@ -15,15 +15,24 @@ export type Beat = {
   title: string;
   /** What actually happened, from the API. "Not yet derived." when it has not. */
   what: string;
-  impact: string;
+  /** The artefact the beat produced, shown inside its card; null when it has not been derived. */
+  preview: BeatPreview | null;
   provenance: string;
   evidence: { label: string; href: string };
 };
 
+export type BeatPreview =
+  | { kind: "turns"; turns: { key: number; name: string; t: number; text: string }[] }
+  | { kind: "fields"; rows: { label: string; value: string; confidence: number }[] }
+  | { kind: "follow-up"; title: string; lines: string[] }
+  | { kind: "numbers"; items: { label: string; value: string }[] }
+  | { kind: "icp"; line: string; companies: string[] }
+  | { kind: "leads"; leads: { id: string; company: string; similarity: number }[] }
+  | { kind: "campaign"; line: string; state: string };
+
 export type Loop = {
-  runtime: { label: string; value: string }[];
-  runtimeNote: string;
-  runtimeCaveat: string | null;
+  /** One line of what the API reports about itself, for the footer. */
+  runtimeLine: string;
   beats: Beat[];
   value: { figure: string; note: string }[];
   demoHref: string;
@@ -48,13 +57,33 @@ const mmss = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.rou
 const label = (key: string) => key.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
 const range = (values: number[]) => (values.length ? `${Math.min(...values)}–${Math.max(...values)}` : null);
 
-function runtimeRows(readiness: ApiReadiness | null): { label: string; value: string }[] {
+function runtimeLine(readiness: ApiReadiness | null): string {
+  if (!readiness) return "Runtime unavailable.";
+  const flags = readiness.integrations;
   return [
-    { label: "API", value: readiness ? `${label(readiness.environment ?? "unknown")} · ${readiness.storage} storage` : UNKNOWN },
-    { label: "Reasoning", value: readiness?.reasoning_model ? `${readiness.reasoning_provider ?? "provider"} · ${readiness.reasoning_model}` : UNKNOWN },
-    { label: "Embeddings", value: readiness?.embedding_model ?? "None" },
-    { label: "Revision", value: readiness ? readiness.revision.slice(0, 7) : UNKNOWN },
-  ];
+    `${label(readiness.environment ?? "unknown")} API`,
+    readiness.reasoning_model ? `${readiness.reasoning_provider ?? "provider"} ${readiness.reasoning_model}` : `reasoning ${UNKNOWN.toLowerCase()}`,
+    readiness.embedding_model ?? "no embeddings",
+    `rev ${readiness.revision.slice(0, 7)}`,
+    `storage ${readiness.storage}`,
+    `Origami ${flags.origami ? "connected" : "not connected (leads labelled fictional)"}`,
+    `delivery ${flags.email_delivery ? "on" : "off, nothing is sent"}`,
+  ].join(" · ");
+}
+
+const speakerName = (speaker: string, rep: string | null) => (speaker === "rep" ? rep ?? "Rep" : speaker === "prospect" ? "Prospect" : speaker);
+const money = (n: number) => `$${n.toLocaleString("en-AU")}`;
+
+function fieldsPreview(extraction: ApiCallExtraction | null): BeatPreview | null {
+  if (!extraction) return null;
+  const { contact, deal } = extraction;
+  const rows: { label: string; value: string; confidence: number }[] = [];
+  if (contact.name?.value != null) {
+    rows.push({ label: "Contact", value: [contact.name.value, contact.title?.value].filter((v) => v != null).join(" · "), confidence: contact.name.confidence });
+  }
+  if (deal.stage?.value != null) rows.push({ label: "Deal stage", value: label(String(deal.stage.value)), confidence: deal.stage.confidence });
+  if (deal.amount?.value != null) rows.push({ label: "Value", value: typeof deal.amount.value === "number" ? money(deal.amount.value) : String(deal.amount.value), confidence: deal.amount.confidence });
+  return rows.length ? { kind: "fields", rows } : null;
 }
 
 function extractionBeat(extraction: ApiCallExtraction | null): string {
@@ -82,14 +111,10 @@ export function buildLoop(input: LoopInput): Loop {
   const icpVersion = evidence?.icp?.version ?? null;
   const live = icpVersion != null ? `Live · ICP v${icpVersion}` : "Live";
 
-  const integrations = readiness ? Object.entries(readiness.integrations) : [];
-  const runtimeNote = readiness
-    ? `Storage: ${readiness.storage} · ${integrations.map(([key, on]) => `${label(key)} ${on ? "on" : "off"}`).join(" · ")}`
-    : "Runtime unavailable.";
-  const caveats = [
-    readiness && !readiness.integrations.origami ? "leads are generated and labelled fictional" : null,
-    readiness && !readiness.integrations.email_delivery ? "nothing is sent" : null,
-  ].filter((item): item is string => item !== null);
+  const topLeads = leads ? [...leads].sort((a, b) => (b.similarity_score ?? 0) - (a.similarity_score ?? 0)).slice(0, 3) : [];
+  const queued = leads ? leads.filter((lead) => lead.status !== "rejected").length : 0;
+  const approved = leads ? leads.filter((lead) => lead.status === "approved").length : 0;
+  const sent = leads ? leads.filter((lead) => lead.status === "contacted").length : 0;
 
   const beats: Beat[] = [
     {
@@ -97,7 +122,9 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Listen",
       title: "One sales call",
       what: demoCall ? `${demoCall.subject}, ${demoCall.segments.length} turns${demoCall.duration_seconds ? `, ${mmss(demoCall.duration_seconds)}` : ""}.` : NOT_DERIVED,
-      impact: "The conversation becomes structured input instead of a note nobody reads.",
+      preview: demoCall?.segments.length
+        ? { kind: "turns", turns: demoCall.segments.slice(0, 2).map((segment) => ({ key: segment.sequence, name: speakerName(segment.speaker, demoCall.rep), t: Math.round(segment.start_ms / 1000), text: segment.body })) }
+        : null,
       provenance: "Recorded demo call",
       evidence: { label: "Transcript", href: demoHref },
     },
@@ -106,7 +133,7 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Remember",
       title: "CRM writes itself",
       what: extractionBeat(demoExtraction),
-      impact: "Every field points at the turn it came from, so the rep checks instead of types.",
+      preview: fieldsPreview(demoExtraction),
       provenance: "Recorded demo call",
       evidence: { label: "Extracted fields", href: demoHref },
     },
@@ -115,7 +142,13 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Respond",
       title: "Safe follow-up",
       what: draftBeat(demoExtraction),
-      impact: "The follow-up says only what the call supports, and goes out the same day.",
+      preview: demoExtraction
+        ? {
+            kind: "follow-up",
+            title: demoExtraction.next_step ? `Next step kept: ${demoExtraction.next_step.description}` : "No dated next step on the call",
+            lines: [`${demoExtraction.promises.length} promises checked · ${demoExtraction.grounding.dropped} dropped · ${demoExtraction.grounding.repaired} repaired`],
+          }
+        : null,
       provenance: "Recorded demo call",
       evidence: { label: "Follow-up draft", href: demoHref },
     },
@@ -126,7 +159,9 @@ export function buildLoop(input: LoopInput): Loop {
       what: source
         ? `${source.calls} calls and ${source.emails} ${source.emails === 1 ? "email" : "emails"} · ${wins ?? 0} wins · ${playbook ? `${playbook.patterns.length} ${playbook.patterns.length === 1 ? "pattern" : "patterns"}` : "patterns not yet derived"}.`
         : NOT_DERIVED,
-      impact: "What the best calls did differently is written down with the quotes that prove it.",
+      preview: source
+        ? { kind: "numbers", items: [{ label: "Calls analysed", value: String(source.calls) }, { label: "Won deals", value: String(wins ?? 0) }, { label: "Patterns", value: playbook ? String(playbook.patterns.length) : "None yet" }] }
+        : null,
       provenance: live,
       evidence: { label: "Intelligence", href: "/intelligence" },
     },
@@ -137,7 +172,13 @@ export function buildLoop(input: LoopInput): Loop {
       what: profile
         ? `${profile.industries.length} won industries · ${profile.headcount_band} staff · ${profile.roles.slice(0, 3).join(", ")}.`
         : NOT_DERIVED,
-      impact: "The ideal customer is derived from the deals that closed, not from a workshop.",
+      preview: profile
+        ? {
+            kind: "icp",
+            line: `${wins ?? 0} won deals → ${[profile.industries.slice(0, 2).join(", "), `${profile.headcount_band} staff`, profile.roles[0]].filter(Boolean).join(" · ")}`,
+            companies: (evidence?.icp?.source_deals ?? []).slice(0, 3).map((deal) => deal.company_name),
+          }
+        : null,
       provenance: live,
       evidence: { label: "ICP profile", href: "/intelligence" },
     },
@@ -148,7 +189,9 @@ export function buildLoop(input: LoopInput): Loop {
       what: evidence
         ? `Brief generated from the won-deal profile · ${evidence.lead_count} companies found${similarity ? ` · similarity ${similarity}` : ""}.`
         : NOT_DERIVED,
-      impact: "The next companies to call look like the last ones that said yes.",
+      preview: topLeads.length
+        ? { kind: "leads", leads: topLeads.map((lead) => ({ id: lead.id, company: lead.company_name, similarity: Math.round((lead.similarity_score ?? 0) * 100) })) }
+        : null,
       provenance: live,
       evidence: { label: "Leads", href: "/leads" },
     },
@@ -157,9 +200,11 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Execute",
       title: "Outreach stays controlled",
       what: leads
-        ? `${leads.filter((lead) => lead.status !== "rejected").length} prospects queued · ${leads.filter((lead) => lead.status === "approved").length} approved · ${leads.filter((lead) => lead.status === "contacted").length} sent.`
+        ? `${queued} prospects queued · ${approved} approved · ${sent} sent.`
         : NOT_DERIVED,
-      impact: "Outreach is drafted and queued for a person to approve. Nothing leaves without one.",
+      preview: leads
+        ? { kind: "campaign", line: `${queued} queued · ${approved} approved · ${sent} sent`, state: readiness?.integrations.email_delivery ? "Waiting for approval" : "Nothing is sent" }
+        : null,
       provenance: "Live guardrail",
       evidence: { label: "Leads", href: "/leads" },
     },
@@ -171,9 +216,7 @@ export function buildLoop(input: LoopInput): Loop {
   const replies = rateScenario({ volume: 200, baselineRate: 0.05, scenarioRate: 0.06 });
 
   return {
-    runtime: runtimeRows(readiness),
-    runtimeNote,
-    runtimeCaveat: caveats.length ? `${caveats.join(", ")}.` : null,
+    runtimeLine: runtimeLine(readiness),
     beats,
     value: [
       { figure: `${admin.baselineOutcomes} min a day`, note: "Illustrative: 10 minutes of CRM admin and follow-up per call, 8 calls a day." },

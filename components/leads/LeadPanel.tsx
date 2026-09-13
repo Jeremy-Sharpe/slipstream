@@ -38,6 +38,7 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
                 {l.synthetic && <Pill className="shrink-0">Fictional</Pill>}
               </div>
               <p className="truncate text-[13.5px] text-soft">{[l.contact, l.title, l.location].filter(Boolean).join(" · ")}</p>
+              {l.linkedinUrl && <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[13px] text-soft transition-colors duration-150 hover:text-ink">LinkedIn →</a>}
             </div>
             <button type="button" aria-label="Close" onClick={onClose} className="flex size-8 shrink-0 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><X className="size-4" strokeWidth={1.75} /></button>
           </header>

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, House, LineChart, MessageSquare, Repeat } from "lucide-react";
+import { BarChart3, House, LineChart, MessageSquare, Repeat, Settings } from "lucide-react";
+import { StartCoachDialog } from "@/components/coach/StartCoachDialog";
+import { company, user } from "@/lib/data/seller";
 import { Avatar } from "./Avatar";
 import { cn } from "./ui";
 
@@ -41,11 +43,24 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="mt-auto flex items-center gap-2.5 px-3">
-        <Avatar name="Maxim Durand" size={28} />
+      <div className="mt-4">
+        <StartCoachDialog />
+      </div>
+      <Link
+        href="/settings"
+        className={cn(
+          "mt-auto flex h-9 items-center gap-2.5 rounded-full px-3 text-[13.5px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
+          pathname.startsWith("/settings") ? "bg-surface text-ink" : "text-soft hover:bg-surface hover:text-ink",
+        )}
+      >
+        <Settings className="size-[17px]" strokeWidth={1.75} />
+        Settings
+      </Link>
+      <div className="mt-3 flex items-center gap-2.5 px-3">
+        <Avatar name={user.name} size={28} />
         <div className="min-w-0">
-          <p className="truncate text-[12.5px] font-semibold leading-tight text-ink">Maxim Durand</p>
-          <p className="truncate text-[11px] text-faint">Eleno</p>
+          <p className="truncate text-[12.5px] font-semibold leading-tight text-ink">{user.name}</p>
+          <p className="truncate text-[11px] text-faint">{company.name}</p>
         </div>
       </div>
     </aside>

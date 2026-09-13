@@ -22,6 +22,7 @@ from app.core.readiness import (
 from app.routers import (
     calls,
     campaigns,
+    coach_sessions,
     crm,
     deliveries,
     demo,
@@ -35,6 +36,7 @@ from app.routers import (
 )
 from app.services import deliveries as delivery_service
 from app.services.campaigns import create_campaign_store
+from app.services.coach_store import CoachStore
 from app.services.icp_leads_store import create_icp_leads_store
 from app.services.score import build_judge
 from app.ws import coach
@@ -59,6 +61,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         yield
     finally:
+        await asyncio.gather(
+            *list(app.state.coach_store.model_tasks.values()), return_exceptions=True
+        )
         close_judge = getattr(app.state.scorecard_judge, "close", None)
         if callable(close_judge):
             await asyncio.to_thread(close_judge)
@@ -99,6 +104,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.icp_leads_store = create_icp_leads_store(runtime_settings)
     app.state.supabase = create_supabase(runtime_settings)
     app.state.campaign_store = create_campaign_store(runtime_settings, app.state.supabase)
+    app.state.coach_store = CoachStore(app.state.supabase)
     app.state.call_store = {}
     app.state.extraction_store = {}
     app.state.draft_store = {}
@@ -189,4 +195,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(leads.router)
     app.include_router(leads.router, prefix="/api/v1")
     app.include_router(coach.router, prefix="/api/v1")
+    app.include_router(coach_sessions.router, prefix="/api/v1")
     return app

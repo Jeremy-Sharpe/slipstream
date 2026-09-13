@@ -1,4 +1,5 @@
 import type { EmailIngestInput } from "@/lib/api/slipstream";
+import { company, reps } from "@/lib/data/seller";
 
 export type DemoEmailThread = {
   id: string;
@@ -15,7 +16,7 @@ export type DemoEmailThread = {
   messages: EmailIngestInput[];
 };
 
-const mailbox = { name: "Sam Whitfield", email: "sam@eleno.example" };
+const mailbox = reps[0];
 
 export const emailThreads: DemoEmailThread[] = [
   {
@@ -28,11 +29,11 @@ export const emailThreads: DemoEmailThread[] = [
     location: "Kew, VIC",
     subject: "Source logging and next steps",
     provider: "demo",
-    mailboxExternalId: "eleno-sales",
+    mailboxExternalId: company.mailboxExternalId,
     threadExternalId: "fairfield-source-logging",
     messages: [
       {
-        provider: "demo", mailbox_external_id: "eleno-sales", mailbox,
+        provider: "demo", mailbox_external_id: company.mailboxExternalId, mailbox,
         source_external_id: "fairfield-001", thread_external_id: "fairfield-source-logging", direction: "inbound",
         sender: { name: "Olivia Hart", email: "olivia@fairfieldwealth.example" },
         recipients: [{ ...mailbox, kind: "to" }], subject: "Source logging and next steps",
@@ -40,7 +41,7 @@ export const emailThreads: DemoEmailThread[] = [
         occurred_at: "2026-09-12T00:12:00Z",
       },
       {
-        provider: "demo", mailbox_external_id: "eleno-sales", mailbox,
+        provider: "demo", mailbox_external_id: company.mailboxExternalId, mailbox,
         source_external_id: "fairfield-002", thread_external_id: "fairfield-source-logging", direction: "outbound",
         sender: mailbox,
         recipients: [{ name: "Olivia Hart", email: "olivia@fairfieldwealth.example", kind: "to" }], subject: "Re: Source logging and next steps",
@@ -48,7 +49,7 @@ export const emailThreads: DemoEmailThread[] = [
         occurred_at: "2026-09-12T00:41:00Z", in_reply_to: "fairfield-001",
       },
       {
-        provider: "demo", mailbox_external_id: "eleno-sales", mailbox,
+        provider: "demo", mailbox_external_id: company.mailboxExternalId, mailbox,
         source_external_id: "fairfield-003", thread_external_id: "fairfield-source-logging", direction: "inbound",
         sender: { name: "Olivia Hart", email: "olivia@fairfieldwealth.example" },
         recipients: [{ ...mailbox, kind: "to" }], subject: "Re: Source logging and next steps",
@@ -67,11 +68,11 @@ export const emailThreads: DemoEmailThread[] = [
     location: "Docklands, VIC",
     subject: "Sequencing before broker season",
     provider: "demo",
-    mailboxExternalId: "eleno-sales",
+    mailboxExternalId: company.mailboxExternalId,
     threadExternalId: "kestrel-broker-season",
     messages: [
       {
-        provider: "demo", mailbox_external_id: "eleno-sales", mailbox,
+        provider: "demo", mailbox_external_id: company.mailboxExternalId, mailbox,
         source_external_id: "kestrel-001", thread_external_id: "kestrel-broker-season", direction: "inbound",
         sender: { name: "Felix Morgan", email: "felix@kestrellending.example" },
         recipients: [{ ...mailbox, kind: "to" }], subject: "Sequencing before broker season",

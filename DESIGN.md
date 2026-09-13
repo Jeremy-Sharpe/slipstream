@@ -3,7 +3,7 @@
 Read this before touching any file. Every screen already follows it; new screens must too.
 
 ## The product in one line
-A sales call (or email thread) comes in → Slipstream writes it into the CRM, drafts the follow-up, learns the ideal customer from the deals that were won, and finds the next companies like them. Fictional seller: **Harbourline IT** (12-person Melbourne managed-IT provider selling to 15–120 staff Australian firms; reps Sam Whitfield and Jordan Lee). All data in `lib/` is mock but shaped like the real API (`docs/api-shapes.ts`).
+A sales call (or email thread) comes in → Slipstream writes it into the CRM, drafts the follow-up, learns the ideal customer from the deals that were won, and finds the next companies like them. Seller: **Eleno** (see `fixtures/seller.json`; reps Sam Whitfield and Jordan Lee). The signed-in sample user, the seller and its reps come from `lib/data/seller.json`; the Home placeholders from `lib/data/placeholders.ts`. Everything else on screen is an API response (`docs/api-shapes.ts`).
 
 ## Screens (nav: Home · Conversations · Leads · Intelligence · Revenue loop)
 - **Home `/`** — one input card (Upload file · Record · Paste transcript). Nothing else.

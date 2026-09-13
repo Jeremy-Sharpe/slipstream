@@ -47,16 +47,16 @@ export function SearchPane({ searches, leads, profile, wonDeals, selectedId, onS
   return (
     <div className="flex h-full min-h-0 flex-col">
       <section className="shrink-0 rounded-2xl bg-surface-2 p-4">
-        <label htmlFor="brief" className="block text-[12px] font-medium uppercase tracking-[0.06em] text-faint">Brief</label>
         <textarea
           id="brief"
+          aria-label="Brief"
           ref={areaRef}
           value={brief}
           placeholder={profile ? "" : "Deriving the brief from your won deals"}
           onChange={(e) => setBrief(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && e.metaKey) { e.preventDefault(); find(); } }}
           rows={1}
-          className="mt-2 w-full resize-none overflow-y-auto bg-transparent text-[14px] leading-[22px] text-ink outline-none placeholder:text-faint"
+          className="w-full resize-none overflow-y-auto bg-transparent text-[14px] leading-[22px] text-ink outline-none placeholder:text-faint"
         />
         <div className="mt-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
