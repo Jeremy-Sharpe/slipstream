@@ -62,13 +62,34 @@ export function IntelligenceView({ data }: { data: Intelligence }) {
   const profileData = useMemo(() => {
     if (!liveProfile) return data;
     const knownCalls = new Map(
-      data.icp.attributes.flatMap((attribute) => attribute.evidence).map((item) => [item.id, item]),
+      [
+        ...data.talkRatios.map((item) => item.call),
+        ...data.icp.attributes.flatMap((attribute) => attribute.evidence),
+      ].map((item) => [item.id, item]),
     );
-    const evidenceFor = (...terms: string[]) => liveProfile.evidence
-      .filter((item) => terms.some((term) => item.attribute.toLowerCase().includes(term)))
-      .flatMap((item) => item.deal_ids)
-      .map((id) => knownCalls.get(id))
-      .filter((item) => item != null);
+    const sourceCalls = new Map<string, Array<{ id: string; company: string }>>();
+    for (const deal of liveProfile.source_deals ?? []) {
+      sourceCalls.set(
+        deal.deal_id,
+        deal.call_ids.flatMap((callId) => {
+          const call = knownCalls.get(callId);
+          return call ? [{ ...call, company: deal.company_name }] : [];
+        }),
+      );
+    }
+    const evidenceFor = (...terms: string[]) => {
+      const legacyResponse = liveProfile.source_deals === undefined;
+      const calls = liveProfile.evidence
+        .filter((item) => terms.some((term) => item.attribute.toLowerCase().includes(term)))
+        .flatMap((item) => item.deal_ids)
+        .flatMap((id) => {
+          const resolved = sourceCalls.get(id);
+          if (resolved) return resolved;
+          const legacyCall = legacyResponse ? knownCalls.get(id) : undefined;
+          return legacyCall ? [legacyCall] : [];
+        });
+      return [...new Map(calls.map((call) => [call.id, call])).values()];
+    };
     return {
       ...data,
       icpVersion: liveProfile.version,

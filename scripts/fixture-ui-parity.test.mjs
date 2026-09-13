@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -62,4 +62,16 @@ test("voiced demo call UI stays aligned with its canonical fixture", async () =>
   assert.match(call.draft.body, new RegExp(`Hi ${script.prospect.name.split(" ")[0]},`));
   assert.match(call.draft.body, new RegExp(`${script.rep}$`));
   assert.doesNotMatch(JSON.stringify(call), /Dev Patel|Jordan Lee|dev@marlowefinch\.example/);
+});
+
+test("every fixture call id resolves to a generated conversation route", async () => {
+  const [calls, fixtureEntries] = await Promise.all([
+    readUiCalls(),
+    readdir(path.join(root, "fixtures/calls"), { withFileTypes: true }),
+  ]);
+  const routeIds = new Set(calls.map(({ id }) => id));
+  const fixtureIds = fixtureEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+
+  assert.ok(fixtureIds.length > 0);
+  assert.deepEqual(fixtureIds.filter((id) => !routeIds.has(id)), []);
 });
