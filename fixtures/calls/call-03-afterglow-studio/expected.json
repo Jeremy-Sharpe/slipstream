@@ -19,15 +19,15 @@
       "outcome": "lost"
     },
     "promises": [
-      "I will send some info this afternoon"
+      "I will send the scope and the numbers through this afternoon"
     ],
     "objections": [
       {
-        "text": "We are probably too small for a monthly managed service",
+        "text": "We do not have the volume to justify a build like that",
         "handling": "ignored"
       },
       {
-        "text": "That is more than double what we pay now",
+        "text": "That is more than we spent on our entire software stack last year",
         "handling": "ignored"
       }
     ],
@@ -37,8 +37,8 @@
     "discovery_questions": 0,
     "next_step_secured": false,
     "objection_handling": "ignored",
-    "rep_talk_ratio": 0.61,
-    "notes": "Jordan pitched the managed service before understanding the studio, ignored the size and price objections and left with no next step."
+    "rep_talk_ratio": 0.66,
+    "notes": "Jordan quoted a build price in the first sentence, never asked what the studio does, talked past the volume and cost objections and left with no next step."
   },
   "icp_signals": {
     "industry": "Creative branding studio",

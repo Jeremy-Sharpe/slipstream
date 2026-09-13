@@ -21,10 +21,12 @@ class Rep(BaseModel):
 
 class Pricing(BaseModel):
     currency: Literal["AUD"]
-    managed_services_per_seat_monthly_low: int
-    managed_services_per_seat_monthly_high: int
-    onboarding_project_aud_low: int
-    onboarding_project_aud_high: int
+    discovery_phase_aud_low: int
+    discovery_phase_aud_high: int
+    build_project_aud_low: int
+    build_project_aud_high: int
+    managed_optimisation_monthly_aud_low: int
+    managed_optimisation_monthly_aud_high: int
 
 
 class VoiceConfig(BaseModel):

@@ -1,4 +1,6 @@
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -23,6 +25,13 @@ from app.schemas.extraction import (
     StringField,
 )
 from app.services.extract import ground
+
+FIXTURE_DIR = (
+    Path(__file__).resolve().parents[2] / "fixtures" / "calls" / "call-13-marlowe-finch-demo"
+)
+SCRIPT = json.loads((FIXTURE_DIR / "script.json").read_text(encoding="utf-8"))
+LABELS = json.loads((FIXTURE_DIR / "expected.json").read_text(encoding="utf-8"))["extraction"]
+NEXT_STEP_QUOTE = "Send it by 5pm today, 11 September"
 
 
 def _assert_evidence_span_is_grounded(segments: dict[int, str], evidence: dict) -> None:
@@ -75,75 +84,82 @@ def _string(
     )
 
 
-def _minimal_payload(call: CallResponse) -> ExtractionPayload:
+def _locate(call: CallResponse | None, quote: str, default: int = 0) -> int:
+    """Sequence of the first segment carrying quote, or default when there is none."""
+    if call is not None:
+        for segment in call.segments:
+            if quote.casefold() in segment.body.casefold():
+                return segment.sequence
+    return default
+
+
+def _from_call(
+    call: CallResponse | None, value: str | None, quote: str
+) -> StringField:
+    return _string(value, _locate(call, quote), quote)
+
+
+def _minimal_payload(call: CallResponse | None) -> ExtractionPayload:
+    contact = LABELS["contact"]
+    company = LABELS["company"]
+    deal = LABELS["deal"]
+    next_step = LABELS["next_step"]
+    close_quote = "we will sign and start the discovery phase"
     return ExtractionPayload(
         contact=ContactFields(
-            name=_string("Donnie Azoff", 0, "Donnie Azoff"),
-            email=_string("donnie@marlowefinch.example", 26, "donnie@marlowefinch.example"),
+            name=_from_call(call, contact["name"], contact["name"]),
+            email=_from_call(call, contact["email"], contact["email"]),
             phone=_string(None),
-            title=_string("CFO", 1, "CFO"),
+            title=_from_call(call, contact["role"], contact["role"]),
         ),
         company=CompanyFields(
-            name=_string("Marlowe & Finch Accounting", 0, "Marlowe & Finch Accounting"),
+            name=_from_call(call, company["name"], company["name"]),
             domain=_string(None),
-            industry=_string("Accounting practice", 2, "accountants"),
+            industry=_from_call(call, company["industry"], "practice"),
             employee_count=IntegerField(
-                value=34,
+                value=company["headcount"],
                 confidence=0.9,
-                evidence=[_span(0, "thirty-four-person")],
+                evidence=[_span(_locate(call, "thirty-four-person"), "thirty-four-person")],
             ),
-            location=_string("Hawthorn, VIC", 0, "Hawthorn"),
+            location=_from_call(call, company["location"], "Hawthorn"),
         ),
         deal=DealFields(
             stage=StageField(
                 value="customer",
                 confidence=0.9,
-                evidence=[_span(25, "start with onboarding Monday")],
+                evidence=[_span(_locate(call, close_quote), close_quote)],
             ),
             outcome=OutcomeField(
-                value="won",
+                value=deal["outcome"],
                 confidence=0.9,
-                evidence=[_span(25, "we'll sign the 30-seat agreement")],
+                evidence=[_span(_locate(call, close_quote), close_quote)],
             ),
             amount=IntegerField(
-                value=48600,
+                value=deal["value_aud"],
                 confidence=0.9,
-                evidence=[_span(26, "$48,600")],
+                evidence=[_span(_locate(call, "$48,600"), "$48,600")],
             ),
         ),
         promises=[
-            _string(
-                "I will get a proposal in your inbox today",
-                22,
-                "I will get a proposal in your inbox today",
-            ),
-            _string(
-                "I will send the proposal and 30-seat agreement by 5pm today",
-                24,
-                "I will send the proposal and 30-seat agreement by 5pm today",
-            ),
+            _from_call(call, promise, promise) for promise in LABELS["promises"]
         ],
         objections=[
             Objection(
-                text="Price is my first concern",
-                handling="ignored",
+                text=objection["text"],
+                handling=objection["handling"],
                 confidence=0.9,
-                evidence=[_span(7, "Price is my first concern")],
+                evidence=[_span(_locate(call, objection["text"]), objection["text"])],
             )
+            for objection in LABELS["objections"][:1]
         ],
         next_step=NextStep(
-            description=(
-                "Jordan to send the proposal and 30-seat agreement by 5pm for Donnie "
-                "and the managing partner to review and sign."
-            ),
-            due_date="2026-09-11",
-            owner="Jordan Belfort",
+            description=next_step["description"],
+            due_date=next_step["due"],
+            owner=SCRIPT["rep"],
             confidence=0.9,
-            evidence=[
-                _span(25, "Fine. Send it by 5pm today, 11 September"),
-            ],
+            evidence=[_span(_locate(call, NEXT_STEP_QUOTE), NEXT_STEP_QUOTE)],
         ),
-        summary="Jordan agreed to send Donnie a proposal and agreement for review.",
+        summary="Jordan agreed to send Donnie a proposal and statement of work for review.",
     )
 
 
@@ -163,11 +179,11 @@ def test_demo_call_extracts_crm_fields_with_evidence(client: TestClient) -> None
     assert fetched.json() == first.json()
     extraction = first.json()
     assert extraction["source"] == "fixture_labels"
-    assert extraction["contact"]["name"]["value"] == "Donnie Azoff"
-    assert extraction["company"]["name"]["value"] == "Marlowe & Finch Accounting"
-    assert extraction["deal"]["outcome"]["value"] == "won"
-    assert extraction["deal"]["amount"]["value"] == 48600
-    assert extraction["next_step"]["due_date"] == "2026-09-11"
+    assert extraction["contact"]["name"]["value"] == LABELS["contact"]["name"]
+    assert extraction["company"]["name"]["value"] == LABELS["company"]["name"]
+    assert extraction["deal"]["outcome"]["value"] == LABELS["deal"]["outcome"]
+    assert extraction["deal"]["amount"]["value"] == LABELS["deal"]["value_aud"]
+    assert extraction["next_step"]["due_date"] == LABELS["next_step"]["due"]
     _assert_evidence_is_grounded(call, extraction)
 
 
@@ -379,10 +395,7 @@ def test_model_extraction_drops_unmatched_evidence_without_failing(
     assert response.status_code == 200
     extraction = response.json()
     assert extraction["contact"]["phone"] == {"value": None, "confidence": 0, "evidence": []}
-    assert [promise["value"] for promise in extraction["promises"]] == [
-        "I will get a proposal in your inbox today",
-        "I will send the proposal and 30-seat agreement by 5pm today",
-    ]
+    assert [promise["value"] for promise in extraction["promises"]] == LABELS["promises"]
     assert extraction["grounding"] == {"repaired": 0, "dropped": 2}
     _assert_evidence_is_grounded(call, extraction)
 

@@ -1,0 +1,50 @@
+{
+  "call_id": "call-06-meridian-mutual",
+  "extraction": {
+    "contact": {
+      "name": "Tom Reid",
+      "role": "Head of Member Services",
+      "email": "tom@meridianmutual.example",
+      "phone": "+61 3 7010 1106"
+    },
+    "company": {
+      "name": "Meridian Mutual",
+      "industry": "Regional mutual bank",
+      "headcount": 118,
+      "location": "Geelong, VIC"
+    },
+    "deal": {
+      "stage": "evaluation",
+      "value_aud": 174000,
+      "outcome": "stalled"
+    },
+    "promises": [
+      "I will send a decision brief and an indicative staging plan by the end of next week",
+      "I will include a one-page summary the chief operating officer can lift straight into the board pack"
+    ],
+    "objections": [
+      {
+        "text": "Budget sits with the board in the new financial year, not with me this month",
+        "handling": "partial"
+      }
+    ],
+    "next_step": {
+      "description": "Jordan to send a decision brief and staging plan for Tom to circulate to the chief operating officer and the board.",
+      "due": null
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 5,
+    "next_step_secured": false,
+    "objection_handling": "partial",
+    "rep_talk_ratio": 0.45,
+    "notes": "Jordan ran good discovery on the complaints queue but reframed the budget blocker into a document instead of reaching the chief operating officer, so the next step has no date."
+  },
+  "icp_signals": {
+    "industry": "Regional mutual bank",
+    "headcount_band": "81-120",
+    "role": "Head of Member Services",
+    "trigger": "Complaints volume up after a core banking migration"
+  },
+  "risk_flags": []
+}

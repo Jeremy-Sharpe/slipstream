@@ -19,7 +19,7 @@
       "outcome": "no_show"
     },
     "promises": [
-      "I will send a quick email with a couple of times to reschedule"
+      "I will send a short email with two times to reschedule"
     ],
     "objections": [],
     "next_step": null
@@ -28,8 +28,8 @@
     "discovery_questions": 0,
     "next_step_secured": false,
     "objection_handling": "none_raised",
-    "rep_talk_ratio": 0.65,
-    "notes": "Jordan reached reception instead of Ethan and left a brief reschedule message, so no sales conversation occurred."
+    "rep_talk_ratio": 0.63,
+    "notes": "Jordan reached reception rather than Ethan and left a brief reschedule message, so no sales conversation took place."
   },
   "icp_signals": {
     "industry": "Dental practice",

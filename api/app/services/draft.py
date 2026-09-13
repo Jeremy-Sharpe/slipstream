@@ -31,10 +31,11 @@ SAFE_GUARANTEE_PATTERN = re.compile(
     r"|\bwithout making guarantees?\b",
     re.IGNORECASE,
 )
-SAFE_INSURANCE_PATTERN = re.compile(
+HEADCOUNT_NOUN = r"headcount|staff|FTEs?|payroll|back[ -]office team"
+SAFE_SAVINGS_PATTERN = re.compile(
     r"\b(?:cannot|can not|can't|do not|don't)\b[^.!?]{0,80}"
     r"\b(?:promise|guarantee)\b[^.!?]{0,80}"
-    r"\b(?:insurance|insurer|premiums?|sav(?:e|es|ed|ing))\b",
+    rf"\b(?:{HEADCOUNT_NOUN}|sav(?:e|es|ed|ing))\b",
     re.IGNORECASE,
 )
 SAVINGS_VERB = (
@@ -43,18 +44,20 @@ SAVINGS_VERB = (
 )
 RISKY_DRAFT_PATTERNS = (
     re.compile(
-        r"\b(?:breach[ -]?proof|never breached|100% secure|"
-        r"(?:completely|fully|totally|perfectly) secure)\b",
+        r"\b(?:never hallucinat(?:e|es|ed)|zero hallucinations|100% accurate|"
+        r"breach[ -]?proof|100% secure|"
+        r"(?:completely|fully|totally|perfectly) (?:accurate|autonomous|compliant|secure))\b",
         re.IGNORECASE,
     ),
     re.compile(
-        rf"\b(?:insurance|insurer|premiums?)\b.*\b{SAVINGS_VERB}\b"
-        rf"|\b{SAVINGS_VERB}\b.*\b(?:insurance|insurer|premiums?)\b",
+        rf"\b(?:{HEADCOUNT_NOUN})\b.*\b{SAVINGS_VERB}\b"
+        rf"|\b{SAVINGS_VERB}\b.*\b(?:{HEADCOUNT_NOUN})\b",
         re.IGNORECASE,
     ),
     re.compile(
-        r"\b(?:competitor|incumbent|provider)\b.*"
-        r"\b(?:not(?:\s+\w+){0,4}\s+certified|uncertified|lose certification)\b",
+        r"\b(?:competitor|incumbent|provider|vendor)\b.*"
+        r"\b(?:not(?:\s+\w+){0,4}\s+certified|uncertified|lose (?:their )?certification|"
+        r"about to (?:lose|fold|shut)|going under)\b",
         re.IGNORECASE,
     ),
 )
@@ -67,7 +70,7 @@ def _contains_risky_claim(text: str) -> bool:
         flags=re.IGNORECASE,
     )
     for clause in clauses:
-        without_safe_qualifications = SAFE_INSURANCE_PATTERN.sub("", clause)
+        without_safe_qualifications = SAFE_SAVINGS_PATTERN.sub("", clause)
         without_safe_qualifications = SAFE_GUARANTEE_PATTERN.sub(
             "", without_safe_qualifications
         )

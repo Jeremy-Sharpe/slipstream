@@ -93,9 +93,24 @@ test("verdict parser accepts an explicit final score when a judge omits JSON", (
   assert.match(verdict.band, /prose fallback/);
 });
 
+test("verdict parser accepts a score reaffirmed after a late judge notification", () => {
+  const verdict = parseVerdict(
+    "The independent findings corroborate the review. This does not change my verdict — score stands at 8/8 as already reported.",
+    { id: "T2", points: 8 },
+  );
+
+  assert.equal(verdict.criterion, "T2");
+  assert.equal(verdict.score, 8);
+  assert.match(verdict.band, /reaffirmed score/);
+});
+
 test("verdict parser does not infer a score from ordinary assessment prose", () => {
   assert.equal(
     parseVerdict("T1 could move from 6/10 to 8/10 with a better demo.", { id: "T1", points: 10 }),
+    null,
+  );
+  assert.equal(
+    parseVerdict("The score could stand at 8/8 after the missing evidence is added.", { id: "T2", points: 8 }),
     null,
   );
 });

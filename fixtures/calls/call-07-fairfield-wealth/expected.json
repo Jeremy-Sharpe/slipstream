@@ -1,0 +1,50 @@
+{
+  "call_id": "call-07-fairfield-wealth",
+  "extraction": {
+    "contact": {
+      "name": "Olivia Hart",
+      "role": "Practice Manager",
+      "email": "olivia@fairfieldwealth.example",
+      "phone": "+61 3 7010 1107"
+    },
+    "company": {
+      "name": "Fairfield Wealth Partners",
+      "industry": "Financial planning and wealth advice firm",
+      "headcount": 37,
+      "location": "Kew, VIC"
+    },
+    "deal": {
+      "stage": "closed_won",
+      "value_aud": 59600,
+      "outcome": "won"
+    },
+    "promises": [
+      "I will send the scope, the source logging design and the fixed price by Wednesday",
+      "I will also include two worked examples built from your own template"
+    ],
+    "objections": [
+      {
+        "text": "Our compliance manager will want to see how it logs its sources before any adviser is allowed to use it",
+        "handling": "handled"
+      }
+    ],
+    "next_step": {
+      "description": "Sam to send scope, source logging design and fixed price, then walk both principals and the compliance manager through it.",
+      "due": "2026-09-10"
+    }
+  },
+  "scorecard": {
+    "discovery_questions": 6,
+    "next_step_secured": true,
+    "objection_handling": "handled",
+    "rep_talk_ratio": 0.48,
+    "notes": "Sam quantified the advice drafting backlog before pricing anything and answered the source logging gate with a concrete design, then booked a dated session with both principals and the compliance manager."
+  },
+  "icp_signals": {
+    "industry": "Financial planning and wealth advice firm",
+    "headcount_band": "25-80",
+    "role": "Practice Manager",
+    "trigger": "Statement of advice drafting backlog after acquiring a smaller practice"
+  },
+  "risk_flags": []
+}

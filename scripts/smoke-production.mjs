@@ -191,10 +191,10 @@ export async function runSmoke(rawOptions = {}) {
     assert(/^[0-9a-f]{7,40}$/i.test(expectedRevision), "expected revision must be a Git SHA");
   }
 
-  const campaignPage = await request(`${uiUrl}/campaigns`, {}, fetchImpl);
-  assert(campaignPage.response.status === 200, `campaign UI returned ${campaignPage.response.status}`);
-  assert(campaignPage.body.includes("Delivery execution"), "campaign UI is missing Delivery execution");
-  assert(campaignPage.body.includes("Hackathon demo — intentionally unsent"), "campaign UI is missing the paused demo campaign on first response");
+  const conversationsPage = await request(`${uiUrl}/conversations`, {}, fetchImpl);
+  assert(conversationsPage.response.status === 200, `conversations UI returned ${conversationsPage.response.status}`);
+  assert(conversationsPage.body.includes("Conversations"), "conversations UI is missing the Conversations shell");
+  assert(conversationsPage.body.includes("Revenue loop"), "conversations UI is missing the Revenue loop navigation");
 
   const readyResponse = await request(`${apiUrl}/ready`, {}, fetchImpl);
   assert(readyResponse.response.status === 200, `/ready returned ${readyResponse.response.status}`);

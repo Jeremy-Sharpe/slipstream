@@ -16,7 +16,7 @@ function json(value, status = 200) {
 
 function fixtureFetch(overrides = {}) {
   const paths = {
-    "https://ui.example/campaigns": new Response("<h2>Delivery execution</h2><p>Hackathon demo — intentionally unsent</p>"),
+    "https://ui.example/conversations": new Response("<nav>Conversations Leads Intelligence Revenue loop</nav>"),
     "https://api.example/ready": json({
       status: "ok",
       environment: "production",
@@ -145,16 +145,16 @@ test("rejects a stale API deployment", async () => {
   );
 });
 
-test("rejects a campaign UI without the live execution surface", async () => {
+test("rejects a UI without the conversations shell", async () => {
   await assert.rejects(
     runSmoke({
       uiUrl: "https://ui.example",
       apiUrl: "https://api.example",
       fetchImpl: fixtureFetch({
-        "https://ui.example/campaigns": new Response("<h2>Sequence workspace</h2>"),
+        "https://ui.example/conversations": new Response("<h2>Sequence workspace</h2>"),
       }),
     }),
-    /missing Delivery execution/,
+    /missing the Conversations shell/,
   );
 });
 

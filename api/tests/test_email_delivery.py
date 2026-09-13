@@ -10,8 +10,8 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
-from app.routers import deliveries
 from app.schemas.leads import LeadIn
+from app.services import deliveries
 from app.services.outreach import approve_outreach
 
 
@@ -312,7 +312,7 @@ def test_delivery_has_fail_fast_admission_and_overall_deadline(
     client.app.state.email_delivery_admission_slots = asyncio.Semaphore(0)
     busy = _deliver(client, draft["id"])
     client.app.state.email_delivery_admission_slots = asyncio.Semaphore(4)
-    monkeypatch.setattr("app.routers.deliveries.DELIVERY_TOTAL_SECONDS", 0.01)
+    monkeypatch.setattr("app.services.deliveries.DELIVERY_TOTAL_SECONDS", 0.01)
     timed_out = _deliver(client, draft["id"])
 
     assert busy.status_code == 429

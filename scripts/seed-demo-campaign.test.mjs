@@ -78,6 +78,13 @@ test("creates and pauses an unsent synthetic campaign", async () => {
   const protectedCalls = fixture.calls.filter(({ url }) => url.endsWith("/emails") || url.endsWith("/draft-reply") || url.endsWith("/campaigns") || url.endsWith("/pause"));
   assert.equal(protectedCalls.length, 4);
   assert.equal(protectedCalls.every(({ init }) => init.headers["x-slipstream-ingest-token"] === "a-secure-demo-token"), true);
+
+  const inbound = JSON.parse(fixture.calls.find(({ url }) => url.endsWith("/emails")).init.body);
+  assert.equal(inbound.sender.email, "donnie@marlowefinch.example");
+  assert.deepEqual(inbound.recipients.map((r) => r.email), ["jordan@eleno.example"]);
+  assert.equal(inbound.mailbox.email, "jordan@eleno.example");
+  assert.match(inbound.subject, /month-end reporting build/);
+  assert.match(inbound.body, /proposal and statement of work/);
 });
 
 test("requires exact configured-model provenance before creating a campaign", async () => {

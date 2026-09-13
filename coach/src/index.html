@@ -1,71 +1,120 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src https://slipstream-api.3-104-149-193.sslip.io wss://slipstream-api.3-104-149-193.sslip.io https://api.elevenlabs.io wss://api.elevenlabs.io; media-src 'self' blob:; worker-src 'self' blob:">
-  <title>Slipstream Coach</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <main class="shell">
-    <header class="titlebar">
-      <div class="brand"><span class="mark">S</span><span>Slipstream Coach</span></div>
-      <div class="window-actions">
-        <button id="minimize" aria-label="Minimize">—</button>
-        <button id="close" aria-label="Close">×</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src https: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*; object-src 'none'; base-uri 'none'"
+    />
+    <title>Slipstream Coach</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <span class="mark">S</span>
+      <div class="identity">
+        <strong id="customer">Call coach</strong
+        ><span id="status" role="status">Ready when you are</span>
       </div>
+      <button id="collapse" class="icon" aria-label="Collapse coach" title="Collapse">−</button>
     </header>
-
-    <section id="setup" class="setup">
-      <div class="eyebrow">Live deal copilot</div>
-      <h1>Listen better.<br>Move the deal forward.</h1>
-      <p class="lede">Transparent, consent-based coaching grounded in the words spoken on this call.</p>
-      <label>Mode
-        <select id="mode">
-          <option value="demo">Demo transcript — no keys needed</option>
-          <option value="microphone">Live rep microphone — ElevenLabs Scribe</option>
-        </select>
-      </label>
-      <div class="grid">
-        <label>Rep name<input id="rep" value="Sam Whitfield" maxlength="80"></label>
-        <label>Call subject<input id="subject" value="Harbourline discovery" maxlength="200"></label>
-      </div>
-      <label>Deal context<textarea id="context" rows="3" maxlength="2000">Professional services firm reviewing managed IT after a cyber-insurance renewal.</textarea></label>
-      <details>
-        <summary>Connection settings</summary>
-        <label>API URL<input id="api" value="https://slipstream-api.3-104-149-193.sslip.io"></label>
-        <label>Ingest token<input id="token" type="password" autocomplete="off" placeholder="Only when the server requires it"></label>
-      </details>
-      <button id="start" class="primary">Start coaching</button>
-      <p class="consent">Start only after everyone on the call has agreed to transcription and coaching.</p>
-    </section>
-
-    <section id="live" hidden>
-      <div class="livebar">
-        <span class="pulse"></span>
-        <div><strong>Coaching live</strong><small id="partial">Waiting for the next turn…</small></div>
-        <button id="stop" class="stop">End & save</button>
-      </div>
-      <section class="panel">
-        <div class="panel-title"><span>Next move</span><span class="source">Slipstream</span></div>
-        <ul id="suggestions" class="suggestions">
-          <li class="suggestion placeholder"><span class="category">listening</span><p>Coaching appears after the prospect shares a signal, objection, or next step.</p></li>
-        </ul>
+    <div id="error" role="alert" hidden></div>
+    <main id="main">
+      <section id="setup">
+        <div class="eyebrow">ALONGSIDE EVERY CALL</div>
+        <h1>A little help.<br />A better conversation.</h1>
+        <p>
+          Choose your customer in Slipstream, then open their coach. Your call stays in the app you
+          already use.
+        </p>
+        <label for="launch-link">Paste a coach launch link</label
+        ><input id="launch-link" placeholder="slipstream://coach?…" autocomplete="off" /><button
+          id="open"
+          class="primary"
+        >
+          Open customer
+        </button>
+        <details>
+          <summary>Connection settings</summary>
+          <label for="api">Coach API</label><input id="api" type="url" /><label for="web"
+            >Slipstream website</label
+          ><input id="web" type="url" /><button id="save-settings">Save connections</button>
+          <p class="small">
+            Use the same API as your Slipstream website. No provider keys are stored here.
+          </p>
+        </details>
       </section>
-      <section class="panel transcript-panel">
-        <div class="panel-title"><span>Committed transcript</span></div>
-        <ul id="turns" class="turns"></ul>
-        <div class="composer">
-          <select id="role" aria-label="Speaker"><option value="prospect">Prospect</option><option value="rep">You</option></select>
-          <textarea id="manual" rows="2" placeholder="Paste a turn for the credential-free demo…"></textarea>
-          <button id="send">Commit ⌘↵</button>
+      <section id="call" hidden>
+        <div id="brief" class="brief"></div>
+        <p id="server" class="small"></p>
+        <div class="meters">
+          <span
+            >Mic
+            <meter
+              id="mic-meter"
+              min="0"
+              max="0.15"
+              value="0"
+              aria-label="Microphone level"
+            ></meter></span
+          ><span
+            >Call
+            <meter
+              id="system-meter"
+              min="0"
+              max="0.15"
+              value="0"
+              aria-label="Call audio level"
+            ></meter
+          ></span>
         </div>
+        <div id="waiting" class="waiting">
+          <span class="eyebrow">READY TO LISTEN</span>
+          <p>
+            Start when you’re ready. The coach will use this customer’s context to suggest your next
+            question.
+          </p>
+        </div>
+        <div id="advice" aria-live="polite"></div>
+        <div id="upcoming"></div>
+        <details id="captured-section" hidden>
+          <summary>Captured commitments</summary>
+          <ul id="captured"></ul>
+        </details>
+        <details>
+          <summary>Conversation so far</summary>
+          <div id="transcript" class="transcript"></div>
+        </details>
       </section>
-    </section>
-
-    <footer><span id="status" role="status" aria-live="polite">Ready</span><span>Never hidden from screen sharing</span></footer>
-  </main>
-  <script src="../.build/renderer.js"></script>
-</body>
+      <section id="ended" hidden>
+        <span class="eyebrow">CALL FINISHED</span>
+        <h1>All caught up.</h1>
+        <p>Your conversation and coaching history are saved for review.</p>
+        <button id="review" class="primary">Review call</button
+        ><button id="export">Save recording to a file</button>
+        <p class="small" id="recording-note"></p>
+      </section>
+    </main>
+    <footer id="controls" hidden>
+      <div class="control-row">
+        <button id="start" class="primary">Start listening</button
+        ><button id="pause" hidden>Pause</button
+        ><button id="end" class="quiet" hidden>End call</button>
+      </div>
+      <div id="finish-options" hidden>
+        <button id="retry-finish">Retry recording upload</button
+        ><button id="finish-live">Save live transcript instead</button>
+      </div>
+      <div class="utility">
+        <button id="undo">Undo</button
+        ><span
+          ><button id="smaller" aria-label="Make overlay smaller">A−</button
+          ><button id="larger" aria-label="Make overlay larger">A+</button
+          ><button id="reset">Reset position</button></span
+        >
+      </div>
+    </footer>
+    <script type="module" src="renderer.mjs"></script>
+  </body>
 </html>

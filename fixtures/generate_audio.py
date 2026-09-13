@@ -24,6 +24,7 @@ API_URL = "https://api.elevenlabs.io/v1/text-to-dialogue"
 VOICE_LIST_URL = "https://api.elevenlabs.io/v1/voices"
 MAX_CHARS = 1800
 FFMPEG = "/opt/homebrew/bin/ffmpeg"
+FFPROBE = "/opt/homebrew/bin/ffprobe"
 
 
 @dataclass
@@ -160,6 +161,32 @@ def concatenate(chunks: list[Path], output: Path) -> None:
         concat_path.unlink(missing_ok=True)
 
 
+def measure_seconds(audio_path: Path, fallback: float) -> float:
+    """Measured mp3 length, falling back to the target when ffprobe is unavailable."""
+    try:
+        result = subprocess.run(
+            [
+                FFPROBE,
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                str(audio_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return fallback
+    try:
+        return float(result.stdout.strip())
+    except ValueError:
+        return fallback
+
+
 def update_audio_seconds(script_path: Path, seconds: float) -> None:
     data = json.loads(script_path.read_text(encoding="utf-8"))
     data["audio_seconds"] = round(seconds, 2)
@@ -218,7 +245,10 @@ def main() -> int:
             chunk_path.write_bytes(generate_chunk(chunk.inputs, key or ""))
             chunk_paths.append(chunk_path)
         concatenate(chunk_paths, output)
-        update_audio_seconds(call_dir / "script.json", float(script.duration_target_seconds))
+        update_audio_seconds(
+            call_dir / "script.json",
+            measure_seconds(output, float(script.duration_target_seconds)),
+        )
         print(f"{script.call_id}: wrote {output}")
     return 0
 

@@ -10,13 +10,13 @@ We built Slipstream: an AI sales layer that sits beside the CRM a team already h
 
 A call enters as audio. ElevenLabs separates the speakers. Slipstream fills the contact, company and deal, including objections and the agreed next step. Every field links to the exact words behind it.
 
-Then Slipstream drafts the follow-up from what was agreed. In our demo, the rep claims cyber insurance will be cut in half. Slipstream records that risk but refuses to repeat it. One click approves the safe draft. Approval never pretends the email was sent.
+Then Slipstream drafts the follow-up from what was agreed. In our demo, the rep claims the agents will halve the client’s back-office headcount. Slipstream records that risk but refuses to repeat it. One click approves the safe draft. Approval never pretends the email was sent.
 
-Approved drafts can enter a scheduled campaign. Sends are throttled, tracked and retried safely, and an operator can pause future work. The screen always shows the true delivery state.
+Approved drafts can enter a scheduled campaign. Sends are throttled, tracked and retried safely, and an operator can pause future work. The screen shows both the true delivery state and whether the targeting evidence is still current.
 
 That already saves over an hour a day for a rep doing eight calls. But the real difference is what happens across the whole team.
 
-Slipstream scores discovery, objection handling and next-step quality. Then it studies the deals that won and works out who this sales team should target. In our synthetic history, that means 25-to-80-person services firms with a compliance deadline and a decision-maker involved.
+Slipstream scores discovery, objection handling and next-step quality. Then it studies the deals that won and works out who this sales team should target. In our synthetic history, that means 25-to-80-person financial services, lending, property and auction businesses with a document-heavy workflow bottleneck and a decision-maker on the call.
 
 This is Revenue DNA. When a deal wins or loses, Slipstream detects that the old target is stale. It pauses new sourcing, relearns the profile and flags leads that need a new score. The target learns from outcomes instead of gathering dust in a slide deck.
 
