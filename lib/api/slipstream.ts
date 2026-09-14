@@ -1,4 +1,5 @@
 import { apiUrl, fetchWithRetry, serverAuthHeaders } from "@/lib/api/client";
+import { user } from "@/lib/data/seller";
 
 export { API_BASE_URL } from "@/lib/api/client";
 
@@ -748,7 +749,7 @@ export async function getLeadSourceStatus(jobId: string, signal?: AbortSignal): 
 export async function draftLeadOutreach(leadId: string, signal?: AbortSignal): Promise<ApiOutreachDraft> {
   return parseOutreachDraft(await request<unknown>(`/leads/${encodeURIComponent(leadId)}/outreach`, {
     method: "POST",
-    body: JSON.stringify({ rep_name: "Sam" }),
+    body: JSON.stringify({ rep_name: user.name }),
     signal,
   }));
 }
