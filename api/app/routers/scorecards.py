@@ -141,6 +141,9 @@ def _save_memory_scorecard(request: Request, scorecard: Scorecard) -> Scorecard:
 
 def _score_durable(client: Any, submitted: Transcript, judge, started_at: datetime):
     canonical, revision = load_scorecard_source(client, submitted.call_id)
+    if canonical.outcome is None and submitted.outcome is not None:
+        # No linked deal carries an outcome, so the caller's label is the only one.
+        canonical = canonical.model_copy(update={"outcome": submitted.outcome})
     if (
         submitted.rep != canonical.rep
         or submitted.outcome != canonical.outcome

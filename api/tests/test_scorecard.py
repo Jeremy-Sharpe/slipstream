@@ -1607,3 +1607,64 @@ def test_wrapped_judge_quote_is_stored_as_the_evidence_text() -> None:
     )
     kept = _valid_patterns([pattern], [scorecard])
     assert [item.quotes for item in kept] == [[evidence]]
+
+
+def test_durable_scoring_adopts_submitted_outcome_when_no_deal_carries_one() -> None:
+    from app.routers.scorecards import _score_durable
+    from app.services.scorecard_store import ScorecardStaleError
+
+    submitted = Transcript(
+        call_id="external-call",
+        request_id="request-durable",
+        rep="Sam Whitfield",
+        outcome="won",
+        turns=[
+            TranscriptTurn(speaker="rep", name="Sam Whitfield", text="What changed?"),
+            TranscriptTurn(speaker="prospect", name="Maya Chen", text="The audit is due."),
+        ],
+    )
+
+    unlabelled = _FakeUnlabelledCanonicalClient()
+    scorecard, _ = _score_durable(unlabelled, submitted, FakeJudge(), datetime.now(UTC))
+
+    assert unlabelled.stored is not None
+    assert unlabelled.stored["p_scorecard"]["outcome"] == "won"
+    assert scorecard.outcome == "won"
+
+    labelled_lost = _FakeUnlabelledCanonicalClient(outcome="lost")
+    try:
+        _score_durable(labelled_lost, submitted, FakeJudge(), datetime.now(UTC))
+    except ScorecardStaleError:
+        pass
+    else:
+        raise AssertionError("a deal-labelled outcome must still reject a conflicting submission")
+
+
+class _FakeUnlabelledCanonicalClient:
+    """Canonical source without a linked deal: rep and segments match, outcome is null."""
+
+    def __init__(self, outcome: str | None = None) -> None:
+        self.outcome = outcome
+        self.stored: dict[str, Any] | None = None
+
+    def rpc(self, name: str, payload: dict[str, Any]):
+        if name == "read_scorecard_source":
+            return _StaticRpcCall(
+                {
+                    "id": "00000000-0000-4000-8000-000000000010",
+                    "processing_status": "ready",
+                    "rep": "Sam Whitfield",
+                    "outcome": self.outcome,
+                    "source_revision": "canonical-revision",
+                    "segments": [
+                        {"sequence": 0, "speaker": "Sam Whitfield", "body": "What changed?"},
+                        {"sequence": 1, "speaker": "Maya Chen", "body": "The audit is due."},
+                    ],
+                }
+            )
+        assert name == "store_conversation_scorecard"
+        self.stored = payload
+        return _StaticRpcCall([{"scorecard": payload["p_scorecard"]}])
+
+    def table(self, name: str) -> _FakeCanonicalQuery:
+        return _FakeCanonicalQuery(name)

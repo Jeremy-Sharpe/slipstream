@@ -196,3 +196,74 @@ def test_paid_transcription_requires_token_and_is_idempotent(monkeypatch) -> Non
     assert second.status_code == 200
     assert first.json()["id"] == second.json()["id"]
     assert provider_calls == 1
+
+
+def test_supabase_persist_keeps_the_deterministic_call_id() -> None:
+    from uuid import NAMESPACE_URL, uuid5
+
+    transcript = Transcript(
+        text="Rep: Hello",
+        language_code="en",
+        segments=[
+            TranscriptSegment(sequence=0, speaker="Rep", body="Hello", start_ms=0, end_ms=500)
+        ],
+        provider="fixture",
+    )
+    record = calls._record(
+        source_external_id="call-13-marlowe-finch-demo",
+        subject="Demo",
+        occurred_at=datetime(2026, 9, 11, tzinfo=UTC),
+        transcript=transcript,
+        fixture=True,
+    )
+    client = _FakeConversationsClient()
+
+    persisted = calls._persist_to_supabase(client, record)
+
+    expected = uuid5(NAMESPACE_URL, "slipstream:call-13-marlowe-finch-demo")
+    assert record.id == expected
+    assert client.inserted["conversations"][0]["id"] == str(expected)
+    assert persisted.id == expected
+    assert client.inserted["transcript_segments"][0]["conversation_id"] == str(expected)
+
+
+class _FakeConversationsClient:
+    """Empty Supabase: every lookup misses and inserts echo the row they were given."""
+
+    def __init__(self) -> None:
+        self.inserted: dict[str, list[dict]] = {}
+
+    def table(self, name: str) -> "_FakeConversationsQuery":
+        return _FakeConversationsQuery(self, name)
+
+
+class _FakeConversationsQuery:
+    def __init__(self, owner: _FakeConversationsClient, name: str) -> None:
+        self.owner = owner
+        self.name = name
+        self.result: list[dict] = []
+
+    def select(self, _: str) -> "_FakeConversationsQuery":
+        return self
+
+    def eq(self, *_: object) -> "_FakeConversationsQuery":
+        return self
+
+    def limit(self, _: int) -> "_FakeConversationsQuery":
+        return self
+
+    def insert(self, payload: dict | list[dict]) -> "_FakeConversationsQuery":
+        rows = payload if isinstance(payload, list) else [payload]
+        self.owner.inserted.setdefault(self.name, []).extend(rows)
+        self.result = [{"id": row["id"]} for row in rows if "id" in row]
+        return self
+
+    def update(self, _: dict) -> "_FakeConversationsQuery":
+        return self
+
+    def execute(self) -> "_FakeConversationsQuery":
+        return self
+
+    @property
+    def data(self) -> list[dict]:
+        return self.result

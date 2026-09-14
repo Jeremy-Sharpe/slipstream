@@ -1,76 +1,92 @@
 # Slipstream live demo script
 
-Target: 3 minutes 30 seconds. One presenter talks; one teammate keeps the API fallback terminal open. Use the production UI at https://slipstream.3-104-149-193.sslip.io and the production API at https://slipstream-api.3-104-149-193.sslip.io. Do not narrate setup, architecture, or model names unless a judge asks.
+Target: 3 minutes 30 seconds, one presenter driving, one teammate on the clock with the terminal fallback open. Use the production UI at https://slipstream.3-104-149-193.sslip.io and the production API at https://slipstream-api.3-104-149-193.sslip.io. You are signed in as Liam Albrecht, the sample sales lead at Eleno; the reps on the calls are Sam Whitfield and Jordan Lee, and the demo call is Jordan Belfort. Do not narrate setup, architecture or model names unless a judge asks.
+
+The whole loop in one sentence, for you not the judges: one call becomes CRM fields, a score, a safe follow-up, a refreshed ideal customer profile, ten look-alike leads and three outreach drafts, and every one of those links back to the words on the call.
 
 ## Before walking on stage
 
-1. Open the production UI on Revenue Loop (`/demo`). Open Maya Chen at Northstar Labs, Intelligence and Campaigns in three background tabs. Use Campaigns only if its “Delivery execution” card is visible on the production URL; otherwise skip that ten-second beat rather than switching to a preview deployment on stage.
-2. In a terminal, run `curl -fsS https://slipstream-api.3-104-149-193.sslip.io/ready | jq`. Confirm `status` is `ok` and keep the terminal open.
-3. Confirm Revenue Loop says `Production API · Connected`, shows an exact revision, and reports the live cohort and paused campaign. Confirm the Maya Chen conversation detail, CRM write-back card and follow-up draft are visible in the background tab without scrolling.
-4. Use browser zoom that makes the main card and evidence visible from the back of the room. Close notifications and unrelated tabs.
-5. Decide roles: presenter drives; a second teammate watches the clock and takes over only if asked.
+1. Open the production UI on Home. Confirm the sidebar shows Liam Albrecht · Eleno at the bottom and the call picker lists Marlowe & Finch Accounting · Donnie Azoff with a play button.
+2. In a terminal, run `curl -fsS https://slipstream-api.3-104-149-193.sslip.io/ready | jq`. Confirm `status` is `ok`, `storage` is `supabase`, and `openrouter`, `embeddings` and `elevenlabs` are true. Keep the terminal open.
+3. Open Intelligence in a second tab. If the banner says "12 calls are still unscored and there is no playbook yet", click `Score 12 calls` now and wait for it to finish (one to two minutes, twelve model calls). Never do this on stage. When it is done the page shows "What winning calls did", "Why they bought" and "Coaching focus" under the ideal customer card.
+4. Open Revenue loop in a third tab. Beats 01 to 03 must show the Marlowe & Finch call, not "Not yet derived". If they say "Not yet derived", go to Home and click Marlowe & Finch Accounting once so the call exists, then reload Revenue loop.
+5. Open Leads in a fourth tab. Confirm the grid on the right lists ten companies tagged Fictional.
+6. Click the play button beside Marlowe & Finch Accounting on Home and confirm the room can hear it. Stop it.
+7. Rehearsals leave a finished run behind. That is fine: clicking the call on Home starts a fresh run, and the call page has `Re-run` at the top right.
+8. Set browser zoom so the right-hand "What Slipstream did" column is readable from the back of the room. Close notifications and unrelated tabs.
 
-## 0:00–0:35 — Show the whole loop in one sentence
+## 0:00 to 0:30, Home: the call is the input
 
-Action: Start on Revenue Loop. Click `Play guided loop` as you deliver the first sentence. The recorded Maya example and live proof are labelled separately. Pause on any beat you want to explain, or use Previous/Next. Then select the first beat and click `Open transcript` into Maya Chen; your selected beat persists when you return to the original Revenue Loop tab.
+Action: Stay on Home. Point at the heading "What happened on the call?" and the five-way control: Pick a call, Upload file, Record, Paste transcript, Paste an email. Click the play button beside Marlowe & Finch Accounting · Donnie Azoff, let eight to ten seconds of the ElevenLabs-voiced call play, then click the same button to stop it.
 
-Say: “Most sales AI ends when the call summary appears. Ours starts there. One buyer conversation writes the CRM, creates the safe follow-up, teaches the team who wins, and changes who they call next. This is the entire revenue loop, connected.”
+Say: "Small sales teams own a CRM, but the truth is still stuck in phone calls. After every call there is ten minutes of admin and a follow-up to write, so it gets skipped and the pipeline turns into fiction. Slipstream starts from the call itself. Here is one: Jordan, one of our reps, calling the CFO of a thirty-four-person accounting practice."
 
-Point to the labelled capacity strip and add: “On a deliberately conservative demo assumption—ten minutes of admin, eight calls a day—that returns 6.7 hours, or about five hundred dollars of rep capacity, every week. We label the assumptions because customer rollout is where we replace them with a measured baseline.”
+Action: Click the row Marlowe & Finch Accounting · Donnie Azoff. Home fades and the call page opens.
 
-Action: On Maya's conversation, click one evidence/confidence marker, point to “Approve & sync changes,” then point to “Approve.” Do not approve yet.
+## 0:30 to 1:20, the CRM writes itself
 
-Fallback: If the page does not load, use the pre-opened tab. If both fail, begin with the terminal fallback and say, “I’ll show the same pipeline directly through our production API.”
+What you see: the header reads Donnie Azoff · Marlowe & Finch Accounting, an Open badge, Jordan Belfort, 11 Sept · 09:00 · 5:34, an audio scrubber and `Re-run`. The transcript runs down the left with timestamps. On the right, under "What Slipstream did", the first step reads "Transcribed 5:34 · 30 turns · talk ratio 65%", and the second reads "Extracted 6 fields · Waiting for your approval" with the fields open: Contact Donnie Azoff · CFO, Company Marlowe & Finch Accounting · 34 staff · Hawthorn, Deal stage Discovery, Value $48,600, Next step "Send proposal and statement of work by 5pm on 11 September", Promises, and one Objection about price marked Partial. Each row carries a timestamp and a confidence.
 
-## 0:35–1:20 — A difficult call becomes structured evidence
+Action: Hover the Value row so the transcript highlights the turn at 5:01, then click it so the transcript jumps there. Do the same with the Next step row (4:16).
 
-Action: Stay on Maya Chen. Open the transcript and scroll once so speaker turns and timestamps are obvious. If audio playback is present, play 8–12 seconds and stop it.
+Say: "Scribe separated the speakers. Then Slipstream pulled out the contact, the company, the deal value, the promises Jordan made and the next step he agreed. Every field carries a confidence and points at the exact words behind it. A value whose quote cannot be found in the transcript is dropped rather than shown."
 
-Say: “The input is the conversation, not a form. Scribe separates the speakers. Slipstream extracts the contact, company, deal, promises, objections and next step. Every confidence value opens back to either an exact transcript span or, for pre-labelled fixture metadata such as caller ID, an explicitly marked fixture source.”
+Action: Click `Approve & sync to CRM`. The step collapses to "Extracted 6 fields · Synced" and the note "CRM record written; external webhook not configured on this deployment" appears.
 
-Action: Click the evidence behind Maya’s next step, the research note drafting pilot walkthrough on Thursday 3 September, and show that it jumps to its source. Point briefly to the objection or review panel.
+Say: "Nothing is written until a person approves it. The records are HubSpot-shaped company, contact and deal objects; a production connector swaps our tables for the CRM the team already has."
 
-Fallback: If the action fails, use the terminal fallback below. It runs the newest voiced fixture and should return Donnie Azoff, Marlowe & Finch, outcome `won`, amount `48600`, two promises and two objections. Explain that the fallback fixture differs from Maya but exercises the same production path.
+If asked why the deal stage says Discovery when the call was won: Donnie said "review it, not sign it". The model reads what was said; the outcome label in our fixtures is what happened afterwards.
 
-## 1:20–2:10 — CRM and follow-up write themselves safely
+## 1:20 to 2:10, the call is scored and the follow-up drafts itself
 
-Action: Show the CRM preview beside Maya’s transcript. Point to company, contact and deal as three separate records, then open the email draft.
+What you see: "Scored the call · 1 discovery question · next step secured · talk ratio 65%" with four rows (Discovery questions before pricing, Next step secured, Objection handling, Rep talk ratio), a short narrative and a "Went well" list. Above the timeline a "Conversation intelligence" box streams a two-line summary with the sticking point and the next step, and offers a "Why did this one close?" chip. Below the score, "Follow-up drafted · Waiting for your approval" shows the subject "Proposal and SOW for Marlowe & Finch Accounting" and the body typing in.
 
-Say: “Those are HubSpot-shaped records, not a blob of notes. With Supabase connected, the same action idempotently upserts the company, contact and deal without erasing stronger fields already in the CRM. Now the follow-up drafts itself from grounded facts. Notice what is missing: Jordan claimed the agents would halve your back-office headcount, but that risky claim is not repeated here. The draft includes only the agreed proposal, commercial terms and next step.”
+Action: Point at "1 discovery question" and "talk ratio 65%". Do not expand the "To improve" list.
 
-Action: Click Approve. Show status change from Draft to Approved and the approval timestamp.
+Say: "This is coaching, not a summary. Jordan pitched a price in his third sentence, talked for two thirds of the call, and still got a dated next step. The team sees that pattern across every call, not just this one."
 
-Say: “Approval and delivery are separate, so this screen never claims an email went out when it did not. The production Resend adapter sends only this exact approved copy, behind a server token and a content-bound idempotency key. We deliberately left delivery unconfigured, so no judge gets a surprise email.”
+Action: Scroll to the draft. Point at the body: it opens with the proposal by 5pm on 11 September, lists the two-week discovery phase, six-week build and IP transfer, and acknowledges the price concern.
 
-Action: If the production Campaigns tab has the live “Delivery execution” card, switch to it and point first to the live `Revenue DNA spend gate`: it should show the exact current ICP version and cohort fingerprint beside outreach execution. Then point to the `Live API` badge, the paused “Hackathon demo — intentionally unsent” record, its zero sent count, and the labelled evaluation sequence below. Do not resume or send the campaign on stage.
+Say: "Now the follow-up. On the call Jordan promised the agents would never hallucinate and that Donnie would halve his back-office headcount by Christmas. Neither claim is in this email. The draft only carries what was actually agreed. It is editable, and approval never pretends it was sent."
 
-Say: “The same targeting fingerprint now follows the workflow into Campaigns. If an outcome changes, new sourcing is blocked before it can waste a credit. Below it is a real campaign record, not a hard-coded card. The same synthetic account produced a genuine OpenRouter call extraction and follow-up draft; the campaign recipient comes from the validated sender on its email thread. That approved reply was enrolled by exact ID, scheduled for 2099, then paused through the authenticated server action. It shows one queued, zero sent and zero attempts. With Resend configured, a Railway worker would claim eight at a time and separate confirmed sends, safe retries, failures and anything needing reconciliation. We deliberately stopped before delivery rather than fake a success.”
+Action: Click `Approve follow-up`. The step reads "Follow-up approved · nothing is sent" and the badge "Approved · nothing is sent from Slipstream" appears.
 
-Fallback: Use the API commands below, then show the returned `status: approved`, approver, approval timestamp, and empty `sent_at`.
+## 2:10 to 2:50, the last deal changes the next call
 
-## 2:10–2:55 — The team learns who to call next
+What you see: three more steps run without a click. "ICP updated · From 12 won deals" opens with a paragraph starting "Observed win industries are Quantitative investment research boutique, Non-bank commercial lender, Financial planning and wealth advice firm..." and four rows: Industry, Size 25-80 staff, Buyer (Managing Partner, Head of Credit Operations, Practice Manager, Director, General Manager) and Trigger. Then "Found 10 leads like the ones you closed", then "Outreach drafted · 3 drafts ready" with a link "Review in Leads →".
 
-Action: Open the call scorecard, point to its `Labelled evaluation` badge, then switch to Intelligence. Point to the live OpenRouter model, the mixed call-and-email cohort, the derived ICP and one won-deal evidence item. In Revenue DNA, click `New deal won` once: the explicitly non-mutating shock test shows the current ICP becoming stale, affected leads queued for re-score, provider spend paused and the next profile version. Reset it, then open Leads and click `Run search`: unchanged real evidence reuses the current profile. Refresh Leads after it finishes and visibly confirm that the screen renders ten fictional prospects with `.example` domains and no deliverable contact details.
+Say: "Here is the part nobody else does. Slipstream takes the twelve deals this team has won, works out who actually buys, and turns that into a search. Financial services, lending, property and auctions, twenty-five to eighty staff, a decision maker on the call and a document-heavy bottleneck. When a deal wins or loses, that profile goes stale and gets relearned. The target learns from outcomes instead of living in a slide deck."
 
-Say: “A saved transcript is not coaching. This scorecard is labelled evaluation data, while the ICP is a live OpenRouter artifact grounded in calls and emails. The shock test is local and leaves production unchanged, but it makes the mechanism visible: a new outcome invalidates the old target, marks leads for a new score and pauses provider spend until the next profile is learned. These ten companies are openly fictional proof: reserved domains, no deliverable contacts, and no paid data account. The point is the closed-loop contract, not a fake enrichment claim.”
+Action: Click `Review in Leads →`.
 
-Action: Point to one winning signal and one stall signal. Avoid reading every metric.
+## 2:50 to 3:15, Leads
 
-Configured-key option: If `/ready` reports a scorecard integration before the demo, run the live call pipeline, click `Generate live scorecard`, and show the `Live · model` badge after it completes. Generate a live playbook only if Intelligence has already found a revision-pinned cohort containing both won and not-won calls. Never wait for setup or install a key on stage.
+What you see: a Brief card on the left ("Find organisations matching these won-deal industries..."), a counter "Find 10 companies" with a `Find leads` button, and "From 12 won deals". On the right, "Preview · 10 leads" with a grid: Pinnacle Stockbroking, Southbank Quant Research, Harbourview Wealth Advisors, UrbanEdge Property, Marrick Capital Partners, Brickfield Debt Fund and so on, each tagged Fictional, with Contact, Similarity, Trigger, Location, Status and Draft columns.
 
-Fallback: Use the labelled scorecard already rendered in Conversations, then show the preloaded Intelligence tab. If Intelligence is unavailable, say, “The paid sourcing key is not part of the fallback; the terminal path proved the upstream call record that feeds it,” and move on without waiting.
+Action: Click the first row. The lead panel opens with "Why this matched", the Similarity score, the Outreach draft, and `Approve` and `Skip`. Do not click `Find leads` on stage; it starts a new search.
 
-## 2:55–3:25 — Close on value and proof
+Say: "These ten companies are openly fictional: reserved dot-example domains, no deliverable contact details, no paid data subscription. What matters is the contract. The same brief plugs into a real company-data provider, the scoring is against the deals that won, and every outreach draft waits for approval and is never sent from here."
 
-Action: Return to Revenue Loop and leave all seven beats completed. Point to the two pipeline scenarios below the rep-capacity strip.
+Action: Press Escape to close the panel.
 
-Say: “A small sales team currently buys a recorder, CRM automation, call coaching and lead sourcing separately—and still has to keep them in sync. Slipstream makes the call the source of truth. One conversation updates the CRM, creates the safe follow-up, teaches the team who converts, and finds the next person to call. These scenarios are not forecasts: they show exactly what one prevented miss or one point of better replies would mean, and a pilot replaces our inputs with the customer's baseline. The production API you just saw is running on the exact Git revision in GitHub. That is the sales layer we would install beside the CRM a team already has.”
+## 3:15 to 3:30, close on Revenue loop
+
+Action: Switch to the Revenue loop tab. It shows seven beats, Listen, Remember, Respond, Learn, Focus, Find and Execute, each with the evidence from the run you just did, and the line "In numbers, illustrative · 80 min a day · +1 deal a month · +2 replies".
+
+Say: "One loop. The conversation becomes CRM truth, the outcome updates the ideal customer, and the ideal customer builds the next pipeline. Eighty minutes a day back for a rep doing eight calls, and every number on this page is labelled illustrative until a customer's own baseline replaces it. The path to production is direct: Aircall or Twilio for recordings, HubSpot for the writes, Gmail for delivery. The intelligence does not change."
 
 Stop. Do not fill spare time. Invite questions.
 
+## If something breaks
+
+- The call page stalls on a step: click `Re-run` at the top right. A failed step shows `Try again` under it.
+- Home will not load the call list: use the Conversations tab, which lists every call and email with its run state, and open Marlowe & Finch Accounting from there.
+- The API is unreachable: run the terminal fallback below and say "I will show the same pipeline directly through our production API." Do not disguise a fallback as the UI.
+- Intelligence shows "Not yet derived" under the ideal customer card: the scoring in step 3 of the checklist was skipped. Talk over the ideal customer card instead and move on.
+
 ## Terminal fallback
 
-Run these before the presentation once so DNS, TLS and `jq` are warm. Run them again only if the UI action fails.
+Run these once before the presentation so DNS, TLS and `jq` are warm. Run them again only if the UI action fails.
 
 ```bash
 API=https://slipstream-api.3-104-149-193.sslip.io/api/v1
@@ -78,7 +94,7 @@ curl -fsS https://slipstream-api.3-104-149-193.sslip.io/ready | jq
 
 CALL_ID=$(curl -fsS -X POST "$API/calls/fixtures/call-13-marlowe-finch-demo/ingest" | jq -r .id)
 curl -fsS -X POST "$API/calls/$CALL_ID/extract" \
-  | jq '{contact:.contact.name.value,company:.company.name.value,outcome:.deal.outcome.value,amount:.deal.amount.value,promises:(.promises|length),objections:(.objections|length),next_step:.next_step.description}'
+  | jq '{contact:.contact.name.value,company:.company.name.value,stage:.deal.stage.value,amount:.deal.amount.value,promises:(.promises|length),objections:(.objections|length),next_step:.next_step.description}'
 
 DRAFT=$(curl -fsS -X POST "$API/drafts/from-call/$CALL_ID")
 echo "$DRAFT" | jq '{id,recipient_name,recipient_email,subject,body,status}'
@@ -87,15 +103,26 @@ curl -fsS -X POST -H 'Content-Type: application/json' \
   -d '{"approved_by":"Demo presenter"}' "$API/drafts/$DRAFT_ID/approve" \
   | jq '{status,approved_by,approved_at,sent_at}'
 
-curl -fsS "$API/campaigns?limit=2" | jq
+curl -fsS "$API/demo/evidence" | jq '{status,lead_count,models,revenue_dna:.revenue_dna.status}'
 ```
 
-If the VPS is unreachable, use the production UI’s already-loaded deterministic fixture and say so immediately. If the UI is unreachable, use the API fallback. If both are unreachable, show the locally running app only after stating that it is the same main-branch revision; do not disguise a fallback as production.
+Expected: Donnie Azoff, Marlowe & Finch Accounting, amount 48600, a next step due 11 September, a draft with status `draft` that approves to `approved` with an empty `sent_at`, and demo evidence `verified` with ten leads.
+
+## Optional: the live coach
+
+Only if the desktop coach is installed and was tested on this machine that morning. Click `Start call with coach` in the sidebar. The dialog asks for the customer's name and company, an optional "What do you know so far?", and an audio source: Call and mic, Call only, or Speakerphone. `Prepare coach` returns a link to paste into the desktop coach, which then listens and suggests. It runs on macOS only. If it was not tested, mention it in one sentence and do not open the dialog.
+
+## Rough edges to know about, so nothing surprises you
+
+- The demo call's deal stage reads Discovery and the badge says Open, although the fixture labels it won. See the note in the 0:30 section.
+- The scorecard's "To improve" list on the current production model can contain boilerplate lines ("This scorecard has been completed successfully") instead of coaching points. Keep that list collapsed.
+- The ideal customer's industry list includes "State transport infrastructure project" because North East Link is one of Eleno's public clients loaded as a won deal.
+- Every restart of the API used to wipe the demo. Since 14 September storage is Supabase, so runs, the profile and the leads survive restarts.
 
 ## Likely judge interruptions
 
-- “What is mocked?” The prospects, calls and generated leads are synthetic and explicitly labelled. The seller, Eleno, is a real company and a sponsor of this hackathon: its description comes from its public website and its seven publicly listed clients are loaded as won CRM deals with no invented contact, headcount, value or dialogue, while every other seller fact is a labelled demo assumption. The OpenRouter extraction, drafting, mixed-channel ICP, embedding and lead-scoring path runs live; generated prospects use `.example` domains and cannot be delivered to. Origami and email delivery have real adapters but are not configured, and readiness says so plainly.
-- “Is this really a CRM integration?” The demo writes to Postgres tables shaped like HubSpot company, contact, deal, engagement and task objects. A production connector swaps those writes for HubSpot APIs; the extraction contract does not change.
-- “What happens without keys?” Fixture ingestion, extraction and drafting remain deterministic and tested. Paid transcription fails closed, and cannot be enabled in production without an ingest token.
-- “Can scheduled outreach duplicate a send?” Campaign and per-draft leases prevent concurrent ownership, and the provider request reuses an exact content-bound idempotency key. Ambiguous results are retried or surfaced for reconciliation; they are never relabelled as successful.
-- “Why is the demo campaign paused?” It proves exact enrollment and live orchestration state without allowing a public hackathon deployment to email anyone. It is synthetic, scheduled for 2099, has zero attempts and zero sends. The durable Postgres migrations, scheduler container and delivery adapter are merged and tested.
+- "What is mocked?" The prospects, calls and generated leads are synthetic and labelled. The seller, Eleno, is a real company and a sponsor of this hackathon: its description comes from its public website and its seven publicly listed clients are loaded as won CRM deals with no invented contact, headcount, value or dialogue. Every other seller fact is a labelled demo assumption. Transcription, extraction, drafting, scoring, the ICP, embeddings and lead scoring run live through ElevenLabs and OpenRouter. Generated prospects use dot-example domains and cannot be emailed. Origami and email delivery have real adapters but are not configured, and the readiness endpoint says so.
+- "Is this really a CRM integration?" The demo writes to Postgres tables shaped like HubSpot company, contact, deal, engagement and task objects. A production connector swaps those writes for HubSpot API calls; the extraction contract does not change.
+- "What happens without keys?" Fixture ingestion falls back to the labelled fixtures and says so in the result. Paid transcription fails closed and cannot be enabled without an ingest token.
+- "Why does nothing get sent?" Approval and delivery are separate on purpose. The delivery adapter sends only an exact approved draft behind a server token and a content-bound idempotency key, and the public deployment has no email credential, so no judge gets a surprise email.
+- "How accurate is the extraction?" Every field has a confidence and a transcript span. A quote that cannot be found verbatim is dropped. Thirteen labelled calls run through the same endpoints in tests, and the scoring lane compares output with hand labels across a model bake-off recorded in the repo.
