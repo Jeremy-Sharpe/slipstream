@@ -61,7 +61,7 @@ export function Preview({ preview }: { preview: BeatPreview | null }) {
           {preview.companies.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {preview.companies.map((c) => (
-                <span key={c} className="inline-flex h-7 items-center rounded-full bg-white px-3 text-[13px] leading-none shadow-[inset_0_0_0_1px_#e8e8e8]">{c}</span>
+                <span key={c} className="inline-flex h-7 items-center rounded-full bg-surface-2 px-3 text-[13px] leading-none">{c}</span>
               ))}
             </div>
           )}
