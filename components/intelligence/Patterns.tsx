@@ -12,8 +12,8 @@ export function Patterns({ patterns, error }: { patterns: Pattern[]; error: stri
   return (
     <section>
       <SectionLabel>What winning calls did</SectionLabel>
-      {measured.length === 0 ? (
-        error ? <ErrorLine className="mt-2">{error}</ErrorLine> : null
+      {error ? (
+        <ErrorLine className="mt-2">{error}</ErrorLine>
       ) : (
         <ul className="mt-2 divide-y divide-line-soft border-y border-line-soft">
           {measured.map((p) => {

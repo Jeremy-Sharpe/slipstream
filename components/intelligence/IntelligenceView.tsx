@@ -39,8 +39,8 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
             {!icp
               ? "No ideal customer profile yet. Load the call history and derive one."
               : scoredCalls === 0
-                ? `The profile is derived. ${unscoredFixtures.length} calls are still unscored, so the patterns below are empty.`
-                : `${unscoredFixtures.length} calls are still unscored and there is no playbook yet.`}
+                ? `The profile is derived. ${unscoredFixtures.length === 1 ? "1 call is" : `${unscoredFixtures.length} calls are`} still unscored.`
+                : `${unscoredFixtures.length === 1 ? "1 call is" : `${unscoredFixtures.length} calls are`} still unscored.`}
           </p>
           <DeriveButton hasIcp={Boolean(icp)} unscored={unscoredFixtures} />
         </section>
