@@ -1,4 +1,4 @@
-import { apiUrl } from "@/lib/api/client";
+import { apiUrl, serverAuthHeaders } from "@/lib/api/client";
 import { ApiError, type ApiCall, type ApiIcpFreshness, type ApiIcpProfile } from "@/lib/api/slipstream";
 
 // Endpoints the Intelligence and Revenue loop screens need that the shared
@@ -182,7 +182,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(apiUrl(path), {
     ...init,
     cache: "no-store",
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: { "Content-Type": "application/json", ...serverAuthHeaders(), ...init?.headers },
   });
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { detail?: string } | null;

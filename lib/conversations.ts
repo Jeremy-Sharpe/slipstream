@@ -77,7 +77,13 @@ export function useConversationList(): { rows: ConversationRow[]; loading: boole
 
   const base = [...(fixtures ?? []).map(fixtureEntry), ...emailThreads.map(demoEntry)];
   const byId = new Map(base.map((entry) => [entry.id, entry]));
-  for (const entry of entries) byId.set(entry.id, { ...byId.get(entry.id), ...tidy(entry) });
+  // A fixture this browser has run carries the API's own id; drop the placeholder row for it.
+  const placeholder = new Map((fixtures ?? []).map((fixture) => [fixture.call_id, fixtureConversationId(fixture.call_id)]));
+  for (const entry of entries) {
+    const derived = entry.sourceExternalId ? placeholder.get(entry.sourceExternalId) : undefined;
+    if (derived && derived !== entry.id) byId.delete(derived);
+    byId.set(entry.id, { ...byId.get(entry.id), ...tidy(entry) });
+  }
 
   const rows = [...byId.values()]
     .map((entry) => ({ ...entry, run: runs[entry.id] }))
