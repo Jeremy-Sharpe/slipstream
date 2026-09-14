@@ -18,7 +18,7 @@ export function IcpCard({ icp }: { icp: IcpView }) {
 
   const evidence = new Map<string, { id: string; company: string; href: string }>();
   for (const r of icp.rows) for (const d of r.deals) evidence.set(d.id, d);
-  const deals = [...evidence.values()].slice(0, 5);
+  const deals = [...evidence.values()].slice(0, 12);
 
   return (
     <section className="rounded-2xl bg-surface-2 p-7">
