@@ -1,4 +1,4 @@
-import { apiUrl, serverAuthHeaders } from "@/lib/api/client";
+import { apiUrl, fetchWithRetry, serverAuthHeaders } from "@/lib/api/client";
 
 export { API_BASE_URL } from "@/lib/api/client";
 
@@ -917,7 +917,7 @@ export function describeFailure(status: number, detail?: string): string {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(apiUrl(path), {
+  const response = await fetchWithRetry(apiUrl(path), {
     ...init,
     headers: { "Content-Type": "application/json", ...serverAuthHeaders(), ...init?.headers },
   });
