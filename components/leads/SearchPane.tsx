@@ -64,7 +64,7 @@ export function SearchPane({ searches, leads, profile, wonDeals, selectedId, onS
             <div className="flex h-8 items-center rounded-full bg-white px-1 shadow-[var(--shadow-card)]">
               <button type="button" aria-label="Fewer" onClick={() => setCount((c) => Math.max(5, c - 5))} className="flex size-6 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><Minus className="size-3" strokeWidth={2} /></button>
               <span className="w-7 text-center text-[13.5px] tabular-nums text-ink">{count}</span>
-              <button type="button" aria-label="More" onClick={() => setCount((c) => Math.min(20, c + 5))} className="flex size-6 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><Plus className="size-3" strokeWidth={2} /></button>
+              <button type="button" aria-label="More" onClick={() => setCount((c) => Math.min(10, c + 5))} className="flex size-6 items-center justify-center rounded-full text-soft transition-colors duration-150 hover:bg-surface hover:text-ink"><Plus className="size-3" strokeWidth={2} /></button>
             </div>
             <span className="text-[13px] text-soft">companies</span>
           </div>
