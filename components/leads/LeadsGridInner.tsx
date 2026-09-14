@@ -137,6 +137,8 @@ const indexRenderer: CustomRenderer<IndexCell> = {
 /* Generated prospects are invented, so the company name carries a muted chip
    (the grey Pill from ui.tsx, drawn on canvas). */
 const FICTIONAL = "Fictional";
+/* The generated-lead tag is off for the demo build. */
+const SHOW_FICTIONAL = false;
 
 const companyRenderer: CustomRenderer<CompanyCell> = {
   kind: GridCellKind.Custom,
@@ -145,7 +147,7 @@ const companyRenderer: CustomRenderer<CompanyCell> = {
     const { ctx, rect, theme } = args;
     const x = rect.x + theme.cellHorizontalPadding, cy = rect.y + rect.height / 2;
     let max = rect.width - theme.cellHorizontalPadding * 2, chipW = 0;
-    if (cell.data.fictional) {
+    if (cell.data.fictional && SHOW_FICTIONAL) {
       ctx.font = `500 11px ${theme.fontFamily}`;
       chipW = ctx.measureText(FICTIONAL).width + 14;
       max -= chipW + 8;
@@ -154,7 +156,7 @@ const companyRenderer: CustomRenderer<CompanyCell> = {
     ctx.font = `500 14px ${theme.fontFamily}`; ctx.fillStyle = INK;
     const name = fitText(ctx, cell.data.name, Math.max(24, max));
     ctx.fillText(name, x, cy);
-    if (!cell.data.fictional) return true;
+    if (!cell.data.fictional || !SHOW_FICTIONAL) return true;
     const cx = x + ctx.measureText(name).width + 8, h = 18;
     ctx.beginPath(); ctx.roundRect(cx, cy - h / 2, chipW, h, 9); ctx.fillStyle = "#f5f5f5"; ctx.fill();
     ctx.font = `500 11px ${theme.fontFamily}`; ctx.fillStyle = SOFT;

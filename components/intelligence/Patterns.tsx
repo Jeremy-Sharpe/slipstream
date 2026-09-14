@@ -13,7 +13,7 @@ export function Patterns({ patterns, error }: { patterns: Pattern[]; error: stri
     <section>
       <SectionLabel>What winning calls did</SectionLabel>
       {measured.length === 0 ? (
-        <ErrorLine className="mt-2">{error ?? "Not yet derived. Score the call history to fill this."}</ErrorLine>
+        error ? <ErrorLine className="mt-2">{error}</ErrorLine> : null
       ) : (
         <ul className="mt-2 divide-y divide-line-soft border-y border-line-soft">
           {measured.map((p) => {
@@ -53,6 +53,7 @@ export function Patterns({ patterns, error }: { patterns: Pattern[]; error: stri
 /* Why they bought: the triggers the profile named. The API carries no count
    per trigger, so a bar only shows when one exists. */
 export function Triggers({ triggers }: { triggers: Trigger[] }) {
+  if (triggers.length === 0) return null;
   const counted = triggers.filter((t): t is Trigger & { count: number } => t.count != null);
   const max = Math.max(1, ...counted.map((t) => t.count));
 
@@ -88,6 +89,7 @@ const firstSentence = (text: string): string => {
 
 /* Coaching: the rep whose numbers say so, one line each. */
 export function Coaching({ lines, rep }: { lines: string[]; rep: string | null }) {
+  if (lines.length === 0) return null;
   return (
     <section>
       <SectionLabel>{rep ? `Coach ${rep.split(" ")[0]} on` : "Coaching focus"}</SectionLabel>

@@ -33,7 +33,7 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
         )}
       </div>
 
-      {needsDerive && (
+      {needsDerive && (!icp || unscoredFixtures.length > 0) && (
         <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-white p-5">
           <p className="text-[13.5px] text-soft">
             {!icp
@@ -52,9 +52,11 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
       {errors.freshness && <ErrorLine className="mt-2">Freshness unavailable: {errors.freshness}</ErrorLine>}
       {errors.scorecards && <ErrorLine className="mt-2">Scorecards unavailable: {errors.scorecards}</ErrorLine>}
 
-      <div className="mt-10"><Patterns patterns={patterns} error={errors.playbook} /></div>
-      <div className="mt-10"><Triggers triggers={triggers} /></div>
-      <div className="mt-10"><Coaching lines={coachingFocus} rep={coachRep} /></div>
+      <div className="flex flex-col gap-10 pt-10 empty:hidden">
+        <Patterns patterns={patterns} error={errors.playbook} />
+        <Triggers triggers={triggers} />
+        <Coaching lines={coachingFocus} rep={coachRep} />
+      </div>
 
       <div className="pb-8" />
     </div>

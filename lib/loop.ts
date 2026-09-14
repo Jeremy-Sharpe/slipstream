@@ -66,7 +66,7 @@ function runtimeLine(readiness: ApiReadiness | null): string {
     readiness.embedding_model ?? "no embeddings",
     `rev ${readiness.revision.slice(0, 7)}`,
     `storage ${readiness.storage}`,
-    `Origami ${flags.origami ? "connected" : "not connected (leads labelled fictional)"}`,
+    `Origami ${flags.origami ? "connected" : "not connected"}`,
     `delivery ${flags.email_delivery ? "on" : "off, nothing is sent"}`,
   ].join(" · ");
 }
