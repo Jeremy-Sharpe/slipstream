@@ -23,7 +23,7 @@ export function LeadsView() {
   const [showSearch, setShowSearch] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
 
-  useEffect(() => { void actions.load(); }, []);
+  useEffect(() => { void actions.load().then(() => actions.warmDrafts()); }, []);
 
   const search = searches.find((s) => s.id === selectedId) ?? null;
   const busySearch = searches.some((s) => s.status === "running");
@@ -53,7 +53,7 @@ export function LeadsView() {
 
   const onFind = useCallback((brief: string, count: number) => { setSort(null); setOpenId(null); void start(brief, count); }, [start]);
   const onSelect = useCallback((id: string) => { actions.select(selectedId === id ? null : id); setSort(null); }, [selectedId]);
-  const onOpen = useCallback((l: Lead) => { setOpenId(l.id); if (l.status !== "approved") void actions.draftFor(l.id); }, []);
+  const onOpen = useCallback((l: Lead) => { setOpenId(l.id); void actions.draftFor(l.id); }, []);
   const onClose = useCallback(() => setOpenId(null), []);
 
   const empty = status === "error"

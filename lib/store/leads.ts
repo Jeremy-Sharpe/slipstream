@@ -46,6 +46,37 @@ function commit() {
 export function useLeads() { return useSyncExternalStore(subscribe, () => snapshot, () => snapshot); }
 
 const SEARCHES_KEY = "slipstream.searches";
+const DRAFTS_KEY = "slipstream.lead-drafts";
+
+type DraftRecord = NonNullable<Lead["draft"]>;
+
+/** Drafts the API wrote for this browser, so a lead opens with its draft already there. */
+function readDrafts(): Record<string, DraftRecord> {
+  try {
+    const raw = window.localStorage.getItem(DRAFTS_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, DraftRecord>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function rememberDraft(id: string, draft: DraftRecord) {
+  try {
+    window.localStorage.setItem(DRAFTS_KEY, JSON.stringify({ ...readDrafts(), [id]: draft }));
+  } catch {
+    // Storage off: the draft lives for the session only.
+  }
+}
+
+/** The model sometimes writes an em dash; the product never does. */
+const tidy = (text: string) => text.replace(/\s*[—–]\s*/g, ", ");
+const tidyDraft = (d: { id: string; subject: string; body: string }): DraftRecord => ({ id: d.id, subject: tidy(d.subject), body: tidy(d.body) });
+
+function withDrafts(rows: Lead[]): Lead[] {
+  const cache = readDrafts();
+  return rows.map((row) => (row.draft || !cache[row.id] ? row : { ...row, draft: cache[row.id] }));
+}
 
 function readSearches(): Search[] {
   try {
@@ -107,7 +138,7 @@ export const actions = {
           const rows = await getLeads(profile.id);
           const claimed = new Map<string, string>();
           for (const search of state.searches) for (const id of search.leadIds ?? []) claimed.set(id, search.id);
-          state.leads = rows.map((row) => toLead(row, claimed.get(row.id) ?? "", profile));
+          state.leads = withDrafts(rows.map((row) => toLead(row, claimed.get(row.id) ?? "", profile)));
         }
         state.status = "ready";
         state.error = undefined;
@@ -126,7 +157,7 @@ export const actions = {
 
   async refreshLeads(): Promise<Lead[]> {
     if (!state.profile) return [];
-    const rows = (await getLeads(state.profile.id)).map((row) => toLead(row, "", state.profile));
+    const rows = withDrafts((await getLeads(state.profile.id)).map((row) => toLead(row, "", state.profile)));
     merge(rows);
     commit();
     return state.leads;
@@ -171,14 +202,15 @@ export const actions = {
   /** The outreach draft for a lead, written by the API. Cached after the first call. */
   async draftFor(id: string): Promise<void> {
     const lead = state.leads.find((l) => l.id === id);
-    if (!lead || lead.draft || lead.status === "approved" || state.busy[id]) return;
+    if (!lead || lead.draft || state.busy[id]) return;
     state.busy = { ...state.busy, [id]: true };
     commit();
     try {
-      const draft = await draftLeadOutreach(id);
+      const draft = tidyDraft(await draftLeadOutreach(id));
+      rememberDraft(id, draft);
       actions.patchLead(id, {
-        draft: { id: draft.id, subject: draft.subject, body: draft.body },
-        status: draft.status === "approved" ? "approved" : "drafted",
+        draft,
+        status: lead.status === "approved" ? "approved" : "drafted",
       });
     } catch (error) {
       state.error = message(error);
@@ -195,8 +227,9 @@ export const actions = {
     state.busy = { ...state.busy, [id]: true };
     commit();
     try {
-      const draft = await approveLeadOutreach(id, lead.draft.id);
-      actions.patchLead(id, { status: "approved", draft: { id: draft.id, subject: draft.subject, body: draft.body } });
+      const approved = tidyDraft(await approveLeadOutreach(id, lead.draft.id));
+      rememberDraft(id, approved);
+      actions.patchLead(id, { status: "approved", draft: approved });
     } catch (error) {
       state.error = message(error);
     } finally {
@@ -206,8 +239,27 @@ export const actions = {
     }
   },
 
+  /** Fetch the drafts the sheet says exist, two at a time, so a click opens on a finished draft. */
+  async warmDrafts(): Promise<void> {
+    const pending = state.leads.filter((l) => l.status !== "new" && !l.draft && !state.busy[l.id]).map((l) => l.id);
+    const lane = async () => {
+      let id = pending.shift();
+      while (id) {
+        await actions.draftFor(id);
+        id = pending.shift();
+      }
+    };
+    await Promise.all([lane(), lane()]);
+  },
+
+  /** Every drafted lead, in order: fetch its draft if this browser does not hold it yet, then approve. */
   async approveAll(ids: string[]): Promise<void> {
-    for (const id of ids) await actions.approve(id);
+    for (const id of ids) {
+      const lead = state.leads.find((l) => l.id === id);
+      if (!lead || lead.status === "approved") continue;
+      if (!lead.draft) await actions.draftFor(id);
+      await actions.approve(id);
+    }
   },
 
   clearError() { state.error = undefined; commit(); },

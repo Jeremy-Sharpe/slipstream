@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { actions } from "@/lib/store/leads";
 import type { Lead } from "@/lib/types";
 import { Button, Pill, cn } from "../ui";
@@ -91,13 +91,16 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
               </>
             ) : (
               <p className="mt-3 text-[14px] text-faint">
-                {drafting ? "Writing the draft" : l.status === "approved" ? "Approved earlier" : "No draft yet"}
+                {drafting ? "Writing the draft" : "No draft yet"}
               </p>
             )}
           </div>
           <footer className="flex items-center justify-end gap-2 border-t border-line px-6 py-4">
             {l.status === "approved" ? (
-              <span className="mr-auto text-[13px] text-soft">Approved · Nothing is sent</span>
+              <span className="mr-auto inline-flex items-center gap-2 text-[13.5px] text-soft">
+                <span className="flex size-5 items-center justify-center rounded-full bg-ink text-white"><Check className="size-3" strokeWidth={2.5} /></span>
+                Approved · Nothing is sent from Slipstream
+              </span>
             ) : (
               <>
                 <Button onClick={onClose}>Skip</Button>
