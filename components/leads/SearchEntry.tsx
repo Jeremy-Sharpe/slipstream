@@ -68,8 +68,8 @@ export function SearchEntry({ search, leads, wonDeals, selected, expanded, onSel
                   <div key={s.id} className="flex min-h-7 items-center gap-2" style={{ animation: "fade-up 320ms cubic-bezier(0.23,1,0.32,1) both" }}>
                     {done ? <Check className="size-3.5 shrink-0 text-faint" strokeWidth={2.5} /> : failed ? <X className="size-3.5 shrink-0 text-danger" strokeWidth={2.5} /> : <Spinner />}
                     <span className="min-w-0 truncate text-[14px] text-text">{s.label(wonDeals)}</span>
-                    {s.id === "search" && running && i === stepIndex && <span className="text-[14px] tabular-nums text-ink">{search.found <= search.count ? `${search.found} of ${search.count}` : search.found}</span>}
-                    {s.id === "draft" && running && i === stepIndex && <span className="text-[14px] tabular-nums text-ink">{search.drafted}</span>}
+                    {s.id === "search" && running && i === stepIndex && <span className="shrink-0 whitespace-nowrap text-[14px] tabular-nums text-ink">{search.found <= search.count ? `${search.found} of ${search.count}` : search.found}</span>}
+                    {s.id === "draft" && running && i === stepIndex && <span className="shrink-0 whitespace-nowrap text-[14px] tabular-nums text-ink">{search.drafted}</span>}
                   </div>
                 );
               })}

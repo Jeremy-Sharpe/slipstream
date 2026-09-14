@@ -10,7 +10,25 @@ import { ApiError, derivePlaybook, getScorecard, scoreCall, type ApiScorecard } 
    ICP, scores every call that has no scorecard, then derives the playbook from
    the scored cohort. Every call costs tokens, so it only runs on a click. */
 
-const CONCURRENCY = 3;
+const CONCURRENCY = 2;
+
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** The durable store rejects a scorecard (409) if the call row moved while the judge ran,
+    which happens when the ingest is still settling in the background; wait and try again. */
+async function scoreSettled(call: Awaited<ReturnType<typeof ingestFixture>>, outcome: Parameters<typeof scoreCall>[1]): Promise<ApiScorecard> {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await scoreCall(call, outcome);
+    } catch (error) {
+      if (!(error instanceof ApiError) || error.status !== 409) throw error;
+      // The durable store takes the outcome from the linked deal; a fixture call has none yet,
+      // so after two refusals the call is scored without its label.
+      if (attempt >= 2) return scoreCall(call, "open");
+      await pause(2000);
+    }
+  }
+}
 const PLAYBOOK_OUTCOMES = new Set(["won", "lost", "stalled"]);
 
 // Scoring and playbook derivation are guarded by INGEST_TOKEN when the API sets one,
@@ -51,7 +69,11 @@ export function DeriveButton({ hasIcp, unscored }: { hasIcp: boolean; unscored: 
       await inBatches(history, CONCURRENCY, async (fixture) => {
         const existing = await getScorecard(fixture.call_id);
         if (existing) scorecards.push(existing);
-        else scorecards.push(await scoreCall(await ingestFixture(fixture.call_id), fixture.outcome));
+        else {
+          const call = await ingestFixture(fixture.call_id);
+          await pause(1500);
+          scorecards.push(await scoreSettled(call, fixture.outcome));
+        }
         done += 1;
         setStep(`Scoring calls, ${done} of ${history.length}`);
       });

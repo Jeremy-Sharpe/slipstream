@@ -4,7 +4,7 @@
 // produce, plus whatever this browser created. There is no list endpoint, so
 // the three sources are merged here and the run page resolves each id itself.
 import { useEffect, useState } from "react";
-import { fixtureConversationId } from "@/lib/adapters";
+import { fixtureConversationId, isMachineId, titleFromFileName } from "@/lib/adapters";
 import { getFixtures, type ApiFixture, type EmailIngestInput } from "@/lib/api/slipstream";
 import { emailThreads, type DemoEmailThread } from "@/lib/data/emails";
 import { useConversations, type ConversationEntry, type StoredRun } from "@/lib/store/conversations";
@@ -44,6 +44,18 @@ export function fixtureEntry(fixture: ApiFixture): ConversationEntry {
   };
 }
 
+/** Entries saved before the API learned to name uploads carry its ids; show them as recordings. */
+function tidy(entry: ConversationEntry): ConversationEntry {
+  if (entry.kind !== "call") return entry;
+  const title = titleFromFileName(entry.fileName) ?? "Recording";
+  return {
+    ...entry,
+    company: isMachineId(entry.company) ? title : entry.company,
+    subject: isMachineId(entry.subject) ? title : entry.subject,
+    contact: entry.contact === "Unknown contact" ? "Unnamed contact" : entry.contact,
+  };
+}
+
 export function useConversationList(): { rows: ConversationRow[]; loading: boolean; error: string | null; retry: () => void } {
   const { entries, runs } = useConversations();
   const [fixtures, setFixtures] = useState<ApiFixture[] | null>(null);
@@ -65,7 +77,13 @@ export function useConversationList(): { rows: ConversationRow[]; loading: boole
 
   const base = [...(fixtures ?? []).map(fixtureEntry), ...emailThreads.map(demoEntry)];
   const byId = new Map(base.map((entry) => [entry.id, entry]));
-  for (const entry of entries) byId.set(entry.id, { ...byId.get(entry.id), ...entry });
+  // A fixture this browser has run carries the API's own id; drop the placeholder row for it.
+  const placeholder = new Map((fixtures ?? []).map((fixture) => [fixture.call_id, fixtureConversationId(fixture.call_id)]));
+  for (const entry of entries) {
+    const derived = entry.sourceExternalId ? placeholder.get(entry.sourceExternalId) : undefined;
+    if (derived && derived !== entry.id) byId.delete(derived);
+    byId.set(entry.id, { ...byId.get(entry.id), ...tidy(entry) });
+  }
 
   const rows = [...byId.values()]
     .map((entry) => ({ ...entry, run: runs[entry.id] }))

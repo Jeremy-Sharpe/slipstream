@@ -66,12 +66,29 @@ export function fixtureConversationId(callId: string): string {
   return uuid5(NAMESPACE_URL, `slipstream:${callId}`);
 }
 
+/** Ids the API mints for uploads and pastes; never something to show as a name. */
+export const isMachineId = (value: string | null | undefined): boolean => !value || /^(upload|paste|rec|recording)[-_][0-9a-z-]+$/i.test(value.trim());
+
+/** Diarised speakers arrive as "speaker_0"; show them as "Speaker 1". */
+export const prettySpeaker = (name: string): string => {
+  const m = /^speaker[_ ]?(\d+)$/i.exec(name.trim());
+  return m ? `Speaker ${Number(m[1]) + 1}` : name;
+};
+
+const isGenericSpeaker = (name: string | null | undefined): boolean => !name || /^speaker[_ ]?\d+$/i.test(name.trim());
+
+/** A recording's file name without its extension, for calls the API could not name. */
+export const titleFromFileName = (fileName: string | undefined): string | null => {
+  const base = (fileName ?? "").replace(/\.[a-z0-9]+$/i, "").trim();
+  return base && !isMachineId(base) ? base : null;
+};
+
 export function turnsFromSegments(call: ApiCall): Turn[] {
   const rep = (call.rep ?? "").trim().toLocaleLowerCase();
   return call.segments.map((segment, i) => ({
     i,
     speaker: segment.speaker.trim().toLocaleLowerCase() === rep ? "rep" : "prospect",
-    name: segment.speaker,
+    name: prettySpeaker(segment.speaker),
     text: segment.body,
     t: Math.round(segment.start_ms / 1000),
   }));
@@ -134,8 +151,8 @@ function scorecardFrom(scorecard: ApiScorecard, turns: Turn[], kind: "call" | "e
     objection: scorecard.objection_handling,
     talkRatio: scorecard.rep_talk_ratio,
     summary: scorecard.summary,
-    wentWell: scorecard.went_well,
-    toImprove: scorecard.to_improve,
+    wentWell: coachingLines(scorecard.went_well),
+    toImprove: coachingLines(scorecard.to_improve),
     ...(kind === "email" ? { askedRightQuestions: scorecard.discovery_questions > 0 } : {}),
     spans: {
       discovery: spanFromTurnIndex(scorecard.discovery_evidence[0]?.turn_index, turns),
@@ -152,6 +169,10 @@ export function splitSubject(subject: string | undefined): { company: string | n
   return { company: parts[0].trim() || null, prospect: parts.slice(1).join(" - ").trim() || null };
 }
 
+/** The scorer sometimes appends notes about itself; only lines about the call are shown. */
+const NOT_COACHING = /scorecard|rubric|simulated|transcript text|instructions|does not involve|real individuals|completed successfully/i;
+const coachingLines = (lines: string[]): string[] => lines.filter((line) => !NOT_COACHING.test(line));
+
 export function toCallRecord(
   call: ApiCall,
   extra: { extraction?: ApiExtraction; scorecard?: ApiScorecard; draft?: ApiDraft; fileName?: string; pasted?: boolean } = {},
@@ -159,17 +180,19 @@ export function toCallRecord(
   const { extraction, scorecard, draft } = extra;
   const turns = turnsFromSegments(call);
   const fromSubject = splitSubject(call.subject);
-  const prospect = turns.find((turn) => turn.speaker === "prospect")?.name ?? null;
+  const prospectName = call.segments.find((segment) => segment.speaker.trim().toLocaleLowerCase() !== (call.rep ?? "").trim().toLocaleLowerCase())?.speaker ?? null;
+  const prospect = isGenericSpeaker(prospectName) ? null : prospectName;
+  const subjectTitle = isMachineId(call.subject) ? null : (call.subject ?? null);
   const lastEnd = call.segments[call.segments.length - 1]?.end_ms ?? 0;
 
   return {
     id: call.id,
     kind: "call",
     sourceId: call.source_external_id,
-    contact: extraction?.contact.name.value ?? fromSubject.prospect ?? prospect ?? "Unknown contact",
+    contact: extraction?.contact.name.value ?? fromSubject.prospect ?? prospect ?? "Unnamed contact",
     title: extraction?.contact.title.value ?? null,
     email: extraction?.contact.email.value ?? null,
-    company: extraction?.company.name.value ?? fromSubject.company ?? call.source_external_id,
+    company: extraction?.company.name.value ?? fromSubject.company ?? titleFromFileName(extra.fileName) ?? subjectTitle ?? "Recording",
     industry: extraction?.company.industry.value ?? null,
     headcount: extraction?.company.employee_count.value ?? null,
     location: extraction?.company.location.value ?? null,

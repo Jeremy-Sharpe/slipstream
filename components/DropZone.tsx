@@ -13,15 +13,15 @@ import { Recorder } from "./home/Recorder";
 import { Segmented } from "./home/Segmented";
 import { TypedPlaceholder } from "./home/TypedPlaceholder";
 import { Submitting, type Source } from "./home/Submitting";
-import { Button, cn, mmss } from "./ui";
+import { Button, cn, mmss, humanize } from "./ui";
 
 type Mode = "pick" | "upload" | "record" | "paste" | "email";
 type Phase = { kind: "idle" } | { kind: "submitting"; source: Source; error?: string; done?: string };
 
 const MEDIA = /\.(mp3|m4a|wav|mp4|mov|webm|ogg|aac|flac|m4v)$/i;
 const MODES: { key: Mode; label: string }[] = [
-  { key: "pick", label: "Pick a call" },
   { key: "upload", label: "Upload file" },
+  { key: "pick", label: "Pick a call" },
   { key: "record", label: "Record" },
   { key: "paste", label: "Paste transcript" },
   { key: "email", label: "Paste an email" },
@@ -34,7 +34,7 @@ const dayFmt = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Melbourne
 
 export function DropZone() {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("pick");
+  const [mode, setMode] = useState<Mode>("upload");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [over, setOver] = useState(false);
   const [text, setText] = useState("");
@@ -213,7 +213,7 @@ export function DropZone() {
                       className="grid h-9 min-w-0 flex-1 grid-cols-[minmax(0,1fr)_96px_64px] items-center gap-x-3 rounded-lg px-2 text-left transition-colors duration-150 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                     >
                       <span className="min-w-0 truncate text-[14px] text-ink">{fixture.company} <span className="text-soft">· {fixture.prospect}</span></span>
-                      <span className="truncate text-[13px] text-soft">{fixture.outcome.replace("_", " ")}</span>
+                      <span className="truncate text-[13px] text-soft">{humanize(fixture.outcome.replace("_", " "))}</span>
                       <span className="text-right text-[13px] tabular-nums text-faint">{dayFmt.format(new Date(fixture.scheduled_at))}</span>
                     </button>
                   </li>

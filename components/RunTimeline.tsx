@@ -11,6 +11,13 @@ import { WorkingLine } from "./run/WorkingLine";
 import { StreamingText, words } from "./run/StreamingText";
 import { humanize, Button, Score, cn, mmss } from "./ui";
 
+/** What a gate button says while its request is in flight. */
+const WORKING: Record<string, string> = {
+  "Approve & sync to CRM": "Syncing to CRM",
+  "Approve follow-up": "Approving",
+  "Approve reply": "Approving",
+};
+
 const LABELS: Record<StepId, { working: string; done: string }> = {
   transcribe: { working: "Transcribing", done: "Transcribed" },
   extract: { working: "Extracting fields", done: "Extracted fields" },
@@ -28,9 +35,19 @@ const EMAIL_LABELS: Partial<Record<StepId, { working: string; done: string }>> =
   draft: { working: "Drafting the reply", done: "Reply drafted" },
 };
 
+/** The draft textarea takes the height of its text, so the card keeps the
+    height it had while the draft streamed and nothing is cut off. */
+const fitToContent = (el: HTMLTextAreaElement | null) => {
+  if (!el) return;
+  el.style.height = "0";
+  el.style.height = `${el.scrollHeight}px`;
+};
+
 const fmtAud = (n: number | null | undefined, none = "None") => (n == null ? none : `$${n.toLocaleString("en-AU")}`);
 const pct = (c: number) => `${Math.round(c * 100)}%`;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+/** Every segment after a " · " starts with a capital. */
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const narrativeSections = (s: NonNullable<CallRecord["scorecard"]>): [string, string[]][] =>
   ([["Went well", s.wentWell], ["To improve", s.toImprove]] as [string, string[]][]).filter(([, lines]) => lines.length > 0);
 
@@ -48,13 +65,16 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
   onReveal?: (el: HTMLElement) => void;
   onExpandClick?: (el: HTMLElement, bodyHeight: number) => void;
   onRetry: (id: StepId) => void;
-  onSynced: () => void;
-  onDraftApproved: () => void;
+  onSynced: () => void | Promise<void>;
+  onDraftApproved: () => void | Promise<void>;
 }) {
   const synced = data.synced;
   const approved = data.approved;
   // The draft body streams in the first time the step completes, then edits.
   const [draftStreamed, setDraftStreamed] = useState(false);
+  /* The gate the user just pressed, until its request settles: the button
+     shows what it is doing instead of sitting still on camera. */
+  const [pendingGate, setPendingGate] = useState<string | null>(null);
   const [draftGen, setDraftGen] = useState(0);
   // Re-stream when the run restarts or the body is replaced from outside
   // (state adjusted during render). Edits in the textarea update `edited`.
@@ -79,7 +99,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
         { label: "Deal stage", value: call.fields.stage.value ? humanize(String(call.fields.stage.value)) : "Not stated", field: call.fields.stage },
         { label: "Value", value: fmtAud(call.fields.value.value, email ? "Not stated" : "None"), field: call.fields.value },
         { label: "Next step", value: call.fields.next_step.value ?? "None", field: call.fields.next_step },
-        { label: "Promises", value: call.fields.promises.value.length ? call.fields.promises.value.join(" · ") : "None", field: call.fields.promises },
+        { label: "Promises", value: call.fields.promises.value.length ? call.fields.promises.value.map(cap).join(" · ") : "None", field: call.fields.promises },
       ]
     : [];
   const filled = fieldRows.filter((row) => {
@@ -87,34 +107,36 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
     return Array.isArray(value) ? value.length > 0 : value != null;
   }).length;
   const leads = data.leads ?? [];
-  const drafted = leads.filter((lead) => ["reviewed", "approved", "contacted"].includes(lead.status)).length;
+  const drafted = leads.filter((lead) => lead.status !== "new" && lead.status !== "rejected").length;
   const wonDeals = data.wonDeals ?? 0;
 
   const summary = (st: StepState): ReactNode => {
     if (st.status === "error") return st.error;
+    // A step that has not run yet says nothing, even when an earlier run left data behind.
+    if (st.status === "pending" || st.status === "running") return "";
     switch (st.id) {
       case "transcribe": return email
         ? `${plural(messages.length, "message")} · ${inbound} inbound`
-        : `${mmss(call.duration)} · ${plural(call.turns.length, "turn")} · talk ratio ${pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))}`;
+        : `${mmss(call.duration)} · ${plural(call.turns.length, "turn")} · Talk ratio ${pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))}`;
       case "extract":
-        if (synced) return email ? "Thread filed to CRM" : `${plural(filled, "field")} written to CRM`;
+        if (synced) return "Synced to CRM";
         return st.status === "waiting" ? "Waiting for your approval" : "";
       case "score": {
         const s = call.scorecard;
         if (!s) return "";
-        return `${plural(s.discovery, "discovery question")} · ${s.nextStepSecured ? "next step secured" : "no dated next step"} · talk ratio ${pct(s.talkRatio)}`;
+        return `${plural(s.discovery, "discovery question")} · ${s.nextStepSecured ? "Next step secured" : "No dated next step"} · Talk ratio ${pct(s.talkRatio)}`;
       }
-      case "draft": return approved ? `${email ? "Reply" : "Follow-up"} approved · nothing is sent` : st.status === "waiting" ? "Waiting for your approval" : call.draft?.subject ?? "";
+      case "draft": return approved ? "Approved · Nothing is sent" : st.status === "waiting" ? "Waiting for your approval" : call.draft?.subject ?? "";
       case "icp": return data.icp ? `From ${plural(wonDeals, "won deal")}` : "";
-      case "search": return st.status === "done" ? `${plural(leads.length, "lead")} · scored against the won deals` : "";
+      case "search": return st.status === "done" ? "Scored against the won deals" : "";
       case "outreach": return st.status === "done" ? `${plural(drafted, "draft")} ready` : "";
     }
   };
 
-  const doneLabel = (id: StepId) => {
-    if (id === "extract" && !email) return synced ? `Extracted ${plural(filled, "field")} · Synced` : `Extracted ${plural(filled, "field")}`;
-    if (id === "extract" && email && synced) return "Filed to CRM · Synced";
-    if (id === "search") return `Found ${plural(leads.length, "lead")} like the ones you closed`;
+  const doneLabel = (st: StepState) => {
+    const { id } = st;
+    if (id === "extract" && !email) return `Extracted ${plural(filled, "field")}`;
+    if (id === "search" && st.status === "done") return `Found ${plural(leads.length, "lead")} like the ones you closed`;
     return labels(id).done;
   };
 
@@ -144,18 +166,36 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
     </div>
   );
 
-  const gate = (label: string, doneLine: string, note: string | undefined, onClick: () => void, isDone: boolean) => (
-    <div className="mt-4">
-      {isDone ? (
-        <div style={{ animation: "fade-in 200ms ease-out both" }}>
-          <p className="flex items-center gap-2 text-[14px] text-soft"><Check className="size-3.5 text-ink" strokeWidth={2.5} /> {doneLine}</p>
-          {note && <p className="mt-1 text-[13.5px] text-faint">{note}</p>}
-        </div>
-      ) : (
-        <Button variant="primary" onClick={onClick}>{label}</Button>
-      )}
-    </div>
-  );
+  const gate = (label: string, doneLine: string, note: string | undefined, onClick: () => void | Promise<void>, isDone: boolean) => {
+    const pending = pendingGate === label;
+    const press = async () => {
+      setPendingGate(label);
+      try {
+        await onClick();
+      } finally {
+        setPendingGate(null);
+      }
+    };
+    return (
+      <div className="mt-4">
+        {isDone ? (
+          <div style={{ animation: "fade-in 200ms ease-out both" }}>
+            <p className="flex items-center gap-2 text-[14px] text-soft"><Check className="size-3.5 text-ink" strokeWidth={2.5} /> {doneLine}</p>
+            {note && <p className="mt-1 text-[13.5px] text-faint">{note}</p>}
+          </div>
+        ) : (
+          <Button variant="primary" disabled={pending} className="disabled:opacity-100" onClick={press}>
+            {pending ? (
+              <>
+                <span aria-hidden className="inline-block size-3.5 shrink-0 rounded-full border-[1.5px] border-accent-ink/25 border-t-accent-ink" style={{ animation: "spin 700ms linear infinite" }} />
+                {WORKING[label] ?? "Working"}
+              </>
+            ) : label}
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   const card = (st: StepState): ReactNode => {
     if (st.status === "error") {
@@ -168,6 +208,8 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
     }
     switch (st.id) {
       case "transcribe":
+        // The result waits for the step, like every other card.
+        if (st.status !== "done") return null;
         if (email) return <p className="text-[14px] text-soft">Read {plural(messages.length, "message")}, {inbound} from {call.contact.split(" ")[0]} and {messages.length - inbound} from {call.rep.split(" ")[0]}.{call.responseTime ? ` ${call.rep.split(" ")[0]} replied in ${call.responseTime}.` : ""}</p>;
         return <p className="text-[14px] text-soft">Diarised into {plural(call.turns.length, "turn")}. {call.rep} spoke {pct(call.scorecard?.talkRatio ?? talkRatioFromTurns(call.turns))} of the time.</p>;
       case "extract": {
@@ -185,7 +227,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
                 {plainRow("Messages", plural(records.length || messages.length, "message"))}
                 {plainRow("CRM deal", first?.deal_external_id ?? "Not stated")}
               </div>
-              {gate("Approve & sync to CRM", "Filed to CRM · the thread is on the deal", data.crmNote, onSynced, synced)}
+              {gate("Approve & sync to CRM", "Filed to CRM · The thread is on the deal", data.crmNote, onSynced, synced)}
             </div>
           );
         }
@@ -221,7 +263,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
           <div className="-mx-2 flex flex-col">
             {row("Discovery questions before pricing", String(s.discovery), s.spans.discovery)}
             {row("Next step secured", s.nextStepSecured ? "Yes, dated" : "No", s.spans.nextStep)}
-            {row("Objection handling", s.objection.replace("_", " "), s.spans.objection)}
+            {row("Objection handling", humanize(s.objection), s.spans.objection)}
             {row("Rep talk ratio", pct(s.talkRatio), null)}
             {s.summary && <p className="mt-3 px-2 text-[14px] leading-6 text-ink">{s.summary}</p>}
             {(s.wentWell.length > 0 || s.toImprove.length > 0) && (
@@ -246,18 +288,19 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
             <p className="text-[15px] font-medium text-ink">{call.draft.subject}</p>
             {draftStreamed ? (
               <textarea
+                ref={fitToContent}
                 value={draftBody}
-                onChange={(e) => { setSeen({ runId, body: e.target.value }); setDraftBody(e.target.value); }}
+                onChange={(e) => { fitToContent(e.currentTarget); setSeen({ runId, body: e.target.value }); setDraftBody(e.target.value); }}
                 readOnly={approved}
-                className="mt-2 w-full resize-none rounded-lg bg-white px-3 py-2 text-[15px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
-                rows={Math.min(12, draftBody.split("\n").length + 1)}
+                className="mt-2 w-full resize-none overflow-hidden rounded-lg bg-white px-3 py-2 text-[15px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
+                rows={1}
               />
             ) : (
               <div className="mt-2 rounded-lg bg-white px-3 py-2 whitespace-pre-line">
                 <StreamingText key={draftGen} size="lg" tokens={words(draftBody.replace(/\n/g, " ⏎ ")).map((t) => ({ text: t.text === "⏎" ? "\n" : t.text }))} onDone={() => setDraftStreamed(true)} />
               </div>
             )}
-            {gate(email ? "Approve reply" : "Approve follow-up", "Approved · nothing is sent from Slipstream", undefined, onDraftApproved, approved)}
+            {(draftStreamed || approved) && gate(email ? "Approve reply" : "Approve follow-up", "Approved · Nothing is sent from Slipstream", undefined, onDraftApproved, approved)}
           </div>
         );
       case "icp": {
@@ -266,7 +309,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
         return (
           <div>
             <p className="text-[15px] text-ink">{profile.summary}</p>
-            <p className="mt-1 text-[14px] text-soft">From {plural(wonDeals, "won deal")}{data.icpStatus ? ` · profile ${data.icpStatus}` : ""}</p>
+            <p className="mt-1 text-[14px] text-soft">From {plural(wonDeals, "won deal")}{data.icpStatus ? ` · Profile ${data.icpStatus}` : ""}</p>
             <ul className="mt-4 flex flex-col gap-1.5">
               {[["Industry", profile.industries.join(", ")], ["Size", `${profile.headcount_band} staff`], ["Buyer", profile.roles.join(", ")], ["Trigger", profile.triggers[0] ?? "None"]].map(([k, v]) => (
                 <li key={k} className="grid grid-cols-[20px_72px_minmax(0,1fr)] items-center gap-x-1 text-[14px]">
@@ -324,7 +367,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
             key={st.id}
             status={st.status}
             workingLabel={labels(st.id).working}
-            doneLabel={st.status === "error" ? labels(st.id).working : doneLabel(st.id)}
+            doneLabel={st.status === "error" ? labels(st.id).working : doneLabel(st)}
             summary={summary(st)}
             rows={st.status === "running" ? trace[st.id] : []}
             rowsDone={st.progress ?? 0}

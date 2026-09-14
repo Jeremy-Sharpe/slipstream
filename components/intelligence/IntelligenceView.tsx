@@ -1,5 +1,4 @@
 import { Avatar } from "@/components/Avatar";
-import { fmtDate } from "@/components/ui";
 import type { Intelligence } from "@/lib/intelligence";
 import { DeriveButton } from "./DeriveButton";
 import { IcpCard } from "./IcpCard";
@@ -10,7 +9,7 @@ import { ErrorLine } from "./parts";
    coaching. Everything on the page comes from the API; anything not derived
    yet says so. */
 export function IntelligenceView({ intelligence }: { intelligence: Intelligence }) {
-  const { icp, stats, patterns, coachingFocus, coachingSource, coachRep, triggers, provenance, errors, scoredCalls, unscoredFixtures, needsDerive } = intelligence;
+  const { icp, stats, patterns, coachingFocus, coachRep, triggers, errors, scoredCalls, unscoredFixtures, needsDerive } = intelligence;
   const o = stats.outcomes;
 
   return (
@@ -34,14 +33,14 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
         )}
       </div>
 
-      {needsDerive && (
+      {needsDerive && (!icp || unscoredFixtures.length > 0) && (
         <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-white p-5">
           <p className="text-[13.5px] text-soft">
             {!icp
               ? "No ideal customer profile yet. Load the call history and derive one."
               : scoredCalls === 0
-                ? `The profile is derived. ${unscoredFixtures.length} calls are still unscored, so the patterns below are empty.`
-                : `${unscoredFixtures.length} calls are still unscored and there is no playbook yet.`}
+                ? `The profile is derived. ${unscoredFixtures.length === 1 ? "1 call is" : `${unscoredFixtures.length} calls are`} still unscored.`
+                : `${unscoredFixtures.length === 1 ? "1 call is" : `${unscoredFixtures.length} calls are`} still unscored.`}
           </p>
           <DeriveButton hasIcp={Boolean(icp)} unscored={unscoredFixtures} />
         </section>
@@ -53,18 +52,13 @@ export function IntelligenceView({ intelligence }: { intelligence: Intelligence 
       {errors.freshness && <ErrorLine className="mt-2">Freshness unavailable: {errors.freshness}</ErrorLine>}
       {errors.scorecards && <ErrorLine className="mt-2">Scorecards unavailable: {errors.scorecards}</ErrorLine>}
 
-      <div className="mt-10"><Patterns patterns={patterns} error={errors.playbook} /></div>
-      <div className="mt-10"><Triggers triggers={triggers} /></div>
-      <div className="mt-10"><Coaching lines={coachingFocus} rep={coachRep} source={coachingSource} /></div>
+      <div className="flex flex-col gap-10 pt-10 empty:hidden">
+        <Patterns patterns={patterns} error={errors.playbook} />
+        <Triggers triggers={triggers} />
+        <Coaching lines={coachingFocus} rep={coachRep} />
+      </div>
 
-      <p className="mt-10 pb-8 text-[12px] text-faint">
-        {provenance.rubricVersion ? `Scored with rubric ${provenance.rubricVersion}` : "No rubric version yet"}
-        {provenance.playbookModel ? ` · playbook by ${provenance.playbookModel}` : " · playbook not derived"}
-        {provenance.playbookGeneratedAt ? ` · generated ${fmtDate(provenance.playbookGeneratedAt)}` : ""}
-        {provenance.profileVersion != null ? ` · profile v${provenance.profileVersion}` : ""}
-        {provenance.cohortRevision ? ` · cohort ${provenance.cohortRevision.slice(0, 7)}` : ""}
-        {provenance.profileCreatedAt ? ` · derived ${fmtDate(provenance.profileCreatedAt)}` : ""}
-      </p>
+      <div className="pb-8" />
     </div>
   );
 }

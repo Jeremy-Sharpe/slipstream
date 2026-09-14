@@ -10,13 +10,10 @@ import { Button, cn } from "./ui";
 
 const CRM = ["HubSpot", "Pipedrive", "Salesforce", "Attio"] as const;
 
-function Row({ label, children, hint }: { label: string; hint?: string; children: React.ReactNode }) {
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid grid-cols-[200px_minmax(0,1fr)] items-center gap-6 py-3.5">
-      <div>
-        <p className="text-[13.5px] text-ink">{label}</p>
-        {hint && <p className="mt-0.5 text-[12.5px] text-faint">{hint}</p>}
-      </div>
+      <p className="text-[13.5px] text-ink">{label}</p>
       <div className="flex items-center justify-end gap-2">{children}</div>
     </div>
   );
@@ -27,7 +24,7 @@ function Field({ value, onChange, className }: { value: string; onChange: (v: st
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={cn("h-9 w-64 rounded-full bg-surface px-4 text-[13.5px] text-ink outline-none transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-accent/40", className)}
+      className={cn("h-9 w-64 rounded-full bg-white px-4 text-[13.5px] text-ink outline-none transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-accent/40", className)}
     />
   );
 }
@@ -42,7 +39,7 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
       onClick={() => onChange(!on)}
       className={cn("relative h-5 w-9 shrink-0 rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40", on ? "bg-ink" : "bg-[#d4d4d4]")}
     >
-      <span className={cn("absolute top-0.5 left-0.5 size-4 rounded-full bg-white transition-transform duration-150", on && "translate-x-4")} />
+      <span className={cn("absolute top-0.5 left-0.5 size-4 rounded-full transition-[transform,background-color] duration-150", on ? "translate-x-4 bg-accent" : "bg-white")} />
     </button>
   );
 }
@@ -66,6 +63,18 @@ export function SettingsView({ crmConnected }: { crmConnected: boolean | null })
   const [notifyDone, setNotifyDone] = useState(true);
   const [notifyLeads, setNotifyLeads] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  /** Forgets what this browser added (runs, pasted calls, searches, drafts) and reloads on Home. */
+  function resetWorkspace() {
+    setResetting(true);
+    try {
+      for (const key of Object.keys(window.localStorage)) if (key.startsWith("slipstream.")) window.localStorage.removeItem(key);
+    } catch {
+      // Storage off: nothing to forget.
+    }
+    window.location.assign("/home");
+  }
 
   const save = () => {
     setSaved(true);
@@ -91,7 +100,7 @@ export function SettingsView({ crmConnected }: { crmConnected: boolean | null })
         </Card>
 
         <Card title="CRM">
-          <Row label="Connected to" hint="Where approved fields and follow-ups are written.">
+          <Row label="Connected to">
             <div className="flex gap-1.5">
               {CRM.map((c) => (
                 <button
@@ -113,17 +122,17 @@ export function SettingsView({ crmConnected }: { crmConnected: boolean | null })
               {crmConnected === null
                 ? "Status unavailable, the API did not answer"
                 : crmConnected
-                  ? "Connected · nothing is written without your approval"
-                  : "Not connected on this deployment · approved fields stay in Slipstream"}
+                  ? "Connected · Nothing is written without your approval"
+                  : "Not connected on this deployment · Approved fields stay in Slipstream"}
             </span>
           </Row>
         </Card>
 
         <Card title="Approvals">
-          <Row label="Extracted fields" hint="Stop and wait before writing to the CRM.">
+          <Row label="Extracted fields">
             <Toggle on={approveFields} onChange={setApproveFields} label="Approve extracted fields" />
           </Row>
-          <Row label="Follow-up" hint="Stop and wait before the follow-up is filed.">
+          <Row label="Follow-up">
             <Toggle on={approveFollowUp} onChange={setApproveFollowUp} label="Approve follow-up" />
           </Row>
         </Card>
@@ -136,11 +145,17 @@ export function SettingsView({ crmConnected }: { crmConnected: boolean | null })
             <Toggle on={notifyLeads} onChange={setNotifyLeads} label="Notify when leads are ready" />
           </Row>
         </Card>
+
+        <Card title="Workspace">
+          <Row label="Start fresh">
+            <Button onClick={resetWorkspace}>{resetting ? "Resetting" : "Reset"}</Button>
+          </Row>
+        </Card>
       </div>
 
       <div className="mt-6 flex items-center gap-3">
-        <Button variant="primary" onClick={save}>Save changes</Button>
-        <span className={cn("text-[13px] text-soft transition-opacity duration-150", saved ? "opacity-100" : "opacity-0")}>Saved for this session</span>
+        <Button variant="primary" onClick={save}>Save</Button>
+        <span className={cn("text-[13px] text-soft transition-opacity duration-150", saved ? "opacity-100" : "opacity-0")}>Saved</span>
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ export function Beat({ beat, expanded, onToggle, last }: { beat: BeatRecord; exp
           type="button"
           aria-expanded={expanded}
           onClick={onToggle}
-          className="-mx-1.5 flex h-8 w-[calc(100%+12px)] items-center gap-2 rounded-lg px-1.5 text-left transition-colors duration-100 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          className="-mx-1.5 flex h-8 w-[calc(100%+12px)] items-center gap-2 rounded-lg px-1.5 text-left transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           <span className="shrink-0 text-[15px] font-medium whitespace-nowrap text-ink">
             <span className="mr-2 tabular-nums text-faint">{beat.n}</span>
@@ -43,7 +43,6 @@ export function Beat({ beat, expanded, onToggle, last }: { beat: BeatRecord; exp
             <div className="mt-1.5 rounded-xl bg-surface p-4">
               <Preview preview={beat.preview} />
               <div className="mt-3 flex items-center gap-2">
-                <span className="inline-flex h-6 items-center rounded-full border border-line px-2.5 text-[12px] font-medium leading-none text-soft">{beat.provenance}</span>
                 <Link
                   href={beat.evidence.href}
                   className="inline-flex h-6 items-center rounded-full border border-line bg-white px-2.5 text-[12px] font-medium leading-none text-ink transition-colors duration-150 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"

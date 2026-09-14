@@ -21,7 +21,7 @@ export function LoopView({ loop }: { loop: Loop }) {
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">Revenue loop</h1>
-          <p className="mt-2 text-[14px] text-soft">One call becomes CRM truth, a follow-up, team intelligence, an ICP, and the next campaign. Every step below links to its evidence.</p>
+          <p className="mt-2 text-[14px] text-soft">One call in. The next ten companies out.</p>
         </div>
         <Link
           href={`${loop.demoHref}?from=home`}
@@ -66,15 +66,7 @@ export function LoopView({ loop }: { loop: Loop }) {
         ))}
       </ol>
 
-      <p className="mt-10 text-[13.5px] text-soft">
-        In numbers, illustrative · {loop.value.map((v) => v.figure).join(" · ")}
-      </p>
-      <p className="mt-1 text-[12px] text-faint">{loop.value.map((v) => v.note).join(" ")} Scenarios from these assumptions, not measured results.</p>
-
-      <p className="mt-4 flex items-center gap-2 text-[13px] text-soft">
-        <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-ink" />
-        <span>{loop.runtimeLine}</span>
-      </p>
+      <div className="pb-8" />
     </div>
   );
 }

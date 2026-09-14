@@ -55,7 +55,7 @@ const UNKNOWN = "Unknown";
 
 const mmss = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, "0")}`;
 const label = (key: string) => key.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
-const range = (values: number[]) => (values.length ? `${Math.min(...values)}–${Math.max(...values)}` : null);
+const range = (values: number[]) => (values.length ? `${Math.min(...values)} to ${Math.max(...values)}` : null);
 
 function runtimeLine(readiness: ApiReadiness | null): string {
   if (!readiness) return "Runtime unavailable.";
@@ -66,7 +66,7 @@ function runtimeLine(readiness: ApiReadiness | null): string {
     readiness.embedding_model ?? "no embeddings",
     `rev ${readiness.revision.slice(0, 7)}`,
     `storage ${readiness.storage}`,
-    `Origami ${flags.origami ? "connected" : "not connected (leads labelled fictional)"}`,
+    `Origami ${flags.origami ? "connected" : "not connected"}`,
     `delivery ${flags.email_delivery ? "on" : "off, nothing is sent"}`,
   ].join(" · ");
 }
@@ -121,7 +121,7 @@ export function buildLoop(input: LoopInput): Loop {
       n: "01",
       verb: "Listen",
       title: "One sales call",
-      what: demoCall ? `${demoCall.subject}, ${demoCall.segments.length} turns${demoCall.duration_seconds ? `, ${mmss(demoCall.duration_seconds)}` : ""}.` : NOT_DERIVED,
+      what: demoCall ? `${demoCall.subject.replace(/\s+[—–]\s+/g, " · ")}, ${demoCall.segments.length} turns${demoCall.duration_seconds ? `, ${mmss(demoCall.duration_seconds)}` : ""}.` : NOT_DERIVED,
       preview: demoCall?.segments.length
         ? { kind: "turns", turns: demoCall.segments.slice(0, 2).map((segment) => ({ key: segment.sequence, name: speakerName(segment.speaker, demoCall.rep), t: Math.round(segment.start_ms / 1000), text: segment.body })) }
         : null,
@@ -157,10 +157,10 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Learn",
       title: "The team compounds",
       what: source
-        ? `${source.calls} calls and ${source.emails} ${source.emails === 1 ? "email" : "emails"} · ${wins ?? 0} wins · ${playbook ? `${playbook.patterns.length} ${playbook.patterns.length === 1 ? "pattern" : "patterns"}` : "patterns not yet derived"}.`
+        ? `${source.calls} calls and ${source.emails} ${source.emails === 1 ? "email" : "emails"} · ${wins ?? 0} wins${playbook ? ` · ${playbook.patterns.length} ${playbook.patterns.length === 1 ? "pattern" : "patterns"}` : ""}.`
         : NOT_DERIVED,
       preview: source
-        ? { kind: "numbers", items: [{ label: "Calls analysed", value: String(source.calls) }, { label: "Won deals", value: String(wins ?? 0) }, { label: "Patterns", value: playbook ? String(playbook.patterns.length) : "None yet" }] }
+        ? { kind: "numbers", items: [{ label: "Calls analysed", value: String(source.calls) }, { label: "Won deals", value: String(wins ?? 0) }, ...(playbook ? [{ label: "Patterns", value: String(playbook.patterns.length) }] : [])] }
         : null,
       provenance: live,
       evidence: { label: "Intelligence", href: "/intelligence" },
@@ -187,7 +187,7 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Find",
       title: "Next search writes itself",
       what: evidence
-        ? `Brief generated from the won-deal profile · ${evidence.lead_count} companies found${similarity ? ` · similarity ${similarity}` : ""}.`
+        ? `Brief generated from the won-deal profile · ${evidence.lead_count} companies found${similarity ? ` · Similarity ${similarity}` : ""}.`
         : NOT_DERIVED,
       preview: topLeads.length
         ? { kind: "leads", leads: topLeads.map((lead) => ({ id: lead.id, company: lead.company_name, similarity: Math.round((lead.similarity_score ?? 0) * 100) })) }

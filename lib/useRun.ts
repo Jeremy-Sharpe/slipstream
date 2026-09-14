@@ -328,7 +328,7 @@ export function useRun(source: RunSource, opts: { instant?: boolean; startDelay?
 
     let scorecard: ApiScorecard | undefined;
     if (email) {
-      skip(["score"], call.responseTime ? `Threads are not scored · replied in ${call.responseTime}` : "Threads are not scored · no reply yet");
+      skip(["score"], call.responseTime ? `Threads are not scored · Replied in ${call.responseTime}` : "Threads are not scored · No reply yet");
     } else {
       if (!instant) await wait(SETTLE);
       scorecard = await runScore();

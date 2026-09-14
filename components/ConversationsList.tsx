@@ -22,6 +22,14 @@ function dayLabel(iso: string, now: number | null) {
   return longDay.format(new Date(iso));
 }
 
+/** The subject earns its slot only when it says more than the company and contact already do. */
+function showSubject(row: ConversationRow): boolean {
+  const subject = (row.subject ?? "").trim();
+  if (!subject || subject === row.company) return false;
+  const [head] = subject.split(/\s+[—–-]\s+/);
+  return !(head.trim() === row.company && subject.includes(row.contact));
+}
+
 export function ConversationsList({ query = "", filter = "all" }: { query?: string; filter?: ConversationFilter }) {
   const { rows: all, loading, error, retry } = useConversationList();
   const [now, setNow] = useState<number | null>(null);
@@ -33,9 +41,19 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
     .filter((row) => !q || `${row.contact} ${row.company} ${row.subject}`.toLowerCase().includes(q));
 
   if (loading) {
+    // Same bones as the list: a day label, then 56px rows with a disc and two bars.
     return (
-      <div aria-busy className="flex flex-col gap-2">
-        {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-14 rounded-xl bg-surface-2" style={{ opacity: 1 - i * 0.1 }} />)}
+      <div aria-busy>
+        <div className="mb-2 h-3.5 w-40 rounded bg-surface-2" />
+        <ul className="border-b border-line-soft">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <li key={i} className="flex h-14 items-center gap-3 px-2" style={{ opacity: 1 - i * 0.1 }}>
+              <span className="size-7 shrink-0 rounded-full bg-surface" />
+              <span className="ml-7 h-3.5 w-32 rounded bg-surface" />
+              <span className="ml-4 h-3.5 w-56 rounded bg-surface-2" />
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
@@ -81,8 +99,8 @@ export function ConversationsList({ query = "", filter = "all" }: { query?: stri
                       <span className="truncate text-[14px] font-medium text-ink">{row.contact}</span>
                     </span>
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="shrink-0 truncate text-[14px] text-ink">{row.company}</span>
-                      <span className="truncate text-[13.5px] text-soft">· {row.subject}</span>
+                      <span className="min-w-0 max-w-[60%] truncate text-[14px] text-ink">{row.company}</span>
+                      {showSubject(row) && <><span className="shrink-0 text-faint">·</span><span className="min-w-0 truncate text-[13.5px] text-soft">{row.subject}</span></>}
                     </span>
                     <span className="flex items-center">{row.run?.outcome && <OutcomePill outcome={row.run.outcome} />}</span>
                     <span className="text-[13.5px] tabular-nums text-soft">{fmtTime(row.at)}</span>

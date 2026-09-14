@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Check, X } from "lucide-react";
 import { actions } from "@/lib/store/leads";
 import type { Lead } from "@/lib/types";
 import { Button, Pill, cn } from "../ui";
@@ -15,11 +15,21 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
   const [bodyFor, setBodyFor] = useState(lead?.draft?.id);
   if (lead?.draft && lead.draft.id !== bodyFor) { setBodyFor(lead.draft.id); setBody(lead.draft.body); }
 
+  // The draft box grows to fit its text, so nothing is ever cut off.
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    el.style.height = "0px";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [body, lead]);
+
   useEffect(() => {
     if (!lead) return;
+    // Capture phase: the sheet's canvas keeps focus after a row click and stops Escape from bubbling.
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [lead, onClose]);
 
   const l = shown;
@@ -35,7 +45,6 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <p className="truncate text-[16px] font-semibold text-ink">{l.company}</p>
-                {l.synthetic && <Pill className="shrink-0">Fictional</Pill>}
               </div>
               <p className="truncate text-[13.5px] text-soft">{[l.contact, l.title, l.location].filter(Boolean).join(" · ")}</p>
               {l.linkedinUrl && <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[13px] text-soft transition-colors duration-150 hover:text-ink">LinkedIn →</a>}
@@ -58,9 +67,8 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
                   <li key={i} className="grid grid-cols-[96px_minmax(0,1fr)] gap-x-3">
                     <p className="pt-px text-[13.5px] text-soft">{e.attribute}</p>
                     <div className="min-w-0">
-                      <p className="text-[14px] font-medium text-ink">{e.value}</p>
-                      <p className="mt-1 text-[13.5px] leading-5 text-text">{e.why}</p>
-                      {e.deals.length > 0 && <p className="mt-0.5 text-[13.5px] text-soft">{e.deals.join(", ")}</p>}
+                      <p className="text-[14px] leading-5 text-ink">{e.value}</p>
+                      {e.deals.length > 0 && <p className="mt-0.5 truncate text-[13.5px] text-soft">{e.deals.join(", ")}</p>}
                     </div>
                   </li>
                 ))}
@@ -72,22 +80,26 @@ export function LeadPanel({ lead, drafting, onClose }: { lead: Lead | null; draf
               <>
                 <p className="mt-3 text-[14px] font-medium text-ink">{l.draft.subject}</p>
                 <textarea
+                  ref={bodyRef}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   readOnly={l.status === "approved"}
-                  rows={body.split("\n").length + 1}
-                  className="mt-2 w-full resize-none rounded-lg bg-surface-2 px-3 py-2 text-[14px] leading-6 text-text outline-none transition-shadow duration-150 focus:ring-2 focus:ring-accent/30"
+                  rows={1}
+                  className="mt-2 w-full resize-none overflow-hidden rounded-xl bg-surface-2 px-3 py-2 text-[14px] leading-6 text-text outline-none transition-shadow duration-150 focus-visible:ring-2 focus-visible:ring-accent/40"
                 />
               </>
             ) : (
               <p className="mt-3 text-[14px] text-faint">
-                {drafting ? "Writing the draft" : l.status === "approved" ? "Approved earlier, this browser did not keep the draft" : "No draft yet"}
+                {drafting ? "Writing the draft" : "No draft yet"}
               </p>
             )}
           </div>
           <footer className="flex items-center justify-end gap-2 border-t border-line px-6 py-4">
             {l.status === "approved" ? (
-              <span className="mr-auto text-[13px] text-soft">Approved · nothing is sent</span>
+              <span className="mr-auto inline-flex items-center gap-2 text-[13.5px] text-soft">
+                <span className="flex size-5 items-center justify-center rounded-full bg-ink text-white"><Check className="size-3" strokeWidth={2.5} /></span>
+                Approved · Nothing is sent from Slipstream
+              </span>
             ) : (
               <>
                 <Button onClick={onClose}>Skip</Button>

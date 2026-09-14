@@ -88,7 +88,7 @@ export function CoachReview({ id }: { id: string }) {
         {session.model && (
           <p className="mt-2 text-[12.5px] text-soft">
             Advice from {session.model}
-            {session.last_analysis_ms != null && ` · last analysis took ${(session.last_analysis_ms / 1000).toFixed(1)} s`}
+            {session.last_analysis_ms != null && ` · Last analysis took ${(session.last_analysis_ms / 1000).toFixed(1)} s`}
           </p>
         )}
         {state.analysis_status === "unavailable" && session.status !== "ended" && (

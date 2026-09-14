@@ -96,6 +96,39 @@ export function RunView({ source }: { source: RunSource }) {
     return () => { ro.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
 
+  // Reveal a step inside the timeline only when the pointer is NOT inside the
+  // column and the user hasn't wheel/touch-scrolled it in the last 3s.
+  // Nothing ever scrolls under a resting pointer.
+  const userScrolledAt = useRef(0);
+  const pointerInside = useRef(false);
+  const programmatic = useRef(false);
+  useEffect(() => {
+    const host = columnRef.current;
+    if (!host) return;
+    const onUser = () => { userScrolledAt.current = Date.now(); };
+    const onEnter = () => { pointerInside.current = true; };
+    const onLeave = () => { pointerInside.current = false; };
+    host.addEventListener("wheel", onUser, { passive: true });
+    host.addEventListener("touchmove", onUser, { passive: true });
+    host.addEventListener("pointerenter", onEnter);
+    host.addEventListener("pointerleave", onLeave);
+    return () => { host.removeEventListener("wheel", onUser); host.removeEventListener("touchmove", onUser); host.removeEventListener("pointerenter", onEnter); host.removeEventListener("pointerleave", onLeave); };
+  }, []);
+  const reveal = useCallback((el: HTMLElement) => {
+    const host = columnRef.current;
+    if (!host || pointerInside.current || Date.now() - userScrolledAt.current < 3000) return;
+    const h = host.getBoundingClientRect(), r = el.getBoundingClientRect();
+    if (r.top >= h.top && r.bottom <= h.bottom) return;
+    // A step taller than the column shows its head, not its tail: the card's
+    // rows matter more than the gate button under them.
+    const alignTop = r.top < h.top || r.height > h.height - 56;
+    const target = alignTop ? host.scrollTop + (r.top - h.top) - 16 : host.scrollTop + (r.bottom - h.bottom) + 16;
+    programmatic.current = true;
+    pageScrolling.current = true;
+    host.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
+    window.setTimeout(() => { programmatic.current = false; pageScrolling.current = false; }, 600);
+  }, [reduced]);
+
   // The column (CI card + heading + steps, one scroll area) never ends on a
   // row boundary: it is sized so the last visible row is cut about mid-height
   // (a peek at what is below), and a bottom fade shows only while there is
@@ -123,18 +156,29 @@ export function RunView({ source }: { source: RunSource }) {
     // the user is looking at where it is: shift scrollTop by the delta before
     // paint. Never moves anything visually.
     let ciHeight = ci.offsetHeight;
+    let settle = 0;
     const anchor = new ResizeObserver(() => {
       const delta = ci.offsetHeight - ciHeight;
       ciHeight = ci.offsetHeight;
-      if (delta && host.scrollTop > 0) host.scrollTop += delta;
+      if (!delta) return;
+      if (host.scrollTop > 0) host.scrollTop += delta;
+      // At the top there is nothing to compensate, so the card streaming in
+      // pushes the open step (and its gate) below the fold. Once the card
+      // stops growing, bring that step back; reveal honours the pointer rule
+      // and does nothing when the step is already in view.
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        const open = host.querySelector('li[data-step] button[aria-expanded="true"]')?.closest<HTMLElement>("li[data-step]");
+        if (open) reveal(open);
+      }, 400);
     });
     anchor.observe(ci);
     const onScroll = () => setFade(host.scrollHeight - host.clientHeight - host.scrollTop > 2);
     host.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measure);
     document.addEventListener("visibilitychange", measure);
-    return () => { ro.disconnect(); anchor.disconnect(); host.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure); document.removeEventListener("visibilitychange", measure); };
-  }, [run.runId, headerHeight]);
+    return () => { ro.disconnect(); anchor.disconnect(); window.clearTimeout(settle); host.removeEventListener("scroll", onScroll); window.removeEventListener("resize", measure); document.removeEventListener("visibilitychange", measure); };
+  }, [run.runId, headerHeight, reveal]);
 
   // Explicit click-to-expand (exempt from the pointer rule): scroll the column
   // so the whole card sits above the fade, or, if it cannot fit, so the step
@@ -163,36 +207,6 @@ export function RunView({ source }: { source: RunSource }) {
     requestAnimationFrame(tick);
   }, [reduced]);
 
-  // Reveal a step inside the timeline only when the pointer is NOT inside the
-  // column and the user hasn't wheel/touch-scrolled it in the last 3s.
-  // Nothing ever scrolls under a resting pointer.
-  const userScrolledAt = useRef(0);
-  const pointerInside = useRef(false);
-  const programmatic = useRef(false);
-  useEffect(() => {
-    const host = columnRef.current;
-    if (!host) return;
-    const onUser = () => { userScrolledAt.current = Date.now(); };
-    const onEnter = () => { pointerInside.current = true; };
-    const onLeave = () => { pointerInside.current = false; };
-    host.addEventListener("wheel", onUser, { passive: true });
-    host.addEventListener("touchmove", onUser, { passive: true });
-    host.addEventListener("pointerenter", onEnter);
-    host.addEventListener("pointerleave", onLeave);
-    return () => { host.removeEventListener("wheel", onUser); host.removeEventListener("touchmove", onUser); host.removeEventListener("pointerenter", onEnter); host.removeEventListener("pointerleave", onLeave); };
-  }, []);
-  const reveal = useCallback((el: HTMLElement) => {
-    const host = columnRef.current;
-    if (!host || pointerInside.current || Date.now() - userScrolledAt.current < 3000) return;
-    const h = host.getBoundingClientRect(), r = el.getBoundingClientRect();
-    if (r.top >= h.top && r.bottom <= h.bottom) return;
-    const target = r.top < h.top ? host.scrollTop + (r.top - h.top) - 16 : host.scrollTop + (r.bottom - h.bottom) + 16;
-    programmatic.current = true;
-    pageScrolling.current = true;
-    host.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
-    window.setTimeout(() => { programmatic.current = false; pageScrolling.current = false; }, 600);
-  }, [reduced]);
-
   return (
     <div>
       <div style={enter(0)}>
@@ -202,10 +216,10 @@ export function RunView({ source }: { source: RunSource }) {
       <div className="mt-3 flex items-center gap-3">
         <Avatar name={call.contact} size={36} />
         <div className="min-w-0 flex-1">
-          <h1 className="flex items-center gap-2 text-[20px] font-semibold text-ink">
-            {call.contact}
-            <span className="font-normal text-faint">·</span>
-            <span>{call.company}</span>
+          <h1 className="flex min-w-0 items-center gap-2 text-[20px] font-semibold text-ink">
+            <span className="truncate">{call.contact}</span>
+            <span className="shrink-0 font-normal text-faint">·</span>
+            <span className="min-w-0 truncate">{call.company}</span>
           </h1>
           <p className="mt-0.5 flex h-6 items-center gap-2 text-[13px] text-soft">
             <OutcomePill outcome={call.outcome} />
