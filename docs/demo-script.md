@@ -1,6 +1,6 @@
 # Slipstream live demo script
 
-Target: 3 minutes 30 seconds, one presenter driving, one teammate on the clock with the terminal fallback open. Use the production UI at https://slipstream.3-104-149-193.sslip.io and the production API at https://slipstream-api.3-104-149-193.sslip.io. You are signed in as Liam Albrecht, the sample sales lead at Eleno; the reps on the calls are Sam Whitfield and Jordan Lee, and the demo call is Jordan Belfort. Do not narrate setup, architecture or model names unless a judge asks.
+Target: 3 minutes 30 seconds, one presenter driving, one teammate on the clock with the terminal fallback open. Use the production UI at https://slipstream-app-seven.vercel.app and the production API at https://slipstream-api.3-104-149-193.sslip.io. You are signed in as Liam Albrecht, the sample sales lead at Eleno; the reps on the calls are Sam Whitfield and Jordan Lee, and the demo call is Jordan Belfort. Do not narrate setup, architecture or model names unless a judge asks.
 
 The whole loop in one sentence, for you not the judges: one call becomes CRM fields, a score, a safe follow-up, a refreshed ideal customer profile, ten look-alike leads and three outreach drafts, and every one of those links back to the words on the call.
 

@@ -5,7 +5,7 @@ Use this as the final pre-submit runbook. Everything that can be checked without
 ## Verified now
 
 - Public repository: `https://github.com/Jeremy-Sharpe/slipstream`
-- Production UI: `https://slipstream.3-104-149-193.sslip.io` responds with HTTP 200 and serves the newest Revenue DNA demo; Campaigns includes the live “Delivery execution” card.
+- Production UI: `https://slipstream-app-seven.vercel.app` responds with HTTP 200 and serves the current main build wired to the production API; the VPS at `https://slipstream.3-104-149-193.sslip.io` is the backup.
 - Production API: `https://slipstream-api.3-104-149-193.sslip.io/ready` reports `ok` and the exact deployed Git revision.
 - Root `npm run lint` and `npm run build` pass.
 - API Ruff checks and all 367 tests pass, including provider readiness, OpenRouter demo bootstrap, scorecard/playbook revision, coach lifecycle, email concurrency, campaign leasing/controls and provider-environment isolation coverage.
