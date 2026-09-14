@@ -150,6 +150,9 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     openrouter_api_key: SecretStr | None = None
     scorecard_judge_model: str = "deepseek/deepseek-v3.2"
+    # Models that always reason (Claude Fable 5.1) count thinking against max_tokens,
+    # which truncates structured JSON; a low effort keeps the budget for the answer.
+    openrouter_reasoning_effort: Literal["minimal", "low", "medium", "high"] | None = None
     elevenlabs_api_key: SecretStr | None = None
     ingest_token: SecretStr | None = None
     origami_api_key: SecretStr | None = None
@@ -182,6 +185,7 @@ class Settings(BaseSettings):
         "openai_api_key",
         "openrouter_api_key",
         "elevenlabs_api_key",
+        "openrouter_reasoning_effort",
         "ingest_token",
         "origami_api_key",
         "crm_webhook_url",

@@ -31,6 +31,7 @@ class ReasoningClient:
     provider: ReasoningProvider
     model: str
     client: object
+    reasoning_effort: str | None = None
 
 
 @dataclass(frozen=True)
@@ -207,6 +208,12 @@ def create_reasoning_client(settings: Settings) -> ReasoningClient:
         client = create_openrouter_client(settings)
         if native != provider:
             model = openrouter_model_id(model, native)
+        return ReasoningClient(
+            provider=provider,
+            model=model,
+            client=client,
+            reasoning_effort=settings.openrouter_reasoning_effort,
+        )
     else:
         client = create_local_client(settings)
         model = settings.local_model_name
@@ -280,6 +287,7 @@ def structured[SchemaT: BaseModel](
             schema,
             max_tokens,
             timeout,
+            client.reasoning_effort,
         )
     else:
         output, usage = _local_structured(
@@ -350,8 +358,12 @@ def _openrouter_structured[SchemaT: BaseModel](
     schema: type[SchemaT],
     max_tokens: int,
     timeout: float | None,
+    reasoning_effort: str | None = None,
 ) -> tuple[SchemaT, Usage | None]:
     request_options = {} if timeout is None else {"timeout": timeout}
+    extra_body: dict[str, object] = {"usage": {"include": True}}
+    if reasoning_effort is not None:
+        extra_body["reasoning"] = {"effort": reasoning_effort}
     messages = [
         {"role": "system", "content": _json_system_prompt(system, schema)},
         {"role": "user", "content": user},
@@ -370,7 +382,7 @@ def _openrouter_structured[SchemaT: BaseModel](
             messages=messages,
             max_tokens=max_tokens,
             response_format=response_format,
-            extra_body={"usage": {"include": True}},
+            extra_body=extra_body,
             **request_options,
         )
     except (BadRequestError, NotFoundError):
@@ -380,7 +392,7 @@ def _openrouter_structured[SchemaT: BaseModel](
             model=model,
             messages=messages,
             max_tokens=max_tokens,
-            extra_body={"usage": {"include": True}},
+            extra_body=extra_body,
             **request_options,
         )
     return (
