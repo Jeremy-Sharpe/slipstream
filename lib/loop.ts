@@ -157,10 +157,10 @@ export function buildLoop(input: LoopInput): Loop {
       verb: "Learn",
       title: "The team compounds",
       what: source
-        ? `${source.calls} calls and ${source.emails} ${source.emails === 1 ? "email" : "emails"} · ${wins ?? 0} wins · ${playbook ? `${playbook.patterns.length} ${playbook.patterns.length === 1 ? "pattern" : "patterns"}` : "patterns not yet derived"}.`
+        ? `${source.calls} calls and ${source.emails} ${source.emails === 1 ? "email" : "emails"} · ${wins ?? 0} wins${playbook ? ` · ${playbook.patterns.length} ${playbook.patterns.length === 1 ? "pattern" : "patterns"}` : ""}.`
         : NOT_DERIVED,
       preview: source
-        ? { kind: "numbers", items: [{ label: "Calls analysed", value: String(source.calls) }, { label: "Won deals", value: String(wins ?? 0) }, { label: "Patterns", value: playbook ? String(playbook.patterns.length) : "None yet" }] }
+        ? { kind: "numbers", items: [{ label: "Calls analysed", value: String(source.calls) }, { label: "Won deals", value: String(wins ?? 0) }, ...(playbook ? [{ label: "Patterns", value: String(playbook.patterns.length) }] : [])] }
         : null,
       provenance: live,
       evidence: { label: "Intelligence", href: "/intelligence" },
