@@ -63,6 +63,18 @@ export function SettingsView({ crmConnected }: { crmConnected: boolean | null })
   const [notifyDone, setNotifyDone] = useState(true);
   const [notifyLeads, setNotifyLeads] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  /** Forgets what this browser added (runs, pasted calls, searches, drafts) and reloads on Home. */
+  function resetWorkspace() {
+    setResetting(true);
+    try {
+      for (const key of Object.keys(window.localStorage)) if (key.startsWith("slipstream.")) window.localStorage.removeItem(key);
+    } catch {
+      // Storage off: nothing to forget.
+    }
+    window.location.assign("/home");
+  }
 
   const save = () => {
     setSaved(true);
@@ -131,6 +143,12 @@ export function SettingsView({ crmConnected }: { crmConnected: boolean | null })
           </Row>
           <Row label="New leads are ready">
             <Toggle on={notifyLeads} onChange={setNotifyLeads} label="Notify when leads are ready" />
+          </Row>
+        </Card>
+
+        <Card title="Workspace">
+          <Row label="Start fresh">
+            <Button onClick={resetWorkspace}>{resetting ? "Resetting" : "Reset"}</Button>
           </Row>
         </Card>
       </div>
