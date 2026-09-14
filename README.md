@@ -120,6 +120,15 @@ Slipstream is the closed loop. Its Revenue DNA gate is the key difference: call 
 - The linked demo video was recorded on the earlier UI; the screens differ from the current production build.
 - The hosted API currently uses in-memory persistence and has no managed Supabase, Origami, Resend or Railway credentials. OpenRouter reasoning and embeddings are verified live; the UI identifies fictional lead generation, evaluation fixtures and every unavailable integration rather than implying third-party enrichment or delivery.
 
+## Documentation
+
+- `docs/decisions.md`: the architecture decision record, twenty-one dated decisions with the alternatives considered and where to check each one.
+- `docs/architecture.md`: the running technical record, evidence invariants per lane and a dated change log.
+- `docs/model-bakeoff.md`: how every model was evaluated and chosen, with the scorecard, extraction and coach results and the predeclared decision rules.
+- `docs/judging-evals.md`: the LLM judge that scores this submission against the hackathon rubric, plus the deterministic submission checks.
+- `api/evals/`: the eval runners, the scorecard rubric, per-run reports and cost ledgers.
+- `PROJECT.md`: build plan, data model and pipeline; `docs/pitch.md` and `docs/demo-script.md`: the spoken pitch and the timed demo.
+
 ## Run locally
 
 ```bash
