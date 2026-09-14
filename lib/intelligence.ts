@@ -214,7 +214,8 @@ function buildPatterns(scorecards: ApiScorecard[], links: CallLinks): BehaviourP
   const labelled = scorecards.filter((card) => card.outcome !== null);
   const won = labelled.filter((card) => card.outcome === "won");
   const other = labelled.filter((card) => card.outcome !== "won");
-  if (!labelled.length) return [];
+  // A comparison needs both sides.
+  if (!won.length || !other.length) return [];
 
   const quote = (card: ApiScorecard, evidence: { turn_index: number; quote: string } | undefined): Quote | null => {
     const key = card.source_external_id ?? card.call_id;
