@@ -151,8 +151,8 @@ function scorecardFrom(scorecard: ApiScorecard, turns: Turn[], kind: "call" | "e
     objection: scorecard.objection_handling,
     talkRatio: scorecard.rep_talk_ratio,
     summary: scorecard.summary,
-    wentWell: scorecard.went_well,
-    toImprove: scorecard.to_improve,
+    wentWell: coachingLines(scorecard.went_well),
+    toImprove: coachingLines(scorecard.to_improve),
     ...(kind === "email" ? { askedRightQuestions: scorecard.discovery_questions > 0 } : {}),
     spans: {
       discovery: spanFromTurnIndex(scorecard.discovery_evidence[0]?.turn_index, turns),
@@ -168,6 +168,10 @@ export function splitSubject(subject: string | undefined): { company: string | n
   if (parts.length < 2) return { company: null, prospect: null };
   return { company: parts[0].trim() || null, prospect: parts.slice(1).join(" - ").trim() || null };
 }
+
+/** The scorer sometimes appends notes about itself; only lines about the call are shown. */
+const NOT_COACHING = /scorecard|rubric|simulated|transcript text|instructions|does not involve|real individuals|completed successfully/i;
+const coachingLines = (lines: string[]): string[] => lines.filter((line) => !NOT_COACHING.test(line));
 
 export function toCallRecord(
   call: ApiCall,
