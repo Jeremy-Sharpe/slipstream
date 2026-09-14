@@ -195,6 +195,7 @@ def _same_call(left: CallResponse, right: CallResponse) -> bool:
 
 def _persist_to_supabase(client: Any, record: CallResponse) -> CallResponse:
     conversation = {
+        "id": str(record.id),
         "channel": "call",
         "subject": record.subject,
         "direction": "outbound",
