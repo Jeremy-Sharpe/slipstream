@@ -300,7 +300,7 @@ export function RunTimeline({ call, data, steps, open, toggle, runId, draftBody,
                 <StreamingText key={draftGen} size="lg" tokens={words(draftBody.replace(/\n/g, " ⏎ ")).map((t) => ({ text: t.text === "⏎" ? "\n" : t.text }))} onDone={() => setDraftStreamed(true)} />
               </div>
             )}
-            {gate(email ? "Approve reply" : "Approve follow-up", "Approved · Nothing is sent from Slipstream", undefined, onDraftApproved, approved)}
+            {(draftStreamed || approved) && gate(email ? "Approve reply" : "Approve follow-up", "Approved · Nothing is sent from Slipstream", undefined, onDraftApproved, approved)}
           </div>
         );
       case "icp": {
