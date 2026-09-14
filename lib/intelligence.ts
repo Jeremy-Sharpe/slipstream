@@ -314,7 +314,6 @@ async function buildIcp(
         item.deal_ids
           .map((dealId) => sourceDeals.get(dealId))
           .filter((deal): deal is NonNullable<typeof deal> => deal != null)
-          .slice(0, 12)
           .map(async (deal) => ({
             id: deal.deal_id,
             company: deal.company_name,
