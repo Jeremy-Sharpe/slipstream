@@ -8,6 +8,7 @@ import { Bar, ErrorLine, SectionLabel } from "./parts";
    are left out on purpose; the measured rows carry the story. */
 export function Patterns({ patterns, error }: { patterns: Pattern[]; error: string | null }) {
   const measured = patterns.filter((p): p is Extract<Pattern, { kind: "behaviour" }> => p.kind === "behaviour");
+  if (measured.length === 0 && !error) return null;
 
   return (
     <section>
