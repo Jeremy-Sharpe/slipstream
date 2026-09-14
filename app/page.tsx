@@ -1,11 +1,5 @@
-import { DropZone } from "@/components/DropZone";
+import { Landing } from "@/components/Landing";
 
-export default function HomePage() {
-  return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-      <section className="w-full max-w-[720px] pb-16 text-center">
-        <DropZone />
-      </section>
-    </div>
-  );
+export default function LandingPage() {
+  return <Landing />;
 }
